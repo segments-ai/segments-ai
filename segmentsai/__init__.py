@@ -1,1 +1,6 @@
-from segmentsai.main import Test
+from .segments import SegmentsClient, SegmentsDataset
+
+__all__ = [
+    'SegmentsClient',
+    'SegmentsDataset'
+]
