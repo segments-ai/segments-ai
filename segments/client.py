@@ -21,7 +21,7 @@ class SegmentsDataset():
         # Get project info
         print(f'Initializing dataset. This may take a few seconds...')
         self.project_info = self.client.get_project(project)
-        print(self.project_info)
+        # print(self.project_info)
         self.labels = [None, ] + self.project_info['label_taxonomy']
 
         # Get samples in project and filter them
@@ -77,7 +77,13 @@ class SegmentsClient():
         if not os.path.exists(self.cache_dir):
             os.makedirs(self.cache_dir)
 
-        print('Initialized Segments client.')
+        response = self.get('api_status/?lib_version=0.1')
+        if (response.status_code == 200):
+            print('Successfully initialized Segments client.')
+        elif response.status_code == 426:
+            print('Please upgrade: pip install segments-ai --upgrade')
+        else:
+            print('Something went wrong. Did you use the right api key?')
 
     def _load_image(self, image_url, from_cache=False):
         # print(image_url)
@@ -141,12 +147,12 @@ class SegmentsClient():
         response = self.get('images/{}'.format(image_uuid))
         result = response.json()
         # print(result)
-        result['segments_url'] = f'https://segments.ai/{"/".join(result["regular_url"].split("/")[3:])[:-7]}'
+        # result['segments_url'] = f'https://segments.ai/{"/".join(result["regular_url"].split("/")[3:])[:-7]}'
         if extract:
             image_rgb, cache_filename = self._load_image(result['regular_url'], from_cache=True)
             label_data = self._load_label_data(result['label_data_url'], from_cache=self.cache_labels)
 
-            print(label_data)
+            # print(label_data)
             if label_data['format_version'] == '0.1':
                 label_data = label_data['annotations']
             else:
@@ -203,7 +209,7 @@ class SegmentsClient():
         else:
             assert False
 
-        result['segments_url'] = f'https://segments.ai/{project}/{result["uuid"]}'
+        # result['segments_url'] = f'https://segments.ai/{project}/{result["uuid"]}'
         return result
 
     def upload_prediction(self, image_uuid, label, annotation_data=None):
