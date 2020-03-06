@@ -11,34 +11,21 @@ from PIL import Image
 
 # class SegmentsDataset(Dataset):
 class SegmentsDataset():
-    def __init__(self, username, project, api_key, api_url='https://api.segments.ai/', filter_by=None,
-                 transform=None, cache_labels=False, cache_dir='.cache/'):
-        self.username = username
+    def __init__(self, client, project, filter_by=None, transform=None):
         self.project = project
         self.transform = transform
-        self.cache_dir = cache_dir
-        self.cache_labels = cache_labels
-
-        segments = SegmentsClient(api_key, api_url)
-        self.segments = segments
-
+        self.client = client
         self.load_project(project, filter_by)
 
     def load_project(self, project, filter_by=None):
         # Get project info
         print(f'Initializing dataset. This may take a few seconds...')
-        self.project_info = self.segments.get_project(self.username, project)
-        # print(self.project_info)
+        self.project_info = self.client.get_project(project)
+        print(self.project_info)
         self.labels = [None, ] + self.project_info['label_taxonomy']
 
-        # Setup cache
-        self.project_cache_dir = os.path.join(self.cache_dir, self.project_info['owner']['username'],
-                                              self.project_info['name'])
-        if not os.path.exists(self.project_cache_dir):
-            os.makedirs(self.project_cache_dir)
-
         # Get samples in project and filter them
-        self.images = self.segments.get_images(self.username, project)
+        self.images = self.client.get_images(project)
 
         self.images = [image for image in self.images if image['superpixel_status'] == "SUCCEEDED"]
 
@@ -47,10 +34,55 @@ class SegmentsDataset():
 
         print(f'Initialized dataset with {len(self)} images.')
 
+    def __len__(self):
+        return len(self.images)
+
+    def __getitem__(self, index):
+        # image = self.images[index]
+        sample = self.client.get_image(self.images[index]['uuid'], extract=True)
+
+        # print(image)
+
+        sample = {
+            'uuid': sample['uuid'],
+            'filename': sample['filename'],
+            'cache_filename': sample['cache_filename'],
+            'label_status': sample['label_status'],
+            'image': sample['image'],
+            'label': sample['label'],
+            'label_data': sample['label_data'],
+            # 'superpixel_bitmap': sample['superpixel_bitmap']
+        }
+
+        # transform
+        if self.transform is not None:
+            sample = self.transform(sample)
+
+        return sample
+
+    # response = requests.get(image['superpixel_bitmap_urls'][0])
+    # superpixel_map = np.array(Image.open(BytesIO(response.content)))
+    # superpixel_map[:,:,3] = 0
+    # superpixel_map = superpixel_map.view(np.uint32).squeeze(2)
+
+class SegmentsClient():
+    def __init__(self, api_key, api_url='https://api.segments.ai/', cache_dir='.cache/', cache_labels=False,):
+        # print('Initializing Segments client.')
+        self.api_url = api_url
+        self.api_key = api_key
+        self.cache_dir = cache_dir
+        self.cache_labels = cache_labels
+
+        # Setup cache
+        if not os.path.exists(self.cache_dir):
+            os.makedirs(self.cache_dir)
+
+        print('Initialized Segments client.')
+
     def _load_image(self, image_url, from_cache=False):
         # print(image_url)
         # if isinstance(image_url, str):
-        filename = os.path.join(self.project_cache_dir, '-'.join(image_url.split('/')[3:]))
+        filename = os.path.join(self.cache_dir, '-'.join(image_url.split('/')[3:]))
         if from_cache and os.path.exists(filename):
             image = Image.open(filename)
         else:
@@ -63,7 +95,7 @@ class SegmentsDataset():
     def _load_label_data(self, json_url, from_cache=False):
         # print(image_url)
         # if isinstance(image_url, str):
-        filename = os.path.join(self.project_cache_dir, '-'.join(json_url.split('/')[3:]))
+        filename = os.path.join(self.cache_dir, '-'.join(json_url.split('/')[3:]))
         if from_cache and os.path.exists(filename):
             label_data = json.load(filename)
         else:
@@ -83,81 +115,61 @@ class SegmentsDataset():
         instance_label = Image.fromarray(instance_label)
         return instance_label
 
-    def __len__(self):
-        return len(self.images)
-
-    def __getitem__(self, index):
-        # image = self.images[index]
-        image = self.segments.get_image(self.images[index]['uuid'])
-
-        # print(image)
-
-        image_rgb, cache_filename = self._load_image(image['regular_url'], from_cache=True)
-
-        label, _ = self._load_image(image['label_bitmap_url'], from_cache=self.cache_labels)
-        label_bitmap = self._extract_label(label)
-
-        superpixel, _ = self._load_image(image['superpixel_bitmap_urls'][-1], from_cache=False)
-        superpixel_bitmap = self._extract_label(superpixel)
-
-        label_data = self._load_label_data(image['label_data_url'], from_cache=self.cache_labels)
-
-        sample = {
-            'uuid': image['uuid'],
-            'filename': image['filename'],
-            'cache_filename': cache_filename,
-            # 'label_status': image['label_status'],
-            'image': image_rgb,
-            'label_bitmap': label_bitmap,
-            'label_data': label_data,
-            'superpixel_bitmap': superpixel_bitmap
-        }
-
-        # transform
-        if self.transform is not None:
-            sample = self.transform(sample)
-
-        return sample
-
-    # response = requests.get(image['superpixel_bitmap_urls'][0])
-    # superpixel_map = np.array(Image.open(BytesIO(response.content)))
-    # superpixel_map[:,:,3] = 0
-    # superpixel_map = superpixel_map.view(np.uint32).squeeze(2)
-
-class SegmentsClient:
-    def __init__(self, api_key, api_url='https://api.segments.ai/'):
-        self.api_url = api_url
-        self.api_key = api_key
-
-    def get_project(self, username, project):
-        response = self.get('projects/{}/{}/'.format(username, project))
-        return response.json()
-
-    def post_project(self, name, description, labels):
-        response = self.post('projects/', {'name': name, 'description': description, 'label_taxonomy': labels})
-        return response.json()
-
-    def get_images(self, username, project):
-        response = self.get('projects/{}/{}/images'.format(username, project))
-        # print('get_images()', response.json())
-        return response.json()
-
-    def get_image(self, image_id):
-        response = self.get('images/{}'.format(image_id))
-        return response.json()
-
-    def _upload_to_aws(self, file, aws_fields):
+    @staticmethod
+    def _upload_to_aws(file, aws_fields):
         files = {'file': file}
         response = requests.post(aws_fields['url'],
                                  files=files,
                                  data=aws_fields['fields'])
         return response
 
-    def upload_image(self, username, project, image=None, uri=None, filename=None):
-        # image must be a numpy array
+    def get_project(self, project):
+        # print(project)
+        response = self.get(f'projects/{project}')
+        return response.json()
 
-        if image is not None:
-            assert uri is None and filename is not None
+    def post_project(self, name, description, labels):
+        response = self.post('projects/', {'name': name, 'description': description, 'label_taxonomy': labels})
+        return response.json()
+
+    def get_images(self, project):
+        response = self.get('projects/{}/images'.format(project))
+        # print('get_images()', response.json())
+        return response.json()
+
+    def get_image(self, image_uuid, extract=True):
+        response = self.get('images/{}'.format(image_uuid))
+        result = response.json()
+        # print(result)
+        result['segments_url'] = f'https://segments.ai/{"/".join(result["regular_url"].split("/")[3:])[:-7]}'
+        if extract:
+            image_rgb, cache_filename = self._load_image(result['regular_url'], from_cache=True)
+            label_data = self._load_label_data(result['label_data_url'], from_cache=self.cache_labels)
+
+            print(label_data)
+            if label_data['format_version'] == '0.1':
+                label_data = label_data['annotations']
+            else:
+                assert False
+
+            label, _ = self._load_image(result['label_bitmap_url'], from_cache=self.cache_labels)
+            label_bitmap = self._extract_label(label)
+
+            # superpixel, _ = self._load_image(image['superpixel_bitmap_urls'][-1], from_cache=False)
+            # superpixel_bitmap = self._extract_label(superpixel)
+
+            result['image'] = image_rgb
+            result['label'] = label_bitmap
+            result['label_data'] = label_data
+            result['cache_filename'] = cache_filename
+        return result
+
+    def upload_image(self, project, image_numpy=None, image_url=None, filename=None):
+        # image must be a numpy array
+        # TODO: assert
+
+        if image_numpy is not None:
+            assert image_url is None and filename is not None
 
             # Step 1: request signed aws urls from segments
             response = self.post('assets/',
@@ -168,30 +180,33 @@ class SegmentsClient:
 
             # Step 2: post the image to aws
             file = BytesIO()
-            image.save(file, 'png')
+            image_numpy.save(file, 'png')
             response = self._upload_to_aws(file.getvalue(), response.json()['presignedPostFields'])
             # print(response)
 
             # Step 3: post the aws url to segments
-            response = self.post(f'projects/{username}/{project}/images/',
+            response = self.post(f'projects/{project}/images/',
                                  {'filename': filename,
-                                  'url': asset_url})
+                                  'public_url': asset_url})
             # print(response.json())
-            return response.json()
-        elif uri is not None:
-            assert image is None
+            result = response.json()
+        elif image_url is not None:
+            assert image_numpy is None
 
             # Post the uri directly to segments
             if filename is None:
-                filename = os.path.basename(uri)
-            response = self.post(f'projects/{username}/{project}/images/',
+                filename = os.path.basename(image_url)
+            response = self.post(f'projects/{project}/images/',
                                  {'filename': filename,
-                                  'url': uri})
-            # print(response.json())
+                                  'public_url': image_url})
+            result = response.json()
         else:
             assert False
 
-    def save_prediction(self, image_uuid, label, annotation_data=None):
+        result['segments_url'] = f'https://segments.ai/{project}/{result["uuid"]}'
+        return result
+
+    def upload_prediction(self, image_uuid, label, annotation_data=None):
         # label: np.int32 array
         # annotation_data: json that looks like this: [{'instanceId': 1, 'classId': 0}, {'instanceId': 2, 'classId': 0}]
 
@@ -205,10 +220,14 @@ class SegmentsClient:
         res = self._upload_to_aws(label_file.getvalue(), response.json()['prediction_bitmap_url'])
 
         if annotation_data is not None:
+            annotation_data = {
+                'format_version': '0.1',
+                'annotations': annotation_data
+            }
             res = self._upload_to_aws(json.dumps(annotation_data), response.json()['prediction_data_url'])
         # print(response)
 
-    def save_label(self, image_uuid, label, annotation_data=None):
+    def upload_label(self, image_uuid, label, annotation_data=None):
         # label: np.int32 array
         # annotation_data: json that looks like this: [{'instanceId': 1, 'classId': 0}, {'instanceId': 2, 'classId': 0}]
 
@@ -222,6 +241,10 @@ class SegmentsClient:
         res = self._upload_to_aws(label_file.getvalue(), response.json()['label_bitmap_url'])
 
         if annotation_data is not None:
+            annotation_data = {
+                'format_version': '0.1',
+                'annotations': annotation_data
+            }
             res = self._upload_to_aws(json.dumps(annotation_data), response.json()['label_data_url'])
         # print(response)
 
