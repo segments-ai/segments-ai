@@ -8,7 +8,7 @@ setup(
   author = 'Segments.ai',                   # Type in your name
   author_email = 'bert@segments.ai',      # Type in your E-Mail
   url = 'https://github.com/segments-ai/segments-ai',   # Provide either the link to your github or to your website
-  download_url = 'https://github.com/segments-ai/segments-ai/archive/v0.3.tar.gz',    # I explain this later on
+  download_url = 'https://github.com/segments-ai/segments-ai/archive/v0.4.tar.gz',    # I explain this later on
   keywords = ['image', 'segmentation', 'labeling', 'vision'],   # Keywords that define your package best
   install_requires=["numpy", "requests", "numpy", "Pillow"],
   classifiers=[
