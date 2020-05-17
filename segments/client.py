@@ -21,6 +21,10 @@ class SegmentsClient:
         else:
             print('Something went wrong. Did you use the right api key?')
 
+    def get_sample(self, uuid):
+        r = self.get(f'/samples/{uuid}')
+        return r.json()
+
     def add_sample(self, dataset, name, attributes):
         payload = {
             'name': name,
@@ -30,8 +34,8 @@ class SegmentsClient:
         print(r.status_code)
         return r.json()
 
-    def get_sample(self, uuid):
-        r = self.get(f'/samples/{uuid}')
+    def get_label(self, uuid, task_name):
+        r = self.get(f'/labels/{uuid}/{task_name}')
         return r.json()
 
     def add_label(self, sample_uuid, task_name, attributes):
