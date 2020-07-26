@@ -3,10 +3,8 @@ import requests
 
 '''
 TODO:
-- Improve error handling: https://stackoverflow.com/questions/16511337/correct-way-to-try-except-using-python-requests-module
-- Add Dataset class (perhaps only for images for now, and based on releases)
+- Improve error handling
 '''
-
 
 class SegmentsClient:
     def __init__(self, api_key, api_url='https://api.segments.ai/'):
@@ -17,12 +15,20 @@ class SegmentsClient:
         if r.status_code == 200:
             print('Initialized successfully.')
         elif r.status_code == 426:
-            print('Please upgrade: pip install segments-ai --upgrade')
+            print('Please upgrade: pip install segments-ai --upgrade') # TODO: also return this in the server error message
         else:
-            print('Something went wrong. Did you use the right api key?')
+            raise Exception('Something went wrong. Did you use the right api key?')
+
+    def get_dataset(self, dataset):
+        r = self.get('/datasets/{}/'.format(dataset))
+        return r.json()
+
+    def get_samples(self, dataset):
+        r = self.get('/datasets/{}/samples/'.format(dataset))
+        return r.json()
 
     def get_sample(self, uuid):
-        r = self.get(f'/samples/{uuid}')
+        r = self.get('/samples/{}/'.format(uuid))
         return r.json()
 
     def add_sample(self, dataset, name, attributes):
@@ -30,70 +36,89 @@ class SegmentsClient:
             'name': name,
             'attributes': attributes
         }
-        r = self.post(f'/datasets/{dataset}/samples/', payload)
-        print(r.status_code)
+        r = self.post('/datasets/{}/samples/'.format(dataset), payload)
+        print('Uploaded ' + name)
         return r.json()
 
     def get_label(self, uuid, task_name):
-        r = self.get(f'/labels/{uuid}/{task_name}')
+        r = self.get('/labels/{}/{}/'.format(uuid, task_name))
         return r.json()
 
-    def add_label(self, sample_uuid, task_name, attributes):
+    def add_label(self, sample_uuid, task_name, attributes, label_status='PRELABELED'):
         payload = {
+            'label_status': label_status,
             'attributes': attributes
         }
-        r = self.put(f'/labels/{sample_uuid}/{task_name}/', payload)
+        r = self.put('/labels/{}/{}/'.format(sample_uuid, task_name), payload)
         return r.json()
 
-    def get_dataset(self, dataset):
-        r = self.get(f'/datasets/{dataset}')
-        return r.json()
-
-    def get_samples(self, dataset):
-        r = self.get(f'/datasets/{dataset}/samples')
+    def get_release(self, dataset, release):
+        r = self.get('/datasets/{}/releases/{}/'.format(dataset, release))
         return r.json()
 
     def upload_asset(self, file, filename):
         r = self.post('/assets/', {'filename': filename})
         response_aws = self._upload_to_aws(file.getvalue(), r.json()['presignedPostFields'])
-        return r.json()
+        return r.json()    
+
+    # Error handling: https://stackoverflow.com/questions/16511337/correct-way-to-try-except-using-python-requests-module
 
     def _get_auth_header(self):
         if self.api_key:
-            return {'Authorization': f'APIKey {self.api_key}'}
+            return {'Authorization': 'APIKey {}'.format(self.api_key)}
         else:
             return None
 
     def get(self, endpoint, auth=True):
         headers = self._get_auth_header() if auth else None
-        # try:
-        r = requests.get(urllib.parse.urljoin(self.api_url, endpoint),
-                         headers=headers)
-        # r.raise_for_status()
-        # except requests.exceptions.ConnectionError as errc:
-        #     print("Error Connecting:", errc)
-        # except requests.exceptions.Timeout as errt:
-        #     print("Timeout Error:", errt)
+
+        try:
+            r = requests.get(urllib.parse.urljoin(self.api_url, endpoint),
+                            headers=headers)
+            r.raise_for_status()
+        except requests.exceptions.HTTPError as errh:
+            print('{} | {}'.format(errh, r.json()))
 
         return r
 
     def post(self, endpoint, data=None, auth=True):
         headers = self._get_auth_header() if auth else None
-        return requests.post(urllib.parse.urljoin(self.api_url, endpoint),
-                             json=data,  # data=data
-                             headers=headers)
+
+        try:
+            r = requests.post(urllib.parse.urljoin(self.api_url, endpoint),
+                                json=data,  # data=data
+                                headers=headers)
+            r.raise_for_status()
+        except requests.exceptions.HTTPError as errh:
+            print('{} | {}'.format(errh, r.json()))
+
+        return r
 
     def put(self, endpoint, data=None, auth=True):
         headers = self._get_auth_header() if auth else None
-        return requests.put(urllib.parse.urljoin(self.api_url, endpoint),
-                             json=data,  # data=data
-                             headers=headers)
+
+        try:
+            r = requests.put(urllib.parse.urljoin(self.api_url, endpoint),
+                                json=data,  # data=data
+                                headers=headers)
+            r.raise_for_status()
+        except requests.exceptions.HTTPError as errh:
+            print('{} | {}'.format(errh, r.json()))
+
+        return r
 
     def patch(self, endpoint, data=None, auth=True):
         headers = self._get_auth_header() if auth else None
-        return requests.patch(urllib.parse.urljoin(self.api_url, endpoint),
-                              json=data,  # data=data
-                              headers=headers)
+
+        try:
+            r = requests.patch(urllib.parse.urljoin(self.api_url, endpoint),
+                                json=data,  # data=data
+                                headers=headers)
+            r.raise_for_status()
+        except requests.exceptions.HTTPError as errh:
+            print('{} | {}'.format(errh, r.json()))
+
+        return r
 
     @staticmethod
     def _upload_to_aws(file, aws_fields):
