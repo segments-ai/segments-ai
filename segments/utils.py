@@ -108,7 +108,8 @@ def export_dataset(dataset, export_format='coco'):
                 continue
                 
             y0, x0, y1, x1 = bbox
-            rle = mask.encode(np.asfortranarray(instance_mask))
+            # rle = mask.encode(np.asfortranarray(instance_mask))
+            rle = mask.encode(np.array(instance_mask[:,:,None], dtype=np.uint8, order='F'))[0] # https://github.com/matterport/Mask_RCNN/issues/387#issuecomment-522671380
     #         instance_mask_crop = instance_mask[y0:y1, x0:x1]
     #         rle = mask.encode(np.asfortranarray(instance_mask_crop))
     #         plt.imshow(instance_mask_crop)
