@@ -51,14 +51,16 @@ The task type specifies the format that is required for the label: for a classif
 sample_uuid = "602a3eec-a61c-4a77-9fcc-3037ce5e9606"
 task_name = "segmentation"
 attributes = {
-    "segmentation_bitmap_url": "https://segmentsai-prod.s3.eu-west-2.amazonaws.com/assets/bert/49f6aa10-8967-4305-985c-cdc1e8f89b93.png" 
-    "objects": [
+    "segmentation_bitmap": {
+        "url": "https://segmentsai-prod.s3.eu-west-2.amazonaws.com/assets/bert/49f6aa10-8967-4305-985c-cdc1e8f89b93.png"
+    },
+    "annotations": [
         {
-            "instance_id": 1
+            "id": 1
             "category_id": 2
         },
         {
-            "instance_id": 2
+            "id": 2
             "category_id": 3
         }
     ]
