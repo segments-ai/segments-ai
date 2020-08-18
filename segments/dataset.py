@@ -2,6 +2,7 @@ import os
 import json
 import requests
 from urllib.parse import urlparse
+from multiprocessing.pool import ThreadPool
 from tqdm import tqdm
 
 from .utils import load_image, load_segmentation_bitmap
@@ -13,7 +14,8 @@ class SegmentsDataset():
     def __init__(self, release_file, task='segmentation', filter_by=None, segments_dir='segments'):
         self.task = task
         self.filter_by = [filter_by] if isinstance(filter_by, str) else filter_by
-        self.filter_by = [s.lower() for s in self.filter_by]
+        if self.filter_by is not None:
+            self.filter_by = [s.lower() for s in self.filter_by]
         self.segments_dir = segments_dir
 
         
@@ -65,11 +67,20 @@ class SegmentsDataset():
 
         self.samples = filtered_samples
             
-        # Preload all samples
-        for i in tqdm(range(self.__len__())):
-            item = self.__getitem__(i)
+        # # Preload all samples (sequentially)
+        # for i in tqdm(range(self.__len__())):
+        #     item = self.__getitem__(i)
 
-        print('Initialized dataset with {} images.'.format(len(self)))
+        # Preload all samples (in parallel)
+        # https://stackoverflow.com/questions/16181121/a-very-simple-multithreading-parallel-url-fetching-without-queue/27986480
+        # https://stackoverflow.com/questions/3530955/retrieve-multiple-urls-at-once-in-parallel
+        # https://github.com/tqdm/tqdm/issues/484#issuecomment-461998250
+        num_samples = self.__len__()
+        with ThreadPool(16) as pool:
+            r = list(tqdm(pool.imap_unordered(self.__getitem__, range(num_samples)), total=num_samples))
+
+        print('Initialized dataset with {} images.'.format(num_samples))
+
         
     def _load_image_from_cache(self, sample):
         sample_name = os.path.splitext(sample['name'])[0]
