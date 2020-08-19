@@ -17,7 +17,6 @@ class SegmentsDataset():
         if self.filter_by is not None:
             self.filter_by = [s.lower() for s in self.filter_by]
         self.segments_dir = segments_dir
-
         
         # if urlparse(release_file).scheme in ('http', 'https'): # If it's a url
         if isinstance(release_file, str): # If it's a file path
@@ -30,7 +29,7 @@ class SegmentsDataset():
         self.release_file = release_file
 
         self.dataset_identifier = '{}_{}'.format(self.release['dataset']['owner'], self.release['dataset']['name'])
-        self.image_dir = os.path.join(segments_dir, self.dataset_identifier)
+        self.image_dir = os.path.join(segments_dir, self.dataset_identifier, self.release['name'])
 
         # First some checks
         if not self.task in self.release['dataset']['tasks']:
