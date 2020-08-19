@@ -37,6 +37,15 @@ def bitmap2file(bitmap, is_segmentation_bitmap=False):
     Image.fromarray(bitmap2).save(file, 'PNG')
     return file
 
+def get_semantic_bitmap(instance_bitmap, annotations, first_category_id=1):
+    instance2semantic = [0] * (max([a['id'] for a in annotations])+1)
+    for annotation in annotations:
+        instance2semantic[annotation['id']] = annotation['category_id'] + first_category_id
+    instance2semantic = np.array(instance2semantic)
+        
+    semantic_label = instance2semantic[np.array(instance_bitmap, np.uint32)]
+    return semantic_label
+
 def export_dataset(dataset, export_format='coco'):
     from pycocotools import mask
     from skimage.measure import regionprops
