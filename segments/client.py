@@ -58,7 +58,7 @@ class SegmentsClient:
 
     def upload_asset(self, file, filename):
         r = self.post('/assets/', {'filename': filename})
-        response_aws = self._upload_to_aws(file.getvalue(), r.json()['presignedPostFields'])
+        response_aws = self._upload_to_aws(file, r.json()['presignedPostFields'])
         return r.json()    
 
     # Error handling: https://stackoverflow.com/questions/16511337/correct-way-to-try-except-using-python-requests-module

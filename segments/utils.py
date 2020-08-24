@@ -25,17 +25,18 @@ def load_segmentation_bitmap(url):
     segmentation_bitmap = extract_segmentation_bitmap(segmentation_bitmap)
     return segmentation_bitmap
 
-def bitmap2file(bitmap, is_segmentation_bitmap=False):
+def bitmap2file(bitmap, is_segmentation_bitmap=True):
     if is_segmentation_bitmap:
         bitmap2 = np.copy(bitmap)
         bitmap2 = bitmap2[:, :, None].view(np.uint8)
         bitmap2[:, :, 3] = 255
     else:
-        bitmap2 = bitmap
+        assert False
         
-    file = BytesIO()
-    Image.fromarray(bitmap2).save(file, 'PNG')
-    return file
+    f = BytesIO()
+    Image.fromarray(bitmap2).save(f, 'PNG')
+    f = f.seek(0)
+    return f
 
 def get_semantic_bitmap(instance_bitmap, annotations, first_category_id=1):
     instance2semantic = [0] * (max([a['id'] for a in annotations])+1)
