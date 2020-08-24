@@ -35,7 +35,7 @@ def bitmap2file(bitmap, is_segmentation_bitmap=True):
         
     f = BytesIO()
     Image.fromarray(bitmap2).save(f, 'PNG')
-    f = f.seek(0)
+    f.seek(0)
     return f
 
 def get_semantic_bitmap(instance_bitmap, annotations, first_category_id=1):
