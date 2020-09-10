@@ -1,19 +1,20 @@
 import os
 from io import BytesIO
 import requests
+import urllib.request
 import json
 from tqdm import tqdm
 
-from PIL import Image
+from PIL import Image, ExifTags
 
 import numpy as np
 
 
-def load_image(url):
-    image = Image.open(BytesIO(requests.get(url).content))
-    return image
+def download_and_save_image(url, filename):
+    urllib.request.urlretrieve(url, filename)
+    return
 
-def load_segmentation_bitmap(url):
+def download_and_save_segmentation_bitmap(url, filename):
     def extract_segmentation_bitmap(segmentation_bitmap):
         segmentation_bitmap = np.array(segmentation_bitmap)
         segmentation_bitmap[:,:,3] = 0
@@ -23,9 +24,11 @@ def load_segmentation_bitmap(url):
 
     segmentation_bitmap = Image.open(BytesIO(requests.get(url).content))
     segmentation_bitmap = extract_segmentation_bitmap(segmentation_bitmap)
-    return segmentation_bitmap
+    segmentation_bitmap.save(filename)
+    return
 
 def bitmap2file(bitmap, is_segmentation_bitmap=True):
+    # TODO: convert bitmap to np.uint32, if it is not already
     if is_segmentation_bitmap:
         bitmap2 = np.copy(bitmap)
         bitmap2 = bitmap2[:, :, None].view(np.uint8)
@@ -37,6 +40,22 @@ def bitmap2file(bitmap, is_segmentation_bitmap=True):
     Image.fromarray(bitmap2).save(f, 'PNG')
     f.seek(0)
     return f
+
+def handle_exif_rotation(image):
+    try:
+        for orientation in ExifTags.TAGS.keys():
+            if ExifTags.TAGS[orientation]=='Orientation':
+                break
+        exif=dict(image._getexif().items())
+        if exif[orientation] == 3:
+            image=image.transpose(Image.ROTATE_180)
+        elif exif[orientation] == 6:
+            image=image.transpose(Image.ROTATE_270)
+        elif exif[orientation] == 8:
+            image=image.transpose(Image.ROTATE_90)
+        return image
+    except (AttributeError, KeyError, IndexError):
+        return image
 
 def get_semantic_bitmap(instance_bitmap, annotations, first_category_id=1):
     instance2semantic = [0] * (max([a['id'] for a in annotations])+1)

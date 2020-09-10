@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 from multiprocessing.pool import ThreadPool
 from tqdm import tqdm
 
-from .utils import load_image, load_segmentation_bitmap
+from .utils import download_and_save_image, download_and_save_segmentation_bitmap, handle_exif_rotation
 
 from PIL import Image
 
@@ -88,11 +88,13 @@ class SegmentsDataset():
         # image_filename_rel = '{}{}'.format(sample['uuid'], url_extension)
         image_filename_rel = '{}{}'.format(sample_name, url_extension)
         image_filename = os.path.join(self.image_dir, image_filename_rel)
-        if os.path.exists(image_filename):
-            image = Image.open(image_filename)
-        else:
-            image = load_image(image_url)
-            image.save(image_filename)
+
+        if not os.path.exists(image_filename):
+            download_and_save_image(image_url, image_filename)
+
+        image = Image.open(image_filename)
+        image = handle_exif_rotation(image)
+
         return image, image_filename_rel
 
     def _load_segmentation_bitmap_from_cache(self, sample, task):
@@ -102,11 +104,12 @@ class SegmentsDataset():
         url_extension = os.path.splitext(urlparse(segmentation_bitmap_url).path)[1]
         # segmentation_bitmap_filename = os.path.join(self.image_dir, '{}{}'.format(label['uuid'], url_extension))
         segmentation_bitmap_filename = os.path.join(self.image_dir, '{}_label_{}{}'.format(sample_name, task, url_extension))
-        if os.path.exists(segmentation_bitmap_filename):
-            segmentation_bitmap = Image.open(segmentation_bitmap_filename)
-        else:
-            segmentation_bitmap = load_segmentation_bitmap(segmentation_bitmap_url)                
-            segmentation_bitmap.save(segmentation_bitmap_filename)
+        
+        if not os.path.exists(segmentation_bitmap_filename):
+            download_and_save_segmentation_bitmap(segmentation_bitmap_url, segmentation_bitmap_filename)
+
+        segmentation_bitmap = Image.open(segmentation_bitmap_filename)
+
         return segmentation_bitmap
 
     @property
@@ -131,11 +134,11 @@ class SegmentsDataset():
         #     return None
         
         # Load the label
-        if sample['labels'][self.task] is not None:
+        try:
             label = sample['labels'][self.task]
             segmentation_bitmap = self._load_segmentation_bitmap_from_cache(sample, self.task)
             annotations = label['attributes']['annotations']
-        else:
+        except:
             segmentation_bitmap = annotations = None
         
         item = {
