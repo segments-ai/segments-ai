@@ -70,13 +70,19 @@ class SegmentsDataset():
         # for i in tqdm(range(self.__len__())):
         #     item = self.__getitem__(i)
 
+        # To avoid memory overflow or "Too many open files" error when using tqdm in combination with multiprocessing.
+        def _load_image(i):
+            self.__getitem__(i)
+            return i
+
         # Preload all samples (in parallel)
         # https://stackoverflow.com/questions/16181121/a-very-simple-multithreading-parallel-url-fetching-without-queue/27986480
         # https://stackoverflow.com/questions/3530955/retrieve-multiple-urls-at-once-in-parallel
         # https://github.com/tqdm/tqdm/issues/484#issuecomment-461998250
         num_samples = self.__len__()
         with ThreadPool(16) as pool:
-            r = list(tqdm(pool.imap_unordered(self.__getitem__, range(num_samples)), total=num_samples))
+            # r = list(tqdm(pool.imap_unordered(self.__getitem__, range(num_samples)), total=num_samples))
+            r = list(tqdm(pool.imap_unordered(_load_image, range(num_samples)), total=num_samples))
 
         print('Initialized dataset with {} images.'.format(num_samples))
 
