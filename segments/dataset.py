@@ -133,11 +133,11 @@ class SegmentsDataset():
         sample = self.samples[index]
         
         # Load the image
-        # try:
-        image, image_filename = self._load_image_from_cache(sample)
-        # except:
-        #     print('Something went wrong with sample:', sample)
-        #     return None
+        try:
+            image, image_filename = self._load_image_from_cache(sample)
+        except:
+            print('Something went wrong loading sample {}:'.format(sample['name']), sample)
+            raise
         
         # Load the label
         try:
