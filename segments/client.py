@@ -19,10 +19,38 @@ class SegmentsClient:
         else:
             raise Exception('Something went wrong. Did you use the right api key?')
 
-    def get_dataset(self, dataset):
-        r = self.get('/datasets/{}/'.format(dataset))
+    ############
+    # Datasets #
+    ############
+    def get_datasets(self, user=None):
+        if user is not None:
+            r = self.get('/users/{}/datasets/'.format(user))
+        else:
+            r = self.get('/user/datasets/')
         return r.json()
 
+    def get_dataset(self, dataset_identifier):
+        r = self.get('/datasets/{}/'.format(dataset_identifier))
+        return r.json()
+
+    def add_dataset(self, name, description, category='other', public=False, readme=''):
+        payload = {
+            'name': name,
+            'description': description,
+            'category': category,
+            'public': public,
+            'readme': readme,
+            'data_type': 'IMAGE'
+        }
+        r = self.post('/user/datasets/', payload)
+        return r.json()
+
+    def delete_dataset(self, dataset_identifier):
+        r = self.delete('/datasets/{}/'.format(dataset_identifier))
+
+    ###########
+    # Samples #
+    ###########
     def get_samples(self, dataset):
         r = self.get('/datasets/{}/samples/'.format(dataset))
         return r.json()
@@ -40,8 +68,14 @@ class SegmentsClient:
         print('Uploaded ' + name)
         return r.json()
 
-    def get_label(self, uuid, task_name):
-        r = self.get('/labels/{}/{}/'.format(uuid, task_name))
+    def delete_sample(self, uuid):
+        r = self.delete('/samples/{}/'.format(uuid))
+
+    ##########
+    # Labels #
+    ##########
+    def get_label(self, sample_uuid, task_name):
+        r = self.get('/labels/{}/{}/'.format(sample_uuid, task_name))
         return r.json()
 
     def add_label(self, sample_uuid, task_name, attributes, label_status='PRELABELED'):
@@ -52,10 +86,34 @@ class SegmentsClient:
         r = self.put('/labels/{}/{}/'.format(sample_uuid, task_name), payload)
         return r.json()
 
+    def delete_label(self, sample_uuid, task_name):
+        r = self.delete('/labels/{}/{}/'.format(sample_uuid, task_name))
+
+    ############
+    # Releases #
+    ############
+    def get_releases(self, dataset):
+        r = self.get('/datasets/{}/releases/'.format(dataset))
+        return r.json()
+
     def get_release(self, dataset, release):
         r = self.get('/datasets/{}/releases/{}/'.format(dataset, release))
         return r.json()
 
+    def add_release(self, dataset, name, description=''):
+        payload = {
+            'name': name,
+            'description': description
+        }
+        r = self.post('/datasets/{}/releases/'.format(dataset), payload)
+        return r.json()
+
+    def delete_release(self, dataset, release):
+        r = self.delete('/datasets/{}/releases/{}/'.format(dataset, release))
+
+    ##########
+    # Assets #
+    ##########
     def upload_asset(self, file, filename):
         r = self.post('/assets/', {'filename': filename})
         response_aws = self._upload_to_aws(file, r.json()['presignedPostFields'])
@@ -117,6 +175,19 @@ class SegmentsClient:
             r.raise_for_status()
         except requests.exceptions.HTTPError as errh:
             print('{} | {}'.format(errh, r.json()))
+
+        return r
+
+    def delete(self, endpoint, data=None, auth=True):
+        headers = self._get_auth_header() if auth else None
+
+        try:
+            r = requests.delete(urllib.parse.urljoin(self.api_url, endpoint),
+                                json=data,  # data=data
+                                headers=headers)
+            r.raise_for_status()
+        except requests.exceptions.HTTPError as errh:
+            print('{}'.format(errh))
 
         return r
 
