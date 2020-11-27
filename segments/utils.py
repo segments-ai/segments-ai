@@ -101,6 +101,7 @@ def export_dataset(dataset, export_format='coco'):
     # }]
 
     categories = dataset.categories
+    task_type = dataset.task_type
     # for i, category in enumerate(dataset.project_info['label_taxonomy']):
     #     categories.append({
     #         'id': i+1,
@@ -130,33 +131,55 @@ def export_dataset(dataset, export_format='coco'):
         
         for instance in sample['annotations']:
             category_id = instance['category_id']
-                
-            instance_mask = np.array(sample['segmentation_bitmap'], np.uint32) == instance['id']
-            bbox = get_bbox(instance_mask)
-            if not bbox:
-                continue
-                
-            y0, x0, y1, x1 = bbox
-            # rle = mask.encode(np.asfortranarray(instance_mask))
-            rle = mask.encode(np.array(instance_mask[:,:,None], dtype=np.uint8, order='F'))[0] # https://github.com/matterport/Mask_RCNN/issues/387#issuecomment-522671380
-    #         instance_mask_crop = instance_mask[y0:y1, x0:x1]
-    #         rle = mask.encode(np.asfortranarray(instance_mask_crop))
-    #         plt.imshow(instance_mask_crop)
-    #         plt.show()
-            
-            area = int(mask.area(rle))
-            rle['counts'] = rle['counts'].decode('ascii')
-            
-            annotations.append({
+
+            annotation = {
                 'id': annotation_id,
                 'image_id': image_id,
                 'category_id': category_id,
-                'bbox': [x0, y0, x1-x0, y1-y0],
-    #             'bbox_mode': BoxMode.XYWH_ABS,
-                'segmentation': rle,
-                'area': area,
-                'iscrowd': 0,
-            })
+            }
+
+            # Segmentation bitmap
+            if task_type == 'segmentation-bitmap':                
+                instance_mask = np.array(sample['segmentation_bitmap'], np.uint32) == instance['id']
+                bbox = get_bbox(instance_mask)
+                if not bbox:
+                    continue
+                    
+                y0, x0, y1, x1 = bbox
+                # rle = mask.encode(np.asfortranarray(instance_mask))
+                rle = mask.encode(np.array(instance_mask[:,:,None], dtype=np.uint8, order='F'))[0] # https://github.com/matterport/Mask_RCNN/issues/387#issuecomment-522671380
+        #         instance_mask_crop = instance_mask[y0:y1, x0:x1]
+        #         rle = mask.encode(np.asfortranarray(instance_mask_crop))
+        #         plt.imshow(instance_mask_crop)
+        #         plt.show()
+                
+                area = int(mask.area(rle))
+                rle['counts'] = rle['counts'].decode('ascii')
+
+                annotation.update({
+                    'bbox': [x0, y0, x1-x0, y1-y0],
+        #             'bbox_mode': BoxMode.XYWH_ABS,
+                    'segmentation': rle,
+                    'area': area,
+                    'iscrowd': 0,
+                })
+
+            # Bounding boxes
+            elif task_type == 'bboxes':
+                points = instance['points']
+                x0 = points[0][0]
+                y0 = points[0][1]
+                x1 = points[1][0]
+                y1 = points[1][1]
+
+                annotation.update({
+                    'bbox': [x0, y0, x1-x0, y1-y0],
+                })
+
+            else:
+                assert False
+
+            annotations.append(annotation)
             annotation_id += 1
             
     json_data = {

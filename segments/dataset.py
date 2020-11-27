@@ -36,8 +36,9 @@ class SegmentsDataset():
             print('There is no task with name "{}".'.format(self.task))
             return
 
-        if self.release['dataset']['tasks'][self.task]['task_type'] != 'segmentation-bitmap':
-            print('You can only create a dataset for tasks of type "segmentation-bitmap" for now.')
+        self.task_type = self.release['dataset']['tasks'][self.task]['task_type']
+        if self.task_type not in ['segmentation-bitmap', 'bboxes']:
+            print('You can only create a dataset for tasks of type "segmentation-bitmap" or "bboxes" for now.')
             return
         
         self.load_dataset()
@@ -138,23 +139,43 @@ class SegmentsDataset():
         except:
             print('Something went wrong loading sample {}:'.format(sample['name']), sample)
             raise
-        
-        # Load the label
-        try:
-            label = sample['labels'][self.task]
-            segmentation_bitmap = self._load_segmentation_bitmap_from_cache(sample, self.task)
-            annotations = label['attributes']['annotations']
-        except:
-            segmentation_bitmap = annotations = None
-        
+
         item = {
             'uuid': sample['uuid'],
             'name': sample['name'],
             'file_name': image_filename,
             'image': image,
-            'segmentation_bitmap': segmentation_bitmap,
-            'annotations': annotations,
         }
+
+        # Segmentation bitmap
+        if self.task_type == 'segmentation-bitmap':
+            # Load the label
+            try:
+                label = sample['labels'][self.task]
+                segmentation_bitmap = self._load_segmentation_bitmap_from_cache(sample, self.task)
+                annotations = label['attributes']['annotations']
+            except:
+                segmentation_bitmap = annotations = None
+            
+            item.update({
+                'segmentation_bitmap': segmentation_bitmap,
+                'annotations': annotations,
+            })
+
+        # Bounding boxes
+        elif self.task_type == 'bboxes':
+            try:
+                label = sample['labels'][self.task]
+                annotations = label['attributes']['annotations']
+            except:
+                annotations = None
+
+            item.update({
+                'annotations': annotations,
+            })
+
+        else:
+            assert False
 
 #         # transform
 #         if self.transform is not None:
