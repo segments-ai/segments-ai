@@ -11,8 +11,8 @@ from PIL import Image
 
 class SegmentsDataset():
     # https://stackoverflow.com/questions/682504/what-is-a-clean-pythonic-way-to-have-multiple-constructors-in-python
-    def __init__(self, release_file, task='segmentation', filter_by=None, segments_dir='segments'):
-        self.task = task
+    def __init__(self, release_file, labelset='ground-truth', filter_by=None, segments_dir='segments'):
+        self.task = labelset
         self.filter_by = [filter_by] if isinstance(filter_by, str) else filter_by
         if self.filter_by is not None:
             self.filter_by = [s.lower() for s in self.filter_by]
@@ -33,7 +33,7 @@ class SegmentsDataset():
 
         # First some checks
         if not self.task in self.release['dataset']['tasks']:
-            print('There is no task with name "{}".'.format(self.task))
+            print('There is no labelset with name "{}".'.format(self.task))
             return
 
         self.task_type = self.release['dataset']['tasks'][self.task]['task_type']
@@ -153,25 +153,29 @@ class SegmentsDataset():
             try:
                 label = sample['labels'][self.task]
                 segmentation_bitmap = self._load_segmentation_bitmap_from_cache(sample, self.task)
-                annotations = label['attributes']['annotations']
+                attributes = label['attributes']
+                annotations = attributes['annotations']
             except:
-                segmentation_bitmap = annotations = None
+                segmentation_bitmap = attributes = annotations = None
             
             item.update({
                 'segmentation_bitmap': segmentation_bitmap,
                 'annotations': annotations,
+                'attributes': attributes
             })
 
         # Bounding boxes
         elif self.task_type == 'bboxes':
             try:
                 label = sample['labels'][self.task]
-                annotations = label['attributes']['annotations']
+                attributes = label['attributes']
+                annotations = attributes['annotations']
             except:
-                annotations = None
+                attributes = annotations = None
 
             item.update({
                 'annotations': annotations,
+                'attributes': attributes
             })
 
         else:

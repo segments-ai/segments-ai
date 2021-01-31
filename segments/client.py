@@ -51,21 +51,50 @@ class SegmentsClient:
     ###########
     # Samples #
     ###########
-    def get_samples(self, dataset):
-        r = self.get('/datasets/{}/samples/'.format(dataset))
+    def get_samples(self, dataset, per_page=1000, page=1):
+        r = self.get('/datasets/{}/samples/?per_page={}&page={}'.format(dataset, per_page, page))
         return r.json()
 
     def get_sample(self, uuid):
         r = self.get('/samples/{}/'.format(uuid))
         return r.json()
 
-    def add_sample(self, dataset, name, attributes):
+    def add_sample(self, dataset, name, attributes, metadata=None, embedding=None):
         payload = {
             'name': name,
             'attributes': attributes
         }
+
+        if metadata is not None:
+            payload['metadata'] = metadata
+
+        if embedding is not None:
+            payload['embedding'] = embedding
+
         r = self.post('/datasets/{}/samples/'.format(dataset), payload)
-        print('Uploaded ' + name)
+        print('Added ' + name)
+        return r.json()
+
+    def bulk_add_sample(self):
+        pass
+
+    def update_sample(self, uuid, name=None, attributes=None, metadata=None, embedding=None):
+        payload = {}
+
+        if name is not None:
+            payload['name'] = name
+
+        if attributes is not None:
+            payload['attributes'] = attributes
+
+        if metadata is not None:
+            payload['metadata'] = metadata
+
+        if embedding is not None:
+            payload['embedding'] = embedding
+
+        r = self.patch('/samples/{}/'.format(uuid), payload)
+        print('Updated ' + uuid)
         return r.json()
 
     def delete_sample(self, uuid):
@@ -74,20 +103,27 @@ class SegmentsClient:
     ##########
     # Labels #
     ##########
-    def get_label(self, sample_uuid, task_name):
-        r = self.get('/labels/{}/{}/'.format(sample_uuid, task_name))
+    def get_label(self, sample_uuid, labelset):
+        r = self.get('/labels/{}/{}/'.format(sample_uuid, labelset))
         return r.json()
 
-    def add_label(self, sample_uuid, task_name, attributes, label_status='PRELABELED'):
+    def add_label(self, sample_uuid, labelset, attributes, label_status='PRELABELED', score=None):
         payload = {
             'label_status': label_status,
             'attributes': attributes
         }
-        r = self.put('/labels/{}/{}/'.format(sample_uuid, task_name), payload)
+
+        if score is not None:
+            payload['score'] = score
+
+        r = self.put('/labels/{}/{}/'.format(sample_uuid, labelset), payload)
         return r.json()
 
-    def delete_label(self, sample_uuid, task_name):
-        r = self.delete('/labels/{}/{}/'.format(sample_uuid, task_name))
+    def bulk_add_label(self):
+        pass
+
+    def delete_label(self, sample_uuid, labelset):
+        r = self.delete('/labels/{}/{}/'.format(sample_uuid, labelset))
 
     ############
     # Releases #
