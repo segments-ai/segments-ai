@@ -10,9 +10,19 @@ from .utils import download_and_save_image, download_and_save_segmentation_bitma
 from PIL import Image
 
 class SegmentsDataset():
+    """SegmentsDataset class.
+
+    Args:
+        release_file (str or dict): Path to a release file, or a release dict resulting from client.get_release().
+        labelset (str, optional): The labelset that should be loaded. Defaults to 'ground-truth'.
+        filter_by (list, optional): A list of label statuses to filter by. Defaults to None.
+        segments_dir (str, optional): The directory where the data will be downloaded to and stored. Defaults to 'segments'.
+
+    """
+
     # https://stackoverflow.com/questions/682504/what-is-a-clean-pythonic-way-to-have-multiple-constructors-in-python
     def __init__(self, release_file, labelset='ground-truth', filter_by=None, segments_dir='segments'):
-        self.task = labelset
+        self.labelset = labelset
         self.filter_by = [filter_by] if isinstance(filter_by, str) else filter_by
         if self.filter_by is not None:
             self.filter_by = [s.lower() for s in self.filter_by]
@@ -32,11 +42,11 @@ class SegmentsDataset():
         self.image_dir = os.path.join(segments_dir, self.dataset_identifier, self.release['name'])
 
         # First some checks
-        if not self.task in self.release['dataset']['tasks']:
-            print('There is no labelset with name "{}".'.format(self.task))
+        if not self.labelset in self.release['dataset']['labelsets']:
+            print('There is no labelset with name "{}".'.format(self.labelset))
             return
 
-        self.task_type = self.release['dataset']['tasks'][self.task]['task_type']
+        self.task_type = self.release['dataset']['task_type']
         if self.task_type not in ['segmentation-bitmap', 'bboxes']:
             print('You can only create a dataset for tasks of type "segmentation-bitmap" or "bboxes" for now.')
             return
@@ -55,8 +65,8 @@ class SegmentsDataset():
         if self.filter_by is not None:
             filtered_samples = []
             for sample in samples:
-                if sample['labels'][self.task] is not None:
-                    label_status = sample['labels'][self.task]['label_status'].lower()
+                if sample['labels'][self.labelset] is not None:
+                    label_status = sample['labels'][self.labelset]['label_status'].lower()
                 else:
                     label_status = 'unlabeled'
 
@@ -104,13 +114,13 @@ class SegmentsDataset():
 
         return image, image_filename_rel
 
-    def _load_segmentation_bitmap_from_cache(self, sample, task):
+    def _load_segmentation_bitmap_from_cache(self, sample, labelset):
         sample_name = os.path.splitext(sample['name'])[0]
-        label = sample['labels'][task]
+        label = sample['labels'][labelset]
         segmentation_bitmap_url = label['attributes']['segmentation_bitmap']['url']
         url_extension = os.path.splitext(urlparse(segmentation_bitmap_url).path)[1]
         # segmentation_bitmap_filename = os.path.join(self.image_dir, '{}{}'.format(label['uuid'], url_extension))
-        segmentation_bitmap_filename = os.path.join(self.image_dir, '{}_label_{}{}'.format(sample_name, task, url_extension))
+        segmentation_bitmap_filename = os.path.join(self.image_dir, '{}_label_{}{}'.format(sample_name, labelset, url_extension))
         
         if not os.path.exists(segmentation_bitmap_filename):
             download_and_save_segmentation_bitmap(segmentation_bitmap_url, segmentation_bitmap_filename)
@@ -121,9 +131,9 @@ class SegmentsDataset():
 
     @property
     def categories(self):
-        return self.release['dataset']['tasks'][self.task]['attributes']['categories']
+        return self.release['dataset']['labelsets'][self.labelset]['attributes']['categories']
         # categories = {}
-        # for category in self.release['dataset']['tasks'][self.task]['attributes']['categories']:
+        # for category in self.release['dataset']['labelsets'][self.labelset]['attributes']['categories']:
         #     categories[category['id']] = category['name']
         # return categories
 
@@ -151,8 +161,8 @@ class SegmentsDataset():
         if self.task_type == 'segmentation-bitmap':
             # Load the label
             try:
-                label = sample['labels'][self.task]
-                segmentation_bitmap = self._load_segmentation_bitmap_from_cache(sample, self.task)
+                label = sample['labels'][self.labelset]
+                segmentation_bitmap = self._load_segmentation_bitmap_from_cache(sample, self.labelset)
                 attributes = label['attributes']
                 annotations = attributes['annotations']
             except:
@@ -167,7 +177,7 @@ class SegmentsDataset():
         # Bounding boxes
         elif self.task_type == 'bboxes':
             try:
-                label = sample['labels'][self.task]
+                label = sample['labels'][self.labelset]
                 attributes = label['attributes']
                 annotations = attributes['annotations']
             except:
