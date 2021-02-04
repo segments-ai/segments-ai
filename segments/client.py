@@ -19,7 +19,7 @@ class SegmentsClient:
         self.api_key = api_key
         self.api_url = api_url
 
-        r = self.get('/api_status/?lib_version=0.24')
+        r = self.get('/api_status/?lib_version=0.25')
         if r.status_code == 200:
             print('Initialized successfully.')
         elif r.status_code == 426:

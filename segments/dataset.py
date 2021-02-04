@@ -42,7 +42,7 @@ class SegmentsDataset():
         self.image_dir = os.path.join(segments_dir, self.dataset_identifier, self.release['name'])
 
         # First some checks
-        if not self.labelset in self.release['dataset']['labelsets']:
+        if not self.labelset in [labelset['name'] for labelset in self.release['dataset']['labelsets']]:
             print('There is no labelset with name "{}".'.format(self.labelset))
             return
 
@@ -131,7 +131,7 @@ class SegmentsDataset():
 
     @property
     def categories(self):
-        return self.release['dataset']['labelsets'][self.labelset]['attributes']['categories']
+        return self.release['dataset']['task_attributes']['categories']
         # categories = {}
         # for category in self.release['dataset']['labelsets'][self.labelset]['attributes']['categories']:
         #     categories[category['id']] = category['name']
