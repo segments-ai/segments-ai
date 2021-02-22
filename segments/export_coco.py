@@ -155,6 +155,9 @@ def export_coco_panoptic(dataset, export_folder):
     annotations = []
     for i in tqdm(range(len(dataset))):
         sample = dataset[i]
+
+        if sample['annotations'] is None:
+            continue
         
         # Images
         image_id = i+1
@@ -279,7 +282,9 @@ def export_coco_instance(dataset, export_folder):
     annotation_id = 1
     for i in tqdm(range(len(dataset))):        
         sample = dataset[i]
-    #     print(sample)
+
+        if sample['annotations'] is None:
+            continue
         
         image_id = i+1
         images.append({        
