@@ -31,13 +31,13 @@ def bitmap2file(bitmap, is_segmentation_bitmap=True):
     f.seek(0)
     return f
 
-def get_semantic_bitmap(instance_bitmap, annotations, first_category_id=1):
+def get_semantic_bitmap(instance_bitmap, annotations, id_increment=1):
     """Convert an instance bitmap and annotations dict into a segmentation bitmap.
 
     Args:
         instance_bitmap (np.uint32): A numpy array where each unique value represents an instance id.
         annotations (dict): An annotations dictionary.
-        first_category_id (int, optional): First category id. Defaults to 1.
+        id_increment (int, optional): Increment the category ids with this number. Defaults to 1.
 
     Returns:
         np.uint32: a numpy array where each unique value represents a category id.
@@ -45,7 +45,7 @@ def get_semantic_bitmap(instance_bitmap, annotations, first_category_id=1):
 
     instance2semantic = [0] * (max([a['id'] for a in annotations])+1)
     for annotation in annotations:
-        instance2semantic[annotation['id']] = annotation['category_id'] + first_category_id
+        instance2semantic[annotation['id']] = annotation['category_id'] + id_increment
     instance2semantic = np.array(instance2semantic)
         
     semantic_label = instance2semantic[np.array(instance_bitmap, np.uint32)]

@@ -140,7 +140,7 @@ def export_coco_panoptic(dataset, export_folder):
         isthing = int(category['has_instances']) if 'has_instances' in category else 0
 
         categories.append({
-            'id': category['id']+1,
+            'id': category['id'],
             'name': category['name'],
             'color': color,
             'isthing': isthing
@@ -172,7 +172,7 @@ def export_coco_panoptic(dataset, export_folder):
         for instance in sample['annotations']:
             category_id = instance['category_id']
                 
-            instance_id, color = id_generator.get_id_and_color(category_id + 1)
+            instance_id, color = id_generator.get_id_and_color(category_id)
             
             # Read the instance mask
             instance_mask = np.array(sample['segmentation_bitmap'], np.uint32) == instance['id']
@@ -183,7 +183,7 @@ def export_coco_panoptic(dataset, export_folder):
             
             info = {
                 'id': instance_id,
-                'category_id': category_id + 1,
+                'category_id': category_id,
                 'bbox': [x0, y0, x1-x0, y1-y0],
                 'area': area,
                 'iscrowd': 0
