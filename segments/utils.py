@@ -66,7 +66,7 @@ def export_dataset(dataset, export_folder='.', export_format='coco-panoptic'):
     elif export_format == 'coco-panoptic':
         return export_coco_panoptic(dataset, export_folder)
     else:
-        print('Supported export formats: coco, coco-panoptic')
+        print('Supported export formats: coco-instance, coco-panoptic')
         return
 
 def download_and_save_image(url, filename):

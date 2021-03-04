@@ -19,7 +19,7 @@ class SegmentsClient:
         self.api_key = api_key
         self.api_url = api_url
 
-        r = self.get('/api_status/?lib_version=0.28')
+        r = self.get('/api_status/?lib_version=0.29')
         if r.status_code == 200:
             print('Initialized successfully.')
         elif r.status_code == 426:
@@ -139,7 +139,7 @@ class SegmentsClient:
         r = self.get('/samples/{}/'.format(uuid))
         return r.json()
 
-    def add_sample(self, dataset, name, attributes, metadata=None):
+    def add_sample(self, dataset, name, attributes, metadata=None, priority=None):
         """Add a sample to a dataset.
 
         Args:
@@ -147,6 +147,7 @@ class SegmentsClient:
             name (str): The name of the sample.
             attributes (dict): The sample attributes. Please refer to the online documentation.
             metadata (dict, optional): Any sample metadata. Example: {'weather': 'sunny', 'camera_id': 3}.
+            priority (float, optional): Priority in the labeling queue. Samples with higher values will be labeled first. Default is 0.
 
         Returns:
             dict: a dictionary representing the newly created sample.
@@ -154,17 +155,20 @@ class SegmentsClient:
 
         payload = {
             'name': name,
-            'attributes': attributes
+            'attributes': attributes,
         }
 
         if metadata is not None:
             payload['metadata'] = metadata
 
+        if priority is not None:
+            payload['priority'] = priority
+
         r = self.post('/datasets/{}/samples/'.format(dataset), payload)
         print('Added ' + name)
         return r.json()
 
-    def update_sample(self, uuid, name=None, attributes=None, metadata=None):
+    def update_sample(self, uuid, name=None, attributes=None, metadata=None, priority=None):
         """Update a sample.
 
         Args:
@@ -172,6 +176,7 @@ class SegmentsClient:
             name (str, optional): The name of the sample.
             attributes (dict, optional): The sample attributes. Please refer to the online documentation.
             metadata (dict, optional): Any sample metadata. Example: {'weather': 'sunny', 'camera_id': 3}.
+            priority (float, optional): Priority in the labeling queue. Samples with higher values will be labeled first. Default is 0.
 
         Returns:
             dict: a dictionary representing the updated sample.
@@ -187,6 +192,9 @@ class SegmentsClient:
 
         if metadata is not None:
             payload['metadata'] = metadata
+
+        if priority is not None:
+            payload['priority'] = priority
 
         r = self.patch('/samples/{}/'.format(uuid), payload)
         print('Updated ' + uuid)
