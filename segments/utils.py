@@ -56,17 +56,20 @@ def export_dataset(dataset, export_folder='.', export_format='coco-panoptic'):
 
     Args:
         dataset (dict): A dataset object, resulting from client.get_dataset().
-        export_format (str, optional): The destination format. Defaults to 'coco-panoptic'.
+        export_format (str, optional): The destination format. Can be 'coco-panoptic' (default), 'coco-instance', 'yolo.
     """
 
-    from .export_coco import export_coco_instance, export_coco_panoptic
-
-    if export_format == 'coco-instance':
-        return export_coco_instance(dataset, export_folder)
-    elif export_format == 'coco-panoptic':
+    if export_format == 'coco-panoptic':
+        from .export import export_coco_panoptic
         return export_coco_panoptic(dataset, export_folder)
+    elif export_format == 'coco-instance':
+        from .export import export_coco_instance
+        return export_coco_instance(dataset, export_folder)
+    elif export_format == 'yolo':
+        from .export import export_yolo
+        return export_yolo(dataset, export_folder)
     else:
-        print('Supported export formats: coco-instance, coco-panoptic')
+        print('Supported export formats: coco-panoptic, coco-instance, yolo')
         return
 
 def download_and_save_image(url, filename):

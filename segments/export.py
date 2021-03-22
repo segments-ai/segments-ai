@@ -366,3 +366,42 @@ def export_coco_instance(dataset, export_folder):
 
     print('Exported to {}. Images and labels in {}'.format(file_name, dataset.image_dir))
     return file_name, dataset.image_dir
+
+
+def export_yolo(dataset, export_folder):
+    if dataset.task_type != 'bboxes':
+        print('You can only export bounding box datasets to YOLO format.')
+        return
+
+    for i in tqdm(range(len(dataset))):        
+        sample = dataset[i]
+
+        if 'annotations' in sample and len(sample['annotations']) > 0:
+            image_name = os.path.splitext(os.path.basename(sample['name']))[0]
+            image_width = sample['image'].width
+            image_height = sample['image'].height
+            
+            file_name = '{}/{}.txt'.format(dataset.image_dir, image_name)
+    #         print(file_name)       
+            
+            with open(file_name, 'w') as f:
+                for annotation in sample['annotations']:
+                    category_id = annotation['category_id']
+                    [[x0, y0], [x1, y1]] = annotation['points']
+
+                    # Normalize
+                    x0, x1 = x0 / image_width, x1 / image_width
+                    y0, y1 = y0 / image_height, y1 / image_height
+
+                    # Get center, width and height of bbox
+                    x_center = (x0 + x1) / 2
+                    y_center = (y0 + y1) / 2
+                    width = abs(x1 - x0)
+                    height = abs(y1 - y0)
+
+                    # Save it to the file
+    #                 print(category_id, x_center, y_center, width, height)
+                    f.write('{} {:.6f} {:.6f} {:.6f} {:.6f}\n'.format(category_id, x_center, y_center, width, height))
+
+    print('Exported. Images and labels in {}'.format(dataset.image_dir))
+    return dataset.image_dir
