@@ -43,7 +43,10 @@ def get_semantic_bitmap(instance_bitmap, annotations, id_increment=1):
         np.uint32: a numpy array where each unique value represents a category id.
     """
 
-    instance2semantic = [0] * (max([a['id'] for a in annotations])+1)
+    if instance_bitmap is None or annotations is None:
+        return None
+
+    instance2semantic = [0] * (max([a['id'] for a in annotations], default=0)+1)
     for annotation in annotations:
         instance2semantic[annotation['id']] = annotation['category_id'] + id_increment
     instance2semantic = np.array(instance2semantic)
