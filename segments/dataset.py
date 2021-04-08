@@ -21,12 +21,13 @@ class SegmentsDataset():
     """
 
     # https://stackoverflow.com/questions/682504/what-is-a-clean-pythonic-way-to-have-multiple-constructors-in-python
-    def __init__(self, release_file, labelset='ground-truth', filter_by=None, segments_dir='segments'):
+    def __init__(self, release_file, labelset='ground-truth', filter_by=None, segments_dir='segments', preload=True):
         self.labelset = labelset
         self.filter_by = [filter_by] if isinstance(filter_by, str) else filter_by
         if self.filter_by is not None:
             self.filter_by = [s.lower() for s in self.filter_by]
         self.segments_dir = segments_dir
+        self.preload = preload
         
         # if urlparse(release_file).scheme in ('http', 'https'): # If it's a url
         if isinstance(release_file, str): # If it's a file path
@@ -47,14 +48,14 @@ class SegmentsDataset():
             return
 
         self.task_type = self.release['dataset']['task_type']
-        if self.task_type not in ['segmentation-bitmap', 'bboxes']:
-            print('You can only create a dataset for tasks of type "segmentation-bitmap" or "bboxes" for now.')
+        if self.task_type not in ['segmentation-bitmap', 'bboxes', 'keypoints']:
+            print('You can only create a dataset for tasks of type "segmentation-bitmap", "bboxes", or "keypoints" for now.')
             return
         
         self.load_dataset()
 
     def load_dataset(self):
-        print('Initializing dataset. This may take a few seconds...')
+        print('Initializing dataset...')
         
         # Setup cache
         if not os.path.exists(self.image_dir):
@@ -91,9 +92,11 @@ class SegmentsDataset():
         # https://stackoverflow.com/questions/3530955/retrieve-multiple-urls-at-once-in-parallel
         # https://github.com/tqdm/tqdm/issues/484#issuecomment-461998250
         num_samples = self.__len__()
-        with ThreadPool(16) as pool:
-            # r = list(tqdm(pool.imap_unordered(self.__getitem__, range(num_samples)), total=num_samples))
-            r = list(tqdm(pool.imap_unordered(_load_image, range(num_samples)), total=num_samples))
+        if self.preload:
+            print('Preloading all samples. This may take a while...')
+            with ThreadPool(16) as pool:
+                # r = list(tqdm(pool.imap_unordered(self.__getitem__, range(num_samples)), total=num_samples))
+                r = list(tqdm(pool.imap_unordered(_load_image, range(num_samples)), total=num_samples))
 
         print('Initialized dataset with {} images.'.format(num_samples))
 
@@ -175,7 +178,7 @@ class SegmentsDataset():
             })
 
         # Bounding boxes
-        elif self.task_type == 'bboxes':
+        elif self.task_type == 'bboxes' or self.task_type == 'keypoints':
             try:
                 label = sample['labels'][self.labelset]
                 attributes = label['attributes']
