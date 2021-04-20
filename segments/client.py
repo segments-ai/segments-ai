@@ -19,7 +19,7 @@ class SegmentsClient:
         self.api_key = api_key
         self.api_url = api_url
 
-        r = self.get('/api_status/?lib_version=0.32')
+        r = self.get('/api_status/?lib_version=0.33')
         if r.status_code == 200:
             print('Initialized successfully.')
         elif r.status_code == 426:
@@ -107,6 +107,25 @@ class SegmentsClient:
         """
 
         r = self.delete('/datasets/{}/'.format(dataset_identifier))
+
+    def add_dataset_collaborator(self, dataset_identifier, username, role='labeler'):
+        """Add a collaborator to a dataset.
+
+        Args:
+            dataset_identifier (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
+            username (str): The username of the collaborator to be added.
+            role (str, optional): The role of the collaborator to be added. One of labeler, reviewer, admin. Defaults to labeler.
+
+        Returns:
+            dict: a dictionary containing the newly added collaborator with its role.
+        """
+        payload = {
+            'user': username,
+            'role': role
+        }
+        r = self.post('/datasets/{}/collaborators/'.format(dataset_identifier), payload)
+        return r.json()
+
 
     ###########
     # Samples #
@@ -234,6 +253,7 @@ class SegmentsClient:
             labelset (str): The labelset this label belongs to.
             attributes (dict): The label attributes. Please refer to the online documentation.
             label_status (str, optional): The label status. Defaults to 'PRELABELED'.
+            score (float, optional): The label score. Defaults to None.
 
         Returns:
             dict: a dictionary representing the newly created label.
@@ -258,6 +278,7 @@ class SegmentsClient:
             labelset (str): The labelset this label belongs to.
             attributes (dict): The label attributes. Please refer to the online documentation.
             label_status (str, optional): The label status. Defaults to 'PRELABELED'.
+            score (float, optional): The label score. Defaults to None.
 
         Returns:
             dict: a dictionary representing the updated label.
