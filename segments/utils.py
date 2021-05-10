@@ -75,22 +75,47 @@ def export_dataset(dataset, export_folder='.', export_format='coco-panoptic'):
         print('Supported export formats: coco-panoptic, coco-instance, yolo')
         return
 
-def download_and_save_image(url, filename):
-    urllib.request.urlretrieve(url, filename)
-    return
+def load_image_from_url(url, save_filename=None):
+    """Load an image from url.
 
-def download_and_save_segmentation_bitmap(url, filename):
-    def extract_segmentation_bitmap(segmentation_bitmap):
-        segmentation_bitmap = np.array(segmentation_bitmap)
-        segmentation_bitmap[:,:,3] = 0
-        segmentation_bitmap = segmentation_bitmap.view(np.uint32).squeeze(2)
-        segmentation_bitmap = Image.fromarray(segmentation_bitmap)
-        return segmentation_bitmap
+    Args:
+        url (str): The image url.
+        save_filename (str, optional): The filename to save to.
 
-    segmentation_bitmap = Image.open(BytesIO(requests.get(url).content))
-    segmentation_bitmap = extract_segmentation_bitmap(segmentation_bitmap)
-    segmentation_bitmap.save(filename)
-    return
+    Returns:
+        PIL.Image: a PIL image.
+    """
+    image = Image.open(BytesIO(requests.get(url).content))
+    # urllib.request.urlretrieve(url, save_filename)
+
+    if save_filename is not None:
+        image.save(save_filename)
+
+    return image
+
+def load_label_bitmap_from_url(url, save_filename=None):
+    """Load a label bitmap from url.
+
+    Args:
+        url (str): The label bitmap url.
+        save_filename (str, optional): The filename to save to.
+
+    Returns:
+        np.uint32: a numpy np.uint32 array.
+    """
+    def extract_bitmap(bitmap):
+        bitmap = np.array(bitmap)
+        bitmap[:,:,3] = 0
+        bitmap = bitmap.view(np.uint32).squeeze(2)
+        return bitmap
+
+    bitmap = Image.open(BytesIO(requests.get(url).content))
+    bitmap = extract_bitmap(bitmap)
+
+    if save_filename is not None:
+        Image.fromarray(bitmap).save(save_filename)
+
+    return bitmap
 
 def handle_exif_rotation(image):
     try:

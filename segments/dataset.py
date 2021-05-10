@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 from multiprocessing.pool import ThreadPool
 from tqdm import tqdm
 
-from .utils import download_and_save_image, download_and_save_segmentation_bitmap, handle_exif_rotation
+from .utils import load_image_from_url, load_label_bitmap_from_url, handle_exif_rotation
 
 from PIL import Image
 
@@ -110,9 +110,10 @@ class SegmentsDataset():
         image_filename = os.path.join(self.image_dir, image_filename_rel)
 
         if not os.path.exists(image_filename):
-            download_and_save_image(image_url, image_filename)
+            image = load_image_from_url(image_url, image_filename)
+        else:
+            image = Image.open(image_filename)
 
-        image = Image.open(image_filename)
         image = handle_exif_rotation(image)
 
         return image, image_filename_rel
@@ -126,9 +127,9 @@ class SegmentsDataset():
         segmentation_bitmap_filename = os.path.join(self.image_dir, '{}_label_{}{}'.format(sample_name, labelset, url_extension))
         
         if not os.path.exists(segmentation_bitmap_filename):
-            download_and_save_segmentation_bitmap(segmentation_bitmap_url, segmentation_bitmap_filename)
-
-        segmentation_bitmap = Image.open(segmentation_bitmap_filename)
+            segmentation_bitmap = load_label_bitmap_from_url(segmentation_bitmap_url, segmentation_bitmap_filename)
+        else:
+            segmentation_bitmap = Image.open(segmentation_bitmap_filename)
 
         return segmentation_bitmap
 
