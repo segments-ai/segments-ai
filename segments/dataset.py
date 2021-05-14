@@ -48,8 +48,8 @@ class SegmentsDataset():
             return
 
         self.task_type = self.release['dataset']['task_type']
-        if self.task_type not in ['segmentation-bitmap', 'bboxes', 'keypoints']:
-            print('You can only create a dataset for tasks of type "segmentation-bitmap", "bboxes", or "keypoints" for now.')
+        if self.task_type not in ['segmentation-bitmap', 'segmentation-bitmap-highres', 'bboxes', 'keypoints']:
+            print('You can only create a dataset for tasks of type "segmentation-bitmap", "segmentation-bitmap-highres", "bboxes", or "keypoints" for now.')
             return
         
         self.load_dataset()
@@ -162,7 +162,7 @@ class SegmentsDataset():
         }
 
         # Segmentation bitmap
-        if self.task_type == 'segmentation-bitmap':
+        if self.task_type == 'segmentation-bitmap' or self.task_type == 'segmentation-bitmap-highres':
             # Load the label
             try:
                 label = sample['labels'][self.labelset]
