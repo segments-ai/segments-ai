@@ -99,6 +99,46 @@ class SegmentsClient:
         r = self.post('/user/datasets/', payload)
         return r.json()
 
+    def update_dataset(self, dataset_identifier, description=None, task_type=None, task_attributes=None, category=None, public=None, readme=None):
+        """Update a dataset.
+
+        Args:
+            dataset_identifier (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
+            description (str, optional): The dataset description.
+            task_type (str, optional): The dataset's task type.
+            task_attributes (dict, optional): The dataset's task attributes.
+            category (str, optional): The dataset category.
+            public (bool, optional): The dataset visibility.
+            readme (str, optional): The dataset readme.
+
+        Returns:
+            dict: a dictionary representing the updated dataset.
+        """
+
+        payload = {}
+
+        if description is not None:
+            payload['description'] = description
+
+        if task_type is not None:
+            payload['task_type'] = task_type
+
+        if task_attributes is not None:
+            payload['task_attributes'] = task_attributes
+
+        if category is not None:
+            payload['category'] = category
+
+        if public is not None:
+            payload['public'] = public
+
+        if readme is not None:
+            payload['readme'] = readme
+
+        r = self.patch('/datasets/{}/'.format(dataset_identifier), payload)
+        print('Updated ' + dataset_identifier)
+        return r.json()
+
     def delete_dataset(self, dataset_identifier):
         """Delete a dataset.
 
@@ -130,11 +170,11 @@ class SegmentsClient:
     ###########
     # Samples #
     ###########
-    def get_samples(self, dataset, per_page=1000, page=1):
+    def get_samples(self, dataset_identifier, per_page=1000, page=1):
         """Get the samples in a dataset.
 
         Args:
-            dataset (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
+            dataset_identifier (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
             per_page (int, optional): Pagination parameter indicating the maximum number of samples to return. Defaults to 1000.
             page (int, optional): Pagination parameter indicating the page to return. Defaults to 1.
 
@@ -142,7 +182,7 @@ class SegmentsClient:
             list: a list of dictionaries representing the samples.
         """
 
-        r = self.get('/datasets/{}/samples/?per_page={}&page={}'.format(dataset, per_page, page))
+        r = self.get('/datasets/{}/samples/?per_page={}&page={}'.format(dataset_identifier, per_page, page))
         return r.json()
 
     def get_sample(self, uuid):
@@ -158,11 +198,11 @@ class SegmentsClient:
         r = self.get('/samples/{}/'.format(uuid))
         return r.json()
 
-    def add_sample(self, dataset, name, attributes, metadata=None, priority=None):
+    def add_sample(self, dataset_identifier, name, attributes, metadata=None, priority=None):
         """Add a sample to a dataset.
 
         Args:
-            dataset (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
+            dataset_identifier (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
             name (str): The name of the sample.
             attributes (dict): The sample attributes. Please refer to the online documentation.
             metadata (dict, optional): Any sample metadata. Example: {'weather': 'sunny', 'camera_id': 3}.
@@ -183,7 +223,7 @@ class SegmentsClient:
         if priority is not None:
             payload['priority'] = priority
 
-        r = self.post('/datasets/{}/samples/'.format(dataset), payload)
+        r = self.post('/datasets/{}/samples/'.format(dataset_identifier), payload)
         print('Added ' + name)
         return r.json()
 
@@ -311,38 +351,38 @@ class SegmentsClient:
     ############
     # Releases #
     ############
-    def get_releases(self, dataset):
+    def get_releases(self, dataset_identifier):
         """Get the releases in a dataset.
 
         Args:
-            dataset (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
+            dataset_identifier (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
 
         Returns:
             list: a list of dictionaries representing the releases.
         """
 
-        r = self.get('/datasets/{}/releases/'.format(dataset))
+        r = self.get('/datasets/{}/releases/'.format(dataset_identifier))
         return r.json()
 
-    def get_release(self, dataset, release):
+    def get_release(self, dataset_identifier, name):
         """Get a release.
 
         Args:
-            dataset (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
-            release (str): The release name.
+            dataset_identifier (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
+            name (str): The name of the release.
 
         Returns:
             dict: a dictionary representing the release.
         """
 
-        r = self.get('/datasets/{}/releases/{}/'.format(dataset, release))
+        r = self.get('/datasets/{}/releases/{}/'.format(dataset_identifier, name))
         return r.json()
 
-    def add_release(self, dataset, name, description=''):
+    def add_release(self, dataset_identifier, name, description=''):
         """Add a release to a dataset.
 
         Args:
-            dataset (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
+            dataset_identifier (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
             name (str): The name of the release.
             description (str, optional): The release description.
 
@@ -354,28 +394,28 @@ class SegmentsClient:
             'name': name,
             'description': description
         }
-        r = self.post('/datasets/{}/releases/'.format(dataset), payload)
+        r = self.post('/datasets/{}/releases/'.format(dataset_identifier), payload)
         return r.json()
 
-    def delete_release(self, dataset, release):
+    def delete_release(self, dataset_identifier, name):
         """Delete a release.
 
         Args:
-            dataset (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
-            release (str): The release name.
+            dataset_identifier (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
+            name (str): The name of the release.
         """
 
-        r = self.delete('/datasets/{}/releases/{}/'.format(dataset, release))
+        r = self.delete('/datasets/{}/releases/{}/'.format(dataset_identifier, name))
 
     ##########
     # Assets #
     ##########
-    def upload_asset(self, file, filename):
+    def upload_asset(self, file, filename='label.png'):
         """Upload an asset.
 
         Args:
             file (object): A file object.
-            filename (str): The file name.
+            filename (str, optional): The file name. Defaults to label.png.
 
         Returns:
             dict: a dictionary representing the uploaded file.
