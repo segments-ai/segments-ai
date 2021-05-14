@@ -18,7 +18,14 @@ def bitmap2file(bitmap, is_segmentation_bitmap=True):
         object: a file object.
     """
 
-    # TODO: convert bitmap to np.uint32, if it is not already
+    # Convert bitmap to np.uint32, if it is not already
+    if bitmap.dtype == 'uint32':
+        pass
+    elif bitmap.dtype == 'uint8':
+        bitmap = np.uint32(bitmap)
+    else:
+        assert False
+
     if is_segmentation_bitmap:
         bitmap2 = np.copy(bitmap)
         bitmap2 = bitmap2[:, :, None].view(np.uint8)
