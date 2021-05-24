@@ -73,6 +73,7 @@ def export_dataset(dataset, export_folder='.', export_format='coco-panoptic'):
         export_format (str, optional): The destination format. Can be 'coco-panoptic' (default), 'coco-instance', 'yolo.
     """
 
+    print('Exporting dataset. This may take a while...')
     if export_format == 'coco-panoptic':
         from .export import export_coco_panoptic
         return export_coco_panoptic(dataset, export_folder)
