@@ -7,6 +7,10 @@ import json
 import numpy as np
 from PIL import Image, ExifTags
 
+session = requests.Session()
+adapter = requests.adapters.HTTPAdapter(max_retries=3)
+session.mount('http://', adapter)
+session.mount('https://', adapter)
 
 def bitmap2file(bitmap, is_segmentation_bitmap=True):
     """Convert a label bitmap to a file with the proper format.
@@ -92,7 +96,7 @@ def load_image_from_url(url, save_filename=None):
     Returns:
         PIL.Image: a PIL image.
     """
-    image = Image.open(BytesIO(requests.get(url).content))
+    image = Image.open(BytesIO(session.get(url).content))
     # urllib.request.urlretrieve(url, save_filename)
 
     if save_filename is not None:
@@ -116,7 +120,7 @@ def load_label_bitmap_from_url(url, save_filename=None):
         bitmap = bitmap.view(np.uint32).squeeze(2)
         return bitmap
 
-    bitmap = Image.open(BytesIO(requests.get(url).content))
+    bitmap = Image.open(BytesIO(session.get(url).content))
     bitmap = extract_bitmap(bitmap)
 
     if save_filename is not None:

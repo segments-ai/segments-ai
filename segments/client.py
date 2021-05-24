@@ -1,7 +1,6 @@
 import urllib.parse
 import requests
 
-
 class SegmentsClient:
     """SegmentsClient class.
 
@@ -18,6 +17,18 @@ class SegmentsClient:
     def __init__(self, api_key, api_url='https://api.segments.ai/'):
         self.api_key = api_key
         self.api_url = api_url
+
+        # https://realpython.com/python-requests/#performance
+        # https://stackoverflow.com/questions/21371809/cleanly-setting-max-retries-on-python-requests-get-or-post-method
+        # https://stackoverflow.com/questions/23013220/max-retries-exceeded-with-url-in-requests
+        self.api_session = requests.Session()
+        adapter = requests.adapters.HTTPAdapter(max_retries=3)
+        self.api_session.mount('http://', adapter)
+        self.api_session.mount('https://', adapter)
+
+        self.s3_session = requests.Session()
+        self.s3_session.mount('http://', adapter)
+        self.s3_session.mount('https://', adapter)
 
         r = self.get('/api_status/?lib_version=0.35')
         if r.status_code == 200:
@@ -65,7 +76,7 @@ class SegmentsClient:
         Args:
             name (str): The dataset name. Example: flowers.
             description (str, optional): The dataset description. Defaults to ''.
-            task_type (str, optional): The dataset's task type. Defaults to 'segmentation-bitmap'.
+            task_type (str, optional): The dataset's task type. One of 'segmentation-bitmap', 'segmentation-bitmap-highres', 'bboxes', 'keypoints'. Defaults to 'segmentation-bitmap'.
             task_attributes (dict, optional): The dataset's task attributes. Defaults to None.
             category (str, optional): The dataset category. Defaults to 'other'.
             public (bool, optional): The dataset visibility. Defaults to False.
@@ -105,7 +116,7 @@ class SegmentsClient:
         Args:
             dataset_identifier (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
             description (str, optional): The dataset description.
-            task_type (str, optional): The dataset's task type.
+            task_type (str, optional): The dataset's task type. One of 'segmentation-bitmap', 'segmentation-bitmap-highres', 'bboxes', 'keypoints'.
             task_attributes (dict, optional): The dataset's task attributes.
             category (str, optional): The dataset category.
             public (bool, optional): The dataset visibility.
@@ -437,7 +448,7 @@ class SegmentsClient:
         headers = self._get_auth_header() if auth else None
 
         try:
-            r = requests.get(urllib.parse.urljoin(self.api_url, endpoint),
+            r = self.api_session.get(urllib.parse.urljoin(self.api_url, endpoint),
                             headers=headers)
             r.raise_for_status()
         except requests.exceptions.HTTPError as errh:
@@ -449,7 +460,7 @@ class SegmentsClient:
         headers = self._get_auth_header() if auth else None
 
         try:
-            r = requests.post(urllib.parse.urljoin(self.api_url, endpoint),
+            r = self.api_session.post(urllib.parse.urljoin(self.api_url, endpoint),
                                 json=data,  # data=data
                                 headers=headers)
             r.raise_for_status()
@@ -462,7 +473,7 @@ class SegmentsClient:
         headers = self._get_auth_header() if auth else None
 
         try:
-            r = requests.put(urllib.parse.urljoin(self.api_url, endpoint),
+            r = self.api_session.put(urllib.parse.urljoin(self.api_url, endpoint),
                                 json=data,  # data=data
                                 headers=headers)
             r.raise_for_status()
@@ -475,7 +486,7 @@ class SegmentsClient:
         headers = self._get_auth_header() if auth else None
 
         try:
-            r = requests.patch(urllib.parse.urljoin(self.api_url, endpoint),
+            r = self.api_session.patch(urllib.parse.urljoin(self.api_url, endpoint),
                                 json=data,  # data=data
                                 headers=headers)
             r.raise_for_status()
@@ -488,7 +499,7 @@ class SegmentsClient:
         headers = self._get_auth_header() if auth else None
 
         try:
-            r = requests.delete(urllib.parse.urljoin(self.api_url, endpoint),
+            r = self.api_session.delete(urllib.parse.urljoin(self.api_url, endpoint),
                                 json=data,  # data=data
                                 headers=headers)
             r.raise_for_status()
@@ -497,10 +508,9 @@ class SegmentsClient:
 
         return r
 
-    @staticmethod
-    def _upload_to_aws(file, aws_fields):
+    def _upload_to_aws(self, file, aws_fields):
         files = {'file': file}
-        r = requests.post(aws_fields['url'],
+        r = self.s3_session.post(aws_fields['url'],
                                  files=files,
                                  data=aws_fields['fields'])
         return r
