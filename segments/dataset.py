@@ -16,7 +16,8 @@ class SegmentsDataset():
         release_file (str or dict): Path to a release file, or a release dict resulting from client.get_release().
         labelset (str, optional): The labelset that should be loaded. Defaults to 'ground-truth'.
         filter_by (list, optional): A list of label statuses to filter by. Defaults to None.
-        segments_dir (str, optional): The directory where the data will be downloaded to and stored. Defaults to 'segments'.
+        segments_dir (str, optional): The directory where the data will be downloaded to for caching. Set to None to disable caching. Defaults to 'segments'.
+        preload (bool, optional): Whether the data should be pre-downloaded when the dataset is initialized. Ignored if segments_dir is None. Defaults to True. 
 
     """
 
@@ -27,6 +28,7 @@ class SegmentsDataset():
         if self.filter_by is not None:
             self.filter_by = [s.lower() for s in self.filter_by]
         self.segments_dir = segments_dir
+        self.caching_enabled = segments_dir is not None
         self.preload = preload
         
         # if urlparse(release_file).scheme in ('http', 'https'): # If it's a url
@@ -40,7 +42,8 @@ class SegmentsDataset():
         self.release_file = release_file
 
         self.dataset_identifier = '{}_{}'.format(self.release['dataset']['owner'], self.release['dataset']['name'])
-        self.image_dir = os.path.join(segments_dir, self.dataset_identifier, self.release['name'])
+
+        self.image_dir = None if segments_dir is None else os.path.join(segments_dir, self.dataset_identifier, self.release['name'])
 
         # First some checks
         if not self.labelset in [labelset['name'] for labelset in self.release['dataset']['labelsets']]:
@@ -58,7 +61,7 @@ class SegmentsDataset():
         print('Initializing dataset...')
         
         # Setup cache
-        if not os.path.exists(self.image_dir):
+        if self.caching_enabled and not os.path.exists(self.image_dir):
             os.makedirs(self.image_dir)
         
         # Load and filter the samples
@@ -92,7 +95,7 @@ class SegmentsDataset():
         # https://stackoverflow.com/questions/3530955/retrieve-multiple-urls-at-once-in-parallel
         # https://github.com/tqdm/tqdm/issues/484#issuecomment-461998250
         num_samples = self.__len__()
-        if self.preload:
+        if self.caching_enabled and self.preload:
             print('Preloading all samples. This may take a while...')
             with ThreadPool(16) as pool:
                 # r = list(tqdm(pool.imap_unordered(self.__getitem__, range(num_samples)), total=num_samples))
@@ -107,12 +110,15 @@ class SegmentsDataset():
         url_extension = os.path.splitext(urlparse(image_url).path)[1]
         # image_filename_rel = '{}{}'.format(sample['uuid'], url_extension)
         image_filename_rel = '{}{}'.format(sample_name, url_extension)
-        image_filename = os.path.join(self.image_dir, image_filename_rel)
 
-        if not os.path.exists(image_filename):
-            image = load_image_from_url(image_url, image_filename if self.preload else None)
+        if self.caching_enabled:
+            image_filename = os.path.join(self.image_dir, image_filename_rel)
+            if not os.path.exists(image_filename):
+                image = load_image_from_url(image_url, image_filename)
+            else:
+                image = Image.open(image_filename)
         else:
-            image = Image.open(image_filename)
+            image = load_image_from_url(image_url)            
 
         image = handle_exif_rotation(image)
 
@@ -123,13 +129,16 @@ class SegmentsDataset():
         label = sample['labels'][labelset]
         segmentation_bitmap_url = label['attributes']['segmentation_bitmap']['url']
         url_extension = os.path.splitext(urlparse(segmentation_bitmap_url).path)[1]
-        # segmentation_bitmap_filename = os.path.join(self.image_dir, '{}{}'.format(label['uuid'], url_extension))
-        segmentation_bitmap_filename = os.path.join(self.image_dir, '{}_label_{}{}'.format(sample_name, labelset, url_extension))
-        
-        if not os.path.exists(segmentation_bitmap_filename):
-            segmentation_bitmap = load_label_bitmap_from_url(segmentation_bitmap_url, segmentation_bitmap_filename if self.preload else None)
+
+        if self.caching_enabled:
+            # segmentation_bitmap_filename = os.path.join(self.image_dir, '{}{}'.format(label['uuid'], url_extension))
+            segmentation_bitmap_filename = os.path.join(self.image_dir, '{}_label_{}{}'.format(sample_name, labelset, url_extension))            
+            if not os.path.exists(segmentation_bitmap_filename):
+                segmentation_bitmap = load_label_bitmap_from_url(segmentation_bitmap_url, segmentation_bitmap_filename)
+            else:
+                segmentation_bitmap = Image.open(segmentation_bitmap_filename)
         else:
-            segmentation_bitmap = Image.open(segmentation_bitmap_filename)
+            segmentation_bitmap = load_label_bitmap_from_url(segmentation_bitmap_url)            
 
         return segmentation_bitmap
 
