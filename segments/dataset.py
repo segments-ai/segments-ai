@@ -159,6 +159,7 @@ class SegmentsDataset():
             'name': sample['name'],
             'file_name': image_filename,
             'image': image,
+            'metadata': sample['metadata']
         }
 
         # Segmentation bitmap
