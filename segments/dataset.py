@@ -110,7 +110,7 @@ class SegmentsDataset():
         image_filename = os.path.join(self.image_dir, image_filename_rel)
 
         if not os.path.exists(image_filename):
-            image = load_image_from_url(image_url, image_filename)
+            image = load_image_from_url(image_url, image_filename if self.preload else None)
         else:
             image = Image.open(image_filename)
 
@@ -127,7 +127,7 @@ class SegmentsDataset():
         segmentation_bitmap_filename = os.path.join(self.image_dir, '{}_label_{}{}'.format(sample_name, labelset, url_extension))
         
         if not os.path.exists(segmentation_bitmap_filename):
-            segmentation_bitmap = load_label_bitmap_from_url(segmentation_bitmap_url, segmentation_bitmap_filename)
+            segmentation_bitmap = load_label_bitmap_from_url(segmentation_bitmap_url, segmentation_bitmap_filename if self.preload else None)
         else:
             segmentation_bitmap = Image.open(segmentation_bitmap_filename)
 
