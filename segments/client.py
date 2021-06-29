@@ -30,7 +30,7 @@ class SegmentsClient:
         self.s3_session.mount('http://', adapter)
         self.s3_session.mount('https://', adapter)
 
-        r = self.get('/api_status/?lib_version=0.40')
+        r = self.get('/api_status/?lib_version=0.41')
         if r.status_code == 200:
             print('Initialized successfully.')
         elif r.status_code == 426:
@@ -358,6 +358,31 @@ class SegmentsClient:
         """
 
         r = self.delete('/labels/{}/{}/'.format(sample_uuid, labelset))
+
+
+    #############
+    # Labelsets #
+    #############
+    def add_labelset(self, dataset_identifier, name, description=''):
+        """Add a labelset to a dataset.
+
+        Args:
+            dataset_identifier (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
+            name (str): The name of the labelset.
+            description (str, optional): The labelset description.
+
+        Returns:
+            dict: a dictionary representing the labelset.
+        """
+
+        payload = {
+            'name': name,
+            'description': description,
+            'attributes': '{}',
+        }
+        r = self.post('/datasets/{}/labelsets/'.format(dataset_identifier), payload)
+        return r.json()
+
 
     ############
     # Releases #
