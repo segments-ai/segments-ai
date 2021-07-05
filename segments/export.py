@@ -183,16 +183,14 @@ def export_coco_panoptic(dataset, export_folder):
             y0, x0, y1, x1 = get_bbox(instance_mask)
             rle = mask.encode(np.array(instance_mask[:,:,None], dtype=np.uint8, order='F'))[0] # https://github.com/matterport/Mask_RCNN/issues/387#issuecomment-522671380
             area = int(mask.area(rle))
-            
-            info = {
+
+            segments_info.append({
                 'id': instance_id,
                 'category_id': category_id,
                 'bbox': [x0, y0, x1-x0, y1-y0],
                 'area': area,
                 'iscrowd': 0
-            }
-
-            segments_info.append(info)
+            })
             
         file_name = os.path.splitext(os.path.basename(sample['name']))[0]
         label_file_name = '{}_label_{}_coco-panoptic.png'.format(file_name, dataset.labelset)
