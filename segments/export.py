@@ -169,7 +169,7 @@ def export_coco_panoptic(dataset, export_folder):
         })
         
         # Annotations
-        panoptic_label = np.zeros((sample['image'].size[1], sample['image'].size[0], 3), np.uint8)
+        panoptic_label = np.zeros((sample['segmentation_bitmap'].size[1], sample['segmentation_bitmap'].size[0], 3), np.uint8)
         
         segments_info = []
         for instance in sample['annotations']:
@@ -207,12 +207,12 @@ def export_coco_panoptic(dataset, export_folder):
             
         # # Instance png
         # instance_label = sample['segmentation_bitmap']
-        # export_file = os.path.join(label_export_folder, '{}_gt_instance.png'.format(file_name))
+        # export_file = os.path.join(dataset.image_dir, '{}_label_{}_instance.png'.format(file_name, dataset.labelset))
         # instance_label.save(export_file)
         
         # # Colored instance png
         # instance_label_colored = colorize(np.uint8(instance_label))
-        # export_file = os.path.join(label_export_folder, '{}_gt_instance_colored.png'.format(file_name))
+        # export_file = os.path.join(dataset.image_dir, '{}_label{}_instance_colored.png'.format(file_name, dataset.labelset))
         # Image.fromarray(img_as_ubyte(instance_label_colored)).save(export_file)
         
         # Panoptic png
@@ -221,12 +221,12 @@ def export_coco_panoptic(dataset, export_folder):
         
         # # Semantic png
         # semantic_label = get_semantic_bitmap(instance_label, sample['annotations'])
-        # export_file = os.path.join(label_export_folder, '{}_gt_semantic.png'.format(file_name))
+        # export_file = os.path.join(dataset.image_dir, '{}_label_{}_semantic.png'.format(file_name, dataset.labelset))
         # Image.fromarray(img_as_ubyte(semantic_label)).save(export_file)
         
         # # Colored semantic png
         # semantic_label_colored = colorize(np.uint8(semantic_label), colormap=[c['color'] for c in categories])
-        # export_file = os.path.join(label_export_folder, '{}_gt_semantic_colored.png'.format(file_name))
+        # export_file = os.path.join(dataset.image_dir, '{}_label_{}_semantic_colored.png'.format(file_name, dataset.labelset))
         # Image.fromarray(img_as_ubyte(semantic_label_colored)).save(export_file)
     
     # PUT EVERYTHING TOGETHER
@@ -238,7 +238,7 @@ def export_coco_panoptic(dataset, export_folder):
     }
 
     # WRITE JSON TO FILE
-    file_name = os.path.join(export_folder, 'export_{}_{}.json'.format(dataset.dataset_identifier, dataset.release['name']))
+    file_name = os.path.join(export_folder, 'export_coco-panoptic_{}_{}.json'.format(dataset.dataset_identifier, dataset.release['name']))
     with open(file_name, 'w') as f:
         json.dump(json_data, f)
 
@@ -358,7 +358,7 @@ def export_coco_instance(dataset, export_folder):
     #     'segment_info': [] # Only in Panoptic annotations
     }
 
-    file_name = os.path.join(export_folder, 'export_{}_{}.json'.format(dataset.dataset_identifier, dataset.release['name']))
+    file_name = os.path.join(export_folder, 'export_coco-instance_{}_{}.json'.format(dataset.dataset_identifier, dataset.release['name']))
     with open(file_name, 'w') as f:
         json.dump(json_data, f)
 
