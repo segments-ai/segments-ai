@@ -10,10 +10,6 @@ from shutil import copyfile
 import numpy as np
 
 from PIL import Image
-from skimage import img_as_ubyte
-from skimage.measure import regionprops
-from skimage.segmentation import mark_boundaries
-from pycocotools import mask
 
 from .utils import get_semantic_bitmap
 
@@ -121,7 +117,138 @@ def get_bbox(binary_mask):
         return False
 
 
+def export_coco_instance(dataset, export_folder):
+    # from skimage import img_as_ubyte
+    from skimage.measure import regionprops
+    # from skimage.segmentation import mark_boundaries
+    from pycocotools import mask
+
+    # Create export folder
+    # export_folder = os.path.join(export_folder, dataset.dataset_identifier, dataset.release['name'])
+    os.makedirs(export_folder, exist_ok=True)
+
+    info = {
+        'description': dataset.release['dataset']['name'],
+        # 'url': 'https://segments.ai/test/test',
+        'version':  dataset.release['name'],
+        # 'year': 2020,
+        # 'contributor': 'Segments.ai',
+    }
+
+    # licenses = [{
+    #     'url': 'http://creativecommons.org/licenses/by-nc-sa/2.0/',
+    #     'id': 1,
+    #     'name': 'Attribution-NonCommercial-ShareAlike License'
+    # }]
+
+    categories = dataset.categories
+    task_type = dataset.task_type
+    # for i, category in enumerate(dataset.project_info['label_taxonomy']):
+    #     categories.append({
+    #         'id': i+1,
+    #         'supercategory': 'object',
+    #         'name': category
+    #     })
+
+    images = []
+    annotations = []
+
+    annotation_id = 1
+    for i in tqdm(range(len(dataset))):        
+        sample = dataset[i]
+
+        if sample['annotations'] is None:
+            continue
+        
+        image_id = i+1
+        images.append({        
+            'id': image_id,
+            # 'license': 1,
+            'file_name': sample['file_name'],
+            'height': sample['image'].size[1],
+            'width': sample['image'].size[0],
+    #         'date_captured': "2013-11-14 17:02:52",
+    #         'coco_url': "http://images.cocodataset.org/val2017/000000397133.jpg",
+    #         'flickr_url': "http://farm7.staticflickr.com/6116/6255196340_da26cf2c9e_z.jpg",        
+        })
+        
+        for instance in sample['annotations']:
+            category_id = instance['category_id']
+
+            annotation = {
+                'id': annotation_id,
+                'image_id': image_id,
+                'category_id': category_id,
+            }
+
+            # Segmentation bitmap
+            if task_type == 'segmentation-bitmap':                
+                instance_mask = np.array(sample['segmentation_bitmap'], np.uint32) == instance['id']
+                bbox = get_bbox(instance_mask)
+                if not bbox:
+                    continue
+                    
+                y0, x0, y1, x1 = bbox
+                # rle = mask.encode(np.asfortranarray(instance_mask))
+                rle = mask.encode(np.array(instance_mask[:,:,None], dtype=np.uint8, order='F'))[0] # https://github.com/matterport/Mask_RCNN/issues/387#issuecomment-522671380
+        #         instance_mask_crop = instance_mask[y0:y1, x0:x1]
+        #         rle = mask.encode(np.asfortranarray(instance_mask_crop))
+        #         plt.imshow(instance_mask_crop)
+        #         plt.show()
+                
+                area = int(mask.area(rle))
+                rle['counts'] = rle['counts'].decode('ascii')
+
+                annotation.update({
+                    'bbox': [x0, y0, x1-x0, y1-y0],
+        #             'bbox_mode': BoxMode.XYWH_ABS,
+                    'segmentation': rle,
+                    'area': area,
+                    'iscrowd': 0,
+                })
+
+            # Bounding boxes
+            elif task_type == 'bboxes':
+                points = instance['points']
+                x0 = points[0][0]
+                y0 = points[0][1]
+                x1 = points[1][0]
+                y1 = points[1][1]
+
+                annotation.update({
+                    'bbox': [x0, y0, x1-x0, y1-y0],
+                })
+
+            else:
+                assert False
+
+            annotations.append(annotation)
+            annotation_id += 1
+            
+    json_data = {
+        'info': info,
+        # 'licenses': licenses,
+        'categories': categories,
+        'images': images,
+        'annotations': annotations    
+    #     'segment_info': [] # Only in Panoptic annotations
+    }
+
+    file_name = os.path.join(export_folder, 'export_coco-instance_{}_{}.json'.format(dataset.dataset_identifier, dataset.release['name']))
+    with open(file_name, 'w') as f:
+        json.dump(json_data, f)
+
+    print('Exported to {}. Images and labels in {}'.format(file_name, dataset.image_dir))
+    return file_name, dataset.image_dir
+
+
+
 def export_coco_panoptic(dataset, export_folder):
+    # from skimage import img_as_ubyte
+    from skimage.measure import regionprops
+    # from skimage.segmentation import mark_boundaries
+    # from pycocotools import mask
+
     # Create export folder
     # export_folder = os.path.join(export_folder, dataset.dataset_identifier, dataset.release['name'])
     os.makedirs(export_folder, exist_ok=True)
@@ -246,124 +373,69 @@ def export_coco_panoptic(dataset, export_folder):
     return file_name, dataset.image_dir
 
 
-def export_coco_instance(dataset, export_folder):
+def export_image(dataset, export_format, export_folder):
+    from skimage import img_as_ubyte
+
     # Create export folder
     # export_folder = os.path.join(export_folder, dataset.dataset_identifier, dataset.release['name'])
     os.makedirs(export_folder, exist_ok=True)
+    
+    # CATEGORIES    
+    categories = []
+    for i, category in enumerate(dataset.categories):
+        color = category['color'] if 'color' in category else get_color(i)
+        isthing = int(category['has_instances']) if 'has_instances' in category else 0
 
-    info = {
-        'description': dataset.release['dataset']['name'],
-        # 'url': 'https://segments.ai/test/test',
-        'version':  dataset.release['name'],
-        # 'year': 2020,
-        # 'contributor': 'Segments.ai',
-    }
+        categories.append({
+            'id': category['id'],
+            'name': category['name'],
+            'color': color,
+            'isthing': isthing
+        })
 
-    # licenses = [{
-    #     'url': 'http://creativecommons.org/licenses/by-nc-sa/2.0/',
-    #     'id': 1,
-    #     'name': 'Attribution-NonCommercial-ShareAlike License'
-    # }]
-
-    categories = dataset.categories
-    task_type = dataset.task_type
-    # for i, category in enumerate(dataset.project_info['label_taxonomy']):
-    #     categories.append({
-    #         'id': i+1,
-    #         'supercategory': 'object',
-    #         'name': category
-    #     })
-
-    images = []
-    annotations = []
-
-    annotation_id = 1
-    for i in tqdm(range(len(dataset))):        
+    for i in tqdm(range(len(dataset))):
         sample = dataset[i]
 
         if sample['annotations'] is None:
             continue
-        
-        image_id = i+1
-        images.append({        
-            'id': image_id,
-            # 'license': 1,
-            'file_name': sample['file_name'],
-            'height': sample['image'].size[1],
-            'width': sample['image'].size[0],
-    #         'date_captured': "2013-11-14 17:02:52",
-    #         'coco_url': "http://images.cocodataset.org/val2017/000000397133.jpg",
-    #         'flickr_url': "http://farm7.staticflickr.com/6116/6255196340_da26cf2c9e_z.jpg",        
-        })
-        
-        for instance in sample['annotations']:
-            category_id = instance['category_id']
 
-            annotation = {
-                'id': annotation_id,
-                'image_id': image_id,
-                'category_id': category_id,
-            }
+        file_name = os.path.splitext(os.path.basename(sample['name']))[0]
 
-            # Segmentation bitmap
-            if task_type == 'segmentation-bitmap':                
-                instance_mask = np.array(sample['segmentation_bitmap'], np.uint32) == instance['id']
-                bbox = get_bbox(instance_mask)
-                if not bbox:
-                    continue
-                    
-                y0, x0, y1, x1 = bbox
-                # rle = mask.encode(np.asfortranarray(instance_mask))
-                rle = mask.encode(np.array(instance_mask[:,:,None], dtype=np.uint8, order='F'))[0] # https://github.com/matterport/Mask_RCNN/issues/387#issuecomment-522671380
-        #         instance_mask_crop = instance_mask[y0:y1, x0:x1]
-        #         rle = mask.encode(np.asfortranarray(instance_mask_crop))
-        #         plt.imshow(instance_mask_crop)
-        #         plt.show()
-                
-                area = int(mask.area(rle))
-                rle['counts'] = rle['counts'].decode('ascii')
+        # # Image
+        # image = sample['image']
+        # export_file = os.path.join(label_export_folder, '{}.png'.format(file_name))
+        # image.save(export_file)
 
-                annotation.update({
-                    'bbox': [x0, y0, x1-x0, y1-y0],
-        #             'bbox_mode': BoxMode.XYWH_ABS,
-                    'segmentation': rle,
-                    'area': area,
-                    'iscrowd': 0,
-                })
+        if export_format == 'instance':
+            # Instance png
+            instance_label = sample['segmentation_bitmap']
+            export_file = os.path.join(dataset.image_dir, '{}_label_{}_instance.png'.format(file_name, dataset.labelset))
+            instance_label.save(export_file)
 
-            # Bounding boxes
-            elif task_type == 'bboxes':
-                points = instance['points']
-                x0 = points[0][0]
-                y0 = points[0][1]
-                x1 = points[1][0]
-                y1 = points[1][1]
+        elif export_format == 'instance-color':
+            # Colored instance png
+            instance_label = sample['segmentation_bitmap']
+            instance_label_colored = colorize(np.uint8(instance_label))
+            export_file = os.path.join(dataset.image_dir, '{}_label{}_instance_colored.png'.format(file_name, dataset.labelset))
+            Image.fromarray(img_as_ubyte(instance_label_colored)).save(export_file)
 
-                annotation.update({
-                    'bbox': [x0, y0, x1-x0, y1-y0],
-                })
+        elif export_format == 'semantic':
+            # Semantic png
+            instance_label = sample['segmentation_bitmap']
+            semantic_label = get_semantic_bitmap(instance_label, sample['annotations'])
+            export_file = os.path.join(dataset.image_dir, '{}_label_{}_semantic.png'.format(file_name, dataset.labelset))
+            Image.fromarray(img_as_ubyte(semantic_label)).save(export_file)
 
-            else:
-                assert False
+        elif export_format == 'semantic-color':
+            # Colored semantic png
+            instance_label = sample['segmentation_bitmap']
+            semantic_label = get_semantic_bitmap(instance_label, sample['annotations'])
+            semantic_label_colored = colorize(np.uint8(semantic_label), colormap=[c['color'] for c in categories])
+            export_file = os.path.join(dataset.image_dir, '{}_label_{}_semantic_colored.png'.format(file_name, dataset.labelset))
+            Image.fromarray(img_as_ubyte(semantic_label_colored)).save(export_file)
 
-            annotations.append(annotation)
-            annotation_id += 1
-            
-    json_data = {
-        'info': info,
-        # 'licenses': licenses,
-        'categories': categories,
-        'images': images,
-        'annotations': annotations    
-    #     'segment_info': [] # Only in Panoptic annotations
-    }
-
-    file_name = os.path.join(export_folder, 'export_coco-instance_{}_{}.json'.format(dataset.dataset_identifier, dataset.release['name']))
-    with open(file_name, 'w') as f:
-        json.dump(json_data, f)
-
-    print('Exported to {}. Images and labels in {}'.format(file_name, dataset.image_dir))
-    return file_name, dataset.image_dir
+    print('Exported to {}'.format(dataset.image_dir))
+    return dataset.image_dir
 
 
 def export_yolo(dataset, export_folder):

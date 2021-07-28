@@ -70,7 +70,7 @@ def export_dataset(dataset, export_folder='.', export_format='coco-panoptic'):
 
     Args:
         dataset (dict): A dataset object, resulting from client.get_dataset().
-        export_format (str, optional): The destination format. Can be 'coco-panoptic' (default), 'coco-instance', 'yolo.
+        export_format (str, optional): The destination format. Can be 'coco-panoptic' (default), 'coco-instance', 'yolo', 'instance', 'instance-color', 'semantic', 'semantic-color'.
     """
 
     print('Exporting dataset. This may take a while...')
@@ -83,6 +83,9 @@ def export_dataset(dataset, export_folder='.', export_format='coco-panoptic'):
     elif export_format == 'yolo':
         from .export import export_yolo
         return export_yolo(dataset, export_folder)
+    elif export_format in ['semantic-color', 'instance-color', 'semantic', 'instance']:
+        from .export import export_image
+        return export_image(dataset, export_format, export_folder)
     else:
         print('Supported export formats: coco-panoptic, coco-instance, yolo')
         return
