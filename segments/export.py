@@ -109,6 +109,8 @@ def colorize(img, colormap=None):
     return colored_img
 
 def get_bbox(binary_mask):
+    # fix for undefined regionpropos in this function
+    from skimage.measure import regionprops
     regions = regionprops(np.uint8(binary_mask))
     if len(regions) == 1:
         bbox = regions[0].bbox
