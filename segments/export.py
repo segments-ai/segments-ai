@@ -10,6 +10,9 @@ from shutil import copyfile
 import numpy as np
 
 from PIL import Image
+from skimage import img_as_ubyte
+from skimage.measure import regionprops
+from pycocotools import mask
 
 from .utils import get_semantic_bitmap
 
@@ -118,11 +121,6 @@ def get_bbox(binary_mask):
 
 
 def export_coco_instance(dataset, export_folder):
-    # from skimage import img_as_ubyte
-    from skimage.measure import regionprops
-    # from skimage.segmentation import mark_boundaries
-    from pycocotools import mask
-
     # Create export folder
     # export_folder = os.path.join(export_folder, dataset.dataset_identifier, dataset.release['name'])
     os.makedirs(export_folder, exist_ok=True)
@@ -244,11 +242,6 @@ def export_coco_instance(dataset, export_folder):
 
 
 def export_coco_panoptic(dataset, export_folder):
-    # from skimage import img_as_ubyte
-    from skimage.measure import regionprops
-    # from skimage.segmentation import mark_boundaries
-    # from pycocotools import mask
-
     # Create export folder
     # export_folder = os.path.join(export_folder, dataset.dataset_identifier, dataset.release['name'])
     os.makedirs(export_folder, exist_ok=True)
@@ -374,8 +367,6 @@ def export_coco_panoptic(dataset, export_folder):
 
 
 def export_image(dataset, export_format, export_folder):
-    from skimage import img_as_ubyte
-
     # Create export folder
     # export_folder = os.path.join(export_folder, dataset.dataset_identifier, dataset.release['name'])
     os.makedirs(export_folder, exist_ok=True)
