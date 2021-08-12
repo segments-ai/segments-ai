@@ -65,12 +65,14 @@ def get_semantic_bitmap(instance_bitmap, annotations, id_increment=1):
     semantic_label = instance2semantic[np.array(instance_bitmap, np.uint32)]
     return semantic_label
 
-def export_dataset(dataset, export_folder='.', export_format='coco-panoptic'):
+def export_dataset(dataset, export_folder='.', export_format='coco-panoptic', id_increment=1):
     """Export a dataset to a different format.
 
     Args:
         dataset (dict): A dataset object, resulting from client.get_dataset().
+        export_folder (str, optional): The folder to export the dataset to. Defaults to '.'.
         export_format (str, optional): The destination format. Can be 'coco-panoptic' (default), 'coco-instance', 'yolo', 'instance', 'instance-color', 'semantic', 'semantic-color'.
+        id_increment (int, optional): Increment the category ids with this number. Defaults to 1. Ignored unless export_format is 'semantic' or 'semantic-color'.
     """
 
     print('Exporting dataset. This may take a while...')
@@ -85,7 +87,7 @@ def export_dataset(dataset, export_folder='.', export_format='coco-panoptic'):
         return export_yolo(dataset, export_folder)
     elif export_format in ['semantic-color', 'instance-color', 'semantic', 'instance']:
         from .export import export_image
-        return export_image(dataset, export_format, export_folder)
+        return export_image(dataset, export_folder, export_format, id_increment)
     else:
         print('Supported export formats: coco-panoptic, coco-instance, yolo')
         return

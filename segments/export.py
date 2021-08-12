@@ -366,7 +366,7 @@ def export_coco_panoptic(dataset, export_folder):
     return file_name, dataset.image_dir
 
 
-def export_image(dataset, export_format, export_folder):
+def export_image(dataset, export_folder, export_format, id_increment):
     # Create export folder
     # export_folder = os.path.join(export_folder, dataset.dataset_identifier, dataset.release['name'])
     os.makedirs(export_folder, exist_ok=True)
@@ -413,14 +413,14 @@ def export_image(dataset, export_format, export_folder):
         elif export_format == 'semantic':
             # Semantic png
             instance_label = sample['segmentation_bitmap']
-            semantic_label = get_semantic_bitmap(instance_label, sample['annotations'])
+            semantic_label = get_semantic_bitmap(instance_label, sample['annotations'], id_increment)
             export_file = os.path.join(dataset.image_dir, '{}_label_{}_semantic.png'.format(file_name, dataset.labelset))
             Image.fromarray(img_as_ubyte(semantic_label)).save(export_file)
 
         elif export_format == 'semantic-color':
             # Colored semantic png
             instance_label = sample['segmentation_bitmap']
-            semantic_label = get_semantic_bitmap(instance_label, sample['annotations'])
+            semantic_label = get_semantic_bitmap(instance_label, sample['annotations'], id_increment)
             semantic_label_colored = colorize(np.uint8(semantic_label), colormap=[c['color'] for c in categories])
             export_file = os.path.join(dataset.image_dir, '{}_label_{}_semantic_colored.png'.format(file_name, dataset.labelset))
             Image.fromarray(img_as_ubyte(semantic_label_colored)).save(export_file)
