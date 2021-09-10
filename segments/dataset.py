@@ -107,20 +107,24 @@ class SegmentsDataset():
     def _load_image_from_cache(self, sample):
         sample_name = os.path.splitext(sample['name'])[0]
         image_url = sample['attributes']['image']['url']
-        url_extension = os.path.splitext(urlparse(image_url).path)[1]
+        image_url_parsed = urlparse(image_url)
+        url_extension = os.path.splitext(image_url_parsed.path)[1]
         # image_filename_rel = '{}{}'.format(sample['uuid'], url_extension)
         image_filename_rel = '{}{}'.format(sample_name, url_extension)
 
-        if self.caching_enabled:
-            image_filename = os.path.join(self.image_dir, image_filename_rel)
-            if not os.path.exists(image_filename):
-                image = load_image_from_url(image_url, image_filename)
-            else:
-                image = Image.open(image_filename)
+        if image_url_parsed.scheme == 's3':
+            image = None
         else:
-            image = load_image_from_url(image_url)            
+            if self.caching_enabled:
+                image_filename = os.path.join(self.image_dir, image_filename_rel)
+                if not os.path.exists(image_filename):
+                    image = load_image_from_url(image_url, image_filename)
+                else:
+                    image = Image.open(image_filename)
+            else:
+                image = load_image_from_url(image_url)            
 
-        image = handle_exif_rotation(image)
+            image = handle_exif_rotation(image)
 
         return image, image_filename_rel
 

@@ -30,7 +30,7 @@ class SegmentsClient:
         self.s3_session.mount('http://', adapter)
         self.s3_session.mount('https://', adapter)
 
-        r = self.get('/api_status/?lib_version=0.46')
+        r = self.get('/api_status/?lib_version=0.47')
         if r.status_code == 200:
             print('Initialized successfully.')
         elif r.status_code == 426:
@@ -282,12 +282,12 @@ class SegmentsClient:
     ##########
     # Labels #
     ##########
-    def get_label(self, sample_uuid, labelset):
+    def get_label(self, sample_uuid, labelset='ground-truth'):
         """Get a label.
 
         Args:
             sample_uuid (str): The sample uuid.
-            labelset (str): The labelset this label belongs to.
+            labelset (str): The labelset this label belongs to. Defaults to 'ground-truth'.
 
         Returns:
             dict: a dictionary representing the label.
