@@ -76,7 +76,7 @@ class SegmentsClient:
         Args:
             name (str): The dataset name. Example: flowers.
             description (str, optional): The dataset description. Defaults to ''.
-            task_type (str, optional): The dataset's task type. One of 'segmentation-bitmap', 'segmentation-bitmap-highres', 'bboxes', 'keypoints'. Defaults to 'segmentation-bitmap'.
+            task_type (str, optional): The dataset's task type. One of 'segmentation-bitmap', 'segmentation-bitmap-highres', 'vector', 'bboxes', 'keypoints'. Defaults to 'segmentation-bitmap', 'pointcloud-segmentation', 'pointcloud-detection'.
             task_attributes (dict, optional): The dataset's task attributes. Defaults to None.
             category (str, optional): The dataset category. Defaults to 'other'.
             public (bool, optional): The dataset visibility. Defaults to False.
@@ -116,7 +116,7 @@ class SegmentsClient:
         Args:
             dataset_identifier (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
             description (str, optional): The dataset description.
-            task_type (str, optional): The dataset's task type. One of 'segmentation-bitmap', 'segmentation-bitmap-highres', 'bboxes', 'keypoints'.
+            task_type (str, optional): The dataset's task type. One of 'segmentation-bitmap', 'segmentation-bitmap-highres', 'vector', 'bboxes', 'keypoints', 'pointcloud-segmentation', 'pointcloud-detection'.
             task_attributes (dict, optional): The dataset's task attributes.
             category (str, optional): The dataset category.
             public (bool, optional): The dataset visibility.
@@ -209,7 +209,7 @@ class SegmentsClient:
         r = self.get('/samples/{}/'.format(uuid))
         return r.json()
 
-    def add_sample(self, dataset_identifier, name, attributes, metadata=None, priority=None):
+    def add_sample(self, dataset_identifier, name, attributes, metadata=None, priority=None, embedding=None):
         """Add a sample to a dataset.
 
         Args:
@@ -217,7 +217,8 @@ class SegmentsClient:
             name (str): The name of the sample.
             attributes (dict): The sample attributes. Please refer to the online documentation.
             metadata (dict, optional): Any sample metadata. Example: {'weather': 'sunny', 'camera_id': 3}.
-            priority (float, optional): Priority in the labeling queue. Samples with higher values will be labeled first. Default is 0.
+            priority (float, optional): Priority in the labeling queue. Samples with higher values will be labeled first. Defaults to 0.
+            embedding (array, optional): Embedding of this sample represented by an array of floats.
 
         Returns:
             dict: a dictionary representing the newly created sample.
@@ -234,11 +235,14 @@ class SegmentsClient:
         if priority is not None:
             payload['priority'] = priority
 
+        if embedding is not None:
+            payload['embedding'] = embedding
+
         r = self.post('/datasets/{}/samples/'.format(dataset_identifier), payload)
         print('Added ' + name)
         return r.json()
 
-    def update_sample(self, uuid, name=None, attributes=None, metadata=None, priority=None):
+    def update_sample(self, uuid, name=None, attributes=None, metadata=None, priority=None, embedding=None):
         """Update a sample.
 
         Args:
@@ -247,6 +251,7 @@ class SegmentsClient:
             attributes (dict, optional): The sample attributes. Please refer to the online documentation.
             metadata (dict, optional): Any sample metadata. Example: {'weather': 'sunny', 'camera_id': 3}.
             priority (float, optional): Priority in the labeling queue. Samples with higher values will be labeled first. Default is 0.
+            embedding (array, optional): Embedding of this sample represented by an array of floats.
 
         Returns:
             dict: a dictionary representing the updated sample.
@@ -265,6 +270,9 @@ class SegmentsClient:
 
         if priority is not None:
             payload['priority'] = priority
+
+        if embedding is not None:
+            payload['embedding'] = embedding
 
         r = self.patch('/samples/{}/'.format(uuid), payload)
         print('Updated ' + uuid)
