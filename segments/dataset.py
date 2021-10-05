@@ -51,8 +51,8 @@ class SegmentsDataset():
             return
 
         self.task_type = self.release['dataset']['task_type']
-        if self.task_type not in ['segmentation-bitmap', 'segmentation-bitmap-highres', 'bboxes', 'keypoints']:
-            print('You can only create a dataset for tasks of type "segmentation-bitmap", "segmentation-bitmap-highres", "bboxes", or "keypoints" for now.')
+        if self.task_type not in ['segmentation-bitmap', 'segmentation-bitmap-highres', 'bboxes', 'keypoints', 'pointcloud-detection', 'pointcloud-segmentation']:
+            print('You can only create a dataset for tasks of type "segmentation-bitmap", "segmentation-bitmap-highres", "bboxes", "keypoints", "pointcloud-detection", or "pointcloud-segmentation" for now.')
             return
         
         self.load_dataset()
@@ -95,7 +95,7 @@ class SegmentsDataset():
         # https://stackoverflow.com/questions/3530955/retrieve-multiple-urls-at-once-in-parallel
         # https://github.com/tqdm/tqdm/issues/484#issuecomment-461998250
         num_samples = self.__len__()
-        if self.caching_enabled and self.preload:
+        if self.caching_enabled and self.preload and self.task_type not in ['pointcloud-segmentation', 'pointcloud-detection']:
             print('Preloading all samples. This may take a while...')
             with ThreadPool(16) as pool:
                 # r = list(tqdm(pool.imap_unordered(self.__getitem__, range(num_samples)), total=num_samples))
@@ -159,6 +159,9 @@ class SegmentsDataset():
 
     def __getitem__(self, index):
         sample = self.samples[index]
+
+        if self.task_type == 'pointcloud-segmentation' or self.task_type == 'pointcloud-detection':
+            return sample
         
         # Load the image
         try:
