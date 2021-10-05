@@ -134,6 +134,11 @@ def load_label_bitmap_from_url(url, save_filename=None):
 
     return bitmap
 
+def load_release(release):
+    release_file = release['attributes']['url']
+    content = requests.get(release_file)
+    return json.loads(content.content)
+
 def handle_exif_rotation(image):
     try:
         for orientation in ExifTags.TAGS.keys():
