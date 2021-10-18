@@ -8,7 +8,7 @@ setup(
   author = 'Segments.ai',                   # Type in your name
   author_email = 'bert@segments.ai',      # Type in your E-Mail
   url = 'https://github.com/segments-ai/segments-ai',   # Provide either the link to your github or to your website
-  download_url = 'https://github.com/segments-ai/segments-ai/archive/v0.48.tar.gz',
+  download_url = 'https://github.com/segments-ai/segments-ai/archive/v0.49.tar.gz',
   keywords = ['image', 'segmentation', 'labeling', 'vision'],   # Keywords that define your package best
   install_requires = ['numpy', 'requests', 'Pillow', 'scikit-image', 'tqdm', 'pycocotools;platform_system!="Windows"', 'pycocotools-windows;platform_system=="Windows"'],
   classifiers = [

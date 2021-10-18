@@ -169,6 +169,10 @@ def export_coco_instance(dataset, export_folder):
     #         'coco_url': "http://images.cocodataset.org/val2017/000000397133.jpg",
     #         'flickr_url': "http://farm7.staticflickr.com/6116/6255196340_da26cf2c9e_z.jpg",        
         })
+
+        # https://scikit-image.org/docs/dev/api/skimage.measure.html#skimage.measure.regionprops
+        regions = regionprops(np.array(sample['segmentation_bitmap'], np.uint32))
+        regions = {region.label: region for region in regions}
         
         for instance in sample['annotations']:
             category_id = instance['category_id']
@@ -180,11 +184,17 @@ def export_coco_instance(dataset, export_folder):
             }
 
             # Segmentation bitmap
-            if task_type == 'segmentation-bitmap':                
-                instance_mask = np.array(sample['segmentation_bitmap'], np.uint32) == instance['id']
-                bbox = get_bbox(instance_mask)
-                if not bbox:
+            if task_type == 'segmentation-bitmap' or task_type == 'segmentation-bitmap-highres':
+                if instance['id'] not in regions:
+                    # Only happens when the instance has 0 labeled pixels, which should not happen.
+                    print(f'Skipping instance with 0 labeled pixels: {sample["file_name"]}, instance_id: {instance["id"]}, category_id: {category_id}')
                     continue
+
+                instance_mask = np.array(sample['segmentation_bitmap'], np.uint32) == instance['id']
+
+                region = regions[instance['id']]
+                bbox = region.bbox
+                # bbox = get_bbox(instance_mask)
                     
                 y0, x0, y1, x1 = bbox
                 # rle = mask.encode(np.asfortranarray(instance_mask))
@@ -194,7 +204,8 @@ def export_coco_instance(dataset, export_folder):
         #         plt.imshow(instance_mask_crop)
         #         plt.show()
                 
-                area = int(mask.area(rle))
+                # area = int(mask.area(rle))
+                area = int(region.area)
                 rle['counts'] = rle['counts'].decode('ascii')
 
                 annotation.update({
@@ -292,17 +303,33 @@ def export_coco_panoptic(dataset, export_folder):
         panoptic_label = np.zeros((sample['segmentation_bitmap'].size[1], sample['segmentation_bitmap'].size[0], 3), np.uint8)
         
         segments_info = []
+
+        # https://scikit-image.org/docs/dev/api/skimage.measure.html#skimage.measure.regionprops
+        regions = regionprops(np.array(sample['segmentation_bitmap'], np.uint32))
+        regions = {region.label: region for region in regions}
+
         for instance in sample['annotations']:
             category_id = instance['category_id']
                 
             instance_id, color = id_generator.get_id_and_color(category_id)
+
+            if instance['id'] not in regions:
+                # Only happens when the instance has 0 labeled pixels, which should not happen.
+                print(f'Skipping instance with 0 labeled pixels: {sample["file_name"]}, instance_id: {instance["id"]}, category_id: {category_id}')
+                continue
             
-            # Read the instance mask
+            # Read the instance mask and fill in the panoptic label. TODO: take this out of the loop to speed things up.
             instance_mask = np.array(sample['segmentation_bitmap'], np.uint32) == instance['id']
             panoptic_label[instance_mask] = color
-            y0, x0, y1, x1 = get_bbox(instance_mask)
-            rle = mask.encode(np.array(instance_mask[:,:,None], dtype=np.uint8, order='F'))[0] # https://github.com/matterport/Mask_RCNN/issues/387#issuecomment-522671380
-            area = int(mask.area(rle))
+
+            # bbox = get_bbox(instance_mask)
+            region = regions[instance['id']]
+            bbox = region.bbox
+            y0, x0, y1, x1 = bbox
+
+            # rle = mask.encode(np.array(instance_mask[:,:,None], dtype=np.uint8, order='F'))[0] # https://github.com/matterport/Mask_RCNN/issues/387#issuecomment-522671380
+            # area = int(mask.area(rle))
+            area = int(region.area)
 
             segments_info.append({
                 'id': instance_id,
