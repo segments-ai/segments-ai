@@ -30,7 +30,7 @@ class SegmentsClient:
         self.s3_session.mount('http://', adapter)
         self.s3_session.mount('https://', adapter)
 
-        r = self.get('/api_status/?lib_version=0.50')
+        r = self.get('/api_status/?lib_version=0.51')
         if r.status_code == 200:
             print('Initialized successfully.')
         elif r.status_code == 426:
@@ -196,17 +196,23 @@ class SegmentsClient:
         r = self.get('/datasets/{}/samples/?per_page={}&page={}'.format(dataset_identifier, per_page, page))
         return r.json()
 
-    def get_sample(self, uuid):
+    def get_sample(self, uuid, labelset=None):
         """Get a sample.
 
         Args:
             uuid (str): The sample uuid.
+            labelset (str, optional): If defined, this additionally returns the label for the given labelset. Defaults to None. 
 
         Returns:
-            dict: a dictionary representing the sample.
+            dict: a dictionary representing the sample
         """
 
-        r = self.get('/samples/{}/'.format(uuid))
+        query_string = '/samples/{}/'.format(uuid)
+
+        if labelset is not None:
+            query_string += '?labelset={}'.format(labelset)
+
+        r = self.get(query_string)
         return r.json()
 
     def add_sample(self, dataset_identifier, name, attributes, metadata=None, priority=None, embedding=None):
