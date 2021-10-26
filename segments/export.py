@@ -434,7 +434,7 @@ def export_image(dataset, export_folder, export_format, id_increment):
             # Colored instance png
             instance_label = sample['segmentation_bitmap']
             instance_label_colored = colorize(np.uint8(instance_label))
-            export_file = os.path.join(dataset.image_dir, '{}_label{}_instance_colored.png'.format(file_name, dataset.labelset))
+            export_file = os.path.join(dataset.image_dir, '{}_label_{}_instance_colored.png'.format(file_name, dataset.labelset))
             Image.fromarray(img_as_ubyte(instance_label_colored)).save(export_file)
 
         elif export_format == 'semantic':
