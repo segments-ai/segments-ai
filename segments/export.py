@@ -401,7 +401,7 @@ def export_image(dataset, export_folder, export_format, id_increment):
     # CATEGORIES    
     categories = []
     for i, category in enumerate(dataset.categories):
-        color = category['color'] if 'color' in category else get_color(i)
+        color = category['color'][:3] if 'color' in category else get_color(i)
         isthing = int(category['has_instances']) if 'has_instances' in category else 0
 
         categories.append({
