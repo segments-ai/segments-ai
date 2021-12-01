@@ -70,7 +70,7 @@ class SegmentsClient:
         r = self.get('/datasets/{}/'.format(dataset_identifier))
         return r.json()
 
-    def add_dataset(self, name, description='', task_type='segmentation-bitmap', task_attributes=None, category='other', public=False, readme=''):
+    def add_dataset(self, name, description='', task_type='segmentation-bitmap', task_attributes=None, category='other', public=False, readme='', enable_skip_labeling=True, enable_skip_reviewing=False, enable_ratings=False):
         """Add a dataset.
 
         Args:
@@ -81,6 +81,9 @@ class SegmentsClient:
             category (str, optional): The dataset category. Defaults to 'other'.
             public (bool, optional): The dataset visibility. Defaults to False.
             readme (str, optional): The dataset readme. Defaults to ''.
+            enable_skip_labeling (bool, optional): Enable the skip button in the labeling workflow. Defaults to True.
+            enable_skip_reviewing (bool, optional): Enable the skip button in the reviewing workflow. Defaults to False.
+            enable_ratings: Enable star-ratings for labeled images. Defaults to False.
 
         Returns:
             dict: a dictionary representing the newly created dataset.
@@ -105,12 +108,15 @@ class SegmentsClient:
             'category': category,
             'public': public,
             'readme': readme,
+            'enable_skip_labeling': enable_skip_labeling,
+            'enable_skip_reviewing': enable_skip_reviewing,
+            'enable_ratings': enable_ratings,
             'data_type': 'IMAGE'
         }
         r = self.post('/user/datasets/', payload)
         return r.json()
 
-    def update_dataset(self, dataset_identifier, description=None, task_type=None, task_attributes=None, category=None, public=None, readme=None):
+    def update_dataset(self, dataset_identifier, description=None, task_type=None, task_attributes=None, category=None, public=None, readme=None, enable_skip_labeling=None, enable_skip_reviewing=None, enable_ratings=None):
         """Update a dataset.
 
         Args:
@@ -121,6 +127,9 @@ class SegmentsClient:
             category (str, optional): The dataset category.
             public (bool, optional): The dataset visibility.
             readme (str, optional): The dataset readme.
+            enable_skip_labeling (bool, optional): Enable the skip button in the labeling workflow.
+            enable_skip_reviewing (bool, optional): Enable the skip button in the reviewing workflow.
+            enable_ratings: Enable star-ratings for labeled images.
 
         Returns:
             dict: a dictionary representing the updated dataset.
@@ -145,6 +154,15 @@ class SegmentsClient:
 
         if readme is not None:
             payload['readme'] = readme
+
+        if enable_skip_labeling is not None:
+            payload['enable_skip_labeling'] = enable_skip_labeling
+
+        if enable_skip_reviewing is not None:
+            payload['enable_skip_reviewing'] = enable_skip_reviewing
+
+        if enable_ratings is not None:
+            payload['enable_ratings'] = enable_ratings
 
         r = self.patch('/datasets/{}/'.format(dataset_identifier), payload)
         print('Updated ' + dataset_identifier)
