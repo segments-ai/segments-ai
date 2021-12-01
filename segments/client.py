@@ -199,11 +199,16 @@ class SegmentsClient:
     ###########
     # Samples #
     ###########
-    def get_samples(self, dataset_identifier, per_page=1000, page=1):
+    def get_samples(self, dataset_identifier, name=None, label_status=None, metadata=None, sort='name', direction='asc', per_page=1000, page=1):
         """Get the samples in a dataset.
 
         Args:
             dataset_identifier (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
+            name (str, optional): Name to filter by. Defaults to None (no filtering).
+            label_status (list, optional): List of label statuses to filter by. Defaults to None (no filtering).
+            metadata (list, optional): List of 'key:value' metadata attributes to filter by. Defaults to None (no filtering).
+            sort (str, optional): What to sort results by. One of 'name', 'created', 'priority'. Defaults to 'name'.
+            direction (str, optional): Sorting direction. One of 'asc' (ascending) or 'desc' (descending). Defaults to 'asc'.
             per_page (int, optional): Pagination parameter indicating the maximum number of samples to return. Defaults to 1000.
             page (int, optional): Pagination parameter indicating the page to return. Defaults to 1.
 
@@ -211,8 +216,42 @@ class SegmentsClient:
             list: a list of dictionaries representing the samples.
         """
 
-        r = self.get('/datasets/{}/samples/?per_page={}&page={}'.format(dataset_identifier, per_page, page))
-        return r.json()
+        # pagination
+        query_string = '?per_page={}&page={}'.format(per_page, page)
+
+        # filter by name
+        if name is not None:
+            query_string += '&name__contains={}'.format(name)
+
+        # filter by metadata
+        if metadata is not None:
+            if isinstance(metadata, str):
+                metadata = [metadata]
+            query_string += '&filters={}'.format(','.join(metadata))
+
+        # filter by label status
+        if label_status is not None:
+            if isinstance(label_status, str):
+                label_status = [label_status]
+            assert isinstance(label_status, list)
+            label_status = [status.upper() for status in label_status]
+            query_string += '&labelset=ground-truth&label_status={}'.format(','.join(label_status))
+
+        # sorting
+        sort_dict = { 'name': 'name', 'created': 'created_at', 'priority': 'priority' }
+        assert sort in sort_dict
+        assert direction in ['asc', 'desc']
+        if sort != 'name':            
+            direction_str = '' if direction == 'asc' else '-'
+            sort_str = sort_dict[sort]
+            query_string += '&sort={}{}'.format(direction_str, sort_str)
+
+        r = self.get('/datasets/{}/samples/{}'.format(dataset_identifier, query_string))
+        results = r.json()
+
+        for result in results:
+            result.pop('label', None)
+        return results
 
     def get_sample(self, uuid, labelset=None):
         """Get a sample.
