@@ -77,15 +77,23 @@ def export_dataset(dataset, export_folder='.', export_format='coco-panoptic', id
 
     print('Exporting dataset. This may take a while...')
     if export_format == 'coco-panoptic':
+        if not dataset.task_type in ['segmentation-bitmap', 'segmentation-bitmap-highres']:
+            raise ValueError('Only datasets of type "segmentation-bitmap" and "segmentation-bitmap-highres" can be exported to this format.')
         from .export import export_coco_panoptic
         return export_coco_panoptic(dataset, export_folder)
     elif export_format == 'coco-instance':
+        if not dataset.task_type in ['segmentation-bitmap', 'segmentation-bitmap-highres']:
+            raise ValueError('Only datasets of type "segmentation-bitmap" and "segmentation-bitmap-highres" can be exported to this format.')
         from .export import export_coco_instance
         return export_coco_instance(dataset, export_folder)
     elif export_format == 'yolo':
+        if not dataset.task_type in ['vector', 'bboxes']:
+            raise ValueError('Only datasets of type "vector" and "bboxes" can be exported to this format.')
         from .export import export_yolo
         return export_yolo(dataset, export_folder)
     elif export_format in ['semantic-color', 'instance-color', 'semantic', 'instance']:
+        if not dataset.task_type in ['segmentation-bitmap', 'segmentation-bitmap-highres']:
+            raise ValueError('Only datasets of type "segmentation-bitmap" and "segmentation-bitmap-highres" can be exported to this format.')
         from .export import export_image
         return export_image(dataset, export_folder, export_format, id_increment)
     else:

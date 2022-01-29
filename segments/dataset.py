@@ -51,8 +51,8 @@ class SegmentsDataset():
             return
 
         self.task_type = self.release['dataset']['task_type']
-        if self.task_type not in ['segmentation-bitmap', 'segmentation-bitmap-highres', 'bboxes', 'keypoints', 'pointcloud-detection', 'pointcloud-segmentation']:
-            print('You can only create a dataset for tasks of type "segmentation-bitmap", "segmentation-bitmap-highres", "bboxes", "keypoints", "pointcloud-detection", or "pointcloud-segmentation" for now.')
+        if self.task_type not in ['segmentation-bitmap', 'segmentation-bitmap-highres', 'vector', 'bboxes', 'keypoints', 'pointcloud-detection', 'pointcloud-segmentation']:
+            print('You can only create a dataset for tasks of type "segmentation-bitmap", "segmentation-bitmap-highres", "vector", "bboxes", "keypoints", "pointcloud-detection", or "pointcloud-segmentation" for now.')
             return
         
         self.load_dataset()
@@ -195,8 +195,8 @@ class SegmentsDataset():
                 'attributes': attributes
             })
 
-        # Bounding boxes
-        elif self.task_type == 'bboxes' or self.task_type == 'keypoints':
+        # Vector labels
+        elif self.task_type == 'vector' or self.task_type == 'bboxes' or self.task_type == 'keypoints':
             try:
                 label = sample['labels'][self.labelset]
                 attributes = label['attributes']
