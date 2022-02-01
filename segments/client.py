@@ -30,7 +30,7 @@ class SegmentsClient:
         self.s3_session.mount('http://', adapter)
         self.s3_session.mount('https://', adapter)
 
-        r = self.get('/api_status/?lib_version=0.55')
+        r = self.get('/api_status/?lib_version=0.56')
         if r.status_code == 200:
             print('Initialized successfully.')
         elif r.status_code == 426:
@@ -434,6 +434,33 @@ class SegmentsClient:
     #############
     # Labelsets #
     #############
+    def get_labelsets(self, dataset_identifier):
+        """Get the labelsets in a dataset.
+
+        Args:
+            dataset_identifier (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
+
+        Returns:
+            list: a list of dictionaries representing the labelsets.
+        """
+
+        r = self.get('/datasets/{}/labelsets/'.format(dataset_identifier))
+        return r.json()
+
+    def get_labelset(self, dataset_identifier, name):
+        """Get a labelset.
+
+        Args:
+            dataset_identifier (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
+            name (str): The name of the labelset.
+
+        Returns:
+            dict: a dictionary representing the labelset.
+        """
+
+        r = self.get('/datasets/{}/labelsets/{}/'.format(dataset_identifier, name))
+        return r.json()
+
     def add_labelset(self, dataset_identifier, name, description=''):
         """Add a labelset to a dataset.
 
@@ -454,6 +481,15 @@ class SegmentsClient:
         r = self.post('/datasets/{}/labelsets/'.format(dataset_identifier), payload)
         return r.json()
 
+    def delete_labelset(self, dataset_identifier, name):
+        """Delete a labelset.
+
+        Args:
+            dataset_identifier (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
+            name (str): The name of the labelset.
+        """
+
+        r = self.delete('/datasets/{}/labelsets/{}/'.format(dataset_identifier, name))
 
     ############
     # Releases #
