@@ -5,7 +5,7 @@ from PIL import Image
 
 from .utils import load_image_from_url, load_label_bitmap_from_url
 
-def release2dataset(release, download_images=False):
+def release2dataset(release, download_images=True):
     try:
         import datasets
     except ImportError:
