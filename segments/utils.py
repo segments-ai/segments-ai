@@ -114,7 +114,10 @@ def load_image_from_url(url, save_filename=None):
     # urllib.request.urlretrieve(url, save_filename)
 
     if save_filename is not None:
-        image.save(save_filename)
+        if 'exif' in image.info:
+            image.save(save_filename, exif=image.info['exif'])
+        else:
+            image.save(save_filename)
 
     return image
 
