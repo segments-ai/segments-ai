@@ -14,32 +14,35 @@ try:
 except ImportError:
     print('Please install HuggingFace datasets first: pip install --upgrade datasets')
 
-# Overwrite the push_to_hub method of datasets.Dataset, to also upload the label file and readme.
-class DatasetExtended(datasets.Dataset):
-    def push_to_hub(self, repo_id, *args, **kwargs):
-        super().push_to_hub(repo_id, *args, **kwargs)
+# Add some functionality to the push_to_hub function of datasets.Dataset
+push_to_hub_original = datasets.Dataset.push_to_hub
+def push_to_hub(self, repo_id, *args, **kwargs):
+    push_to_hub_original(self, repo_id, *args, **kwargs)
 
-        # Upload the label file (https://huggingface.co/datasets/huggingface/label-files)
-        tmpfile = os.path.join(tempfile.gettempdir(), 'id2label.json')
-        with open(tmpfile, 'w') as f:
-            json.dump(self.id2label, f)
+    # Upload the label file (https://huggingface.co/datasets/huggingface/label-files)
+    print('Uploading id2label.json')
+    tmpfile = os.path.join(tempfile.gettempdir(), 'id2label.json')
+    with open(tmpfile, 'w') as f:
+        json.dump(self.id2label, f)
 
-        upload_file(
-            path_or_fileobj=tmpfile, 
-            path_in_repo="id2label.json",
-            repo_id=f"datasets/{repo_id}"
-        )
+    upload_file(
+        path_or_fileobj=tmpfile, 
+        path_in_repo="id2label.json",
+        repo_id=f"datasets/{repo_id}"
+    )
 
-        # Upload README.md
-        tmpfile = os.path.join(tempfile.gettempdir(), 'README.md')
-        with open(tmpfile, 'w') as f:
-            f.write(self.readme)
+    # Upload README.md
+    print('Uploading README.md')
+    tmpfile = os.path.join(tempfile.gettempdir(), 'README.md')
+    with open(tmpfile, 'w') as f:
+        f.write(self.readme)
 
-        upload_file(
-            path_or_fileobj=tmpfile, 
-            path_in_repo="README.md",
-            repo_id=f"datasets/{repo_id}"
-        )
+    upload_file(
+        path_or_fileobj=tmpfile, 
+        path_in_repo="README.md",
+        repo_id=f"datasets/{repo_id}"
+    )
+datasets.Dataset.push_to_hub = push_to_hub
 
 
 def release2dataset(release, download_images=True):
@@ -104,7 +107,7 @@ def release2dataset(release, download_images=True):
         print("This type of dataset is not yet supported.")
         assert False
         
-    samples = release_dict['dataset']['samples']
+    samples = release_dict['dataset']['samples'][:10]
     
     data_rows = []
     for sample in samples:
@@ -203,8 +206,5 @@ def release2dataset(release, download_images=True):
 
     # Create readme
     dataset.readme = f'# {release_dict["dataset"]["name"]}'
-
-    # Change the class
-    dataset.__class__ = DatasetExtended
     
     return dataset
