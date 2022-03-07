@@ -30,7 +30,7 @@ class SegmentsClient:
         self.s3_session.mount('http://', adapter)
         self.s3_session.mount('https://', adapter)
 
-        r = self.get('/api_status/?lib_version=0.60')
+        r = self.get('/api_status/?lib_version=0.61')
         if r.status_code == 200:
             print('Initialized successfully.')
         elif r.status_code == 426:
