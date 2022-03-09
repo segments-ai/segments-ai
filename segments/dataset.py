@@ -16,17 +16,19 @@ class SegmentsDataset():
         release_file (str or dict): Path to a release file, or a release dict resulting from client.get_release().
         labelset (str, optional): The labelset that should be loaded. Defaults to 'ground-truth'.
         filter_by (list, optional): A list of label statuses to filter by. Defaults to None.
+        filter_by_metadata (dict, optional): a dict of metadata key:value pairs to filter by. Filters are ANDed together. Defaults to None.
         segments_dir (str, optional): The directory where the data will be downloaded to for caching. Set to None to disable caching. Defaults to 'segments'.
         preload (bool, optional): Whether the data should be pre-downloaded when the dataset is initialized. Ignored if segments_dir is None. Defaults to True. 
 
     """
 
     # https://stackoverflow.com/questions/682504/what-is-a-clean-pythonic-way-to-have-multiple-constructors-in-python
-    def __init__(self, release_file, labelset='ground-truth', filter_by=None, segments_dir='segments', preload=True):
+    def __init__(self, release_file, labelset='ground-truth', filter_by=None, filter_by_metadata=None, segments_dir='segments', preload=True):
         self.labelset = labelset
         self.filter_by = [filter_by] if isinstance(filter_by, str) else filter_by
         if self.filter_by is not None:
             self.filter_by = [s.lower() for s in self.filter_by]
+        self.filter_by_metadata = filter_by_metadata
         self.segments_dir = segments_dir
         self.caching_enabled = segments_dir is not None
         self.preload = preload
@@ -76,10 +78,16 @@ class SegmentsDataset():
 
                 if label_status in self.filter_by:
                     filtered_samples.append(sample)
-        else:
-            filtered_samples = samples
+            samples = filtered_samples
 
-        self.samples = filtered_samples
+        if self.filter_by_metadata is not None:
+            filtered_samples = []
+            for sample in samples:
+                if self.filter_by_metadata.items() <= sample['metadata'].items(): # https://stackoverflow.com/a/41579450/1542912
+                    filtered_samples.append(sample)
+            samples = filtered_samples
+
+        self.samples = samples
             
         # # Preload all samples (sequentially)
         # for i in tqdm(range(self.__len__())):
