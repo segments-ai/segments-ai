@@ -3,6 +3,7 @@ import json
 import types
 import requests
 import tempfile
+from string import Template
 
 from PIL import Image
 
@@ -20,36 +21,48 @@ def push_to_hub(self, repo_id, *args, **kwargs):
     push_to_hub_original(self, repo_id, *args, **kwargs)
 
     # Upload the label file (https://huggingface.co/datasets/huggingface/label-files)
-    print('Uploading id2label.json')
-    tmpfile = os.path.join(tempfile.gettempdir(), 'id2label.json')
-    with open(tmpfile, 'w') as f:
-        json.dump(self.id2label, f)
+    if hasattr(self, 'id2label'):
+        print('Uploading id2label.json')
+        tmpfile = os.path.join(tempfile.gettempdir(), 'id2label.json')
+        with open(tmpfile, 'w') as f:
+            json.dump(self.id2label, f)
 
-    upload_file(
-        path_or_fileobj=tmpfile, 
-        path_in_repo="id2label.json",
-        repo_id=f"datasets/{repo_id}"
-    )
+        upload_file(
+            path_or_fileobj=tmpfile, 
+            path_in_repo="id2label.json",
+            repo_id=f"datasets/{repo_id}"
+        )
 
     # Upload README.md
-    print('Uploading README.md')
-    tmpfile = os.path.join(tempfile.gettempdir(), 'README.md')
-    with open(tmpfile, 'w') as f:
-        f.write(self.readme)
+    if hasattr(self, 'readme'):
+        print('Uploading README.md')
+        tmpfile = os.path.join(tempfile.gettempdir(), 'README.md')
+        with open(tmpfile, 'w') as f:
+            f.write(self.readme)
 
-    upload_file(
-        path_or_fileobj=tmpfile, 
-        path_in_repo="README.md",
-        repo_id=f"datasets/{repo_id}"
-    )
+        upload_file(
+            path_or_fileobj=tmpfile, 
+            path_in_repo="README.md",
+            repo_id=f"datasets/{repo_id}"
+        )
 datasets.Dataset.push_to_hub = push_to_hub
+
+
+def get_taxonomy_table(taxonomy):
+    markdown_table = ''
+    for category in taxonomy['categories']:
+        id_ = category['id']
+        name = category['name']
+        description = category['description'] if 'description' in category else '-'
+        markdown_table += f'| {id_} | {name} | {description} |\n'
+    return markdown_table
 
 
 def release2dataset(release, download_images=True):
     content = requests.get(release['attributes']['url'])
     release_dict = json.loads(content.content)
             
-    task_type = release_dict['dataset']['task_type']    
+    task_type = release_dict['dataset']['task_type']
     
     if task_type in ['vector', 'bboxes', 'keypoint']:
         features = datasets.Features({
@@ -191,20 +204,69 @@ def release2dataset(release, download_images=True):
                 segmentation_bitmap = load_label_bitmap_from_url(data_row['label.segmentation_bitmap.url'])
                 data_row['label.segmentation_bitmap'] = Image.fromarray(segmentation_bitmap)
             except:
-                data_row['label.segmentation_bitmap'] = Image.new('RGB', (1,1)) # None not possible?
+                data_row['label.segmentation_bitmap'] = Image.new('RGB', (1,1)) # TODO: replace with None
             return data_row 
         
         dataset = dataset.map(download_image, remove_columns=['image.url'])
         if task_type in ['segmentation-bitmap', 'segmentation-bitmap-highres']:
             dataset = dataset.map(download_segmentation_bitmap, remove_columns=['label.segmentation_bitmap.url'])
+            # Reorder the features
+            features = datasets.Features({
+                'name': dataset.features['name'],
+                'uuid': dataset.features['uuid'],
+                'status': dataset.features['status'],
+                'image': datasets.Image(),                
+                'label.annotations': dataset.features['label.annotations'],
+                'label.segmentation_bitmap': datasets.Image()
+            })
+            dataset.info.features = features
+        else:
+            # Reorder the features
+            features = datasets.Features({
+                'name': dataset.features['name'],
+                'uuid': dataset.features['uuid'],
+                'status': dataset.features['status'],
+                'image': datasets.Image(),                
+                'label.annotations': dataset.features['label.annotations'],
+            })
+            dataset.info.features = features
 
     # Create id2label
     id2label = {}
     for category in release_dict['dataset']['task_attributes']['categories']:
         id2label[category['id']] = category['name']
+    id2label[0] = "unlabeled"
     dataset.id2label = id2label
 
-    # Create readme
-    dataset.readme = f'# {release_dict["dataset"]["name"]}'
+    # Create readme.md and update DatasetInfo
+    # https://stackoverflow.com/questions/6385686/is-there-a-native-templating-system-for-plain-text-files-in-python
+
+    task_type = release_dict['dataset']['task_type']
+    if task_type in ['segmentation-bitmap', 'segmentation-bitmap-highres']:
+        task_category = 'image-segmentation'
+    elif task_type in ['vector', 'bboxes']:
+        task_category = 'object-detection'
+    elif task_type in ['text-named-entities', 'text-span-categorization']:
+        task_category = 'named-entity-recognition'
+    else:
+        task_category = 'other'    
+
+    info = {
+        'name': release_dict['dataset']['name'],
+        'segments_url': f'https://segments.ai/{release_dict["dataset"]["owner"]}/{release_dict["dataset"]["name"]}',
+        'short_description': release_dict['dataset']['description'],
+        'release': release_dict['name'],
+        'taxonomy_table': get_taxonomy_table(release_dict['dataset']['task_attributes']),
+        'task_category': task_category
+    }
+
+    ## Create readme.md
+    with open('data/dataset_card_template.md', 'r') as f:
+        template = Template(f.read())
+        readme = template.substitute(info)
+        dataset.readme = readme
+
+    ## Update DatasetInfo
+    # TODO
     
     return dataset
