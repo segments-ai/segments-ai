@@ -120,7 +120,7 @@ def release2dataset(release, download_images=True):
         print("This type of dataset is not yet supported.")
         assert False
         
-    samples = release_dict['dataset']['samples'][:10]
+    samples = release_dict['dataset']['samples']
     
     data_rows = []
     for sample in samples:
@@ -267,6 +267,7 @@ def release2dataset(release, download_images=True):
         dataset.readme = readme
 
     ## Update DatasetInfo
-    # TODO
+    dataset.info.description = info['short_description']
+    dataset.info.homepage = info['segments_url']
     
     return dataset
