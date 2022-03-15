@@ -1,0 +1,41 @@
+[
+    {
+        "uuid": "7547812c-4440-439b-8847-76ae3c63bcf2",
+        "name": "v0.1",
+        "description": "",
+        "release_type": "JSON",
+        "attributes": {
+            "url": "https://segmentsai-prod.s3.eu-west-2.amazonaws.com/releases/7547812c-4440-439b-8847-76ae3c63bcf2.json"
+        },
+        "status": "SUCCEEDED",
+        "status_info": "",
+        "created_at": "2022-03-09T22:41:35.654371Z",
+        "samples_count": 5
+    },
+    {
+        "uuid": "a08df447-6c1b-4275-8a40-6b66949cf1c0",
+        "name": "v0.2",
+        "description": "",
+        "release_type": "JSON",
+        "attributes": {
+            "url": "https://segmentsai-prod.s3.eu-west-2.amazonaws.com/releases/a08df447-6c1b-4275-8a40-6b66949cf1c0.json"
+        },
+        "status": "SUCCEEDED",
+        "status_info": "",
+        "created_at": "2022-03-09T22:41:43.194016Z",
+        "samples_count": 5
+    },
+    {
+        "uuid": "97e7bb86-f571-475f-b689-dfbe6d77ee96",
+        "name": "v0.3",
+        "description": "",
+        "release_type": "JSON",
+        "attributes": {
+            "url": "https://segmentsai-prod.s3.eu-west-2.amazonaws.com/releases/97e7bb86-f571-475f-b689-dfbe6d77ee96.json"
+        },
+        "status": "SUCCEEDED",
+        "status_info": "",
+        "created_at": "2022-03-09T22:41:48.493580Z",
+        "samples_count": 5
+    }
+]

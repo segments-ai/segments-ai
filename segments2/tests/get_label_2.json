@@ -1,0 +1,292 @@
+{
+    "sample_uuid": "1dc60151-bed7-40c6-960e-c4d6d218ec09",
+    "label_type": "image-vector-sequence",
+    "label_status": "REVIEWED",
+    "attributes": {
+        "frames": [
+            {
+                "format_version": 0.1,
+                "annotations": [
+                    {
+                        "id": 1,
+                        "category_id": 1,
+                        "type": "bbox",
+                        "points": [
+                            [
+                                867.82,
+                                455.59
+                            ],
+                            [
+                                956.79,
+                                531.44
+                            ]
+                        ],
+                        "track_id": 1,
+                        "is_keyframe": true
+                    },
+                    {
+                        "id": 2,
+                        "category_id": 1,
+                        "type": "bbox",
+                        "points": [
+                            [
+                                977.21,
+                                459.97
+                            ],
+                            [
+                                1079.31,
+                                538.73
+                            ]
+                        ],
+                        "track_id": 2,
+                        "is_keyframe": true
+                    },
+                    {
+                        "id": 3,
+                        "category_id": 1,
+                        "type": "bbox",
+                        "points": [
+                            [
+                                713.22,
+                                454.14
+                            ],
+                            [
+                                794.9,
+                                535.81
+                            ]
+                        ],
+                        "track_id": 3,
+                        "is_keyframe": true
+                    }
+                ]
+            },
+            {
+                "format_version": 0.1,
+                "annotations": [
+                    {
+                        "id": 1,
+                        "category_id": 1,
+                        "type": "bbox",
+                        "points": [
+                            [
+                                891.16,
+                                459.97
+                            ],
+                            [
+                                980.13,
+                                535.82
+                            ]
+                        ],
+                        "track_id": 1,
+                        "is_keyframe": true
+                    },
+                    {
+                        "id": 2,
+                        "category_id": 1,
+                        "type": "bbox",
+                        "points": [
+                            [
+                                1000.55,
+                                454.14
+                            ],
+                            [
+                                1131.82,
+                                546.02
+                            ]
+                        ],
+                        "track_id": 2,
+                        "is_keyframe": true
+                    },
+                    {
+                        "id": 3,
+                        "category_id": 1,
+                        "type": "bbox",
+                        "points": [
+                            [
+                                713.22,
+                                454.14
+                            ],
+                            [
+                                794.9,
+                                535.81
+                            ]
+                        ],
+                        "track_id": 3
+                    }
+                ]
+            },
+            {
+                "format_version": 0.1,
+                "annotations": [
+                    {
+                        "id": 1,
+                        "category_id": 1,
+                        "type": "bbox",
+                        "points": [
+                            [
+                                914.5,
+                                461.43
+                            ],
+                            [
+                                1003.47,
+                                537.28
+                            ]
+                        ],
+                        "track_id": 1,
+                        "is_keyframe": true
+                    },
+                    {
+                        "id": 2,
+                        "category_id": 1,
+                        "type": "bbox",
+                        "points": [
+                            [
+                                1022.42,
+                                442.47
+                            ],
+                            [
+                                1196,
+                                557.69
+                            ]
+                        ],
+                        "track_id": 2,
+                        "is_keyframe": true
+                    },
+                    {
+                        "id": 3,
+                        "category_id": 1,
+                        "type": "bbox",
+                        "points": [
+                            [
+                                713.22,
+                                454.14
+                            ],
+                            [
+                                794.9,
+                                535.81
+                            ]
+                        ],
+                        "track_id": 3
+                    }
+                ]
+            },
+            {
+                "format_version": 0.1,
+                "annotations": [
+                    {
+                        "id": 1,
+                        "category_id": 1,
+                        "type": "bbox",
+                        "points": [
+                            [
+                                937.83,
+                                458.51
+                            ],
+                            [
+                                1004.93,
+                                518.32
+                            ]
+                        ],
+                        "track_id": 1,
+                        "is_keyframe": true
+                    },
+                    {
+                        "id": 2,
+                        "category_id": 1,
+                        "type": "bbox",
+                        "points": [
+                            [
+                                1120.15,
+                                452.7
+                            ],
+                            [
+                                1267.47,
+                                562.07
+                            ]
+                        ],
+                        "track_id": 2,
+                        "is_keyframe": true
+                    },
+                    {
+                        "id": 3,
+                        "category_id": 1,
+                        "type": "bbox",
+                        "points": [
+                            [
+                                713.22,
+                                454.14
+                            ],
+                            [
+                                794.9,
+                                535.81
+                            ]
+                        ],
+                        "track_id": 3
+                    }
+                ]
+            },
+            {
+                "format_version": 0.1,
+                "annotations": [
+                    {
+                        "id": 1,
+                        "category_id": 1,
+                        "type": "bbox",
+                        "points": [
+                            [
+                                961.17,
+                                465.81
+                            ],
+                            [
+                                1018.06,
+                                519.78
+                            ]
+                        ],
+                        "track_id": 1,
+                        "is_keyframe": true
+                    },
+                    {
+                        "id": 2,
+                        "category_id": 1,
+                        "type": "bbox",
+                        "points": [
+                            [
+                                1166.82,
+                                459.97
+                            ],
+                            [
+                                1340.4,
+                                578.11
+                            ]
+                        ],
+                        "track_id": 2,
+                        "is_keyframe": true
+                    },
+                    {
+                        "id": 3,
+                        "category_id": 1,
+                        "type": "bbox",
+                        "points": [
+                            [
+                                713.22,
+                                454.14
+                            ],
+                            [
+                                794.9,
+                                535.81
+                            ]
+                        ],
+                        "track_id": 3
+                    }
+                ]
+            }
+        ]
+    },
+    "score": null,
+    "rating": null,
+    "created_at": "2022-03-09T19:37:49.664304Z",
+    "created_by": "python-sdk-tests",
+    "updated_at": "2022-03-09T19:37:59.902290Z",
+    "reviewed_at": "2022-03-09T19:37:59.899647Z",
+    "reviewed_by": "python-sdk-tests"
+}

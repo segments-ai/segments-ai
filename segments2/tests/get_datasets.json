@@ -1,0 +1,2014 @@
+[
+    {
+        "name": "example-images-segmentation",
+        "description": "",
+        "data_type": "IMAGE",
+        "category": "other",
+        "public": false,
+        "owner": {
+            "username": "python-sdk-tests",
+            "created_at": "2022-03-07T14:05:37.855561Z"
+        },
+        "created_at": "2022-03-07T14:05:50.749425Z",
+        "cloned_from": 7627,
+        "enable_ratings": false,
+        "enable_skip_labeling": true,
+        "enable_skip_reviewing": false,
+        "enable_save_button": false,
+        "task_type": "segmentation-bitmap",
+        "task_attributes": {
+            "format_version": "0.2",
+            "categories": [
+                {
+                    "id": 1,
+                    "name": "human.pedestrian.adult",
+                    "color": [
+                        216,
+                        82,
+                        24
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 2,
+                    "name": "human.pedestrian.child",
+                    "color": [
+                        236,
+                        176,
+                        31
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 3,
+                    "name": "human.pedestrian.wheelchair",
+                    "color": [
+                        125,
+                        46,
+                        141
+                    ]
+                },
+                {
+                    "id": 4,
+                    "name": "human.pedestrian.stroller",
+                    "color": [
+                        118,
+                        171,
+                        47
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 5,
+                    "name": "human.pedestrian.personal_mobility",
+                    "color": [
+                        161,
+                        19,
+                        46
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 6,
+                    "name": "human.pedestrian.police_officer",
+                    "color": [
+                        255,
+                        0,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 7,
+                    "name": "human.pedestrian.construction_worker",
+                    "color": [
+                        255,
+                        127,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 8,
+                    "name": "animal",
+                    "color": [
+                        190,
+                        190,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 9,
+                    "name": "vehicle.car",
+                    "color": [
+                        0,
+                        255,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 10,
+                    "name": "vehicle.motorcycle",
+                    "color": [
+                        0,
+                        0,
+                        255
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 11,
+                    "name": "vehicle.bicycle",
+                    "color": [
+                        170,
+                        0,
+                        255
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 12,
+                    "name": "vehicle.bus.bendy",
+                    "color": [
+                        84,
+                        84,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 13,
+                    "name": "vehicle.bus.rigid",
+                    "color": [
+                        84,
+                        170,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 14,
+                    "name": "vehicle.truck",
+                    "color": [
+                        84,
+                        255,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 15,
+                    "name": "vehicle.construction",
+                    "color": [
+                        170,
+                        84,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 16,
+                    "name": "vehicle.emergency.ambulance",
+                    "color": [
+                        170,
+                        170,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 17,
+                    "name": "vehicle.emergency.police",
+                    "color": [
+                        170,
+                        255,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 18,
+                    "name": "vehicle.trailer",
+                    "color": [
+                        255,
+                        84,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 19,
+                    "name": "movable_object.barrier",
+                    "color": [
+                        255,
+                        170,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 20,
+                    "name": "movable_object.trafficcone",
+                    "color": [
+                        255,
+                        255,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 21,
+                    "name": "movable_object.pushable_pullable",
+                    "color": [
+                        0,
+                        84,
+                        127
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 22,
+                    "name": "movable_object.debris",
+                    "color": [
+                        0,
+                        170,
+                        127
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 23,
+                    "name": "static_object.bicycle_rack",
+                    "color": [
+                        0,
+                        255,
+                        127
+                    ],
+                    "attributes": []
+                }
+            ]
+        },
+        "task_readme": "",
+        "collaborators_count": 0,
+        "samples_count": 5,
+        "label_stats": {
+            "TOTAL": 5,
+            "LABELED": 1,
+            "REVIEWED": 1,
+            "UNLABELED": 3
+        }
+    },
+    {
+        "name": "example-images-vector",
+        "description": "",
+        "data_type": "IMAGE",
+        "category": "other",
+        "public": false,
+        "owner": {
+            "username": "python-sdk-tests",
+            "created_at": "2022-03-07T14:05:37.855561Z"
+        },
+        "created_at": "2022-03-07T14:06:22.116877Z",
+        "cloned_from": 7627,
+        "enable_ratings": false,
+        "enable_skip_labeling": true,
+        "enable_skip_reviewing": false,
+        "enable_save_button": false,
+        "task_type": "vector",
+        "task_attributes": {
+            "format_version": "0.2",
+            "categories": [
+                {
+                    "id": 1,
+                    "name": "human.pedestrian.adult",
+                    "color": [
+                        216,
+                        82,
+                        24
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 2,
+                    "name": "human.pedestrian.child",
+                    "color": [
+                        236,
+                        176,
+                        31
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 3,
+                    "name": "human.pedestrian.wheelchair",
+                    "color": [
+                        125,
+                        46,
+                        141
+                    ]
+                },
+                {
+                    "id": 4,
+                    "name": "human.pedestrian.stroller",
+                    "color": [
+                        118,
+                        171,
+                        47
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 5,
+                    "name": "human.pedestrian.personal_mobility",
+                    "color": [
+                        161,
+                        19,
+                        46
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 6,
+                    "name": "human.pedestrian.police_officer",
+                    "color": [
+                        255,
+                        0,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 7,
+                    "name": "human.pedestrian.construction_worker",
+                    "color": [
+                        255,
+                        127,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 8,
+                    "name": "animal",
+                    "color": [
+                        190,
+                        190,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 9,
+                    "name": "vehicle.car",
+                    "color": [
+                        0,
+                        255,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 10,
+                    "name": "vehicle.motorcycle",
+                    "color": [
+                        0,
+                        0,
+                        255
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 11,
+                    "name": "vehicle.bicycle",
+                    "color": [
+                        170,
+                        0,
+                        255
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 12,
+                    "name": "vehicle.bus.bendy",
+                    "color": [
+                        84,
+                        84,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 13,
+                    "name": "vehicle.bus.rigid",
+                    "color": [
+                        84,
+                        170,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 14,
+                    "name": "vehicle.truck",
+                    "color": [
+                        84,
+                        255,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 15,
+                    "name": "vehicle.construction",
+                    "color": [
+                        170,
+                        84,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 16,
+                    "name": "vehicle.emergency.ambulance",
+                    "color": [
+                        170,
+                        170,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 17,
+                    "name": "vehicle.emergency.police",
+                    "color": [
+                        170,
+                        255,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 18,
+                    "name": "vehicle.trailer",
+                    "color": [
+                        255,
+                        84,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 19,
+                    "name": "movable_object.barrier",
+                    "color": [
+                        255,
+                        170,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 20,
+                    "name": "movable_object.trafficcone",
+                    "color": [
+                        255,
+                        255,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 21,
+                    "name": "movable_object.pushable_pullable",
+                    "color": [
+                        0,
+                        84,
+                        127
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 22,
+                    "name": "movable_object.debris",
+                    "color": [
+                        0,
+                        170,
+                        127
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 23,
+                    "name": "static_object.bicycle_rack",
+                    "color": [
+                        0,
+                        255,
+                        127
+                    ],
+                    "attributes": []
+                }
+            ]
+        },
+        "task_readme": "",
+        "collaborators_count": 0,
+        "samples_count": 5,
+        "label_stats": {
+            "TOTAL": 5,
+            "UNLABELED": 5
+        }
+    },
+    {
+        "name": "example-image-sequences-vector",
+        "description": "",
+        "data_type": "IMAGE",
+        "category": "other",
+        "public": false,
+        "owner": {
+            "username": "python-sdk-tests",
+            "created_at": "2022-03-07T14:05:37.855561Z"
+        },
+        "created_at": "2022-03-07T14:06:42.976693Z",
+        "cloned_from": 7628,
+        "enable_ratings": false,
+        "enable_skip_labeling": true,
+        "enable_skip_reviewing": false,
+        "enable_save_button": true,
+        "task_type": "image-vector-sequence",
+        "task_attributes": {
+            "format_version": "0.2",
+            "categories": [
+                {
+                    "id": 1,
+                    "name": "human.pedestrian.adult",
+                    "color": [
+                        216,
+                        82,
+                        24
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 2,
+                    "name": "human.pedestrian.child",
+                    "color": [
+                        236,
+                        176,
+                        31
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 3,
+                    "name": "human.pedestrian.wheelchair",
+                    "color": [
+                        125,
+                        46,
+                        141
+                    ]
+                },
+                {
+                    "id": 4,
+                    "name": "human.pedestrian.stroller",
+                    "color": [
+                        118,
+                        171,
+                        47
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 5,
+                    "name": "human.pedestrian.personal_mobility",
+                    "color": [
+                        161,
+                        19,
+                        46
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 6,
+                    "name": "human.pedestrian.police_officer",
+                    "color": [
+                        255,
+                        0,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 7,
+                    "name": "human.pedestrian.construction_worker",
+                    "color": [
+                        255,
+                        127,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 8,
+                    "name": "animal",
+                    "color": [
+                        190,
+                        190,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 9,
+                    "name": "vehicle.car",
+                    "color": [
+                        0,
+                        255,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 10,
+                    "name": "vehicle.motorcycle",
+                    "color": [
+                        0,
+                        0,
+                        255
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 11,
+                    "name": "vehicle.bicycle",
+                    "color": [
+                        170,
+                        0,
+                        255
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 12,
+                    "name": "vehicle.bus.bendy",
+                    "color": [
+                        84,
+                        84,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 13,
+                    "name": "vehicle.bus.rigid",
+                    "color": [
+                        84,
+                        170,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 14,
+                    "name": "vehicle.truck",
+                    "color": [
+                        84,
+                        255,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 15,
+                    "name": "vehicle.construction",
+                    "color": [
+                        170,
+                        84,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 16,
+                    "name": "vehicle.emergency.ambulance",
+                    "color": [
+                        170,
+                        170,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 17,
+                    "name": "vehicle.emergency.police",
+                    "color": [
+                        170,
+                        255,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 18,
+                    "name": "vehicle.trailer",
+                    "color": [
+                        255,
+                        84,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 19,
+                    "name": "movable_object.barrier",
+                    "color": [
+                        255,
+                        170,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 20,
+                    "name": "movable_object.trafficcone",
+                    "color": [
+                        255,
+                        255,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 21,
+                    "name": "movable_object.pushable_pullable",
+                    "color": [
+                        0,
+                        84,
+                        127
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 22,
+                    "name": "movable_object.debris",
+                    "color": [
+                        0,
+                        170,
+                        127
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 23,
+                    "name": "static_object.bicycle_rack",
+                    "color": [
+                        0,
+                        255,
+                        127
+                    ],
+                    "attributes": []
+                }
+            ]
+        },
+        "task_readme": "",
+        "collaborators_count": 0,
+        "samples_count": 4,
+        "label_stats": {
+            "TOTAL": 4,
+            "UNLABELED": 4
+        }
+    },
+    {
+        "name": "example-point-clouds-segmentation",
+        "description": "",
+        "data_type": "IMAGE",
+        "category": "other",
+        "public": false,
+        "owner": {
+            "username": "python-sdk-tests",
+            "created_at": "2022-03-07T14:05:37.855561Z"
+        },
+        "created_at": "2022-03-07T14:06:58.820266Z",
+        "cloned_from": 7629,
+        "enable_ratings": false,
+        "enable_skip_labeling": true,
+        "enable_skip_reviewing": false,
+        "enable_save_button": false,
+        "task_type": "pointcloud-segmentation",
+        "task_attributes": {
+            "format_version": "0.2",
+            "categories": [
+                {
+                    "id": 1,
+                    "name": "human.pedestrian.adult",
+                    "color": [
+                        216,
+                        82,
+                        24
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 2,
+                    "name": "human.pedestrian.child",
+                    "color": [
+                        236,
+                        176,
+                        31
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 3,
+                    "name": "human.pedestrian.wheelchair",
+                    "color": [
+                        125,
+                        46,
+                        141
+                    ]
+                },
+                {
+                    "id": 4,
+                    "name": "human.pedestrian.stroller",
+                    "color": [
+                        118,
+                        171,
+                        47
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 5,
+                    "name": "human.pedestrian.personal_mobility",
+                    "color": [
+                        161,
+                        19,
+                        46
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 6,
+                    "name": "human.pedestrian.police_officer",
+                    "color": [
+                        255,
+                        0,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 7,
+                    "name": "human.pedestrian.construction_worker",
+                    "color": [
+                        255,
+                        127,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 8,
+                    "name": "animal",
+                    "color": [
+                        190,
+                        190,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 9,
+                    "name": "vehicle.car",
+                    "color": [
+                        0,
+                        255,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 10,
+                    "name": "vehicle.motorcycle",
+                    "color": [
+                        0,
+                        0,
+                        255
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 11,
+                    "name": "vehicle.bicycle",
+                    "color": [
+                        170,
+                        0,
+                        255
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 12,
+                    "name": "vehicle.bus.bendy",
+                    "color": [
+                        84,
+                        84,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 13,
+                    "name": "vehicle.bus.rigid",
+                    "color": [
+                        84,
+                        170,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 14,
+                    "name": "vehicle.truck",
+                    "color": [
+                        84,
+                        255,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 15,
+                    "name": "vehicle.construction",
+                    "color": [
+                        170,
+                        84,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 16,
+                    "name": "vehicle.emergency.ambulance",
+                    "color": [
+                        170,
+                        170,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 17,
+                    "name": "vehicle.emergency.police",
+                    "color": [
+                        170,
+                        255,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 18,
+                    "name": "vehicle.trailer",
+                    "color": [
+                        255,
+                        84,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 19,
+                    "name": "movable_object.barrier",
+                    "color": [
+                        255,
+                        170,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 20,
+                    "name": "movable_object.trafficcone",
+                    "color": [
+                        255,
+                        255,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 21,
+                    "name": "movable_object.pushable_pullable",
+                    "color": [
+                        0,
+                        84,
+                        127
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 22,
+                    "name": "movable_object.debris",
+                    "color": [
+                        0,
+                        170,
+                        127
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 23,
+                    "name": "static_object.bicycle_rack",
+                    "color": [
+                        0,
+                        255,
+                        127
+                    ],
+                    "attributes": []
+                }
+            ]
+        },
+        "task_readme": "",
+        "collaborators_count": 0,
+        "samples_count": 5,
+        "label_stats": {
+            "TOTAL": 5,
+            "UNLABELED": 5
+        }
+    },
+    {
+        "name": "example-point-clouds-cuboids",
+        "description": "",
+        "data_type": "IMAGE",
+        "category": "other",
+        "public": false,
+        "owner": {
+            "username": "python-sdk-tests",
+            "created_at": "2022-03-07T14:05:37.855561Z"
+        },
+        "created_at": "2022-03-07T14:08:10.404110Z",
+        "cloned_from": 7629,
+        "enable_ratings": false,
+        "enable_skip_labeling": true,
+        "enable_skip_reviewing": false,
+        "enable_save_button": false,
+        "task_type": "pointcloud-cuboid",
+        "task_attributes": {
+            "format_version": "0.2",
+            "categories": [
+                {
+                    "id": 1,
+                    "name": "human.pedestrian.adult",
+                    "color": [
+                        216,
+                        82,
+                        24
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 2,
+                    "name": "human.pedestrian.child",
+                    "color": [
+                        236,
+                        176,
+                        31
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 3,
+                    "name": "human.pedestrian.wheelchair",
+                    "color": [
+                        125,
+                        46,
+                        141
+                    ]
+                },
+                {
+                    "id": 4,
+                    "name": "human.pedestrian.stroller",
+                    "color": [
+                        118,
+                        171,
+                        47
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 5,
+                    "name": "human.pedestrian.personal_mobility",
+                    "color": [
+                        161,
+                        19,
+                        46
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 6,
+                    "name": "human.pedestrian.police_officer",
+                    "color": [
+                        255,
+                        0,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 7,
+                    "name": "human.pedestrian.construction_worker",
+                    "color": [
+                        255,
+                        127,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 8,
+                    "name": "animal",
+                    "color": [
+                        190,
+                        190,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 9,
+                    "name": "vehicle.car",
+                    "color": [
+                        0,
+                        255,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 10,
+                    "name": "vehicle.motorcycle",
+                    "color": [
+                        0,
+                        0,
+                        255
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 11,
+                    "name": "vehicle.bicycle",
+                    "color": [
+                        170,
+                        0,
+                        255
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 12,
+                    "name": "vehicle.bus.bendy",
+                    "color": [
+                        84,
+                        84,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 13,
+                    "name": "vehicle.bus.rigid",
+                    "color": [
+                        84,
+                        170,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 14,
+                    "name": "vehicle.truck",
+                    "color": [
+                        84,
+                        255,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 15,
+                    "name": "vehicle.construction",
+                    "color": [
+                        170,
+                        84,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 16,
+                    "name": "vehicle.emergency.ambulance",
+                    "color": [
+                        170,
+                        170,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 17,
+                    "name": "vehicle.emergency.police",
+                    "color": [
+                        170,
+                        255,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 18,
+                    "name": "vehicle.trailer",
+                    "color": [
+                        255,
+                        84,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 19,
+                    "name": "movable_object.barrier",
+                    "color": [
+                        255,
+                        170,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 20,
+                    "name": "movable_object.trafficcone",
+                    "color": [
+                        255,
+                        255,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 21,
+                    "name": "movable_object.pushable_pullable",
+                    "color": [
+                        0,
+                        84,
+                        127
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 22,
+                    "name": "movable_object.debris",
+                    "color": [
+                        0,
+                        170,
+                        127
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 23,
+                    "name": "static_object.bicycle_rack",
+                    "color": [
+                        0,
+                        255,
+                        127
+                    ],
+                    "attributes": []
+                }
+            ]
+        },
+        "task_readme": "",
+        "collaborators_count": 0,
+        "samples_count": 5,
+        "label_stats": {
+            "TOTAL": 5,
+            "UNLABELED": 5
+        }
+    },
+    {
+        "name": "example-point-cloud-sequences-segmentation",
+        "description": "",
+        "data_type": "IMAGE",
+        "category": "other",
+        "public": false,
+        "owner": {
+            "username": "python-sdk-tests",
+            "created_at": "2022-03-07T14:05:37.855561Z"
+        },
+        "created_at": "2022-03-07T14:08:23.564511Z",
+        "cloned_from": 7630,
+        "enable_ratings": false,
+        "enable_skip_labeling": true,
+        "enable_skip_reviewing": false,
+        "enable_save_button": true,
+        "task_type": "pointcloud-segmentation-sequence",
+        "task_attributes": {
+            "format_version": "0.2",
+            "categories": [
+                {
+                    "id": 1,
+                    "name": "human.pedestrian.adult",
+                    "color": [
+                        216,
+                        82,
+                        24
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 2,
+                    "name": "human.pedestrian.child",
+                    "color": [
+                        236,
+                        176,
+                        31
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 3,
+                    "name": "human.pedestrian.wheelchair",
+                    "color": [
+                        125,
+                        46,
+                        141
+                    ]
+                },
+                {
+                    "id": 4,
+                    "name": "human.pedestrian.stroller",
+                    "color": [
+                        118,
+                        171,
+                        47
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 5,
+                    "name": "human.pedestrian.personal_mobility",
+                    "color": [
+                        161,
+                        19,
+                        46
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 6,
+                    "name": "human.pedestrian.police_officer",
+                    "color": [
+                        255,
+                        0,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 7,
+                    "name": "human.pedestrian.construction_worker",
+                    "color": [
+                        255,
+                        127,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 8,
+                    "name": "animal",
+                    "color": [
+                        190,
+                        190,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 9,
+                    "name": "vehicle.car",
+                    "color": [
+                        0,
+                        255,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 10,
+                    "name": "vehicle.motorcycle",
+                    "color": [
+                        0,
+                        0,
+                        255
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 11,
+                    "name": "vehicle.bicycle",
+                    "color": [
+                        170,
+                        0,
+                        255
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 12,
+                    "name": "vehicle.bus.bendy",
+                    "color": [
+                        84,
+                        84,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 13,
+                    "name": "vehicle.bus.rigid",
+                    "color": [
+                        84,
+                        170,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 14,
+                    "name": "vehicle.truck",
+                    "color": [
+                        84,
+                        255,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 15,
+                    "name": "vehicle.construction",
+                    "color": [
+                        170,
+                        84,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 16,
+                    "name": "vehicle.emergency.ambulance",
+                    "color": [
+                        170,
+                        170,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 17,
+                    "name": "vehicle.emergency.police",
+                    "color": [
+                        170,
+                        255,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 18,
+                    "name": "vehicle.trailer",
+                    "color": [
+                        255,
+                        84,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 19,
+                    "name": "movable_object.barrier",
+                    "color": [
+                        255,
+                        170,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 20,
+                    "name": "movable_object.trafficcone",
+                    "color": [
+                        255,
+                        255,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 21,
+                    "name": "movable_object.pushable_pullable",
+                    "color": [
+                        0,
+                        84,
+                        127
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 22,
+                    "name": "movable_object.debris",
+                    "color": [
+                        0,
+                        170,
+                        127
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 23,
+                    "name": "static_object.bicycle_rack",
+                    "color": [
+                        0,
+                        255,
+                        127
+                    ],
+                    "attributes": []
+                }
+            ]
+        },
+        "task_readme": "",
+        "collaborators_count": 0,
+        "samples_count": 5,
+        "label_stats": {
+            "TOTAL": 5,
+            "REVIEWED": 1,
+            "UNLABELED": 4
+        }
+    },
+    {
+        "name": "example-point-cloud-sequences-cuboids",
+        "description": "",
+        "data_type": "IMAGE",
+        "category": "other",
+        "public": false,
+        "owner": {
+            "username": "python-sdk-tests",
+            "created_at": "2022-03-07T14:05:37.855561Z"
+        },
+        "created_at": "2022-03-07T14:08:34.528528Z",
+        "cloned_from": 7630,
+        "enable_ratings": false,
+        "enable_skip_labeling": true,
+        "enable_skip_reviewing": false,
+        "enable_save_button": true,
+        "task_type": "pointcloud-cuboid-sequence",
+        "task_attributes": {
+            "format_version": "0.2",
+            "categories": [
+                {
+                    "id": 1,
+                    "name": "human.pedestrian.adult",
+                    "color": [
+                        216,
+                        82,
+                        24
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 2,
+                    "name": "human.pedestrian.child",
+                    "color": [
+                        236,
+                        176,
+                        31
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 3,
+                    "name": "human.pedestrian.wheelchair",
+                    "color": [
+                        125,
+                        46,
+                        141
+                    ]
+                },
+                {
+                    "id": 4,
+                    "name": "human.pedestrian.stroller",
+                    "color": [
+                        118,
+                        171,
+                        47
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 5,
+                    "name": "human.pedestrian.personal_mobility",
+                    "color": [
+                        161,
+                        19,
+                        46
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 6,
+                    "name": "human.pedestrian.police_officer",
+                    "color": [
+                        255,
+                        0,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 7,
+                    "name": "human.pedestrian.construction_worker",
+                    "color": [
+                        255,
+                        127,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 8,
+                    "name": "animal",
+                    "color": [
+                        190,
+                        190,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 9,
+                    "name": "vehicle.car",
+                    "color": [
+                        0,
+                        255,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 10,
+                    "name": "vehicle.motorcycle",
+                    "color": [
+                        0,
+                        0,
+                        255
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 11,
+                    "name": "vehicle.bicycle",
+                    "color": [
+                        170,
+                        0,
+                        255
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 12,
+                    "name": "vehicle.bus.bendy",
+                    "color": [
+                        84,
+                        84,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 13,
+                    "name": "vehicle.bus.rigid",
+                    "color": [
+                        84,
+                        170,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 14,
+                    "name": "vehicle.truck",
+                    "color": [
+                        84,
+                        255,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 15,
+                    "name": "vehicle.construction",
+                    "color": [
+                        170,
+                        84,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 16,
+                    "name": "vehicle.emergency.ambulance",
+                    "color": [
+                        170,
+                        170,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 17,
+                    "name": "vehicle.emergency.police",
+                    "color": [
+                        170,
+                        255,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 18,
+                    "name": "vehicle.trailer",
+                    "color": [
+                        255,
+                        84,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 19,
+                    "name": "movable_object.barrier",
+                    "color": [
+                        255,
+                        170,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 20,
+                    "name": "movable_object.trafficcone",
+                    "color": [
+                        255,
+                        255,
+                        0
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 21,
+                    "name": "movable_object.pushable_pullable",
+                    "color": [
+                        0,
+                        84,
+                        127
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 22,
+                    "name": "movable_object.debris",
+                    "color": [
+                        0,
+                        170,
+                        127
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 23,
+                    "name": "static_object.bicycle_rack",
+                    "color": [
+                        0,
+                        255,
+                        127
+                    ],
+                    "attributes": []
+                }
+            ]
+        },
+        "task_readme": "",
+        "collaborators_count": 0,
+        "samples_count": 5,
+        "label_stats": {
+            "TOTAL": 5,
+            "REVIEWED": 1,
+            "UNLABELED": 4
+        }
+    },
+    {
+        "name": "example-text-named-entities",
+        "description": "",
+        "data_type": "IMAGE",
+        "category": "other",
+        "public": false,
+        "owner": {
+            "username": "python-sdk-tests",
+            "created_at": "2022-03-07T14:05:37.855561Z"
+        },
+        "created_at": "2022-03-07T14:08:48.121730Z",
+        "cloned_from": 7732,
+        "enable_ratings": false,
+        "enable_skip_labeling": true,
+        "enable_skip_reviewing": false,
+        "enable_save_button": false,
+        "task_type": "text-named-entities",
+        "task_attributes": {
+            "format_version": "0.1",
+            "categories": [
+                {
+                    "name": "Negative",
+                    "id": 0,
+                    "color": [
+                        0,
+                        113,
+                        188,
+                        255
+                    ],
+                    "attributes": []
+                },
+                {
+                    "name": "Neutral",
+                    "id": 1,
+                    "color": [
+                        216,
+                        82,
+                        24,
+                        255
+                    ],
+                    "attributes": []
+                },
+                {
+                    "id": 2,
+                    "name": "Positive",
+                    "color": [
+                        236,
+                        176,
+                        31,
+                        255
+                    ],
+                    "attributes": []
+                }
+            ]
+        },
+        "task_readme": "",
+        "collaborators_count": 0,
+        "samples_count": 5,
+        "label_stats": {
+            "TOTAL": 5,
+            "UNLABELED": 5
+        }
+    },
+    {
+        "name": "example-text-span-categorization",
+        "description": "",
+        "data_type": "IMAGE",
+        "category": "other",
+        "public": false,
+        "owner": {
+            "username": "python-sdk-tests",
+            "created_at": "2022-03-07T14:05:37.855561Z"
+        },
+        "created_at": "2022-03-07T14:08:59.921525Z",
+        "cloned_from": 7735,
+        "enable_ratings": false,
+        "enable_skip_labeling": true,
+        "enable_skip_reviewing": false,
+        "enable_save_button": false,
+        "task_type": "text-span-categorization",
+        "task_attributes": {
+            "format_version": "0.1",
+            "categories": [
+                {
+                    "name": "Negative",
+                    "id": 0,
+                    "color": [
+                        0,
+                        113,
+                        188,
+                        255
+                    ],
+                    "attributes": []
+                },
+                {
+                    "name": "Neutral",
+                    "id": 1,
+                    "color": [
+                        216,
+                        82,
+                        24,
+                        255
+                    ],
+                    "attributes": []
+                },
+                {
+                    "name": "Positive",
+                    "id": 2,
+                    "color": [
+                        236,
+                        176,
+                        31,
+                        255
+                    ],
+                    "attributes": []
+                }
+            ]
+        },
+        "task_readme": "",
+        "collaborators_count": 0,
+        "samples_count": 5,
+        "label_stats": {
+            "TOTAL": 5,
+            "UNLABELED": 5
+        }
+    },
+    {
+        "name": "add_update_delete_dataset",
+        "description": "Test add_update_delete_dataset.",
+        "data_type": "IMAGE",
+        "category": "people",
+        "public": false,
+        "owner": {
+            "username": "python-sdk-tests",
+            "created_at": "2022-03-07T14:05:37.855561Z"
+        },
+        "created_at": "2022-03-10T17:36:08.218912Z",
+        "cloned_from": null,
+        "enable_ratings": true,
+        "enable_skip_labeling": true,
+        "enable_skip_reviewing": true,
+        "enable_save_button": false,
+        "task_type": "vector",
+        "task_attributes": {
+            "format_version": "0.1",
+            "categories": [
+                {
+                    "name": "test",
+                    "id": 1,
+                    "color": [
+                        0,
+                        0,
+                        0,
+                        0
+                    ],
+                    "attributes": [
+                        {
+                            "name": "color",
+                            "input_type": "select",
+                            "values": [
+                                "green",
+                                "yellow",
+                                "red"
+                            ],
+                            "default_value": "red"
+                        },
+                        {
+                            "name": "description",
+                            "input_type": "text",
+                            "default_value": "A nice car."
+                        },
+                        {
+                            "name": "number_of_wheels",
+                            "input_type": "number",
+                            "min": 1,
+                            "max": 20,
+                            "step": 1,
+                            "default_value": 4
+                        },
+                        {
+                            "name": "is_electric",
+                            "input_type": "checkbox",
+                            "default_value": false
+                        }
+                    ]
+                }
+            ]
+        },
+        "task_readme": "",
+        "collaborators_count": 0,
+        "samples_count": 0,
+        "label_stats": {
+            "TOTAL": 0
+        }
+    }
+]

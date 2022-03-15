@@ -1,0 +1,69 @@
+{
+    "uuid": "abf3f77f-2b8e-45ae-8020-0fe2a8292797",
+    "name": "scene-0061",
+    "attributes": {
+        "pcd": {
+            "url": "https://segmentsai-prod.s3.eu-west-2.amazonaws.com/assets/admin-tobias/43dcaf8d-cfd1-440f-8a02-caef662e170a.bin"
+        },
+        "name": "ca9a282c9e77460f8360f564131a8af5_nuscenes",
+        "timestamp": 1532402927647951
+    },
+    "metadata": {
+        "pc_type": "nuscenes"
+    },
+    "created_at": "2022-02-16T12:22:10.746673Z",
+    "created_by": "python-sdk-tests",
+    "comments": [],
+    "priority": 0,
+    "has_embedding": false,
+    "dataset": "python-sdk-tests/example-point-clouds-cuboids",
+    "label": {
+        "sample_uuid": "abf3f77f-2b8e-45ae-8020-0fe2a8292797",
+        "label_type": "pointcloud-cuboid",
+        "label_status": "REVIEWED",
+        "attributes": {
+            "format_version": "0.2",
+            "annotations": [
+                {
+                    "id": 1,
+                    "category_id": 9,
+                    "type": "cuboid",
+                    "position": {
+                        "x": 0.04705544811602447,
+                        "y": -0.8546202767455156,
+                        "z": -0.6531794379077446
+                    },
+                    "dimensions": {
+                        "x": 8.050336082631347,
+                        "y": 9.425149600934223,
+                        "z": 3.306364106571013
+                    },
+                    "yaw": 0
+                },
+                {
+                    "id": 2,
+                    "category_id": 9,
+                    "type": "cuboid",
+                    "position": {
+                        "x": -4.740325191190034,
+                        "y": 17.201371727092372,
+                        "z": 0.3177004625777833
+                    },
+                    "dimensions": {
+                        "x": 6.743914703253132,
+                        "y": 16.984984683447514,
+                        "z": 4.474221789775209
+                    },
+                    "yaw": 0
+                }
+            ]
+        },
+        "score": null,
+        "rating": null,
+        "created_at": "2022-03-09T19:40:03.480196Z",
+        "created_by": "python-sdk-tests",
+        "updated_at": "2022-03-09T19:40:56.343063Z",
+        "reviewed_at": "2022-03-09T19:40:56.340259Z",
+        "reviewed_by": "python-sdk-tests"
+    }
+}

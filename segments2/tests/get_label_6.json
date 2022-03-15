@@ -1,0 +1,141 @@
+{
+    "sample_uuid": "8e99c0ae-6d10-41c2-9473-6e72d920b6b4",
+    "label_type": "pointcloud-cuboid-sequence",
+    "label_status": "REVIEWED",
+    "attributes": {
+        "frames": [
+            {
+                "format_version": 0.1,
+                "annotations": [
+                    {
+                        "id": 1,
+                        "category_id": 9,
+                        "type": "cuboid",
+                        "track_id": 1,
+                        "position": {
+                            "x": -1181.468017578125,
+                            "y": 410.81756591796875,
+                            "z": -0.3534950911998749
+                        },
+                        "dimensions": {
+                            "x": 16.03122901916504,
+                            "y": 7.740538120269775,
+                            "z": 3.2930097579956055
+                        },
+                        "yaw": 1.4759666919708252,
+                        "is_keyframe": true,
+                        "index": 0
+                    }
+                ],
+                "timestamp": 1532402927647951
+            },
+            {
+                "format_version": 0.1,
+                "annotations": [
+                    {
+                        "id": 1,
+                        "category_id": 9,
+                        "type": "cuboid",
+                        "track_id": 1,
+                        "position": {
+                            "x": -1181.468017578125,
+                            "y": 410.81756591796875,
+                            "z": -0.3534950911998749
+                        },
+                        "dimensions": {
+                            "x": 16.03122901916504,
+                            "y": 7.740538120269775,
+                            "z": 3.2930097579956055
+                        },
+                        "yaw": 1.4759666919708252,
+                        "is_keyframe": false,
+                        "index": 1
+                    }
+                ],
+                "timestamp": 1532402928147847
+            },
+            {
+                "format_version": 0.1,
+                "annotations": [
+                    {
+                        "id": 1,
+                        "category_id": 9,
+                        "type": "cuboid",
+                        "track_id": 1,
+                        "position": {
+                            "x": -1181.468017578125,
+                            "y": 410.81756591796875,
+                            "z": -0.3534950911998749
+                        },
+                        "dimensions": {
+                            "x": 16.03122901916504,
+                            "y": 7.740538120269775,
+                            "z": 3.2930097579956055
+                        },
+                        "yaw": 1.4759666919708252,
+                        "is_keyframe": false,
+                        "index": 2
+                    }
+                ],
+                "timestamp": 1532402928698048
+            },
+            {
+                "format_version": 0.1,
+                "annotations": [
+                    {
+                        "id": 1,
+                        "category_id": 9,
+                        "type": "cuboid",
+                        "track_id": 1,
+                        "position": {
+                            "x": -1181.468017578125,
+                            "y": 410.81756591796875,
+                            "z": -0.3534950911998749
+                        },
+                        "dimensions": {
+                            "x": 16.03122901916504,
+                            "y": 7.740538120269775,
+                            "z": 3.2930097579956055
+                        },
+                        "yaw": 1.4759666919708252,
+                        "is_keyframe": false,
+                        "index": 3
+                    }
+                ],
+                "timestamp": 1532402929197353
+            },
+            {
+                "format_version": 0.1,
+                "annotations": [
+                    {
+                        "id": 1,
+                        "category_id": 9,
+                        "type": "cuboid",
+                        "track_id": 1,
+                        "position": {
+                            "x": -1181.468017578125,
+                            "y": 410.81756591796875,
+                            "z": -0.3534950911998749
+                        },
+                        "dimensions": {
+                            "x": 16.03122901916504,
+                            "y": 7.740538120269775,
+                            "z": 3.2930097579956055
+                        },
+                        "yaw": 1.4759666919708252,
+                        "is_keyframe": false,
+                        "index": 4
+                    }
+                ],
+                "timestamp": 1532402929697797
+            }
+        ]
+    },
+    "score": null,
+    "rating": null,
+    "created_at": "2022-03-09T20:26:30.033820Z",
+    "created_by": "python-sdk-tests",
+    "updated_at": "2022-03-09T20:27:01.592520Z",
+    "reviewed_at": "2022-03-09T20:27:01.590228Z",
+    "reviewed_by": "python-sdk-tests"
+}
