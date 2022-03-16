@@ -13,26 +13,17 @@ session.mount("https://", adapter)
 
 
 def bitmap2file(
-    bitmap: Union[npt.NDArray[np.uint32], npt.NDArray[np.uint8]],
+    bitmap: npt.NDArray[np.uint32],
     is_segmentation_bitmap: bool = True,
 ) -> BytesIO:
     """Convert a label bitmap to a file with the proper format.
 
     Args:
-        bitmap (np.uint32): A numpy array where each unique value represents an instance id.
+        bitmap: A numpy array where each unique value represents an instance id.
 
     Returns:
         object: a file object.
     """
-
-    # Convert bitmap to np.uint32, if it is not already
-    if bitmap.dtype == "uint32":
-        pass
-    elif bitmap.dtype == "uint8":
-        bitmap = np.uint32(bitmap)
-    else:
-        assert False
-
     if is_segmentation_bitmap:
         bitmap2 = np.copy(bitmap)
         bitmap2 = bitmap2[:, :, None].view(np.uint8)
@@ -54,12 +45,12 @@ def get_semantic_bitmap(
     """Convert an instance bitmap and annotations dict into a segmentation bitmap.
 
     Args:
-        instance_bitmap (np.uint32): A numpy array where each unique value represents an instance id.
-        annotations (dict): An annotations dictionary.
-        id_increment (int, optional): Increment the category ids with this number. Defaults to 1.
+        instance_bitmap: A numpy array where each unique value represents an instance id.
+        annotations: An annotations dictionary.
+        id_increment: Increment the category ids with this number. Defaults to 1.
 
     Returns:
-        np.uint32: a numpy array where each unique value represents a category id.
+        A numpy array where each unique value represents a category id.
     """
 
     if instance_bitmap is None or annotations is None:
@@ -83,10 +74,11 @@ def export_dataset(
     """Export a dataset to a different format.
 
     Args:
-        dataset (dict): A dataset object, resulting from client.get_dataset().
-        export_folder (str, optional): The folder to export the dataset to. Defaults to '.'.
-        export_format (str, optional): The destination format. Can be 'coco-panoptic' (default), 'coco-instance', 'yolo', 'instance', 'instance-color', 'semantic', 'semantic-color'.
-        id_increment (int, optional): Increment the category ids with this number. Defaults to 1. Ignored unless export_format is 'semantic' or 'semantic-color'.
+        dataset: A dataset object, resulting from client.get_dataset().
+        export_folder: The folder to export the dataset to. Defaults to '.'.
+        export_format: The destination format. Can be 'coco-panoptic' (default), 'coco-instance', 'yolo', 'instance', 'instance-color', 'semantic', 'semantic-color'.
+        id_increment: Increment the category ids with this number. Defaults to 1. Ignored unless export_format is 'semantic' or 'semantic-color'.
+
     """
 
     print("Exporting dataset. This may take a while...")
@@ -140,11 +132,11 @@ def load_image_from_url(url: str, save_filename: Optional[str] = None) -> Image:
     """Load an image from url.
 
     Args:
-        url (str): The image url.
-        save_filename (str, optional): The filename to save to.
+        url: The image url.
+        save_filename: The filename to save to.
 
     Returns:
-        PIL.Image: a PIL image.
+        A PIL image.
     """
     image = Image.open(BytesIO(session.get(url).content))
     # urllib.request.urlretrieve(url, save_filename)
@@ -161,11 +153,11 @@ def load_label_bitmap_from_url(
     """Load a label bitmap from url.
 
     Args:
-        url (str): The label bitmap url.
-        save_filename (str, optional): The filename to save to.
+        url: The label bitmap url.
+        save_filename: The filename to save to.
 
     Returns:
-        np.uint32: a numpy np.uint32 array.
+        A numpy np.uint32 array.
     """
 
     def extract_bitmap(bitmap: Image) -> npt.NDArray[np.uint32]:

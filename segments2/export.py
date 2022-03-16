@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 import os
 import json
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Dict, List, Optional, Set, Tuple, Union
 from tqdm import tqdm
 import numpy as np
 from PIL import Image

@@ -76,6 +76,16 @@ class InputType(Enum):
     checkbox = "checkbox"
 
 
+class Category(Enum):
+    street_scenery = "street_scenery"
+    garden = "garden"
+    agriculture = "agriculture"
+    satellite = "satellite"
+    people = "people"
+    medical = "medical"
+    other = "other"
+
+
 DACITE_CONFIG = Config(
     cast=[
         LabelStatus,
@@ -88,11 +98,16 @@ DACITE_CONFIG = Config(
         PointcloudAnnotationType,
         PCDType,
         InputType,
+        Category,
     ]
 )
 RGB = List[float]  # TODO Tuple[float, float, float]
 RGBA = List[float]  # TODO Tuple[float, float, float, float]
 FormatVersion = Union[float, str]
+
+
+class AuthHeader(TypedDict):
+    Authorization: str
 
 
 ###########
@@ -138,7 +153,7 @@ AWSFields = TypedDict(
 @dataclass
 class PresignedPostFields:
     url: str
-    fields: Dict[str, Any]  # AWSFields
+    fields: AWSFields  # Dict[str, Any]  # AWSFields
 
 
 @dataclass
@@ -155,27 +170,27 @@ class File:
 #####################################
 @dataclass
 class ObjectAttribute:
-    # select and checkbox
+    # Select and checkbox
     name: str
     input_type: InputType
     default_value: Optional[Union[str, float, bool]] = None
-    # text
+    # Text
     values: Optional[List[str]] = None
-    # number
+    # Number
     min: Optional[float] = None
     max: Optional[float] = None
     step: Optional[float] = None
 
     def __post_init__(self):
-        # select
+        # Select
         if isinstance(self.values, list):
             assert self.input_type == InputType.select
-        # text/select
+        # Text/select
         if isinstance(self.default_value, str):
             assert (
                 self.input_type == InputType.text or self.input_type == InputType.select
             )
-        # number
+        # Number
         if (
             isinstance(self.min, float)
             or isinstance(self.max, float)
@@ -232,7 +247,7 @@ class ImageVectorLabelAttributes:
     image_attributes: Optional[ImageAttributes] = None
 
 
-# Image sequence vector annotation
+# Image sequence vector
 @dataclass
 class ImageSequenceVectorAnnotation(_ImageVectorAnnotationBase):
     track_id: int
@@ -315,7 +330,7 @@ class PointcloudSequenceSegmentationLabelAttributes:
     format_version: Optional[FormatVersion] = None
 
 
-# Point cloud sequence cuboid attributes
+# Point cloud sequence cuboid
 @dataclass
 class PointcloudSequenceCuboidAnnotation(_PointcloudCuboidAnnotationBase):
     track_id: int
@@ -461,13 +476,6 @@ class Sample:
     has_embedding: bool
 
 
-##############
-# AuthHeader #
-##############
-class AuthHeader(TypedDict):
-    Authorization: str
-
-
 ########################
 # Dataset and labelset #
 ########################
@@ -490,10 +498,6 @@ class TaskAttributeCategory:
     color: Optional[Union[RGB, RGBA]] = None
     attributes: Optional[ObjectAttributes] = None
     dimensions: Optional[XYZ] = None
-
-    # https://stackoverflow.com/questions/62323967/define-constraints-for-fields-in-a-python-dataclass
-    # def __post_init__(self):
-    #     assert self.id > 0
 
 
 @dataclass
@@ -520,7 +524,7 @@ class Statistics:
 
 
 @dataclass
-class LabelSet:
+class Labelset:
     name: str
     description: str
     uuid: Optional[str] = None
@@ -546,7 +550,7 @@ class Dataset:
     name: str
     description: str
     data_type: DataType
-    category: str
+    category: Category
     public: bool
     owner: Owner
     created_at: str
@@ -561,7 +565,7 @@ class Dataset:
     collaborators_count: Optional[int] = None
     cloned_from: Optional[int] = None
     task_attributes: Optional[TaskAttributes] = None
-    labelsets: Optional[List[LabelSet]] = None
+    labelsets: Optional[List[Labelset]] = None
     role: Optional[str] = None
     readme: Optional[str] = None
     noncollaborator_can_label: Optional[bool] = None

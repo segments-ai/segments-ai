@@ -13,11 +13,11 @@ class SegmentsDataset:
     """SegmentsDataset class.
 
     Args:
-        release_file (str or dict): Path to a release file, or a release dict resulting from client.get_release().
-        labelset (str, optional): The labelset that should be loaded. Defaults to 'ground-truth'.
-        filter_by (list, optional): A list of label statuses to filter by. Defaults to None.
-        segments_dir (str, optional): The directory where the data will be downloaded to for caching. Set to None to disable caching. Defaults to 'segments'.
-        preload (bool, optional): Whether the data should be pre-downloaded when the dataset is initialized. Ignored if segments_dir is None. Defaults to True.
+        release_file: Path to a release file, or a release dict resulting from client.get_release().
+        labelset: The labelset that should be loaded. Defaults to 'ground-truth'.
+        filter_by: A list of label statuses to filter by. Defaults to None.
+        segments_dir: The directory where the data will be downloaded to for caching. Set to None to disable caching. Defaults to 'segments'.
+        preload: Whether the data should be pre-downloaded when the dataset is initialized. Ignored if segments_dir is None. Defaults to True.
 
     """
 

@@ -15,7 +15,7 @@ from typehints import (
     File,
     Label,
     LabelAttributes,
-    LabelSet,
+    Labelset,
     LabelStatus,
     Release,
     Role,
@@ -23,6 +23,7 @@ from typehints import (
     SampleAttributes,
     TaskAttributes,
     TaskType,
+    Category,
 )
 
 
@@ -30,12 +31,12 @@ class SegmentsClient:
     """SegmentsClient class.
 
     Args:
-        api_key (str): Your Segments.ai API key.
-        api_url (str, optional): URL of the Segments.ai API.
+        api_key: Your Segments.ai API key.
+        api_url: URL of the Segments.ai API.
 
     Attributes:
-        api_key (str): Your Segments.ai API key.
-        api_url (str): URL of the Segments.ai API.
+        api_key: Your Segments.ai API key.
+        api_url: URL of the Segments.ai API.
 
     """
 
@@ -63,6 +64,12 @@ class SegmentsClient:
         else:
             raise Exception("Something went wrong. Did you use the right api key?")
 
+    # https://stackoverflow.com/questions/48160728/resourcewarning-unclosed-socket-in-python-3-unit-test
+    def close(self) -> None:
+        self.api_session.close()
+        self.s3_session.close()
+        print("Closed successfully.")
+
     ############
     # Datasets #
     ############
@@ -70,46 +77,36 @@ class SegmentsClient:
         """Get a list of datasets.
 
         Args:
-            user (str, optional): The user for which to get the datasets. Leave empty to get datasets of current user. Defaults to None.
+            user: The user for which to get the datasets. Leave empty to get datasets of current user. Defaults to None.
 
         Returns:
-            list: a list of dictionaries representing the datasets.
+            A list of dataclasses representing the datasets.
         """
 
         if user is not None:
             r = self.get("/users/{}/datasets/".format(user))
         else:
             r = self.get("/user/datasets/")
-
-        # with open(
-        #     "/Users/arnouthillen/segments-ai/segments2/tests/get_datasets.json", "w"
-        # ) as f:
-        #     print(json.dump(r.json(), f))
-
         datasets = [
             from_dict(data_class=Dataset, data=dataset, config=DACITE_CONFIG)
             for dataset in r.json()
         ]
+
         return datasets
 
     def get_dataset(self, dataset_identifier: str) -> Dataset:
         """Get a dataset.
 
         Args:
-            dataset_identifier (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
 
         Returns:
-            dict: a dictionary representing the dataset.
+            Dataset: a dataclass representing the dataset.
         """
 
         r = self.get("/datasets/{}/".format(dataset_identifier))
-
-        # with open(
-        #     "/Users/arnouthillen/segments-ai/segments2/tests/get_dataset.json", "w"
-        # ) as f:
-        #     print(json.dump(r.json(), f))
-
         dataset = from_dict(data_class=Dataset, data=r.json(), config=DACITE_CONFIG)
+
         return dataset
 
     def add_dataset(
@@ -118,7 +115,7 @@ class SegmentsClient:
         description: str = "",
         task_type: TaskType = "segmentation-bitmap",
         task_attributes: Optional[Dict[str, Any]] = None,
-        category: str = "other",
+        category: Category = "other",
         public: bool = False,
         readme: str = "",
         enable_skip_labeling: bool = True,
@@ -128,19 +125,19 @@ class SegmentsClient:
         """Add a dataset.
 
         Args:
-            name (str): The dataset name. Example: flowers.
-            description (str, optional): The dataset description. Defaults to ''.
-            task_type (str, optional): The dataset's task type. One of 'segmentation-bitmap', 'segmentation-bitmap-highres', 'vector', 'bboxes', 'keypoints'. Defaults to 'segmentation-bitmap', 'pointcloud-segmentation', 'pointcloud-detection'.
-            task_attributes (dict, optional): The dataset's task attributes. Defaults to None.
-            category (str, optional): The dataset category. Defaults to 'other'.
-            public (bool, optional): The dataset visibility. Defaults to False.
-            readme (str, optional): The dataset readme. Defaults to ''.
-            enable_skip_labeling (bool, optional): Enable the skip button in the labeling workflow. Defaults to True.
-            enable_skip_reviewing (bool, optional): Enable the skip button in the reviewing workflow. Defaults to False.
+            name: The dataset name. Example: flowers.
+            description: The dataset description. Defaults to ''.
+            task_type: The dataset's task type. One of 'segmentation-bitmap', 'segmentation-bitmap-highres', 'vector', 'bboxes', 'keypoints'. Defaults to 'segmentation-bitmap', 'pointcloud-segmentation', 'pointcloud-detection'.
+            task_attributes: The dataset's task attributes. Defaults to None.
+            category: The dataset category. Defaults to 'other'.
+            public: The dataset visibility. Defaults to False.
+            readme: The dataset readme. Defaults to ''.
+            enable_skip_labeling: Enable the skip button in the labeling workflow. Defaults to True.
+            enable_skip_reviewing: Enable the skip button in the reviewing workflow. Defaults to False.
             enable_ratings: Enable star-ratings for labeled images. Defaults to False.
 
         Returns:
-            dict: a dictionary representing the newly created dataset.
+            A dataclass representing the newly created dataset.
         """
 
         if task_attributes is None:
@@ -172,14 +169,8 @@ class SegmentsClient:
                 "data_type": "IMAGE",
             }
             r = self.post("/user/datasets/", payload)
-
-            # with open(
-            #     f"/Users/arnouthillen/segments-ai/segments2/tests/add_dataset.json",
-            #     "w",
-            # ) as f:
-            #     print(json.dump(r.json(), f))
-
             dataset = from_dict(data_class=Dataset, data=r.json(), config=DACITE_CONFIG)
+
             return dataset
 
     def update_dataset(
@@ -188,7 +179,7 @@ class SegmentsClient:
         description: Optional[str] = None,
         task_type: Optional[TaskType] = None,
         task_attributes: Optional[Dict[str, Any]] = None,
-        category: Optional[str] = None,
+        category: Optional[Category] = None,
         public: Optional[bool] = None,
         readme: Optional[str] = None,
         enable_skip_labeling: Optional[bool] = None,
@@ -198,19 +189,19 @@ class SegmentsClient:
         """Update a dataset.
 
         Args:
-            dataset_identifier (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
-            description (str, optional): The dataset description.
-            task_type (str, optional): The dataset's task type. One of 'segmentation-bitmap', 'segmentation-bitmap-highres', 'vector', 'bboxes', 'keypoints', 'pointcloud-segmentation', 'pointcloud-detection'.
-            task_attributes (dict, optional): The dataset's task attributes.
-            category (str, optional): The dataset category.
-            public (bool, optional): The dataset visibility.
-            readme (str, optional): The dataset readme.
-            enable_skip_labeling (bool, optional): Enable the skip button in the labeling workflow.
-            enable_skip_reviewing (bool, optional): Enable the skip button in the reviewing workflow.
-            enable_ratings (bool, optional): Enable star-ratings for labeled images.
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
+            description: The dataset description.
+            task_type: The dataset's task type. One of 'segmentation-bitmap', 'segmentation-bitmap-highres', 'vector', 'bboxes', 'keypoints', 'pointcloud-segmentation', 'pointcloud-detection'.
+            task_attributes: The dataset's task attributes.
+            category: The dataset category.
+            public: The dataset visibility.
+            readme: The dataset readme.
+            enable_skip_labeling: Enable the skip button in the labeling workflow.
+            enable_skip_reviewing: Enable the skip button in the reviewing workflow.
+            enable_ratings: Enable star-ratings for labeled images.
 
         Returns:
-            dict: a dictionary representing the updated dataset.
+            A dataclass representing the updated dataset.
         """
 
         payload: Dict[str, Any] = {}
@@ -243,22 +234,16 @@ class SegmentsClient:
             payload["enable_ratings"] = enable_ratings
 
         r = self.patch("/datasets/{}/".format(dataset_identifier), payload)
-
-        # with open(
-        #     f"/Users/arnouthillen/segments-ai/segments2/tests/update_dataset.json",
-        #     "w",
-        # ) as f:
-        #     print(json.dump(r.json(), f))
-
         print("Updated " + dataset_identifier)
         dataset = from_dict(data_class=Dataset, data=r.json(), config=DACITE_CONFIG)
+
         return dataset
 
     def delete_dataset(self, dataset_identifier: str) -> None:
         """Delete a dataset.
 
         Args:
-            dataset_identifier (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
         """
 
         r = self.delete("/datasets/{}/".format(dataset_identifier))
@@ -269,25 +254,19 @@ class SegmentsClient:
         """Add a collaborator to a dataset.
 
         Args:
-            dataset_identifier (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
-            username (str): The username of the collaborator to be added.
-            role (str, optional): The role of the collaborator to be added. One of labeler, reviewer, admin. Defaults to labeler.
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
+            username: The username of the collaborator to be added.
+            role: The role of the collaborator to be added. One of labeler, reviewer, admin. Defaults to labeler.
 
         Returns:
-            dict: a dictionary containing the newly added collaborator with its role.
+            A dataclass containing the newly added collaborator with its role.
         """
         payload = {"user": username, "role": role}
         r = self.post("/datasets/{}/collaborators/".format(dataset_identifier), payload)
-
-        # with open(
-        #     f"/Users/arnouthillen/segments-ai/segments2/tests/add_dataset_collaborator.json",
-        #     "w",
-        # ) as f:
-        #     print(json.dump(r.json(), f))
-
         collaborator = from_dict(
             data_class=Collaborator, data=r.json(), config=DACITE_CONFIG
         )
+
         return collaborator
 
     def delete_dataset_collaborator(
@@ -296,8 +275,8 @@ class SegmentsClient:
         """Delete a dataset collaborator.
 
         Args:
-            dataset_identifier (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
-            username (str): The username of the collaborator to be deleted.
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
+            username: The username of the collaborator to be deleted.
         """
         r = self.delete(
             "/datasets/{}/collaborators/{}".format(dataset_identifier, username),
@@ -320,17 +299,17 @@ class SegmentsClient:
         """Get the samples in a dataset.
 
         Args:
-            dataset_identifier (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
-            name (str, optional): Name to filter by. Defaults to None (no filtering).
-            label_status (list, optional): List of label statuses to filter by. Defaults to None (no filtering).
-            metadata (list, optional): List of 'key:value' metadata attributes to filter by. Defaults to None (no filtering).
-            sort (str, optional): What to sort results by. One of 'name', 'created', 'priority'. Defaults to 'name'.
-            direction (str, optional): Sorting direction. One of 'asc' (ascending) or 'desc' (descending). Defaults to 'asc'.
-            per_page (int, optional): Pagination parameter indicating the maximum number of samples to return. Defaults to 1000.
-            page (int, optional): Pagination parameter indicating the page to return. Defaults to 1.
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
+            name: Name to filter by. Defaults to None (no filtering).
+            label_status: List of label statuses to filter by. Defaults to None (no filtering).
+            metadata: List of 'key:value' metadata attributes to filter by. Defaults to None (no filtering).
+            sort: What to sort results by. One of 'name', 'created', 'priority'. Defaults to 'name'.
+            direction: Sorting direction. One of 'asc' (ascending) or 'desc' (descending). Defaults to 'asc'.
+            per_page: Pagination parameter indicating the maximum number of samples to return. Defaults to 1000.
+            page: Pagination parameter indicating the page to return. Defaults to 1.
 
         Returns:
-            list: a list of dictionaries representing the samples.
+            A list of dataclasses representing the samples.
         """
 
         # pagination
@@ -371,27 +350,22 @@ class SegmentsClient:
         for result in results:
             result.pop("label", None)
 
-        # with open(
-        #     "/Users/arnouthillen/segments-ai/segments2/tests/get_samples.json",
-        #     "w",
-        # ) as f:
-        #     print(json.dump(r.json(), f))
-
         results = [
             from_dict(data_class=Sample, data=result, config=DACITE_CONFIG)
             for result in results
         ]
+
         return results
 
     def get_sample(self, uuid: str, labelset: Optional[str] = None) -> Sample:
         """Get a sample.
 
         Args:
-            uuid (str): The sample uuid.
-            labelset (str, optional): If defined, this additionally returns the label for the given labelset. Defaults to None.
+            uuid: The sample uuid.
+            labelset: If defined, this additionally returns the label for the given labelset. Defaults to None.
 
         Returns:
-            dict: a dictionary representing the sample
+            A dataclass representing the sample
         """
 
         query_string = "/samples/{}/".format(uuid)
@@ -400,14 +374,8 @@ class SegmentsClient:
             query_string += "?labelset={}".format(labelset)
 
         r = self.get(query_string)
-
-        # with open(
-        #     f"/Users/arnouthillen/segments-ai/segments2/tests/get_sample_{index}.json",
-        #     "w",
-        # ) as f:
-        #     print(json.dump(r.json(), f))
-
         sample = from_dict(data_class=Sample, data=r.json(), config=DACITE_CONFIG)
+
         return sample
 
     def add_sample(
@@ -422,15 +390,15 @@ class SegmentsClient:
         """Add a sample to a dataset.
 
         Args:
-            dataset_identifier (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
-            name (str): The name of the sample.
-            attributes (dict): The sample attributes. Please refer to the online documentation.
-            metadata (dict, optional): Any sample metadata. Example: {'weather': 'sunny', 'camera_id': 3}.
-            priority (float, optional): Priority in the labeling queue. Samples with higher values will be labeled first. Defaults to 0.
-            embedding (array, optional): Embedding of this sample represented by an array of floats.
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
+            name: The name of the sample.
+            attributes: The sample attributes. Please refer to the online documentation.
+            metadata: Any sample metadata. Example: {'weather': 'sunny', 'camera_id': 3}.
+            priority: Priority in the labeling queue. Samples with higher values will be labeled first. Defaults to 0.
+            embedding: Embedding of this sample represented by an array of floats.
 
         Returns:
-            dict: a dictionary representing the newly created sample.
+            A dataclass representing the newly created sample.
         """
 
         try:
@@ -460,29 +428,30 @@ class SegmentsClient:
             r = self.post("/datasets/{}/samples/".format(dataset_identifier), payload)
             print("Added " + name)
             sample = from_dict(data_class=Sample, data=r.json(), config=DACITE_CONFIG)
+
             return sample
 
     def update_sample(
         self,
         uuid: str,
-        attributes: Optional[Dict[str, Any]] = None,
         name: Optional[str] = None,
+        attributes: Optional[Dict[str, Any]] = None,
         metadata: Optional[Dict[str, Any]] = None,
         priority: float = 0,
-        embedding: Optional[List[float]] = None,
+        embedding: Optional[Union[npt.NDArray[Any], List[float]]] = None,
     ) -> Sample:
         """Update a sample.
 
         Args:
-            uuid (str): The sample uuid.
-            name (str, optional): The name of the sample.
-            attributes (dict, optional): The sample attributes. Please refer to the online documentation.
-            metadata (dict, optional): Any sample metadata. Example: {'weather': 'sunny', 'camera_id': 3}.
-            priority (float, optional): Priority in the labeling queue. Samples with higher values will be labeled first. Default is 0.
-            embedding (array, optional): Embedding of this sample represented by an array of floats.
+            uuid: The sample uuid.
+            name: The name of the sample.
+            attributes: The sample attributes. Please refer to the online documentation.
+            metadata: Any sample metadata. Example: {'weather': 'sunny', 'camera_id': 3}.
+            priority: Priority in the labeling queue. Samples with higher values will be labeled first. Default is 0.
+            embedding: Embedding of this sample represented by an array of floats.
 
         Returns:
-            dict: a dictionary representing the updated sample.
+            A dataclass representing the updated sample.
         """
 
         payload: Dict[str, Any] = {}
@@ -505,13 +474,14 @@ class SegmentsClient:
         r = self.patch("/samples/{}/".format(uuid), payload)
         print("Updated " + uuid)
         sample = from_dict(data_class=Sample, data=r.json(), config=DACITE_CONFIG)
+
         return sample
 
     def delete_sample(self, uuid: str) -> None:
         """Delete a sample.
 
         Args:
-            uuid (str): The sample uuid.
+            uuid: The sample uuid.
         """
 
         r = self.delete("/samples/{}/".format(uuid))
@@ -523,22 +493,16 @@ class SegmentsClient:
         """Get a label.
 
         Args:
-            sample_uuid (str): The sample uuid.
-            labelset (str, optional): The labelset this label belongs to. Defaults to 'ground-truth'.
+            sample_uuid: The sample uuid.
+            labelset: The labelset this label belongs to. Defaults to 'ground-truth'.
 
         Returns:
-            dict: a dictionary representing the label.
+            A dataclass representing the label.
         """
 
         r = self.get("/labels/{}/{}/".format(sample_uuid, labelset))
-
-        # with open(
-        #     f"/Users/arnouthillen/segments-ai/segments2/tests/get_label_{index}.json",
-        #     "w",
-        # ) as f:
-        #     print(json.dump(r.json(), f))
-
         label = from_dict(data_class=Label, data=r.json(), config=DACITE_CONFIG)
+
         return label
 
     def add_label(
@@ -552,14 +516,14 @@ class SegmentsClient:
         """Add a label to a sample.
 
         Args:
-            sample_uuid (str): The sample uuid.
-            labelset (str): The labelset this label belongs to.
-            attributes (dict): The label attributes. Please refer to the online documentation.
-            label_status (str, optional): The label status. Defaults to 'PRELABELED'.
-            score (float, optional): The label score. Defaults to None.
+            sample_uuid: The sample uuid.
+            labelset: The labelset this label belongs to.
+            attributes: The label attributes. Please refer to the online documentation.
+            label_status: The label status. Defaults to 'PRELABELED'.
+            score: The label score. Defaults to None.
 
         Returns:
-            dict: a dictionary representing the newly created label.
+            A dataclass representing the newly created label.
         """
 
         try:
@@ -580,6 +544,7 @@ class SegmentsClient:
 
             r = self.put("/labels/{}/{}/".format(sample_uuid, labelset), payload)
             label = from_dict(data_class=Label, data=r.json(), config=DACITE_CONFIG)
+
             return label
 
     def update_label(
@@ -593,14 +558,14 @@ class SegmentsClient:
         """Update a label.
 
         Args:
-            sample_uuid (str): The sample uuid.
-            labelset (str): The labelset this label belongs to.
-            attributes (dict): The label attributes. Please refer to the online documentation.
-            label_status (str, optional): The label status. Defaults to 'PRELABELED'.
-            score (float, optional): The label score. Defaults to None.
+            sample_uuid: The sample uuid.
+            labelset: The labelset this label belongs to.
+            attributes: The label attributes. Please refer to the online documentation.
+            label_status: The label status. Defaults to 'PRELABELED'.
+            score: The label score. Defaults to None.
 
         Returns:
-            dict: a dictionary representing the updated label.
+            A dataclass representing the updated label.
         """
 
         payload: Dict[str, Any] = {}
@@ -616,14 +581,15 @@ class SegmentsClient:
 
         r = self.patch("/labels/{}/{}/".format(sample_uuid, labelset), payload)
         label = from_dict(data_class=Label, data=r.json(), config=DACITE_CONFIG)
+
         return label
 
     def delete_label(self, sample_uuid: str, labelset: str) -> None:
         """Delete a label.
 
         Args:
-            sample_uuid (str): The sample uuid.
-            labelset (str): The labelset this label belongs to.
+            sample_uuid: The sample uuid.
+            labelset: The labelset this label belongs to.
         """
 
         r = self.delete("/labels/{}/{}/".format(sample_uuid, labelset))
@@ -631,64 +597,52 @@ class SegmentsClient:
     #############
     # Labelsets #
     #############
-    def get_labelsets(self, dataset_identifier: str) -> List[LabelSet]:
+    def get_labelsets(self, dataset_identifier: str) -> List[Labelset]:
         """Get the labelsets in a dataset.
 
         Args:
-            dataset_identifier (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
 
         Returns:
-            list: a list of dictionaries representing the labelsets.
+            A list of dataclasses representing the labelsets.
         """
 
         r = self.get("/datasets/{}/labelsets/".format(dataset_identifier))
-
-        # with open(
-        #     f"/Users/arnouthillen/segments-ai/segments2/tests/get_labelsets.json",
-        #     "w",
-        # ) as f:
-        #     print(json.dump(r.json(), f))
-
         labelsets = [
-            from_dict(data_class=LabelSet, data=labelset, config=DACITE_CONFIG)
+            from_dict(data_class=Labelset, data=labelset, config=DACITE_CONFIG)
             for labelset in r.json()
         ]
+
         return labelsets
 
-    def get_labelset(self, dataset_identifier: str, name: str) -> LabelSet:
+    def get_labelset(self, dataset_identifier: str, name: str) -> Labelset:
         """Get a labelset.
 
         Args:
-            dataset_identifier (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
-            name (str): The name of the labelset.
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
+            name: The name of the labelset.
 
         Returns:
-            dict: a dictionary representing the labelset.
+            A dataclass representing the labelset.
         """
 
         r = self.get("/datasets/{}/labelsets/{}/".format(dataset_identifier, name))
+        labelset = from_dict(data_class=Labelset, data=r.json(), config=DACITE_CONFIG)
 
-        # with open(
-        #     f"/Users/arnouthillen/segments-ai/segments2/tests/get_labelset_{i}.json",
-        #     "w",
-        # ) as f:
-        #     print(json.dump(r.json(), f))
-
-        labelset = from_dict(data_class=LabelSet, data=r.json(), config=DACITE_CONFIG)
         return labelset
 
     def add_labelset(
         self, dataset_identifier: str, name: str, description: str = ""
-    ) -> LabelSet:
+    ) -> Labelset:
         """Add a labelset to a dataset.
 
         Args:
-            dataset_identifier (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
-            name (str): The name of the labelset.
-            description (str, optional): The labelset description.
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
+            name: The name of the labelset.
+            description: The labelset description.
 
         Returns:
-            dict: a dictionary representing the labelset.
+            A dataclass representing the labelset.
         """
 
         payload = {
@@ -697,22 +651,16 @@ class SegmentsClient:
             "attributes": "{}",
         }
         r = self.post("/datasets/{}/labelsets/".format(dataset_identifier), payload)
+        labelset = from_dict(data_class=Labelset, data=r.json(), config=DACITE_CONFIG)
 
-        # with open(
-        #     f"/Users/arnouthillen/segments-ai/segments2/tests/add_delete_labelset.json",
-        #     "w",
-        # ) as f:
-        #     print(json.dump(r.json(), f))
-
-        labelset = from_dict(data_class=LabelSet, data=r.json(), config=DACITE_CONFIG)
         return labelset
 
     def delete_labelset(self, dataset_identifier: str, name: str) -> None:
         """Delete a labelset.
 
         Args:
-            dataset_identifier (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
-            name (str): The name of the labelset.
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
+            name: The name of the labelset.
         """
 
         r = self.delete("/datasets/{}/labelsets/{}/".format(dataset_identifier, name))
@@ -724,46 +672,34 @@ class SegmentsClient:
         """Get the releases in a dataset.
 
         Args:
-            dataset_identifier (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
 
         Returns:
-            list: a list of dictionaries representing the releases.
+            A list of dataclasses representing the releases.
         """
 
         r = self.get("/datasets/{}/releases/".format(dataset_identifier))
-
-        # with open(
-        #     "/Users/arnouthillen/segments-ai/segments2/tests/get_releases.json",
-        #     "w",
-        # ) as f:
-        #     print(json.dump(r.json(), f))
-
         releases = [
             from_dict(data_class=Release, data=release, config=DACITE_CONFIG)
             for release in r.json()
         ]
+
         return releases
 
     def get_release(self, dataset_identifier: str, name: str) -> Release:
         """Get a release.
 
         Args:
-            dataset_identifier (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
-            name (str): The name of the release.
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
+            name: The name of the release.
 
         Returns:
-            dict: a dictionary representing the release.
+            A dataclass representing the release.
         """
 
         r = self.get("/datasets/{}/releases/{}/".format(dataset_identifier, name))
-
-        # with open(
-        #     f"/Users/arnouthillen/segments-ai/segments2/tests/get_release_{index}.json",
-        #     "w",
-        # ) as f:
-        #     print(json.dump(r.json(), f))
-
         release = from_dict(data_class=Release, data=r.json(), config=DACITE_CONFIG)
+
         return release
 
     def add_release(
@@ -772,32 +708,26 @@ class SegmentsClient:
         """Add a release to a dataset.
 
         Args:
-            dataset_identifier (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
-            name (str): The name of the release.
-            description (str, optional): The release description.
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
+            name: The name of the release.
+            description: The release description.
 
         Returns:
-            dict: a dictionary representing the newly created release.
+            A dataclass representing the newly created release.
         """
 
         payload = {"name": name, "description": description}
         r = self.post("/datasets/{}/releases/".format(dataset_identifier), payload)
-
-        # with open(
-        #     f"/Users/arnouthillen/segments-ai/segments2/tests/add_delete_release.json",
-        #     "w",
-        # ) as f:
-        #     print(json.dump(r.json(), f))
-
         release = from_dict(data_class=Release, data=r.json(), config=DACITE_CONFIG)
+
         return release
 
     def delete_release(self, dataset_identifier: str, name: str) -> None:
         """Delete a release.
 
         Args:
-            dataset_identifier (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
-            name (str): The name of the release.
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
+            name: The name of the release.
         """
 
         r = self.delete("/datasets/{}/releases/{}/".format(dataset_identifier, name))
@@ -809,23 +739,17 @@ class SegmentsClient:
         """Upload an asset.
 
         Args:
-            file (object): A file object.
-            filename (str, optional): The file name. Defaults to label.png.
+            file: A file object.
+            filename: The file name. Defaults to label.png.
 
         Returns:
-            dict: a dictionary representing the uploaded file.
+            A dataclass representing the uploaded file.
         """
 
         r = self.post("/assets/", {"filename": filename})
         response_aws = self._upload_to_aws(file, r.json()["presignedPostFields"])
-
-        # with open(
-        #     f"/Users/arnouthillen/segments-ai/segments2/tests/upload_asset.json",
-        #     "w",
-        # ) as f:
-        #     print(json.dump(r.json(), f))
-
         file = from_dict(data_class=File, data=r.json(), config=DACITE_CONFIG)
+
         return file
 
     # Error handling: https://stackoverflow.com/questions/16511337/correct-way-to-try-except-using-python-requests-module
@@ -922,10 +846,5 @@ class SegmentsClient:
         r = self.s3_session.post(
             aws_fields["url"], files=files, data=aws_fields["fields"]
         )
-        return r
 
-    # https://stackoverflow.com/questions/48160728/resourcewarning-unclosed-socket-in-python-3-unit-test
-    def close(self) -> None:
-        self.api_session.close()
-        self.s3_session.close()
-        print("Closed successfully.")
+        return r
