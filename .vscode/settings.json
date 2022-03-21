@@ -1,7 +1,8 @@
 {
-  "python.linting.mypyEnabled": true,
   "python.formatting.provider": "black",
-  "esbonio.sphinx.confDir": "/Users/arnouthillen/python-sdk-improvements/docs/source",
+  "editor.formatOnSave": true,
+  "python.linting.mypyEnabled": true,
   "python.linting.enabled": true,
+  "esbonio.sphinx.confDir": "/Users/arnouthillen/python-sdk-improvements/docs/source",
   "python.analysis.extraPaths": ["/Users/arnouthillen/python-sdk-improvements/src/segments"],
 }

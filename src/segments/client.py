@@ -384,9 +384,7 @@ class SegmentsClient:
         attributes: Dict[str, Any],
         metadata: Optional[Dict[str, Any]] = None,
         priority: float = 0,
-        embedding: Optional[
-            List[float]
-        ] = None,  # Optional[Union[npt.NDArray[Any], List[float]]] = None,
+        embedding: Optional[Union[npt.NDArray[Any], List[float]]] = None,
     ) -> Sample:
         """Add a sample to a dataset.
 
