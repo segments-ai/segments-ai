@@ -1,9 +1,7 @@
 {
-    "python.linting.mypyEnabled": true,
-    "python.formatting.provider": "black",
-    // "python.linting.flake8Enabled": false,
-    // "python.linting.enabled": true,
-    // "esbonio.server.enabled": true,
-    // "restructuredtext.confPath": "${workspaceFolder}/segments2/docs",
-    // "esbonio.sphinx.confDir": "/Users/arnouthillen/segments-ai/segments2/docs",
+  "python.linting.mypyEnabled": true,
+  "python.formatting.provider": "black",
+  "esbonio.sphinx.confDir": "/Users/arnouthillen/python-sdk-improvements/docs/source",
+  "python.linting.enabled": true,
+  "python.analysis.extraPaths": ["/Users/arnouthillen/python-sdk-improvements/src/segments"],
 }

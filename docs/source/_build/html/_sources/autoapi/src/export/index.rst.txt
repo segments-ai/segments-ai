@@ -1,0 +1,137 @@
+:py:mod:`src.export`
+====================
+
+.. py:module:: src.export
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   src.export.Category
+   src.export.IdGenerator
+
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   src.export.rgb2id
+   src.export.id2rgb
+   src.export.get_color
+   src.export.colorize
+   src.export.get_bbox
+   src.export.export_coco_instance
+   src.export.export_coco_panoptic
+   src.export.export_image
+   src.export.export_yolo
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   src.export.RGB
+   src.export.RGBA
+   src.export.ColorMap
+   src.export.COLORMAP
+
+
+.. py:data:: RGB
+   
+
+   
+
+.. py:data:: RGBA
+   
+
+   
+
+.. py:data:: ColorMap
+   
+
+   
+
+.. py:class:: Category
+
+   .. py:attribute:: id
+      :annotation: :int
+
+      
+
+   .. py:attribute:: name
+      :annotation: :str
+
+      
+
+   .. py:attribute:: color
+      :annotation: :RGB
+
+      
+
+   .. py:attribute:: isthing
+      :annotation: :bool
+
+      
+
+
+.. py:data:: COLORMAP
+   :annotation: :ColorMap = [[0, 113, 188, 255], [216, 82, 24, 255], [236, 176, 31, 255], [125, 46, 141, 255], [118, 171,...
+
+   
+
+.. py:class:: IdGenerator(categories)
+
+   The class is designed to generate unique IDs that have meaningful RGB encoding.
+   Given semantic category unique ID will be generated and its RGB encoding will
+   have color close to the predefined semantic category color.
+   The RGB encoding used is ID = R * 256 * G + 256 * 256 + B.
+   Class constructor takes dictionary {id: category_info}, where all semantic
+   class ids are presented and category_info record is a dict with fields
+   'isthing' and 'color'
+
+   .. py:method:: get_color(self, cat_id)
+
+
+   .. py:method:: get_id(self, cat_id)
+
+
+   .. py:method:: get_id_and_color(self, cat_id)
+
+
+
+.. py:function:: rgb2id(color)
+
+
+.. py:function:: id2rgb(id_map)
+
+
+.. py:function:: get_color(id)
+
+
+.. py:function:: colorize(img, colormap = None)
+
+
+.. py:function:: get_bbox(binary_mask)
+
+
+.. py:function:: export_coco_instance(dataset, export_folder)
+
+
+.. py:function:: export_coco_panoptic(dataset, export_folder)
+
+
+.. py:function:: export_image(dataset, export_folder, export_format, id_increment)
+
+
+.. py:function:: export_yolo(dataset, export_folder)
+
+

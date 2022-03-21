@@ -2,6 +2,7 @@ from distutils.core import setup
 
 setup(
     name="segments-ai",  # How you named your package folder (MyLib)
+    package_dir={"": "src/segments"},
     packages=["segments"],  # Chose the same as "name"
     version="0.58",  # Start with a small number and increase it with every change you make
     license="MIT",  # Chose a license from here: https://help.github.com/articles/licensing-a-repository
@@ -24,22 +25,24 @@ setup(
         "tqdm",
         'pycocotools;platform_system!="Windows"',
         'pycocotools-windows;platform_system=="Windows"',
-        # type hints
+        # Type hints
         "typing_extensions",
         "dacite",
         "dataclasses",
         "typing",
         "enum",
-        "nptyping",
-        # tests
+        "StrEnum",
+        "mypy",
+        # Tests
         "dotenv",
-        # documentation
+        # Documentation
         "sphinx",
         "myst-parser",
         "furo",
         "sphinx-book-theme",
         "nbsphinx",
         "pandoc",
+        "sphinx-autoapi",
     ],
     classifiers=[
         "Development Status :: 3 - Alpha",  # Chose either "3 - Alpha", "4 - Beta" or "5 - Production/Stable" as the current state of your package

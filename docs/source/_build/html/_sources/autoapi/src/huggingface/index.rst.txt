@@ -1,0 +1,22 @@
+:py:mod:`src.huggingface`
+=========================
+
+.. py:module:: src.huggingface
+
+
+Module Contents
+---------------
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   src.huggingface.release2dataset
+
+
+
+.. py:function:: release2dataset(release, download_images = True)
+
+

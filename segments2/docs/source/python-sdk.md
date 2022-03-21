@@ -1,5 +1,0 @@
-# Python SDK for
-
-```{autosummary}
-
-```

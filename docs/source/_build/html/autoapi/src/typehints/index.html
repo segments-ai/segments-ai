@@ -1,0 +1,2134 @@
+<!doctype html>
+<html class="no-js">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
+
+    <meta name="generator" content="sphinx-4.4.0, furo 2022.03.04"/>
+        <title>src.typehints - Segments.ai 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=935aa2abcc5c1da4283d1dc201fb1f0add16d23a" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=25ceb02ed1c46dc30f2321ff83e92799f69dfdb9" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../index.html"><div class="brand">Segments.ai 0.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
+  
+  
+  <span class="sidebar-brand-text">Segments.ai 0.1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
+  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../../index.html">API Reference</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 current has-children"><a class="reference internal" href="../index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">src</span></code></a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../client/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">src.client</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../dataset/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">src.dataset</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../export/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">src.export</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../huggingface/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">src.huggingface</span></code></a></li>
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">src.typehints</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utils/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">src.utils</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container"><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <div class="section" id="module-src.typehints">
+<span id="src-typehints"></span><h1><a class="reference internal" href="#module-src.typehints" title="src.typehints"><code class="xref py py-mod docutils literal notranslate"><span class="pre">src.typehints</span></code></a><a class="headerlink" href="#module-src.typehints" title="Permalink to this headline">#</a></h1>
+<div class="section" id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">#</a></h2>
+<div class="section" id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">#</a></h3>
+<div class="table-wrapper"><table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%"/>
+<col style="width: 90%"/>
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.LabelStatus" title="src.typehints.LabelStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LabelStatus</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints.TaskType" title="src.typehints.TaskType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TaskType</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.DataType" title="src.typehints.DataType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataType</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints.Role" title="src.typehints.Role"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Role</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.Status" title="src.typehints.Status"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Status</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints.ReleaseType" title="src.typehints.ReleaseType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ReleaseType</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.ImageVectorAnnotationType" title="src.typehints.ImageVectorAnnotationType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ImageVectorAnnotationType</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints.PointcloudAnnotationType" title="src.typehints.PointcloudAnnotationType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointcloudAnnotationType</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.PCDType" title="src.typehints.PCDType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PCDType</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints.InputType" title="src.typehints.InputType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InputType</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.Category" title="src.typehints.Category"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Category</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints.AuthHeader" title="src.typehints.AuthHeader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AuthHeader</span></code></a></p></td>
+<td><p>dict() -&gt; new empty dictionary</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.URL" title="src.typehints.URL"><code class="xref py py-obj docutils literal notranslate"><span class="pre">URL</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints.Release" title="src.typehints.Release"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Release</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.PresignedPostFields" title="src.typehints.PresignedPostFields"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PresignedPostFields</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints.File" title="src.typehints.File"><code class="xref py py-obj docutils literal notranslate"><span class="pre">File</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.ObjectAttribute" title="src.typehints.ObjectAttribute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ObjectAttribute</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints.Annotation" title="src.typehints.Annotation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Annotation</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.ImageSegmentationLabelAttributes" title="src.typehints.ImageSegmentationLabelAttributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ImageSegmentationLabelAttributes</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints._ImageVectorAnnotationBase" title="src.typehints._ImageVectorAnnotationBase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_ImageVectorAnnotationBase</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.ImageVectorAnnotation" title="src.typehints.ImageVectorAnnotation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ImageVectorAnnotation</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints.ImageVectorLabelAttributes" title="src.typehints.ImageVectorLabelAttributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ImageVectorLabelAttributes</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.ImageSequenceVectorAnnotation" title="src.typehints.ImageSequenceVectorAnnotation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ImageSequenceVectorAnnotation</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints.ImageVectorFrame" title="src.typehints.ImageVectorFrame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ImageVectorFrame</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.ImageSequenceVectorLabelAttributes" title="src.typehints.ImageSequenceVectorLabelAttributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ImageSequenceVectorLabelAttributes</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints.PointcloudSegmentationLabelAttributes" title="src.typehints.PointcloudSegmentationLabelAttributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointcloudSegmentationLabelAttributes</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.XYZ" title="src.typehints.XYZ"><code class="xref py py-obj docutils literal notranslate"><span class="pre">XYZ</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints._PointcloudCuboidAnnotationBase" title="src.typehints._PointcloudCuboidAnnotationBase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_PointcloudCuboidAnnotationBase</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.PointcloudCuboidAnnotation" title="src.typehints.PointcloudCuboidAnnotation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointcloudCuboidAnnotation</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints.PointcloudCuboidLabelAttributes" title="src.typehints.PointcloudCuboidLabelAttributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointcloudCuboidLabelAttributes</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.PointcloudSequenceSegmentationAnnotation" title="src.typehints.PointcloudSequenceSegmentationAnnotation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointcloudSequenceSegmentationAnnotation</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints.PointcloudSegmentationFrame" title="src.typehints.PointcloudSegmentationFrame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointcloudSegmentationFrame</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.PointcloudSequenceSegmentationLabelAttributes" title="src.typehints.PointcloudSequenceSegmentationLabelAttributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointcloudSequenceSegmentationLabelAttributes</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints.PointcloudSequenceCuboidAnnotation" title="src.typehints.PointcloudSequenceCuboidAnnotation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointcloudSequenceCuboidAnnotation</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.PointcloudSequenceCuboidFrame" title="src.typehints.PointcloudSequenceCuboidFrame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointcloudSequenceCuboidFrame</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints.PointcloudSequenceCuboidLabelAttributes" title="src.typehints.PointcloudSequenceCuboidLabelAttributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointcloudSequenceCuboidLabelAttributes</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.TextAnnotation" title="src.typehints.TextAnnotation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TextAnnotation</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints.TextLabelAttributes" title="src.typehints.TextLabelAttributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TextLabelAttributes</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.Label" title="src.typehints.Label"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Label</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints.ImageSampleAttributes" title="src.typehints.ImageSampleAttributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ImageSampleAttributes</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.ImageFrame" title="src.typehints.ImageFrame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ImageFrame</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints.ImageSequenceSampleAttributes" title="src.typehints.ImageSequenceSampleAttributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ImageSequenceSampleAttributes</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.PCD" title="src.typehints.PCD"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PCD</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints.XYZW" title="src.typehints.XYZW"><code class="xref py py-obj docutils literal notranslate"><span class="pre">XYZW</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.EgoPose" title="src.typehints.EgoPose"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EgoPose</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints.PointcloudSampleAttributes" title="src.typehints.PointcloudSampleAttributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointcloudSampleAttributes</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.PointcloudSequenceSampleAttributes" title="src.typehints.PointcloudSequenceSampleAttributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PointcloudSequenceSampleAttributes</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints.TextSampleAttributes" title="src.typehints.TextSampleAttributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TextSampleAttributes</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.Sample" title="src.typehints.Sample"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Sample</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints.User" title="src.typehints.User"><code class="xref py py-obj docutils literal notranslate"><span class="pre">User</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.Collaborator" title="src.typehints.Collaborator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Collaborator</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints.TaskAttributeCategory" title="src.typehints.TaskAttributeCategory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TaskAttributeCategory</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.TaskAttributes" title="src.typehints.TaskAttributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TaskAttributes</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints.Owner" title="src.typehints.Owner"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Owner</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.Statistics" title="src.typehints.Statistics"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Statistics</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints.Labelset" title="src.typehints.Labelset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Labelset</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.LabelStats" title="src.typehints.LabelStats"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LabelStats</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints.Dataset" title="src.typehints.Dataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Dataset</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="section" id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Permalink to this headline">#</a></h3>
+<div class="table-wrapper"><table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%"/>
+<col style="width: 90%"/>
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.DACITE_CONFIG" title="src.typehints.DACITE_CONFIG"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DACITE_CONFIG</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints.RGB" title="src.typehints.RGB"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RGB</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.RGBA" title="src.typehints.RGBA"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RGBA</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints.FormatVersion" title="src.typehints.FormatVersion"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FormatVersion</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.AWSFields" title="src.typehints.AWSFields"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AWSFields</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints.ObjectAttributes" title="src.typehints.ObjectAttributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ObjectAttributes</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.ImageAttributes" title="src.typehints.ImageAttributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ImageAttributes</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.typehints.LabelAttributes" title="src.typehints.LabelAttributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LabelAttributes</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.typehints.SampleAttributes" title="src.typehints.SampleAttributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SampleAttributes</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table></div>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.LabelStatus">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">LabelStatus</span></span><a class="headerlink" href="#src.typehints.LabelStatus" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">enum.StrEnum</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.LabelStatus.reviewed">
+<span class="sig-name descname"><span class="pre">reviewed</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">REVIEWED</span></em><a class="headerlink" href="#src.typehints.LabelStatus.reviewed" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.LabelStatus.reviewing_in_progress">
+<span class="sig-name descname"><span class="pre">reviewing_in_progress</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">REVIEWING_IN_PROGRESS</span></em><a class="headerlink" href="#src.typehints.LabelStatus.reviewing_in_progress" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.LabelStatus.labeled">
+<span class="sig-name descname"><span class="pre">labeled</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">LABELED</span></em><a class="headerlink" href="#src.typehints.LabelStatus.labeled" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.LabelStatus.labeling_in_progress">
+<span class="sig-name descname"><span class="pre">labeling_in_progress</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">LABELING_IN_PROGRESS</span></em><a class="headerlink" href="#src.typehints.LabelStatus.labeling_in_progress" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.LabelStatus.rejected">
+<span class="sig-name descname"><span class="pre">rejected</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">REJECTED</span></em><a class="headerlink" href="#src.typehints.LabelStatus.rejected" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.LabelStatus.prelabeled">
+<span class="sig-name descname"><span class="pre">prelabeled</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">PRELABELED</span></em><a class="headerlink" href="#src.typehints.LabelStatus.prelabeled" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.LabelStatus.skipped">
+<span class="sig-name descname"><span class="pre">skipped</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">SKIPPED</span></em><a class="headerlink" href="#src.typehints.LabelStatus.skipped" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.TaskType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">TaskType</span></span><a class="headerlink" href="#src.typehints.TaskType" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">enum.StrEnum</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.TaskType.segmentation_bitmap">
+<span class="sig-name descname"><span class="pre">segmentation_bitmap</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">segmentation-bitmap</span></em><a class="headerlink" href="#src.typehints.TaskType.segmentation_bitmap" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.TaskType.segmentation_bitmap_highres">
+<span class="sig-name descname"><span class="pre">segmentation_bitmap_highres</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">segmentation-bitmap-highres</span></em><a class="headerlink" href="#src.typehints.TaskType.segmentation_bitmap_highres" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.TaskType.bboxes">
+<span class="sig-name descname"><span class="pre">bboxes</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">bboxes</span></em><a class="headerlink" href="#src.typehints.TaskType.bboxes" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.TaskType.vector">
+<span class="sig-name descname"><span class="pre">vector</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">vector</span></em><a class="headerlink" href="#src.typehints.TaskType.vector" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.TaskType.pointcloud_cuboid">
+<span class="sig-name descname"><span class="pre">pointcloud_cuboid</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">pointcloud-cuboid</span></em><a class="headerlink" href="#src.typehints.TaskType.pointcloud_cuboid" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.TaskType.pointcloud_cuboid_sequence">
+<span class="sig-name descname"><span class="pre">pointcloud_cuboid_sequence</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">pointcloud-cuboid-sequence</span></em><a class="headerlink" href="#src.typehints.TaskType.pointcloud_cuboid_sequence" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.TaskType.pointcloud_segmentation">
+<span class="sig-name descname"><span class="pre">pointcloud_segmentation</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">pointcloud-segmentation</span></em><a class="headerlink" href="#src.typehints.TaskType.pointcloud_segmentation" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.TaskType.pointcloud_segmentation_sequence">
+<span class="sig-name descname"><span class="pre">pointcloud_segmentation_sequence</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">pointcloud-segmentation-sequence</span></em><a class="headerlink" href="#src.typehints.TaskType.pointcloud_segmentation_sequence" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.TaskType.text_named_entities">
+<span class="sig-name descname"><span class="pre">text_named_entities</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">text-named-entities</span></em><a class="headerlink" href="#src.typehints.TaskType.text_named_entities" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.TaskType.text_span_categorization">
+<span class="sig-name descname"><span class="pre">text_span_categorization</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">text-span-categorization</span></em><a class="headerlink" href="#src.typehints.TaskType.text_span_categorization" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.TaskType.image_vector_sequence">
+<span class="sig-name descname"><span class="pre">image_vector_sequence</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">image-vector-sequence</span></em><a class="headerlink" href="#src.typehints.TaskType.image_vector_sequence" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.TaskType.other">
+<span class="sig-name descname"><span class="pre">other</span></span><em class="property"><span class="w"> </span><span class="pre">=</span></em><a class="headerlink" href="#src.typehints.TaskType.other" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.DataType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">DataType</span></span><a class="headerlink" href="#src.typehints.DataType" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">enum.StrEnum</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.DataType.image">
+<span class="sig-name descname"><span class="pre">image</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">IMAGE</span></em><a class="headerlink" href="#src.typehints.DataType.image" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.Role">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">Role</span></span><a class="headerlink" href="#src.typehints.Role" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">enum.StrEnum</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Role.labeler">
+<span class="sig-name descname"><span class="pre">labeler</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">labeler</span></em><a class="headerlink" href="#src.typehints.Role.labeler" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Role.reviewer">
+<span class="sig-name descname"><span class="pre">reviewer</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">reviewer</span></em><a class="headerlink" href="#src.typehints.Role.reviewer" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Role.admin">
+<span class="sig-name descname"><span class="pre">admin</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">admin</span></em><a class="headerlink" href="#src.typehints.Role.admin" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.Status">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">Status</span></span><a class="headerlink" href="#src.typehints.Status" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">enum.StrEnum</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Status.pending">
+<span class="sig-name descname"><span class="pre">pending</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">PENDING</span></em><a class="headerlink" href="#src.typehints.Status.pending" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Status.succeeded">
+<span class="sig-name descname"><span class="pre">succeeded</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">SUCCEEDED</span></em><a class="headerlink" href="#src.typehints.Status.succeeded" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Status.failed">
+<span class="sig-name descname"><span class="pre">failed</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">FAILED</span></em><a class="headerlink" href="#src.typehints.Status.failed" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.ReleaseType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">ReleaseType</span></span><a class="headerlink" href="#src.typehints.ReleaseType" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">enum.StrEnum</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ReleaseType.json">
+<span class="sig-name descname"><span class="pre">json</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">JSON</span></em><a class="headerlink" href="#src.typehints.ReleaseType.json" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.ImageVectorAnnotationType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">ImageVectorAnnotationType</span></span><a class="headerlink" href="#src.typehints.ImageVectorAnnotationType" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">enum.StrEnum</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ImageVectorAnnotationType.bbox">
+<span class="sig-name descname"><span class="pre">bbox</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">bbox</span></em><a class="headerlink" href="#src.typehints.ImageVectorAnnotationType.bbox" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ImageVectorAnnotationType.polygon">
+<span class="sig-name descname"><span class="pre">polygon</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">polygon</span></em><a class="headerlink" href="#src.typehints.ImageVectorAnnotationType.polygon" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ImageVectorAnnotationType.polyline">
+<span class="sig-name descname"><span class="pre">polyline</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">polyline</span></em><a class="headerlink" href="#src.typehints.ImageVectorAnnotationType.polyline" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ImageVectorAnnotationType.point">
+<span class="sig-name descname"><span class="pre">point</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">point</span></em><a class="headerlink" href="#src.typehints.ImageVectorAnnotationType.point" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.PointcloudAnnotationType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">PointcloudAnnotationType</span></span><a class="headerlink" href="#src.typehints.PointcloudAnnotationType" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">enum.StrEnum</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PointcloudAnnotationType.cuboid">
+<span class="sig-name descname"><span class="pre">cuboid</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">cuboid</span></em><a class="headerlink" href="#src.typehints.PointcloudAnnotationType.cuboid" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.PCDType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">PCDType</span></span><a class="headerlink" href="#src.typehints.PCDType" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">enum.StrEnum</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PCDType.pcd">
+<span class="sig-name descname"><span class="pre">pcd</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">pcd</span></em><a class="headerlink" href="#src.typehints.PCDType.pcd" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PCDType.kitti">
+<span class="sig-name descname"><span class="pre">kitti</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">kitti</span></em><a class="headerlink" href="#src.typehints.PCDType.kitti" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PCDType.nuscenes">
+<span class="sig-name descname"><span class="pre">nuscenes</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">nuscenes</span></em><a class="headerlink" href="#src.typehints.PCDType.nuscenes" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.InputType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">InputType</span></span><a class="headerlink" href="#src.typehints.InputType" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">enum.StrEnum</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.InputType.select">
+<span class="sig-name descname"><span class="pre">select</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">select</span></em><a class="headerlink" href="#src.typehints.InputType.select" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.InputType.text">
+<span class="sig-name descname"><span class="pre">text</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">text</span></em><a class="headerlink" href="#src.typehints.InputType.text" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.InputType.number">
+<span class="sig-name descname"><span class="pre">number</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">number</span></em><a class="headerlink" href="#src.typehints.InputType.number" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.InputType.checkbox">
+<span class="sig-name descname"><span class="pre">checkbox</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">checkbox</span></em><a class="headerlink" href="#src.typehints.InputType.checkbox" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.Category">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">Category</span></span><a class="headerlink" href="#src.typehints.Category" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">enum.StrEnum</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Category.street_scenery">
+<span class="sig-name descname"><span class="pre">street_scenery</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">street_scenery</span></em><a class="headerlink" href="#src.typehints.Category.street_scenery" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Category.garden">
+<span class="sig-name descname"><span class="pre">garden</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">garden</span></em><a class="headerlink" href="#src.typehints.Category.garden" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Category.agriculture">
+<span class="sig-name descname"><span class="pre">agriculture</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">agriculture</span></em><a class="headerlink" href="#src.typehints.Category.agriculture" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Category.satellite">
+<span class="sig-name descname"><span class="pre">satellite</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">satellite</span></em><a class="headerlink" href="#src.typehints.Category.satellite" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Category.people">
+<span class="sig-name descname"><span class="pre">people</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">people</span></em><a class="headerlink" href="#src.typehints.Category.people" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Category.medical">
+<span class="sig-name descname"><span class="pre">medical</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">medical</span></em><a class="headerlink" href="#src.typehints.Category.medical" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Category.other">
+<span class="sig-name descname"><span class="pre">other</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">other</span></em><a class="headerlink" href="#src.typehints.Category.other" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py data">
+<dt class="sig sig-object py" id="src.typehints.DACITE_CONFIG">
+<span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">DACITE_CONFIG</span></span><a class="headerlink" href="#src.typehints.DACITE_CONFIG" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py data">
+<dt class="sig sig-object py" id="src.typehints.RGB">
+<span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">RGB</span></span><a class="headerlink" href="#src.typehints.RGB" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py data">
+<dt class="sig sig-object py" id="src.typehints.RGBA">
+<span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">RGBA</span></span><a class="headerlink" href="#src.typehints.RGBA" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py data">
+<dt class="sig sig-object py" id="src.typehints.FormatVersion">
+<span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">FormatVersion</span></span><a class="headerlink" href="#src.typehints.FormatVersion" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.AuthHeader">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">AuthHeader</span></span><a class="headerlink" href="#src.typehints.AuthHeader" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">typing_extensions.TypedDict</span></code></p>
+<p>dict() -&gt; new empty dictionary
+dict(mapping) -&gt; new dictionary initialized from a mapping object’s</p>
+<blockquote>
+<div><p>(key, value) pairs</p>
+</div></blockquote>
+<dl>
+<dt>dict(iterable) -&gt; new dictionary initialized as if via:</dt><dd><p>d = {}
+for k, v in iterable:</p>
+<blockquote>
+<div><p>d[k] = v</p>
+</div></blockquote>
+</dd>
+<dt>dict(<a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs) -&gt; new dictionary initialized with the name=value pairs</dt><dd><p>in the keyword argument list.  For example:  dict(one=1, two=2)</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.AuthHeader.Authorization">
+<span class="sig-name descname"><span class="pre">Authorization</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.AuthHeader.Authorization" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.URL">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">URL</span></span><a class="headerlink" href="#src.typehints.URL" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.URL.url">
+<span class="sig-name descname"><span class="pre">url</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[str]</span></em><a class="headerlink" href="#src.typehints.URL.url" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.Release">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">Release</span></span><a class="headerlink" href="#src.typehints.Release" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Release.uuid">
+<span class="sig-name descname"><span class="pre">uuid</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.Release.uuid" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Release.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.Release.name" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Release.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.Release.description" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Release.release_type">
+<span class="sig-name descname"><span class="pre">release_type</span></span><em class="property"><span class="w"> </span><span class="pre">:ReleaseType</span></em><a class="headerlink" href="#src.typehints.Release.release_type" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Release.attributes">
+<span class="sig-name descname"><span class="pre">attributes</span></span><em class="property"><span class="w"> </span><span class="pre">:URL</span></em><a class="headerlink" href="#src.typehints.Release.attributes" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Release.status">
+<span class="sig-name descname"><span class="pre">status</span></span><em class="property"><span class="w"> </span><span class="pre">:Status</span></em><a class="headerlink" href="#src.typehints.Release.status" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Release.status_info">
+<span class="sig-name descname"><span class="pre">status_info</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.Release.status_info" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Release.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.Release.created_at" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Release.samples_count">
+<span class="sig-name descname"><span class="pre">samples_count</span></span><em class="property"><span class="w"> </span><span class="pre">:int</span></em><a class="headerlink" href="#src.typehints.Release.samples_count" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py data">
+<dt class="sig sig-object py" id="src.typehints.AWSFields">
+<span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">AWSFields</span></span><a class="headerlink" href="#src.typehints.AWSFields" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.PresignedPostFields">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">PresignedPostFields</span></span><a class="headerlink" href="#src.typehints.PresignedPostFields" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PresignedPostFields.url">
+<span class="sig-name descname"><span class="pre">url</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.PresignedPostFields.url" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PresignedPostFields.fields">
+<span class="sig-name descname"><span class="pre">fields</span></span><em class="property"><span class="w"> </span><span class="pre">:AWSFields</span></em><a class="headerlink" href="#src.typehints.PresignedPostFields.fields" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.File">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">File</span></span><a class="headerlink" href="#src.typehints.File" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.File.uuid">
+<span class="sig-name descname"><span class="pre">uuid</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.File.uuid" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.File.filename">
+<span class="sig-name descname"><span class="pre">filename</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.File.filename" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.File.url">
+<span class="sig-name descname"><span class="pre">url</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.File.url" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.File.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.File.created_at" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.File.presignedPostFields">
+<span class="sig-name descname"><span class="pre">presignedPostFields</span></span><em class="property"><span class="w"> </span><span class="pre">:PresignedPostFields</span></em><a class="headerlink" href="#src.typehints.File.presignedPostFields" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.ObjectAttribute">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">ObjectAttribute</span></span><a class="headerlink" href="#src.typehints.ObjectAttribute" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ObjectAttribute.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.ObjectAttribute.name" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ObjectAttribute.input_type">
+<span class="sig-name descname"><span class="pre">input_type</span></span><em class="property"><span class="w"> </span><span class="pre">:InputType</span></em><a class="headerlink" href="#src.typehints.ObjectAttribute.input_type" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ObjectAttribute.default_value">
+<span class="sig-name descname"><span class="pre">default_value</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[Union[str,</span> <span class="pre">float,</span> <span class="pre">bool]]</span></em><a class="headerlink" href="#src.typehints.ObjectAttribute.default_value" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ObjectAttribute.values">
+<span class="sig-name descname"><span class="pre">values</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[List[str]]</span></em><a class="headerlink" href="#src.typehints.ObjectAttribute.values" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ObjectAttribute.min">
+<span class="sig-name descname"><span class="pre">min</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[float]</span></em><a class="headerlink" href="#src.typehints.ObjectAttribute.min" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ObjectAttribute.max">
+<span class="sig-name descname"><span class="pre">max</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[float]</span></em><a class="headerlink" href="#src.typehints.ObjectAttribute.max" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ObjectAttribute.step">
+<span class="sig-name descname"><span class="pre">step</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[float]</span></em><a class="headerlink" href="#src.typehints.ObjectAttribute.step" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.typehints.ObjectAttribute.__post_init__">
+<span class="sig-name descname"><span class="pre">__post_init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#src.typehints.ObjectAttribute.__post_init__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py data">
+<dt class="sig sig-object py" id="src.typehints.ObjectAttributes">
+<span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">ObjectAttributes</span></span><a class="headerlink" href="#src.typehints.ObjectAttributes" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py data">
+<dt class="sig sig-object py" id="src.typehints.ImageAttributes">
+<span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">ImageAttributes</span></span><a class="headerlink" href="#src.typehints.ImageAttributes" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.Annotation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">Annotation</span></span><a class="headerlink" href="#src.typehints.Annotation" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Annotation.id">
+<span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="w"> </span><span class="pre">:int</span></em><a class="headerlink" href="#src.typehints.Annotation.id" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Annotation.category_id">
+<span class="sig-name descname"><span class="pre">category_id</span></span><em class="property"><span class="w"> </span><span class="pre">:int</span></em><a class="headerlink" href="#src.typehints.Annotation.category_id" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Annotation.attributes">
+<span class="sig-name descname"><span class="pre">attributes</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[ObjectAttributes]</span></em><a class="headerlink" href="#src.typehints.Annotation.attributes" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.ImageSegmentationLabelAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">ImageSegmentationLabelAttributes</span></span><a class="headerlink" href="#src.typehints.ImageSegmentationLabelAttributes" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ImageSegmentationLabelAttributes.annotations">
+<span class="sig-name descname"><span class="pre">annotations</span></span><em class="property"><span class="w"> </span><span class="pre">:List[Annotation]</span></em><a class="headerlink" href="#src.typehints.ImageSegmentationLabelAttributes.annotations" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ImageSegmentationLabelAttributes.segmentation_bitmap">
+<span class="sig-name descname"><span class="pre">segmentation_bitmap</span></span><em class="property"><span class="w"> </span><span class="pre">:URL</span></em><a class="headerlink" href="#src.typehints.ImageSegmentationLabelAttributes.segmentation_bitmap" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ImageSegmentationLabelAttributes.image_attributes">
+<span class="sig-name descname"><span class="pre">image_attributes</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[ImageAttributes]</span></em><a class="headerlink" href="#src.typehints.ImageSegmentationLabelAttributes.image_attributes" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ImageSegmentationLabelAttributes.format_version">
+<span class="sig-name descname"><span class="pre">format_version</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[FormatVersion]</span></em><a class="headerlink" href="#src.typehints.ImageSegmentationLabelAttributes.format_version" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints._ImageVectorAnnotationBase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">_ImageVectorAnnotationBase</span></span><a class="headerlink" href="#src.typehints._ImageVectorAnnotationBase" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints._ImageVectorAnnotationBase.id">
+<span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="w"> </span><span class="pre">:int</span></em><a class="headerlink" href="#src.typehints._ImageVectorAnnotationBase.id" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints._ImageVectorAnnotationBase.category_id">
+<span class="sig-name descname"><span class="pre">category_id</span></span><em class="property"><span class="w"> </span><span class="pre">:int</span></em><a class="headerlink" href="#src.typehints._ImageVectorAnnotationBase.category_id" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints._ImageVectorAnnotationBase.points">
+<span class="sig-name descname"><span class="pre">points</span></span><em class="property"><span class="w"> </span><span class="pre">:List[List[float]]</span></em><a class="headerlink" href="#src.typehints._ImageVectorAnnotationBase.points" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints._ImageVectorAnnotationBase.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="w"> </span><span class="pre">:ImageVectorAnnotationType</span></em><a class="headerlink" href="#src.typehints._ImageVectorAnnotationBase.type" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.ImageVectorAnnotation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">ImageVectorAnnotation</span></span><a class="headerlink" href="#src.typehints.ImageVectorAnnotation" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.typehints._ImageVectorAnnotationBase" title="src.typehints._ImageVectorAnnotationBase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_ImageVectorAnnotationBase</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ImageVectorAnnotation.attributes">
+<span class="sig-name descname"><span class="pre">attributes</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[ObjectAttributes]</span></em><a class="headerlink" href="#src.typehints.ImageVectorAnnotation.attributes" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.ImageVectorLabelAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">ImageVectorLabelAttributes</span></span><a class="headerlink" href="#src.typehints.ImageVectorLabelAttributes" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ImageVectorLabelAttributes.annotations">
+<span class="sig-name descname"><span class="pre">annotations</span></span><em class="property"><span class="w"> </span><span class="pre">:List[ImageVectorAnnotation]</span></em><a class="headerlink" href="#src.typehints.ImageVectorLabelAttributes.annotations" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ImageVectorLabelAttributes.format_version">
+<span class="sig-name descname"><span class="pre">format_version</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[FormatVersion]</span></em><a class="headerlink" href="#src.typehints.ImageVectorLabelAttributes.format_version" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ImageVectorLabelAttributes.image_attributes">
+<span class="sig-name descname"><span class="pre">image_attributes</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[ImageAttributes]</span></em><a class="headerlink" href="#src.typehints.ImageVectorLabelAttributes.image_attributes" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.ImageSequenceVectorAnnotation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">ImageSequenceVectorAnnotation</span></span><a class="headerlink" href="#src.typehints.ImageSequenceVectorAnnotation" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.typehints._ImageVectorAnnotationBase" title="src.typehints._ImageVectorAnnotationBase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_ImageVectorAnnotationBase</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ImageSequenceVectorAnnotation.track_id">
+<span class="sig-name descname"><span class="pre">track_id</span></span><em class="property"><span class="w"> </span><span class="pre">:int</span></em><a class="headerlink" href="#src.typehints.ImageSequenceVectorAnnotation.track_id" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ImageSequenceVectorAnnotation.is_keyframe">
+<span class="sig-name descname"><span class="pre">is_keyframe</span></span><em class="property"><span class="w"> </span><span class="pre">:bool</span> <span class="pre">=</span> <span class="pre">False</span></em><a class="headerlink" href="#src.typehints.ImageSequenceVectorAnnotation.is_keyframe" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ImageSequenceVectorAnnotation.attributes">
+<span class="sig-name descname"><span class="pre">attributes</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[ObjectAttributes]</span></em><a class="headerlink" href="#src.typehints.ImageSequenceVectorAnnotation.attributes" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.ImageVectorFrame">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">ImageVectorFrame</span></span><a class="headerlink" href="#src.typehints.ImageVectorFrame" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ImageVectorFrame.annotations">
+<span class="sig-name descname"><span class="pre">annotations</span></span><em class="property"><span class="w"> </span><span class="pre">:List[ImageSequenceVectorAnnotation]</span></em><a class="headerlink" href="#src.typehints.ImageVectorFrame.annotations" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ImageVectorFrame.timestamp">
+<span class="sig-name descname"><span class="pre">timestamp</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[int]</span></em><a class="headerlink" href="#src.typehints.ImageVectorFrame.timestamp" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ImageVectorFrame.format_version">
+<span class="sig-name descname"><span class="pre">format_version</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[FormatVersion]</span></em><a class="headerlink" href="#src.typehints.ImageVectorFrame.format_version" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ImageVectorFrame.image_attributes">
+<span class="sig-name descname"><span class="pre">image_attributes</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[ImageAttributes]</span></em><a class="headerlink" href="#src.typehints.ImageVectorFrame.image_attributes" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.ImageSequenceVectorLabelAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">ImageSequenceVectorLabelAttributes</span></span><a class="headerlink" href="#src.typehints.ImageSequenceVectorLabelAttributes" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ImageSequenceVectorLabelAttributes.frames">
+<span class="sig-name descname"><span class="pre">frames</span></span><em class="property"><span class="w"> </span><span class="pre">:List[ImageVectorFrame]</span></em><a class="headerlink" href="#src.typehints.ImageSequenceVectorLabelAttributes.frames" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ImageSequenceVectorLabelAttributes.format_version">
+<span class="sig-name descname"><span class="pre">format_version</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[FormatVersion]</span></em><a class="headerlink" href="#src.typehints.ImageSequenceVectorLabelAttributes.format_version" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSegmentationLabelAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">PointcloudSegmentationLabelAttributes</span></span><a class="headerlink" href="#src.typehints.PointcloudSegmentationLabelAttributes" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSegmentationLabelAttributes.annotations">
+<span class="sig-name descname"><span class="pre">annotations</span></span><em class="property"><span class="w"> </span><span class="pre">:List[Annotation]</span></em><a class="headerlink" href="#src.typehints.PointcloudSegmentationLabelAttributes.annotations" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSegmentationLabelAttributes.point_annotations">
+<span class="sig-name descname"><span class="pre">point_annotations</span></span><em class="property"><span class="w"> </span><span class="pre">:List[int]</span></em><a class="headerlink" href="#src.typehints.PointcloudSegmentationLabelAttributes.point_annotations" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSegmentationLabelAttributes.format_version">
+<span class="sig-name descname"><span class="pre">format_version</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[FormatVersion]</span></em><a class="headerlink" href="#src.typehints.PointcloudSegmentationLabelAttributes.format_version" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.XYZ">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">XYZ</span></span><a class="headerlink" href="#src.typehints.XYZ" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.XYZ.x">
+<span class="sig-name descname"><span class="pre">x</span></span><em class="property"><span class="w"> </span><span class="pre">:float</span></em><a class="headerlink" href="#src.typehints.XYZ.x" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.XYZ.y">
+<span class="sig-name descname"><span class="pre">y</span></span><em class="property"><span class="w"> </span><span class="pre">:float</span></em><a class="headerlink" href="#src.typehints.XYZ.y" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.XYZ.z">
+<span class="sig-name descname"><span class="pre">z</span></span><em class="property"><span class="w"> </span><span class="pre">:float</span></em><a class="headerlink" href="#src.typehints.XYZ.z" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints._PointcloudCuboidAnnotationBase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">_PointcloudCuboidAnnotationBase</span></span><a class="headerlink" href="#src.typehints._PointcloudCuboidAnnotationBase" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints._PointcloudCuboidAnnotationBase.id">
+<span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="w"> </span><span class="pre">:int</span></em><a class="headerlink" href="#src.typehints._PointcloudCuboidAnnotationBase.id" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints._PointcloudCuboidAnnotationBase.category_id">
+<span class="sig-name descname"><span class="pre">category_id</span></span><em class="property"><span class="w"> </span><span class="pre">:int</span></em><a class="headerlink" href="#src.typehints._PointcloudCuboidAnnotationBase.category_id" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints._PointcloudCuboidAnnotationBase.position">
+<span class="sig-name descname"><span class="pre">position</span></span><em class="property"><span class="w"> </span><span class="pre">:XYZ</span></em><a class="headerlink" href="#src.typehints._PointcloudCuboidAnnotationBase.position" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints._PointcloudCuboidAnnotationBase.dimensions">
+<span class="sig-name descname"><span class="pre">dimensions</span></span><em class="property"><span class="w"> </span><span class="pre">:XYZ</span></em><a class="headerlink" href="#src.typehints._PointcloudCuboidAnnotationBase.dimensions" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints._PointcloudCuboidAnnotationBase.yaw">
+<span class="sig-name descname"><span class="pre">yaw</span></span><em class="property"><span class="w"> </span><span class="pre">:float</span></em><a class="headerlink" href="#src.typehints._PointcloudCuboidAnnotationBase.yaw" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints._PointcloudCuboidAnnotationBase.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="w"> </span><span class="pre">:PointcloudAnnotationType</span></em><a class="headerlink" href="#src.typehints._PointcloudCuboidAnnotationBase.type" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.PointcloudCuboidAnnotation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">PointcloudCuboidAnnotation</span></span><a class="headerlink" href="#src.typehints.PointcloudCuboidAnnotation" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.typehints._PointcloudCuboidAnnotationBase" title="src.typehints._PointcloudCuboidAnnotationBase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_PointcloudCuboidAnnotationBase</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PointcloudCuboidAnnotation.attributes">
+<span class="sig-name descname"><span class="pre">attributes</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[ObjectAttributes]</span></em><a class="headerlink" href="#src.typehints.PointcloudCuboidAnnotation.attributes" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.PointcloudCuboidLabelAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">PointcloudCuboidLabelAttributes</span></span><a class="headerlink" href="#src.typehints.PointcloudCuboidLabelAttributes" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PointcloudCuboidLabelAttributes.annotations">
+<span class="sig-name descname"><span class="pre">annotations</span></span><em class="property"><span class="w"> </span><span class="pre">:List[PointcloudCuboidAnnotation]</span></em><a class="headerlink" href="#src.typehints.PointcloudCuboidLabelAttributes.annotations" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PointcloudCuboidLabelAttributes.format_version">
+<span class="sig-name descname"><span class="pre">format_version</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[FormatVersion]</span></em><a class="headerlink" href="#src.typehints.PointcloudCuboidLabelAttributes.format_version" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSequenceSegmentationAnnotation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">PointcloudSequenceSegmentationAnnotation</span></span><a class="headerlink" href="#src.typehints.PointcloudSequenceSegmentationAnnotation" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSequenceSegmentationAnnotation.id">
+<span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="w"> </span><span class="pre">:int</span></em><a class="headerlink" href="#src.typehints.PointcloudSequenceSegmentationAnnotation.id" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSequenceSegmentationAnnotation.category_id">
+<span class="sig-name descname"><span class="pre">category_id</span></span><em class="property"><span class="w"> </span><span class="pre">:int</span></em><a class="headerlink" href="#src.typehints.PointcloudSequenceSegmentationAnnotation.category_id" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSequenceSegmentationAnnotation.track_id">
+<span class="sig-name descname"><span class="pre">track_id</span></span><em class="property"><span class="w"> </span><span class="pre">:int</span></em><a class="headerlink" href="#src.typehints.PointcloudSequenceSegmentationAnnotation.track_id" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSequenceSegmentationAnnotation.is_keyframe">
+<span class="sig-name descname"><span class="pre">is_keyframe</span></span><em class="property"><span class="w"> </span><span class="pre">:bool</span> <span class="pre">=</span> <span class="pre">False</span></em><a class="headerlink" href="#src.typehints.PointcloudSequenceSegmentationAnnotation.is_keyframe" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSequenceSegmentationAnnotation.attributes">
+<span class="sig-name descname"><span class="pre">attributes</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[ObjectAttributes]</span></em><a class="headerlink" href="#src.typehints.PointcloudSequenceSegmentationAnnotation.attributes" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSegmentationFrame">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">PointcloudSegmentationFrame</span></span><a class="headerlink" href="#src.typehints.PointcloudSegmentationFrame" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSegmentationFrame.annotations">
+<span class="sig-name descname"><span class="pre">annotations</span></span><em class="property"><span class="w"> </span><span class="pre">:List[PointcloudSequenceSegmentationAnnotation]</span></em><a class="headerlink" href="#src.typehints.PointcloudSegmentationFrame.annotations" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSegmentationFrame.point_annotations">
+<span class="sig-name descname"><span class="pre">point_annotations</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[List[int]]</span></em><a class="headerlink" href="#src.typehints.PointcloudSegmentationFrame.point_annotations" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSegmentationFrame.format_version">
+<span class="sig-name descname"><span class="pre">format_version</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[FormatVersion]</span></em><a class="headerlink" href="#src.typehints.PointcloudSegmentationFrame.format_version" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSequenceSegmentationLabelAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">PointcloudSequenceSegmentationLabelAttributes</span></span><a class="headerlink" href="#src.typehints.PointcloudSequenceSegmentationLabelAttributes" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSequenceSegmentationLabelAttributes.frames">
+<span class="sig-name descname"><span class="pre">frames</span></span><em class="property"><span class="w"> </span><span class="pre">:List[PointcloudSegmentationFrame]</span></em><a class="headerlink" href="#src.typehints.PointcloudSequenceSegmentationLabelAttributes.frames" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSequenceSegmentationLabelAttributes.format_version">
+<span class="sig-name descname"><span class="pre">format_version</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[FormatVersion]</span></em><a class="headerlink" href="#src.typehints.PointcloudSequenceSegmentationLabelAttributes.format_version" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSequenceCuboidAnnotation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">PointcloudSequenceCuboidAnnotation</span></span><a class="headerlink" href="#src.typehints.PointcloudSequenceCuboidAnnotation" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.typehints._PointcloudCuboidAnnotationBase" title="src.typehints._PointcloudCuboidAnnotationBase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_PointcloudCuboidAnnotationBase</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSequenceCuboidAnnotation.track_id">
+<span class="sig-name descname"><span class="pre">track_id</span></span><em class="property"><span class="w"> </span><span class="pre">:int</span></em><a class="headerlink" href="#src.typehints.PointcloudSequenceCuboidAnnotation.track_id" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSequenceCuboidAnnotation.is_keyframe">
+<span class="sig-name descname"><span class="pre">is_keyframe</span></span><em class="property"><span class="w"> </span><span class="pre">:bool</span> <span class="pre">=</span> <span class="pre">False</span></em><a class="headerlink" href="#src.typehints.PointcloudSequenceCuboidAnnotation.is_keyframe" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSequenceCuboidAnnotation.attributes">
+<span class="sig-name descname"><span class="pre">attributes</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[ObjectAttributes]</span></em><a class="headerlink" href="#src.typehints.PointcloudSequenceCuboidAnnotation.attributes" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSequenceCuboidFrame">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">PointcloudSequenceCuboidFrame</span></span><a class="headerlink" href="#src.typehints.PointcloudSequenceCuboidFrame" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSequenceCuboidFrame.timestamp">
+<span class="sig-name descname"><span class="pre">timestamp</span></span><em class="property"><span class="w"> </span><span class="pre">:int</span></em><a class="headerlink" href="#src.typehints.PointcloudSequenceCuboidFrame.timestamp" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSequenceCuboidFrame.annotations">
+<span class="sig-name descname"><span class="pre">annotations</span></span><em class="property"><span class="w"> </span><span class="pre">:List[PointcloudSequenceCuboidAnnotation]</span></em><a class="headerlink" href="#src.typehints.PointcloudSequenceCuboidFrame.annotations" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSequenceCuboidFrame.format_version">
+<span class="sig-name descname"><span class="pre">format_version</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[FormatVersion]</span></em><a class="headerlink" href="#src.typehints.PointcloudSequenceCuboidFrame.format_version" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSequenceCuboidLabelAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">PointcloudSequenceCuboidLabelAttributes</span></span><a class="headerlink" href="#src.typehints.PointcloudSequenceCuboidLabelAttributes" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSequenceCuboidLabelAttributes.frames">
+<span class="sig-name descname"><span class="pre">frames</span></span><em class="property"><span class="w"> </span><span class="pre">:List[PointcloudSequenceCuboidFrame]</span></em><a class="headerlink" href="#src.typehints.PointcloudSequenceCuboidLabelAttributes.frames" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSequenceCuboidLabelAttributes.format_version">
+<span class="sig-name descname"><span class="pre">format_version</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[FormatVersion]</span></em><a class="headerlink" href="#src.typehints.PointcloudSequenceCuboidLabelAttributes.format_version" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.TextAnnotation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">TextAnnotation</span></span><a class="headerlink" href="#src.typehints.TextAnnotation" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.TextAnnotation.start">
+<span class="sig-name descname"><span class="pre">start</span></span><em class="property"><span class="w"> </span><span class="pre">:int</span></em><a class="headerlink" href="#src.typehints.TextAnnotation.start" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.TextAnnotation.end">
+<span class="sig-name descname"><span class="pre">end</span></span><em class="property"><span class="w"> </span><span class="pre">:int</span></em><a class="headerlink" href="#src.typehints.TextAnnotation.end" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.TextAnnotation.category_id">
+<span class="sig-name descname"><span class="pre">category_id</span></span><em class="property"><span class="w"> </span><span class="pre">:int</span></em><a class="headerlink" href="#src.typehints.TextAnnotation.category_id" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.TextLabelAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">TextLabelAttributes</span></span><a class="headerlink" href="#src.typehints.TextLabelAttributes" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.TextLabelAttributes.annotations">
+<span class="sig-name descname"><span class="pre">annotations</span></span><em class="property"><span class="w"> </span><span class="pre">:List[TextAnnotation]</span></em><a class="headerlink" href="#src.typehints.TextLabelAttributes.annotations" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.TextLabelAttributes.format_version">
+<span class="sig-name descname"><span class="pre">format_version</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[FormatVersion]</span></em><a class="headerlink" href="#src.typehints.TextLabelAttributes.format_version" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py data">
+<dt class="sig sig-object py" id="src.typehints.LabelAttributes">
+<span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">LabelAttributes</span></span><a class="headerlink" href="#src.typehints.LabelAttributes" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.Label">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">Label</span></span><a class="headerlink" href="#src.typehints.Label" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Label.sample_uuid">
+<span class="sig-name descname"><span class="pre">sample_uuid</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.Label.sample_uuid" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Label.label_type">
+<span class="sig-name descname"><span class="pre">label_type</span></span><em class="property"><span class="w"> </span><span class="pre">:TaskType</span></em><a class="headerlink" href="#src.typehints.Label.label_type" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Label.label_status">
+<span class="sig-name descname"><span class="pre">label_status</span></span><em class="property"><span class="w"> </span><span class="pre">:LabelStatus</span></em><a class="headerlink" href="#src.typehints.Label.label_status" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Label.attributes">
+<span class="sig-name descname"><span class="pre">attributes</span></span><em class="property"><span class="w"> </span><span class="pre">:LabelAttributes</span></em><a class="headerlink" href="#src.typehints.Label.attributes" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Label.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.Label.created_at" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Label.created_by">
+<span class="sig-name descname"><span class="pre">created_by</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.Label.created_by" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Label.updated_at">
+<span class="sig-name descname"><span class="pre">updated_at</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.Label.updated_at" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Label.score">
+<span class="sig-name descname"><span class="pre">score</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[float]</span></em><a class="headerlink" href="#src.typehints.Label.score" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Label.rating">
+<span class="sig-name descname"><span class="pre">rating</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[float]</span></em><a class="headerlink" href="#src.typehints.Label.rating" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Label.reviewed_at">
+<span class="sig-name descname"><span class="pre">reviewed_at</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[str]</span></em><a class="headerlink" href="#src.typehints.Label.reviewed_at" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Label.reviewed_by">
+<span class="sig-name descname"><span class="pre">reviewed_by</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[str]</span></em><a class="headerlink" href="#src.typehints.Label.reviewed_by" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.ImageSampleAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">ImageSampleAttributes</span></span><a class="headerlink" href="#src.typehints.ImageSampleAttributes" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ImageSampleAttributes.image">
+<span class="sig-name descname"><span class="pre">image</span></span><em class="property"><span class="w"> </span><span class="pre">:URL</span></em><a class="headerlink" href="#src.typehints.ImageSampleAttributes.image" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.ImageFrame">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">ImageFrame</span></span><a class="headerlink" href="#src.typehints.ImageFrame" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.typehints.ImageSampleAttributes" title="src.typehints.ImageSampleAttributes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ImageSampleAttributes</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ImageFrame.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[str]</span></em><a class="headerlink" href="#src.typehints.ImageFrame.name" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.ImageSequenceSampleAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">ImageSequenceSampleAttributes</span></span><a class="headerlink" href="#src.typehints.ImageSequenceSampleAttributes" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.ImageSequenceSampleAttributes.frames">
+<span class="sig-name descname"><span class="pre">frames</span></span><em class="property"><span class="w"> </span><span class="pre">:List[ImageFrame]</span></em><a class="headerlink" href="#src.typehints.ImageSequenceSampleAttributes.frames" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.PCD">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">PCD</span></span><a class="headerlink" href="#src.typehints.PCD" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PCD.url">
+<span class="sig-name descname"><span class="pre">url</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.PCD.url" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PCD.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="w"> </span><span class="pre">:PCDType</span> <span class="pre">=</span> <span class="pre">pcd</span></em><a class="headerlink" href="#src.typehints.PCD.type" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.XYZW">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">XYZW</span></span><a class="headerlink" href="#src.typehints.XYZW" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.XYZW.qx">
+<span class="sig-name descname"><span class="pre">qx</span></span><em class="property"><span class="w"> </span><span class="pre">:float</span></em><a class="headerlink" href="#src.typehints.XYZW.qx" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.XYZW.qy">
+<span class="sig-name descname"><span class="pre">qy</span></span><em class="property"><span class="w"> </span><span class="pre">:float</span></em><a class="headerlink" href="#src.typehints.XYZW.qy" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.XYZW.qz">
+<span class="sig-name descname"><span class="pre">qz</span></span><em class="property"><span class="w"> </span><span class="pre">:float</span></em><a class="headerlink" href="#src.typehints.XYZW.qz" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.XYZW.qw">
+<span class="sig-name descname"><span class="pre">qw</span></span><em class="property"><span class="w"> </span><span class="pre">:float</span></em><a class="headerlink" href="#src.typehints.XYZW.qw" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.EgoPose">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">EgoPose</span></span><a class="headerlink" href="#src.typehints.EgoPose" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.EgoPose.position">
+<span class="sig-name descname"><span class="pre">position</span></span><em class="property"><span class="w"> </span><span class="pre">:XYZ</span></em><a class="headerlink" href="#src.typehints.EgoPose.position" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.EgoPose.heading">
+<span class="sig-name descname"><span class="pre">heading</span></span><em class="property"><span class="w"> </span><span class="pre">:XYZW</span></em><a class="headerlink" href="#src.typehints.EgoPose.heading" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSampleAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">PointcloudSampleAttributes</span></span><a class="headerlink" href="#src.typehints.PointcloudSampleAttributes" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSampleAttributes.pcd">
+<span class="sig-name descname"><span class="pre">pcd</span></span><em class="property"><span class="w"> </span><span class="pre">:PCD</span></em><a class="headerlink" href="#src.typehints.PointcloudSampleAttributes.pcd" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSampleAttributes.ego_pose">
+<span class="sig-name descname"><span class="pre">ego_pose</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[EgoPose]</span></em><a class="headerlink" href="#src.typehints.PointcloudSampleAttributes.ego_pose" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSampleAttributes.default_z">
+<span class="sig-name descname"><span class="pre">default_z</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[float]</span></em><a class="headerlink" href="#src.typehints.PointcloudSampleAttributes.default_z" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSampleAttributes.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[str]</span></em><a class="headerlink" href="#src.typehints.PointcloudSampleAttributes.name" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSampleAttributes.timestamp">
+<span class="sig-name descname"><span class="pre">timestamp</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[int]</span></em><a class="headerlink" href="#src.typehints.PointcloudSampleAttributes.timestamp" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSequenceSampleAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">PointcloudSequenceSampleAttributes</span></span><a class="headerlink" href="#src.typehints.PointcloudSequenceSampleAttributes" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.PointcloudSequenceSampleAttributes.frames">
+<span class="sig-name descname"><span class="pre">frames</span></span><em class="property"><span class="w"> </span><span class="pre">:List[PointcloudSampleAttributes]</span></em><a class="headerlink" href="#src.typehints.PointcloudSequenceSampleAttributes.frames" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.TextSampleAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">TextSampleAttributes</span></span><a class="headerlink" href="#src.typehints.TextSampleAttributes" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.TextSampleAttributes.text">
+<span class="sig-name descname"><span class="pre">text</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.TextSampleAttributes.text" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py data">
+<dt class="sig sig-object py" id="src.typehints.SampleAttributes">
+<span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">SampleAttributes</span></span><a class="headerlink" href="#src.typehints.SampleAttributes" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.Sample">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">Sample</span></span><a class="headerlink" href="#src.typehints.Sample" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Sample.uuid">
+<span class="sig-name descname"><span class="pre">uuid</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.Sample.uuid" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Sample.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.Sample.name" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Sample.attributes">
+<span class="sig-name descname"><span class="pre">attributes</span></span><em class="property"><span class="w"> </span><span class="pre">:SampleAttributes</span></em><a class="headerlink" href="#src.typehints.Sample.attributes" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Sample.metadata">
+<span class="sig-name descname"><span class="pre">metadata</span></span><em class="property"><span class="w"> </span><span class="pre">:Dict[str,</span> <span class="pre">Any]</span></em><a class="headerlink" href="#src.typehints.Sample.metadata" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Sample.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.Sample.created_at" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Sample.created_by">
+<span class="sig-name descname"><span class="pre">created_by</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.Sample.created_by" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Sample.comments">
+<span class="sig-name descname"><span class="pre">comments</span></span><em class="property"><span class="w"> </span><span class="pre">:List[str]</span></em><a class="headerlink" href="#src.typehints.Sample.comments" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Sample.priority">
+<span class="sig-name descname"><span class="pre">priority</span></span><em class="property"><span class="w"> </span><span class="pre">:float</span></em><a class="headerlink" href="#src.typehints.Sample.priority" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Sample.has_embedding">
+<span class="sig-name descname"><span class="pre">has_embedding</span></span><em class="property"><span class="w"> </span><span class="pre">:bool</span></em><a class="headerlink" href="#src.typehints.Sample.has_embedding" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.User">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">User</span></span><a class="headerlink" href="#src.typehints.User" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.User.username">
+<span class="sig-name descname"><span class="pre">username</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.User.username" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.User.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.User.created_at" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.Collaborator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">Collaborator</span></span><a class="headerlink" href="#src.typehints.Collaborator" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Collaborator.user">
+<span class="sig-name descname"><span class="pre">user</span></span><em class="property"><span class="w"> </span><span class="pre">:User</span></em><a class="headerlink" href="#src.typehints.Collaborator.user" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Collaborator.role">
+<span class="sig-name descname"><span class="pre">role</span></span><em class="property"><span class="w"> </span><span class="pre">:Role</span></em><a class="headerlink" href="#src.typehints.Collaborator.role" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.TaskAttributeCategory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">TaskAttributeCategory</span></span><a class="headerlink" href="#src.typehints.TaskAttributeCategory" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.TaskAttributeCategory.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.TaskAttributeCategory.name" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.TaskAttributeCategory.id">
+<span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="w"> </span><span class="pre">:int</span></em><a class="headerlink" href="#src.typehints.TaskAttributeCategory.id" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.TaskAttributeCategory.color">
+<span class="sig-name descname"><span class="pre">color</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[Union[RGB,</span> <span class="pre">RGBA]]</span></em><a class="headerlink" href="#src.typehints.TaskAttributeCategory.color" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.TaskAttributeCategory.attributes">
+<span class="sig-name descname"><span class="pre">attributes</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[ObjectAttributes]</span></em><a class="headerlink" href="#src.typehints.TaskAttributeCategory.attributes" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.TaskAttributeCategory.dimensions">
+<span class="sig-name descname"><span class="pre">dimensions</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[XYZ]</span></em><a class="headerlink" href="#src.typehints.TaskAttributeCategory.dimensions" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.TaskAttributes">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">TaskAttributes</span></span><a class="headerlink" href="#src.typehints.TaskAttributes" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.TaskAttributes.format_version">
+<span class="sig-name descname"><span class="pre">format_version</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[FormatVersion]</span></em><a class="headerlink" href="#src.typehints.TaskAttributes.format_version" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.TaskAttributes.categories">
+<span class="sig-name descname"><span class="pre">categories</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[List[TaskAttributeCategory]]</span></em><a class="headerlink" href="#src.typehints.TaskAttributes.categories" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.Owner">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">Owner</span></span><a class="headerlink" href="#src.typehints.Owner" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Owner.username">
+<span class="sig-name descname"><span class="pre">username</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.Owner.username" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Owner.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.Owner.created_at" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Owner.email">
+<span class="sig-name descname"><span class="pre">email</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[str]</span></em><a class="headerlink" href="#src.typehints.Owner.email" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.Statistics">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">Statistics</span></span><a class="headerlink" href="#src.typehints.Statistics" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Statistics.prelabeled_count">
+<span class="sig-name descname"><span class="pre">prelabeled_count</span></span><em class="property"><span class="w"> </span><span class="pre">:int</span></em><a class="headerlink" href="#src.typehints.Statistics.prelabeled_count" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Statistics.labeled_count">
+<span class="sig-name descname"><span class="pre">labeled_count</span></span><em class="property"><span class="w"> </span><span class="pre">:int</span></em><a class="headerlink" href="#src.typehints.Statistics.labeled_count" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Statistics.reviewed_count">
+<span class="sig-name descname"><span class="pre">reviewed_count</span></span><em class="property"><span class="w"> </span><span class="pre">:int</span></em><a class="headerlink" href="#src.typehints.Statistics.reviewed_count" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Statistics.rejected_count">
+<span class="sig-name descname"><span class="pre">rejected_count</span></span><em class="property"><span class="w"> </span><span class="pre">:int</span></em><a class="headerlink" href="#src.typehints.Statistics.rejected_count" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Statistics.skipped_count">
+<span class="sig-name descname"><span class="pre">skipped_count</span></span><em class="property"><span class="w"> </span><span class="pre">:int</span></em><a class="headerlink" href="#src.typehints.Statistics.skipped_count" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Statistics.samples_count">
+<span class="sig-name descname"><span class="pre">samples_count</span></span><em class="property"><span class="w"> </span><span class="pre">:int</span></em><a class="headerlink" href="#src.typehints.Statistics.samples_count" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.Labelset">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">Labelset</span></span><a class="headerlink" href="#src.typehints.Labelset" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Labelset.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.Labelset.name" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Labelset.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.Labelset.description" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Labelset.uuid">
+<span class="sig-name descname"><span class="pre">uuid</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[str]</span></em><a class="headerlink" href="#src.typehints.Labelset.uuid" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Labelset.readme">
+<span class="sig-name descname"><span class="pre">readme</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[str]</span></em><a class="headerlink" href="#src.typehints.Labelset.readme" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Labelset.task_type">
+<span class="sig-name descname"><span class="pre">task_type</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[TaskType]</span></em><a class="headerlink" href="#src.typehints.Labelset.task_type" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Labelset.attributes">
+<span class="sig-name descname"><span class="pre">attributes</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[Union[str,</span> <span class="pre">TaskAttributes]]</span></em><a class="headerlink" href="#src.typehints.Labelset.attributes" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Labelset.is_groundtruth">
+<span class="sig-name descname"><span class="pre">is_groundtruth</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[bool]</span></em><a class="headerlink" href="#src.typehints.Labelset.is_groundtruth" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Labelset.statistics">
+<span class="sig-name descname"><span class="pre">statistics</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[Statistics]</span></em><a class="headerlink" href="#src.typehints.Labelset.statistics" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Labelset.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[str]</span></em><a class="headerlink" href="#src.typehints.Labelset.created_at" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Labelset.stats">
+<span class="sig-name descname"><span class="pre">stats</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[Dict[str,</span> <span class="pre">Any]]</span></em><a class="headerlink" href="#src.typehints.Labelset.stats" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.LabelStats">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">LabelStats</span></span><a class="headerlink" href="#src.typehints.LabelStats" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.LabelStats.TOTAL">
+<span class="sig-name descname"><span class="pre">TOTAL</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[int]</span></em><a class="headerlink" href="#src.typehints.LabelStats.TOTAL" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.LabelStats.LABELED">
+<span class="sig-name descname"><span class="pre">LABELED</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[int]</span></em><a class="headerlink" href="#src.typehints.LabelStats.LABELED" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.LabelStats.UNLABELED">
+<span class="sig-name descname"><span class="pre">UNLABELED</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[int]</span></em><a class="headerlink" href="#src.typehints.LabelStats.UNLABELED" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.LabelStats.PRELABELED">
+<span class="sig-name descname"><span class="pre">PRELABELED</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[int]</span></em><a class="headerlink" href="#src.typehints.LabelStats.PRELABELED" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.typehints.Dataset">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.typehints.</span></span><span class="sig-name descname"><span class="pre">Dataset</span></span><a class="headerlink" href="#src.typehints.Dataset" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Dataset.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.Dataset.name" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Dataset.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.Dataset.description" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Dataset.data_type">
+<span class="sig-name descname"><span class="pre">data_type</span></span><em class="property"><span class="w"> </span><span class="pre">:DataType</span></em><a class="headerlink" href="#src.typehints.Dataset.data_type" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Dataset.category">
+<span class="sig-name descname"><span class="pre">category</span></span><em class="property"><span class="w"> </span><span class="pre">:Category</span></em><a class="headerlink" href="#src.typehints.Dataset.category" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Dataset.public">
+<span class="sig-name descname"><span class="pre">public</span></span><em class="property"><span class="w"> </span><span class="pre">:bool</span></em><a class="headerlink" href="#src.typehints.Dataset.public" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Dataset.owner">
+<span class="sig-name descname"><span class="pre">owner</span></span><em class="property"><span class="w"> </span><span class="pre">:Owner</span></em><a class="headerlink" href="#src.typehints.Dataset.owner" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Dataset.created_at">
+<span class="sig-name descname"><span class="pre">created_at</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.Dataset.created_at" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Dataset.enable_ratings">
+<span class="sig-name descname"><span class="pre">enable_ratings</span></span><em class="property"><span class="w"> </span><span class="pre">:bool</span></em><a class="headerlink" href="#src.typehints.Dataset.enable_ratings" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Dataset.enable_skip_labeling">
+<span class="sig-name descname"><span class="pre">enable_skip_labeling</span></span><em class="property"><span class="w"> </span><span class="pre">:bool</span></em><a class="headerlink" href="#src.typehints.Dataset.enable_skip_labeling" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Dataset.enable_skip_reviewing">
+<span class="sig-name descname"><span class="pre">enable_skip_reviewing</span></span><em class="property"><span class="w"> </span><span class="pre">:bool</span></em><a class="headerlink" href="#src.typehints.Dataset.enable_skip_reviewing" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Dataset.enable_save_button">
+<span class="sig-name descname"><span class="pre">enable_save_button</span></span><em class="property"><span class="w"> </span><span class="pre">:bool</span></em><a class="headerlink" href="#src.typehints.Dataset.enable_save_button" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Dataset.task_type">
+<span class="sig-name descname"><span class="pre">task_type</span></span><em class="property"><span class="w"> </span><span class="pre">:TaskType</span></em><a class="headerlink" href="#src.typehints.Dataset.task_type" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Dataset.task_readme">
+<span class="sig-name descname"><span class="pre">task_readme</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#src.typehints.Dataset.task_readme" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Dataset.label_stats">
+<span class="sig-name descname"><span class="pre">label_stats</span></span><em class="property"><span class="w"> </span><span class="pre">:LabelStats</span></em><a class="headerlink" href="#src.typehints.Dataset.label_stats" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Dataset.samples_count">
+<span class="sig-name descname"><span class="pre">samples_count</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[Union[str,</span> <span class="pre">int]]</span></em><a class="headerlink" href="#src.typehints.Dataset.samples_count" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Dataset.collaborators_count">
+<span class="sig-name descname"><span class="pre">collaborators_count</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[int]</span></em><a class="headerlink" href="#src.typehints.Dataset.collaborators_count" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Dataset.cloned_from">
+<span class="sig-name descname"><span class="pre">cloned_from</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[int]</span></em><a class="headerlink" href="#src.typehints.Dataset.cloned_from" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Dataset.task_attributes">
+<span class="sig-name descname"><span class="pre">task_attributes</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[TaskAttributes]</span></em><a class="headerlink" href="#src.typehints.Dataset.task_attributes" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Dataset.labelsets">
+<span class="sig-name descname"><span class="pre">labelsets</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[List[Labelset]]</span></em><a class="headerlink" href="#src.typehints.Dataset.labelsets" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Dataset.role">
+<span class="sig-name descname"><span class="pre">role</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[str]</span></em><a class="headerlink" href="#src.typehints.Dataset.role" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Dataset.readme">
+<span class="sig-name descname"><span class="pre">readme</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[str]</span></em><a class="headerlink" href="#src.typehints.Dataset.readme" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Dataset.noncollaborator_can_label">
+<span class="sig-name descname"><span class="pre">noncollaborator_can_label</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[bool]</span></em><a class="headerlink" href="#src.typehints.Dataset.noncollaborator_can_label" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Dataset.noncollaborator_can_review">
+<span class="sig-name descname"><span class="pre">noncollaborator_can_review</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[bool]</span></em><a class="headerlink" href="#src.typehints.Dataset.noncollaborator_can_review" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Dataset.tasks">
+<span class="sig-name descname"><span class="pre">tasks</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[List[Dict[str,</span> <span class="pre">Any]]]</span></em><a class="headerlink" href="#src.typehints.Dataset.tasks" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.typehints.Dataset.embeddings_enabled">
+<span class="sig-name descname"><span class="pre">embeddings_enabled</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[bool]</span></em><a class="headerlink" href="#src.typehints.Dataset.embeddings_enabled" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+</dd></dl>
+</div>
+</div>
+</div>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2022, Arnout Hillen
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            Contents
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">src.typehints</span></code></a><ul>
+<li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li><a class="reference internal" href="#classes">Classes</a></li>
+<li><a class="reference internal" href="#attributes">Attributes</a><ul>
+<li><a class="reference internal" href="#src.typehints.LabelStatus">LabelStatus</a><ul>
+<li><a class="reference internal" href="#src.typehints.LabelStatus.reviewed">reviewed</a></li>
+<li><a class="reference internal" href="#src.typehints.LabelStatus.reviewing_in_progress">reviewing_in_progress</a></li>
+<li><a class="reference internal" href="#src.typehints.LabelStatus.labeled">labeled</a></li>
+<li><a class="reference internal" href="#src.typehints.LabelStatus.labeling_in_progress">labeling_in_progress</a></li>
+<li><a class="reference internal" href="#src.typehints.LabelStatus.rejected">rejected</a></li>
+<li><a class="reference internal" href="#src.typehints.LabelStatus.prelabeled">prelabeled</a></li>
+<li><a class="reference internal" href="#src.typehints.LabelStatus.skipped">skipped</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.TaskType">TaskType</a><ul>
+<li><a class="reference internal" href="#src.typehints.TaskType.segmentation_bitmap">segmentation_bitmap</a></li>
+<li><a class="reference internal" href="#src.typehints.TaskType.segmentation_bitmap_highres">segmentation_bitmap_highres</a></li>
+<li><a class="reference internal" href="#src.typehints.TaskType.bboxes">bboxes</a></li>
+<li><a class="reference internal" href="#src.typehints.TaskType.vector">vector</a></li>
+<li><a class="reference internal" href="#src.typehints.TaskType.pointcloud_cuboid">pointcloud_cuboid</a></li>
+<li><a class="reference internal" href="#src.typehints.TaskType.pointcloud_cuboid_sequence">pointcloud_cuboid_sequence</a></li>
+<li><a class="reference internal" href="#src.typehints.TaskType.pointcloud_segmentation">pointcloud_segmentation</a></li>
+<li><a class="reference internal" href="#src.typehints.TaskType.pointcloud_segmentation_sequence">pointcloud_segmentation_sequence</a></li>
+<li><a class="reference internal" href="#src.typehints.TaskType.text_named_entities">text_named_entities</a></li>
+<li><a class="reference internal" href="#src.typehints.TaskType.text_span_categorization">text_span_categorization</a></li>
+<li><a class="reference internal" href="#src.typehints.TaskType.image_vector_sequence">image_vector_sequence</a></li>
+<li><a class="reference internal" href="#src.typehints.TaskType.other">other</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.DataType">DataType</a><ul>
+<li><a class="reference internal" href="#src.typehints.DataType.image">image</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.Role">Role</a><ul>
+<li><a class="reference internal" href="#src.typehints.Role.labeler">labeler</a></li>
+<li><a class="reference internal" href="#src.typehints.Role.reviewer">reviewer</a></li>
+<li><a class="reference internal" href="#src.typehints.Role.admin">admin</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.Status">Status</a><ul>
+<li><a class="reference internal" href="#src.typehints.Status.pending">pending</a></li>
+<li><a class="reference internal" href="#src.typehints.Status.succeeded">succeeded</a></li>
+<li><a class="reference internal" href="#src.typehints.Status.failed">failed</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.ReleaseType">ReleaseType</a><ul>
+<li><a class="reference internal" href="#src.typehints.ReleaseType.json">json</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.ImageVectorAnnotationType">ImageVectorAnnotationType</a><ul>
+<li><a class="reference internal" href="#src.typehints.ImageVectorAnnotationType.bbox">bbox</a></li>
+<li><a class="reference internal" href="#src.typehints.ImageVectorAnnotationType.polygon">polygon</a></li>
+<li><a class="reference internal" href="#src.typehints.ImageVectorAnnotationType.polyline">polyline</a></li>
+<li><a class="reference internal" href="#src.typehints.ImageVectorAnnotationType.point">point</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.PointcloudAnnotationType">PointcloudAnnotationType</a><ul>
+<li><a class="reference internal" href="#src.typehints.PointcloudAnnotationType.cuboid">cuboid</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.PCDType">PCDType</a><ul>
+<li><a class="reference internal" href="#src.typehints.PCDType.pcd">pcd</a></li>
+<li><a class="reference internal" href="#src.typehints.PCDType.kitti">kitti</a></li>
+<li><a class="reference internal" href="#src.typehints.PCDType.nuscenes">nuscenes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.InputType">InputType</a><ul>
+<li><a class="reference internal" href="#src.typehints.InputType.select">select</a></li>
+<li><a class="reference internal" href="#src.typehints.InputType.text">text</a></li>
+<li><a class="reference internal" href="#src.typehints.InputType.number">number</a></li>
+<li><a class="reference internal" href="#src.typehints.InputType.checkbox">checkbox</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.Category">Category</a><ul>
+<li><a class="reference internal" href="#src.typehints.Category.street_scenery">street_scenery</a></li>
+<li><a class="reference internal" href="#src.typehints.Category.garden">garden</a></li>
+<li><a class="reference internal" href="#src.typehints.Category.agriculture">agriculture</a></li>
+<li><a class="reference internal" href="#src.typehints.Category.satellite">satellite</a></li>
+<li><a class="reference internal" href="#src.typehints.Category.people">people</a></li>
+<li><a class="reference internal" href="#src.typehints.Category.medical">medical</a></li>
+<li><a class="reference internal" href="#src.typehints.Category.other">other</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.DACITE_CONFIG">DACITE_CONFIG</a></li>
+<li><a class="reference internal" href="#src.typehints.RGB">RGB</a></li>
+<li><a class="reference internal" href="#src.typehints.RGBA">RGBA</a></li>
+<li><a class="reference internal" href="#src.typehints.FormatVersion">FormatVersion</a></li>
+<li><a class="reference internal" href="#src.typehints.AuthHeader">AuthHeader</a><ul>
+<li><a class="reference internal" href="#src.typehints.AuthHeader.Authorization">Authorization</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.URL">URL</a><ul>
+<li><a class="reference internal" href="#src.typehints.URL.url">url</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.Release">Release</a><ul>
+<li><a class="reference internal" href="#src.typehints.Release.uuid">uuid</a></li>
+<li><a class="reference internal" href="#src.typehints.Release.name">name</a></li>
+<li><a class="reference internal" href="#src.typehints.Release.description">description</a></li>
+<li><a class="reference internal" href="#src.typehints.Release.release_type">release_type</a></li>
+<li><a class="reference internal" href="#src.typehints.Release.attributes">attributes</a></li>
+<li><a class="reference internal" href="#src.typehints.Release.status">status</a></li>
+<li><a class="reference internal" href="#src.typehints.Release.status_info">status_info</a></li>
+<li><a class="reference internal" href="#src.typehints.Release.created_at">created_at</a></li>
+<li><a class="reference internal" href="#src.typehints.Release.samples_count">samples_count</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.AWSFields">AWSFields</a></li>
+<li><a class="reference internal" href="#src.typehints.PresignedPostFields">PresignedPostFields</a><ul>
+<li><a class="reference internal" href="#src.typehints.PresignedPostFields.url">url</a></li>
+<li><a class="reference internal" href="#src.typehints.PresignedPostFields.fields">fields</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.File">File</a><ul>
+<li><a class="reference internal" href="#src.typehints.File.uuid">uuid</a></li>
+<li><a class="reference internal" href="#src.typehints.File.filename">filename</a></li>
+<li><a class="reference internal" href="#src.typehints.File.url">url</a></li>
+<li><a class="reference internal" href="#src.typehints.File.created_at">created_at</a></li>
+<li><a class="reference internal" href="#src.typehints.File.presignedPostFields">presignedPostFields</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.ObjectAttribute">ObjectAttribute</a><ul>
+<li><a class="reference internal" href="#src.typehints.ObjectAttribute.name">name</a></li>
+<li><a class="reference internal" href="#src.typehints.ObjectAttribute.input_type">input_type</a></li>
+<li><a class="reference internal" href="#src.typehints.ObjectAttribute.default_value">default_value</a></li>
+<li><a class="reference internal" href="#src.typehints.ObjectAttribute.values">values</a></li>
+<li><a class="reference internal" href="#src.typehints.ObjectAttribute.min">min</a></li>
+<li><a class="reference internal" href="#src.typehints.ObjectAttribute.max">max</a></li>
+<li><a class="reference internal" href="#src.typehints.ObjectAttribute.step">step</a></li>
+<li><a class="reference internal" href="#src.typehints.ObjectAttribute.__post_init__">__post_init__</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.ObjectAttributes">ObjectAttributes</a></li>
+<li><a class="reference internal" href="#src.typehints.ImageAttributes">ImageAttributes</a></li>
+<li><a class="reference internal" href="#src.typehints.Annotation">Annotation</a><ul>
+<li><a class="reference internal" href="#src.typehints.Annotation.id">id</a></li>
+<li><a class="reference internal" href="#src.typehints.Annotation.category_id">category_id</a></li>
+<li><a class="reference internal" href="#src.typehints.Annotation.attributes">attributes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.ImageSegmentationLabelAttributes">ImageSegmentationLabelAttributes</a><ul>
+<li><a class="reference internal" href="#src.typehints.ImageSegmentationLabelAttributes.annotations">annotations</a></li>
+<li><a class="reference internal" href="#src.typehints.ImageSegmentationLabelAttributes.segmentation_bitmap">segmentation_bitmap</a></li>
+<li><a class="reference internal" href="#src.typehints.ImageSegmentationLabelAttributes.image_attributes">image_attributes</a></li>
+<li><a class="reference internal" href="#src.typehints.ImageSegmentationLabelAttributes.format_version">format_version</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints._ImageVectorAnnotationBase">_ImageVectorAnnotationBase</a><ul>
+<li><a class="reference internal" href="#src.typehints._ImageVectorAnnotationBase.id">id</a></li>
+<li><a class="reference internal" href="#src.typehints._ImageVectorAnnotationBase.category_id">category_id</a></li>
+<li><a class="reference internal" href="#src.typehints._ImageVectorAnnotationBase.points">points</a></li>
+<li><a class="reference internal" href="#src.typehints._ImageVectorAnnotationBase.type">type</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.ImageVectorAnnotation">ImageVectorAnnotation</a><ul>
+<li><a class="reference internal" href="#src.typehints.ImageVectorAnnotation.attributes">attributes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.ImageVectorLabelAttributes">ImageVectorLabelAttributes</a><ul>
+<li><a class="reference internal" href="#src.typehints.ImageVectorLabelAttributes.annotations">annotations</a></li>
+<li><a class="reference internal" href="#src.typehints.ImageVectorLabelAttributes.format_version">format_version</a></li>
+<li><a class="reference internal" href="#src.typehints.ImageVectorLabelAttributes.image_attributes">image_attributes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.ImageSequenceVectorAnnotation">ImageSequenceVectorAnnotation</a><ul>
+<li><a class="reference internal" href="#src.typehints.ImageSequenceVectorAnnotation.track_id">track_id</a></li>
+<li><a class="reference internal" href="#src.typehints.ImageSequenceVectorAnnotation.is_keyframe">is_keyframe</a></li>
+<li><a class="reference internal" href="#src.typehints.ImageSequenceVectorAnnotation.attributes">attributes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.ImageVectorFrame">ImageVectorFrame</a><ul>
+<li><a class="reference internal" href="#src.typehints.ImageVectorFrame.annotations">annotations</a></li>
+<li><a class="reference internal" href="#src.typehints.ImageVectorFrame.timestamp">timestamp</a></li>
+<li><a class="reference internal" href="#src.typehints.ImageVectorFrame.format_version">format_version</a></li>
+<li><a class="reference internal" href="#src.typehints.ImageVectorFrame.image_attributes">image_attributes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.ImageSequenceVectorLabelAttributes">ImageSequenceVectorLabelAttributes</a><ul>
+<li><a class="reference internal" href="#src.typehints.ImageSequenceVectorLabelAttributes.frames">frames</a></li>
+<li><a class="reference internal" href="#src.typehints.ImageSequenceVectorLabelAttributes.format_version">format_version</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.PointcloudSegmentationLabelAttributes">PointcloudSegmentationLabelAttributes</a><ul>
+<li><a class="reference internal" href="#src.typehints.PointcloudSegmentationLabelAttributes.annotations">annotations</a></li>
+<li><a class="reference internal" href="#src.typehints.PointcloudSegmentationLabelAttributes.point_annotations">point_annotations</a></li>
+<li><a class="reference internal" href="#src.typehints.PointcloudSegmentationLabelAttributes.format_version">format_version</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.XYZ">XYZ</a><ul>
+<li><a class="reference internal" href="#src.typehints.XYZ.x">x</a></li>
+<li><a class="reference internal" href="#src.typehints.XYZ.y">y</a></li>
+<li><a class="reference internal" href="#src.typehints.XYZ.z">z</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints._PointcloudCuboidAnnotationBase">_PointcloudCuboidAnnotationBase</a><ul>
+<li><a class="reference internal" href="#src.typehints._PointcloudCuboidAnnotationBase.id">id</a></li>
+<li><a class="reference internal" href="#src.typehints._PointcloudCuboidAnnotationBase.category_id">category_id</a></li>
+<li><a class="reference internal" href="#src.typehints._PointcloudCuboidAnnotationBase.position">position</a></li>
+<li><a class="reference internal" href="#src.typehints._PointcloudCuboidAnnotationBase.dimensions">dimensions</a></li>
+<li><a class="reference internal" href="#src.typehints._PointcloudCuboidAnnotationBase.yaw">yaw</a></li>
+<li><a class="reference internal" href="#src.typehints._PointcloudCuboidAnnotationBase.type">type</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.PointcloudCuboidAnnotation">PointcloudCuboidAnnotation</a><ul>
+<li><a class="reference internal" href="#src.typehints.PointcloudCuboidAnnotation.attributes">attributes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.PointcloudCuboidLabelAttributes">PointcloudCuboidLabelAttributes</a><ul>
+<li><a class="reference internal" href="#src.typehints.PointcloudCuboidLabelAttributes.annotations">annotations</a></li>
+<li><a class="reference internal" href="#src.typehints.PointcloudCuboidLabelAttributes.format_version">format_version</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.PointcloudSequenceSegmentationAnnotation">PointcloudSequenceSegmentationAnnotation</a><ul>
+<li><a class="reference internal" href="#src.typehints.PointcloudSequenceSegmentationAnnotation.id">id</a></li>
+<li><a class="reference internal" href="#src.typehints.PointcloudSequenceSegmentationAnnotation.category_id">category_id</a></li>
+<li><a class="reference internal" href="#src.typehints.PointcloudSequenceSegmentationAnnotation.track_id">track_id</a></li>
+<li><a class="reference internal" href="#src.typehints.PointcloudSequenceSegmentationAnnotation.is_keyframe">is_keyframe</a></li>
+<li><a class="reference internal" href="#src.typehints.PointcloudSequenceSegmentationAnnotation.attributes">attributes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.PointcloudSegmentationFrame">PointcloudSegmentationFrame</a><ul>
+<li><a class="reference internal" href="#src.typehints.PointcloudSegmentationFrame.annotations">annotations</a></li>
+<li><a class="reference internal" href="#src.typehints.PointcloudSegmentationFrame.point_annotations">point_annotations</a></li>
+<li><a class="reference internal" href="#src.typehints.PointcloudSegmentationFrame.format_version">format_version</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.PointcloudSequenceSegmentationLabelAttributes">PointcloudSequenceSegmentationLabelAttributes</a><ul>
+<li><a class="reference internal" href="#src.typehints.PointcloudSequenceSegmentationLabelAttributes.frames">frames</a></li>
+<li><a class="reference internal" href="#src.typehints.PointcloudSequenceSegmentationLabelAttributes.format_version">format_version</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.PointcloudSequenceCuboidAnnotation">PointcloudSequenceCuboidAnnotation</a><ul>
+<li><a class="reference internal" href="#src.typehints.PointcloudSequenceCuboidAnnotation.track_id">track_id</a></li>
+<li><a class="reference internal" href="#src.typehints.PointcloudSequenceCuboidAnnotation.is_keyframe">is_keyframe</a></li>
+<li><a class="reference internal" href="#src.typehints.PointcloudSequenceCuboidAnnotation.attributes">attributes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.PointcloudSequenceCuboidFrame">PointcloudSequenceCuboidFrame</a><ul>
+<li><a class="reference internal" href="#src.typehints.PointcloudSequenceCuboidFrame.timestamp">timestamp</a></li>
+<li><a class="reference internal" href="#src.typehints.PointcloudSequenceCuboidFrame.annotations">annotations</a></li>
+<li><a class="reference internal" href="#src.typehints.PointcloudSequenceCuboidFrame.format_version">format_version</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.PointcloudSequenceCuboidLabelAttributes">PointcloudSequenceCuboidLabelAttributes</a><ul>
+<li><a class="reference internal" href="#src.typehints.PointcloudSequenceCuboidLabelAttributes.frames">frames</a></li>
+<li><a class="reference internal" href="#src.typehints.PointcloudSequenceCuboidLabelAttributes.format_version">format_version</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.TextAnnotation">TextAnnotation</a><ul>
+<li><a class="reference internal" href="#src.typehints.TextAnnotation.start">start</a></li>
+<li><a class="reference internal" href="#src.typehints.TextAnnotation.end">end</a></li>
+<li><a class="reference internal" href="#src.typehints.TextAnnotation.category_id">category_id</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.TextLabelAttributes">TextLabelAttributes</a><ul>
+<li><a class="reference internal" href="#src.typehints.TextLabelAttributes.annotations">annotations</a></li>
+<li><a class="reference internal" href="#src.typehints.TextLabelAttributes.format_version">format_version</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.LabelAttributes">LabelAttributes</a></li>
+<li><a class="reference internal" href="#src.typehints.Label">Label</a><ul>
+<li><a class="reference internal" href="#src.typehints.Label.sample_uuid">sample_uuid</a></li>
+<li><a class="reference internal" href="#src.typehints.Label.label_type">label_type</a></li>
+<li><a class="reference internal" href="#src.typehints.Label.label_status">label_status</a></li>
+<li><a class="reference internal" href="#src.typehints.Label.attributes">attributes</a></li>
+<li><a class="reference internal" href="#src.typehints.Label.created_at">created_at</a></li>
+<li><a class="reference internal" href="#src.typehints.Label.created_by">created_by</a></li>
+<li><a class="reference internal" href="#src.typehints.Label.updated_at">updated_at</a></li>
+<li><a class="reference internal" href="#src.typehints.Label.score">score</a></li>
+<li><a class="reference internal" href="#src.typehints.Label.rating">rating</a></li>
+<li><a class="reference internal" href="#src.typehints.Label.reviewed_at">reviewed_at</a></li>
+<li><a class="reference internal" href="#src.typehints.Label.reviewed_by">reviewed_by</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.ImageSampleAttributes">ImageSampleAttributes</a><ul>
+<li><a class="reference internal" href="#src.typehints.ImageSampleAttributes.image">image</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.ImageFrame">ImageFrame</a><ul>
+<li><a class="reference internal" href="#src.typehints.ImageFrame.name">name</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.ImageSequenceSampleAttributes">ImageSequenceSampleAttributes</a><ul>
+<li><a class="reference internal" href="#src.typehints.ImageSequenceSampleAttributes.frames">frames</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.PCD">PCD</a><ul>
+<li><a class="reference internal" href="#src.typehints.PCD.url">url</a></li>
+<li><a class="reference internal" href="#src.typehints.PCD.type">type</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.XYZW">XYZW</a><ul>
+<li><a class="reference internal" href="#src.typehints.XYZW.qx">qx</a></li>
+<li><a class="reference internal" href="#src.typehints.XYZW.qy">qy</a></li>
+<li><a class="reference internal" href="#src.typehints.XYZW.qz">qz</a></li>
+<li><a class="reference internal" href="#src.typehints.XYZW.qw">qw</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.EgoPose">EgoPose</a><ul>
+<li><a class="reference internal" href="#src.typehints.EgoPose.position">position</a></li>
+<li><a class="reference internal" href="#src.typehints.EgoPose.heading">heading</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.PointcloudSampleAttributes">PointcloudSampleAttributes</a><ul>
+<li><a class="reference internal" href="#src.typehints.PointcloudSampleAttributes.pcd">pcd</a></li>
+<li><a class="reference internal" href="#src.typehints.PointcloudSampleAttributes.ego_pose">ego_pose</a></li>
+<li><a class="reference internal" href="#src.typehints.PointcloudSampleAttributes.default_z">default_z</a></li>
+<li><a class="reference internal" href="#src.typehints.PointcloudSampleAttributes.name">name</a></li>
+<li><a class="reference internal" href="#src.typehints.PointcloudSampleAttributes.timestamp">timestamp</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.PointcloudSequenceSampleAttributes">PointcloudSequenceSampleAttributes</a><ul>
+<li><a class="reference internal" href="#src.typehints.PointcloudSequenceSampleAttributes.frames">frames</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.TextSampleAttributes">TextSampleAttributes</a><ul>
+<li><a class="reference internal" href="#src.typehints.TextSampleAttributes.text">text</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.SampleAttributes">SampleAttributes</a></li>
+<li><a class="reference internal" href="#src.typehints.Sample">Sample</a><ul>
+<li><a class="reference internal" href="#src.typehints.Sample.uuid">uuid</a></li>
+<li><a class="reference internal" href="#src.typehints.Sample.name">name</a></li>
+<li><a class="reference internal" href="#src.typehints.Sample.attributes">attributes</a></li>
+<li><a class="reference internal" href="#src.typehints.Sample.metadata">metadata</a></li>
+<li><a class="reference internal" href="#src.typehints.Sample.created_at">created_at</a></li>
+<li><a class="reference internal" href="#src.typehints.Sample.created_by">created_by</a></li>
+<li><a class="reference internal" href="#src.typehints.Sample.comments">comments</a></li>
+<li><a class="reference internal" href="#src.typehints.Sample.priority">priority</a></li>
+<li><a class="reference internal" href="#src.typehints.Sample.has_embedding">has_embedding</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.User">User</a><ul>
+<li><a class="reference internal" href="#src.typehints.User.username">username</a></li>
+<li><a class="reference internal" href="#src.typehints.User.created_at">created_at</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.Collaborator">Collaborator</a><ul>
+<li><a class="reference internal" href="#src.typehints.Collaborator.user">user</a></li>
+<li><a class="reference internal" href="#src.typehints.Collaborator.role">role</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.TaskAttributeCategory">TaskAttributeCategory</a><ul>
+<li><a class="reference internal" href="#src.typehints.TaskAttributeCategory.name">name</a></li>
+<li><a class="reference internal" href="#src.typehints.TaskAttributeCategory.id">id</a></li>
+<li><a class="reference internal" href="#src.typehints.TaskAttributeCategory.color">color</a></li>
+<li><a class="reference internal" href="#src.typehints.TaskAttributeCategory.attributes">attributes</a></li>
+<li><a class="reference internal" href="#src.typehints.TaskAttributeCategory.dimensions">dimensions</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.TaskAttributes">TaskAttributes</a><ul>
+<li><a class="reference internal" href="#src.typehints.TaskAttributes.format_version">format_version</a></li>
+<li><a class="reference internal" href="#src.typehints.TaskAttributes.categories">categories</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.Owner">Owner</a><ul>
+<li><a class="reference internal" href="#src.typehints.Owner.username">username</a></li>
+<li><a class="reference internal" href="#src.typehints.Owner.created_at">created_at</a></li>
+<li><a class="reference internal" href="#src.typehints.Owner.email">email</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.Statistics">Statistics</a><ul>
+<li><a class="reference internal" href="#src.typehints.Statistics.prelabeled_count">prelabeled_count</a></li>
+<li><a class="reference internal" href="#src.typehints.Statistics.labeled_count">labeled_count</a></li>
+<li><a class="reference internal" href="#src.typehints.Statistics.reviewed_count">reviewed_count</a></li>
+<li><a class="reference internal" href="#src.typehints.Statistics.rejected_count">rejected_count</a></li>
+<li><a class="reference internal" href="#src.typehints.Statistics.skipped_count">skipped_count</a></li>
+<li><a class="reference internal" href="#src.typehints.Statistics.samples_count">samples_count</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.Labelset">Labelset</a><ul>
+<li><a class="reference internal" href="#src.typehints.Labelset.name">name</a></li>
+<li><a class="reference internal" href="#src.typehints.Labelset.description">description</a></li>
+<li><a class="reference internal" href="#src.typehints.Labelset.uuid">uuid</a></li>
+<li><a class="reference internal" href="#src.typehints.Labelset.readme">readme</a></li>
+<li><a class="reference internal" href="#src.typehints.Labelset.task_type">task_type</a></li>
+<li><a class="reference internal" href="#src.typehints.Labelset.attributes">attributes</a></li>
+<li><a class="reference internal" href="#src.typehints.Labelset.is_groundtruth">is_groundtruth</a></li>
+<li><a class="reference internal" href="#src.typehints.Labelset.statistics">statistics</a></li>
+<li><a class="reference internal" href="#src.typehints.Labelset.created_at">created_at</a></li>
+<li><a class="reference internal" href="#src.typehints.Labelset.stats">stats</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.LabelStats">LabelStats</a><ul>
+<li><a class="reference internal" href="#src.typehints.LabelStats.TOTAL">TOTAL</a></li>
+<li><a class="reference internal" href="#src.typehints.LabelStats.LABELED">LABELED</a></li>
+<li><a class="reference internal" href="#src.typehints.LabelStats.UNLABELED">UNLABELED</a></li>
+<li><a class="reference internal" href="#src.typehints.LabelStats.PRELABELED">PRELABELED</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#src.typehints.Dataset">Dataset</a><ul>
+<li><a class="reference internal" href="#src.typehints.Dataset.name">name</a></li>
+<li><a class="reference internal" href="#src.typehints.Dataset.description">description</a></li>
+<li><a class="reference internal" href="#src.typehints.Dataset.data_type">data_type</a></li>
+<li><a class="reference internal" href="#src.typehints.Dataset.category">category</a></li>
+<li><a class="reference internal" href="#src.typehints.Dataset.public">public</a></li>
+<li><a class="reference internal" href="#src.typehints.Dataset.owner">owner</a></li>
+<li><a class="reference internal" href="#src.typehints.Dataset.created_at">created_at</a></li>
+<li><a class="reference internal" href="#src.typehints.Dataset.enable_ratings">enable_ratings</a></li>
+<li><a class="reference internal" href="#src.typehints.Dataset.enable_skip_labeling">enable_skip_labeling</a></li>
+<li><a class="reference internal" href="#src.typehints.Dataset.enable_skip_reviewing">enable_skip_reviewing</a></li>
+<li><a class="reference internal" href="#src.typehints.Dataset.enable_save_button">enable_save_button</a></li>
+<li><a class="reference internal" href="#src.typehints.Dataset.task_type">task_type</a></li>
+<li><a class="reference internal" href="#src.typehints.Dataset.task_readme">task_readme</a></li>
+<li><a class="reference internal" href="#src.typehints.Dataset.label_stats">label_stats</a></li>
+<li><a class="reference internal" href="#src.typehints.Dataset.samples_count">samples_count</a></li>
+<li><a class="reference internal" href="#src.typehints.Dataset.collaborators_count">collaborators_count</a></li>
+<li><a class="reference internal" href="#src.typehints.Dataset.cloned_from">cloned_from</a></li>
+<li><a class="reference internal" href="#src.typehints.Dataset.task_attributes">task_attributes</a></li>
+<li><a class="reference internal" href="#src.typehints.Dataset.labelsets">labelsets</a></li>
+<li><a class="reference internal" href="#src.typehints.Dataset.role">role</a></li>
+<li><a class="reference internal" href="#src.typehints.Dataset.readme">readme</a></li>
+<li><a class="reference internal" href="#src.typehints.Dataset.noncollaborator_can_label">noncollaborator_can_label</a></li>
+<li><a class="reference internal" href="#src.typehints.Dataset.noncollaborator_can_review">noncollaborator_can_review</a></li>
+<li><a class="reference internal" href="#src.typehints.Dataset.tasks">tasks</a></li>
+<li><a class="reference internal" href="#src.typehints.Dataset.embeddings_enabled">embeddings_enabled</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/scripts/furo.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    </body>
+</html>
