@@ -26,21 +26,14 @@ setup(
         'pycocotools;platform_system!="Windows"',
         'pycocotools-windows;platform_system=="Windows"',
         # Type hints
-        "typing_extensions",
-        # "dataclasses",
         "typing",
+        "typing_extensions",
         "enum",
         "mypy",
         "pydantic",
-        # Tests
-        # "dotenv",
         # Documentation
         "sphinx",
-        # "myst-parser",
         "furo",
-        # "sphinx-book-theme",
-        # "nbsphinx",
-        # "pandoc",
         "sphinx-autoapi",
     ],
     python_requires=">=3.6.0",

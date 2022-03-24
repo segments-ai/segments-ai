@@ -2,10 +2,10 @@ from io import BytesIO
 from typing import Any, Dict, Optional, Tuple, Union
 import requests
 import numpy as np
-
-# import numpy.typing as npt
 from PIL import Image, ExifTags
 from .typehints import Dataset, Release
+
+# import numpy.typing as npt
 
 session = requests.Session()
 adapter = requests.adapters.HTTPAdapter(max_retries=3)

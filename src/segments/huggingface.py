@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 import requests
 from PIL import Image
 from .typehints import Release

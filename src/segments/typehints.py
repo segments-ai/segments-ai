@@ -5,14 +5,6 @@ from pydantic import BaseModel
 ####################################
 # Enums, constants and other types #
 ####################################
-# class LabelStatus(str, Enum):
-#     reviewed = "REVIEWED"
-#     reviewing_in_progress = "REVIEWING_IN_PROGRESS"
-#     labeled = "LABELED"
-#     labeling_in_progress = "LABELING_IN_PROGRESS"
-#     rejected = "REJECTED"
-#     prelabeled = "PRELABELED"
-#     skipped = "SKIPPED"
 LabelStatus = Literal[
     "REVIEWED",
     "REVIEWING_IN_PROGRESS",
@@ -22,21 +14,6 @@ LabelStatus = Literal[
     "PRELABELED",
     "SKIPPED",
 ]
-
-
-# class TaskType(str, Enum):
-#     segmentation_bitmap = "segmentation-bitmap"
-#     segmentation_bitmap_highres = "segmentation-bitmap-highres"
-#     bboxes = "bboxes"
-#     vector = "vector"
-#     pointcloud_cuboid = "pointcloud-cuboid"
-#     pointcloud_cuboid_sequence = "pointcloud-cuboid-sequence"
-#     pointcloud_segmentation = "pointcloud-segmentation"
-#     pointcloud_segmentation_sequence = "pointcloud-segmentation-sequence"
-#     text_named_entities = "text-named-entities"
-#     text_span_categorization = "text-span-categorization"
-#     image_vector_sequence = "image-vector-sequence"
-#     other = ""
 TaskType = Literal[
     "segmentation-bitmap",
     "segmentation-bitmap-highres",
@@ -51,86 +28,17 @@ TaskType = Literal[
     "image-vector-sequence",
     "",
 ]
-
-
-# class DataType(str, Enum):
-#     image = "IMAGE"
 DataType = Literal["IMAGE"]
-
-
-# class Role(str, Enum):
-#     labeler = "labeler"
-#     reviewer = "reviewer"
-#     admin = "admin"
 Role = Literal["labeler", "reviewer", "admin"]
-
-
-# class Status(str, Enum):
-#     pending = "PENDING"
-#     succeeded = "SUCCEEDED"
-#     failed = "FAILED"
 Status = Literal["PENDING", "SUCCEEDED", "FAILED"]
-
-
-# class ReleaseType(str, Enum):
-#     json = "JSON"
 ReleaseType = Literal["JSON"]
-
-
-# class ImageVectorAnnotationType(str, Enum):
-#     bbox = "bbox"
-#     polygon = "polygon"
-#     polyline = "polyline"
-#     point = "point"
 ImageVectorAnnotationType = Literal["bbox", "polygon", "polyline", "point"]
-
-
-# class PointcloudAnnotationType(str, Enum):
-#     cuboid = "cuboid"
 PointcloudAnnotationType = Literal["cuboid"]
-
-# class PCDType(str, Enum):
-#     pcd = "pcd"
-#     kitti = "kitti"
-#     nuscenes = "nuscenes"
 PCDType = Literal["pcd", "kitti", "nuscenes"]
-
-
-# class InputType(str, Enum):
-#     select = "select"
-#     text = "text"
-#     number = "number"
-#     checkbox = "checkbox"
 InputType = Literal["select", "text", "number", "checkbox"]
-
-
-# class Category(str, Enum):
-#     street_scenery = "street_scenery"
-#     garden = "garden"
-#     agriculture = "agriculture"
-#     satellite = "satellite"
-#     people = "people"
-#     medical = "medical"
-#     other = "other"
 Category = Literal[
     "street_scenery", "garden", "agriculture", "satellite", "people", "medical", "other"
 ]
-
-# DACITE_CONFIG = Config(
-#     cast=[
-#         LabelStatus,
-#         TaskType,
-#         DataType,
-#         Role,
-#         Status,
-#         ReleaseType,
-#         ImageVectorAnnotationType,
-#         PointcloudAnnotationType,
-#         PCDType,
-#         InputType,
-#         Category,
-#     ]
-# )
 RGB = List[float]  # TODO Tuple[float, float, float]
 RGBA = List[float]  # TODO Tuple[float, float, float, float]
 FormatVersion = Union[float, str]

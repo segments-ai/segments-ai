@@ -11,6 +11,7 @@ from pycocotools import mask
 from .typehints import Dataset
 from .utils import get_semantic_bitmap
 from pydantic import BaseModel
+
 # import numpy.typing as npt
 
 
@@ -364,14 +365,13 @@ def export_coco_panoptic(dataset: Dataset, export_folder: str) -> Tuple[str, str
         isthing = int(category["has_instances"]) if "has_instances" in category else 0
 
         categories.append(
-            from_dict(
-                data_class=Category,
-                data={
+            Category.parse_obj(
+                {
                     "id": category["id"],
                     "name": category["name"],
                     "color": color,
                     "isthing": isthing,
-                },
+                }
             )
         )
     # print(categories)

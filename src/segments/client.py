@@ -86,10 +86,6 @@ class SegmentsClient:
             r = self.get("/users/{}/datasets/".format(user))
         else:
             r = self.get("/user/datasets/")
-        # datasets = [
-        #     from_dict(data_class=Dataset, data=dataset, config=DACITE_CONFIG)
-        #     for dataset in r.json()
-        # ]
         datasets = parse_obj_as(List[Dataset], r.json())
 
         return datasets
@@ -105,7 +101,6 @@ class SegmentsClient:
         """
 
         r = self.get("/datasets/{}/".format(dataset_identifier))
-        # dataset = from_dict(data_class=Dataset, data=r.json(), config=DACITE_CONFIG)
         dataset = Dataset.parse_obj(r.json())
 
         return dataset
@@ -147,9 +142,6 @@ class SegmentsClient:
                 "categories": [{"id": 0, "name": "object"}],
             }
         try:
-            # from_dict(
-            #     data_class=TaskAttributes, data=task_attributes, config=DACITE_CONFIG
-            # )
             TaskAttributes.parse_obj(task_attributes)
         except Exception as e:
             raise Exception(
@@ -171,7 +163,6 @@ class SegmentsClient:
                 "data_type": "IMAGE",
             }
             r = self.post("/user/datasets/", payload)
-            # dataset = from_dict(data_class=Dataset, data=r.json(), config=DACITE_CONFIG)
             dataset = Dataset.parse_obj(r.json())
 
             return dataset
@@ -238,7 +229,6 @@ class SegmentsClient:
 
         r = self.patch("/datasets/{}/".format(dataset_identifier), payload)
         print("Updated " + dataset_identifier)
-        # dataset = from_dict(data_class=Dataset, data=r.json(), config=DACITE_CONFIG)
         dataset = Dataset.parse_obj(r.json())
 
         return dataset
@@ -267,9 +257,6 @@ class SegmentsClient:
         """
         payload = {"user": username, "role": role}
         r = self.post("/datasets/{}/collaborators/".format(dataset_identifier), payload)
-        # collaborator = from_dict(
-        #     data_class=Collaborator, data=r.json(), config=DACITE_CONFIG
-        # )
         collaborator = Collaborator.parse_obj(r.json())
 
         return collaborator
@@ -473,7 +460,6 @@ class SegmentsClient:
 
         r = self.patch("/samples/{}/".format(uuid), payload)
         print("Updated " + uuid)
-        # sample = from_dict(data_class=Sample, data=r.json(), config=DACITE_CONFIG)
         sample = Sample.parse_obj(r.json())
 
         return sample
