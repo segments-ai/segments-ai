@@ -12,7 +12,7 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath("../../src/"))
+sys.path.insert(0, os.path.abspath("../../src/segments/"))
 
 # -- Project information -----------------------------------------------------
 
@@ -32,7 +32,7 @@ release = "0.1"
 extensions = [
     # "myst_parser",
     # "nbsphinx",
-    # "autoapi.extension",
+    "autoapi.extension",
     "sphinx.ext.duration",
     "sphinx.ext.autosectionlabel",
     "sphinx.ext.autodoc",
@@ -42,7 +42,7 @@ extensions = [
 ]
 autosummary_generate = True
 autoapi_type = "python"
-autoapi_dirs = ["../../src/"]
+autoapi_dirs = ["../../src/segments/"]
 autodoc_typehints = "description"
 
 # Add any paths that contain templates here, relative to this directory.
