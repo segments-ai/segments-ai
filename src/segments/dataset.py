@@ -14,7 +14,7 @@ class SegmentsDataset:
     """SegmentsDataset class.
 
     Args:
-        release_file: Path to a release file, or a release dataclass resulting from client.get_release().
+        release_file: Path to a release file, or a release class resulting from client.get_release().
         labelset: The labelset that should be loaded. Defaults to 'ground-truth'.
         filter_by: A list of label statuses to filter by. Defaults to None.
         segments_dir: The directory where the data will be downloaded to for caching. Set to None to disable caching. Defaults to 'segments'.

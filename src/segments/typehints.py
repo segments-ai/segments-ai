@@ -1,106 +1,136 @@
-from dataclasses import dataclass
-from enum import StrEnum
 from typing import Any, Dict, List, Optional, Union
-from typing_extensions import TypedDict
-from dacite import Config
+from typing_extensions import TypedDict, Literal
+from pydantic import BaseModel
 
 ####################################
 # Enums, constants and other types #
 ####################################
-class LabelStatus(StrEnum):
-    reviewed = "REVIEWED"
-    reviewing_in_progress = "REVIEWING_IN_PROGRESS"
-    labeled = "LABELED"
-    labeling_in_progress = "LABELING_IN_PROGRESS"
-    rejected = "REJECTED"
-    prelabeled = "PRELABELED"
-    skipped = "SKIPPED"
+# class LabelStatus(str, Enum):
+#     reviewed = "REVIEWED"
+#     reviewing_in_progress = "REVIEWING_IN_PROGRESS"
+#     labeled = "LABELED"
+#     labeling_in_progress = "LABELING_IN_PROGRESS"
+#     rejected = "REJECTED"
+#     prelabeled = "PRELABELED"
+#     skipped = "SKIPPED"
+LabelStatus = Literal[
+    "REVIEWED",
+    "REVIEWING_IN_PROGRESS",
+    "LABELED",
+    "LABELING_IN_PROGRESS",
+    "REJECTED",
+    "PRELABELED",
+    "SKIPPED",
+]
 
 
-class TaskType(StrEnum):
-    segmentation_bitmap = "segmentation-bitmap"
-    segmentation_bitmap_highres = "segmentation-bitmap-highres"
-    bboxes = "bboxes"
-    vector = "vector"
-    pointcloud_cuboid = "pointcloud-cuboid"
-    pointcloud_cuboid_sequence = "pointcloud-cuboid-sequence"
-    pointcloud_segmentation = "pointcloud-segmentation"
-    pointcloud_segmentation_sequence = "pointcloud-segmentation-sequence"
-    text_named_entities = "text-named-entities"
-    text_span_categorization = "text-span-categorization"
-    image_vector_sequence = "image-vector-sequence"
-    other = ""
+# class TaskType(str, Enum):
+#     segmentation_bitmap = "segmentation-bitmap"
+#     segmentation_bitmap_highres = "segmentation-bitmap-highres"
+#     bboxes = "bboxes"
+#     vector = "vector"
+#     pointcloud_cuboid = "pointcloud-cuboid"
+#     pointcloud_cuboid_sequence = "pointcloud-cuboid-sequence"
+#     pointcloud_segmentation = "pointcloud-segmentation"
+#     pointcloud_segmentation_sequence = "pointcloud-segmentation-sequence"
+#     text_named_entities = "text-named-entities"
+#     text_span_categorization = "text-span-categorization"
+#     image_vector_sequence = "image-vector-sequence"
+#     other = ""
+TaskType = Literal[
+    "segmentation-bitmap",
+    "segmentation-bitmap-highres",
+    "bboxes",
+    "vector",
+    "pointcloud-cuboid",
+    "pointcloud-cuboid-sequence",
+    "pointcloud-segmentation",
+    "pointcloud-segmentation-sequence",
+    "text-named-entities",
+    "text-span-categorization",
+    "image-vector-sequence",
+    "",
+]
 
 
-class DataType(StrEnum):
-    image = "IMAGE"
+# class DataType(str, Enum):
+#     image = "IMAGE"
+DataType = Literal["IMAGE"]
 
 
-class Role(StrEnum):
-    labeler = "labeler"
-    reviewer = "reviewer"
-    admin = "admin"
+# class Role(str, Enum):
+#     labeler = "labeler"
+#     reviewer = "reviewer"
+#     admin = "admin"
+Role = Literal["labeler", "reviewer", "admin"]
 
 
-class Status(StrEnum):
-    pending = "PENDING"
-    succeeded = "SUCCEEDED"
-    failed = "FAILED"
+# class Status(str, Enum):
+#     pending = "PENDING"
+#     succeeded = "SUCCEEDED"
+#     failed = "FAILED"
+Status = Literal["PENDING", "SUCCEEDED", "FAILED"]
 
 
-class ReleaseType(StrEnum):
-    json = "JSON"
+# class ReleaseType(str, Enum):
+#     json = "JSON"
+ReleaseType = Literal["JSON"]
 
 
-class ImageVectorAnnotationType(StrEnum):
-    bbox = "bbox"
-    polygon = "polygon"
-    polyline = "polyline"
-    point = "point"
+# class ImageVectorAnnotationType(str, Enum):
+#     bbox = "bbox"
+#     polygon = "polygon"
+#     polyline = "polyline"
+#     point = "point"
+ImageVectorAnnotationType = Literal["bbox", "polygon", "polyline", "point"]
 
 
-class PointcloudAnnotationType(StrEnum):
-    cuboid = "cuboid"
+# class PointcloudAnnotationType(str, Enum):
+#     cuboid = "cuboid"
+PointcloudAnnotationType = Literal["cuboid"]
+
+# class PCDType(str, Enum):
+#     pcd = "pcd"
+#     kitti = "kitti"
+#     nuscenes = "nuscenes"
+PCDType = Literal["pcd", "kitti", "nuscenes"]
 
 
-class PCDType(StrEnum):
-    pcd = "pcd"
-    kitti = "kitti"
-    nuscenes = "nuscenes"
+# class InputType(str, Enum):
+#     select = "select"
+#     text = "text"
+#     number = "number"
+#     checkbox = "checkbox"
+InputType = Literal["select", "text", "number", "checkbox"]
 
 
-class InputType(StrEnum):
-    select = "select"
-    text = "text"
-    number = "number"
-    checkbox = "checkbox"
+# class Category(str, Enum):
+#     street_scenery = "street_scenery"
+#     garden = "garden"
+#     agriculture = "agriculture"
+#     satellite = "satellite"
+#     people = "people"
+#     medical = "medical"
+#     other = "other"
+Category = Literal[
+    "street_scenery", "garden", "agriculture", "satellite", "people", "medical", "other"
+]
 
-
-class Category(StrEnum):
-    street_scenery = "street_scenery"
-    garden = "garden"
-    agriculture = "agriculture"
-    satellite = "satellite"
-    people = "people"
-    medical = "medical"
-    other = "other"
-
-
-DACITE_CONFIG = Config(
-    cast=[
-        LabelStatus,
-        TaskType,
-        DataType,
-        Role,
-        Status,
-        ReleaseType,
-        ImageVectorAnnotationType,
-        PointcloudAnnotationType,
-        PCDType,
-        InputType,
-        Category,
-    ]
-)
+# DACITE_CONFIG = Config(
+#     cast=[
+#         LabelStatus,
+#         TaskType,
+#         DataType,
+#         Role,
+#         Status,
+#         ReleaseType,
+#         ImageVectorAnnotationType,
+#         PointcloudAnnotationType,
+#         PCDType,
+#         InputType,
+#         Category,
+#     ]
+# )
 RGB = List[float]  # TODO Tuple[float, float, float]
 RGBA = List[float]  # TODO Tuple[float, float, float, float]
 FormatVersion = Union[float, str]
@@ -113,13 +143,11 @@ class AuthHeader(TypedDict):
 ###########
 # Release #
 ###########
-@dataclass
-class URL:
+class URL(BaseModel):
     url: Optional[str] = None
 
 
-@dataclass
-class Release:
+class Release(BaseModel):
     uuid: str
     name: str
     description: str
@@ -150,14 +178,12 @@ AWSFields = TypedDict(
 )
 
 
-@dataclass
-class PresignedPostFields:
+class PresignedPostFields(BaseModel):
     url: str
-    fields: AWSFields  # Dict[str, Any] - AWSFields
+    fields: AWSFields
 
 
-@dataclass
-class File:
+class File(BaseModel):
     uuid: str
     filename: str
     url: str
@@ -168,8 +194,7 @@ class File:
 #####################################
 # Object and image level attributes #
 #####################################
-@dataclass
-class ObjectAttribute:
+class ObjectAttribute(BaseModel):
     # Select and checkbox
     name: str
     input_type: InputType
@@ -184,11 +209,13 @@ class ObjectAttribute:
     def __post_init__(self):
         # Select
         if isinstance(self.values, list):
-            assert self.input_type == InputType.select
+            assert self.input_type == "select"  # InputType.select
         # Text/select
         if isinstance(self.default_value, str):
             assert (
-                self.input_type == InputType.text or self.input_type == InputType.select
+                self.input_type == "text"
+                or self.input_type
+                == "select"  # InputType.text or self.input_type == InputType.select
             )
         # Number
         if (
@@ -197,10 +224,10 @@ class ObjectAttribute:
             or isinstance(self.step, float)
             or isinstance(self.default_value, float)
         ):
-            assert self.input_type == InputType.number
+            assert self.input_type == "number"  # InputType.number
         # Checkbox
         if isinstance(self.default_value, bool):
-            assert self.input_type == InputType.checkbox
+            assert self.input_type == "checkbox"  # InputType.checkbox
 
 
 ObjectAttributes = List[ObjectAttribute]
@@ -209,16 +236,14 @@ ImageAttributes = Dict[str, str]
 # #########
 # # Label #
 # #########
-@dataclass
-class Annotation:
+class Annotation(BaseModel):
     id: int
     category_id: int
     attributes: Optional[ObjectAttributes] = None
 
 
 # Image segmenation
-@dataclass
-class ImageSegmentationLabelAttributes:
+class ImageSegmentationLabelAttributes(BaseModel):
     annotations: List[Annotation]
     segmentation_bitmap: URL
     image_attributes: Optional[ImageAttributes] = None
@@ -227,58 +252,50 @@ class ImageSegmentationLabelAttributes:
 
 # Image vector
 # https://stackoverflow.com/questions/51575931/class-inheritance-in-python-3-7-dataclasses
-@dataclass
-class _ImageVectorAnnotationBase:
+class _ImageVectorAnnotationBase(BaseModel):
     id: int
     category_id: int
     points: List[List[float]]
     type: ImageVectorAnnotationType
 
 
-@dataclass
 class ImageVectorAnnotation(_ImageVectorAnnotationBase):
     attributes: Optional[ObjectAttributes] = None
 
 
-@dataclass
-class ImageVectorLabelAttributes:
+class ImageVectorLabelAttributes(BaseModel):
     annotations: List[ImageVectorAnnotation]
     format_version: Optional[FormatVersion] = None
     image_attributes: Optional[ImageAttributes] = None
 
 
 # Image sequence vector
-@dataclass
 class ImageSequenceVectorAnnotation(_ImageVectorAnnotationBase):
     track_id: int
     is_keyframe: bool = False
     attributes: Optional[ObjectAttributes] = None
 
 
-@dataclass
-class ImageVectorFrame:
+class ImageVectorFrame(BaseModel):
     annotations: List[ImageSequenceVectorAnnotation]
     timestamp: Optional[int] = None
     format_version: Optional[FormatVersion] = None
     image_attributes: Optional[ImageAttributes] = None
 
 
-@dataclass
-class ImageSequenceVectorLabelAttributes:
+class ImageSequenceVectorLabelAttributes(BaseModel):
     frames: List[ImageVectorFrame]
     format_version: Optional[FormatVersion] = None
 
 
 # Point cloud segmentation
-@dataclass
-class PointcloudSegmentationLabelAttributes:
+class PointcloudSegmentationLabelAttributes(BaseModel):
     annotations: List[Annotation]
     point_annotations: List[int]
     format_version: Optional[FormatVersion] = None
 
 
-@dataclass
-class XYZ:
+class XYZ(BaseModel):
     x: float
     y: float
     z: float
@@ -286,8 +303,7 @@ class XYZ:
 
 # Point cloud cuboid
 # https://stackoverflow.com/questions/51575931/class-inheritance-in-python-3-7-dataclasses
-@dataclass
-class _PointcloudCuboidAnnotationBase:
+class _PointcloudCuboidAnnotationBase(BaseModel):
     id: int
     category_id: int
     position: XYZ
@@ -296,20 +312,17 @@ class _PointcloudCuboidAnnotationBase:
     type: PointcloudAnnotationType
 
 
-@dataclass
 class PointcloudCuboidAnnotation(_PointcloudCuboidAnnotationBase):
     attributes: Optional[ObjectAttributes] = None
 
 
-@dataclass
-class PointcloudCuboidLabelAttributes:
+class PointcloudCuboidLabelAttributes(BaseModel):
     annotations: List[PointcloudCuboidAnnotation]
     format_version: Optional[FormatVersion] = None
 
 
 # Point cloud sequence segmentation
-@dataclass
-class PointcloudSequenceSegmentationAnnotation:
+class PointcloudSequenceSegmentationAnnotation(BaseModel):
     id: int
     category_id: int
     track_id: int
@@ -317,50 +330,43 @@ class PointcloudSequenceSegmentationAnnotation:
     attributes: Optional[ObjectAttributes] = None
 
 
-@dataclass
-class PointcloudSegmentationFrame:
+class PointcloudSegmentationFrame(BaseModel):
     annotations: List[PointcloudSequenceSegmentationAnnotation]
     point_annotations: Optional[List[int]] = None
     format_version: Optional[FormatVersion] = None
 
 
-@dataclass
-class PointcloudSequenceSegmentationLabelAttributes:
+class PointcloudSequenceSegmentationLabelAttributes(BaseModel):
     frames: List[PointcloudSegmentationFrame]
     format_version: Optional[FormatVersion] = None
 
 
 # Point cloud sequence cuboid
-@dataclass
 class PointcloudSequenceCuboidAnnotation(_PointcloudCuboidAnnotationBase):
     track_id: int
     is_keyframe: bool = False
     attributes: Optional[ObjectAttributes] = None
 
 
-@dataclass
-class PointcloudSequenceCuboidFrame:
+class PointcloudSequenceCuboidFrame(BaseModel):
     timestamp: int
     annotations: List[PointcloudSequenceCuboidAnnotation]
     format_version: Optional[FormatVersion] = None
 
 
-@dataclass
-class PointcloudSequenceCuboidLabelAttributes:
+class PointcloudSequenceCuboidLabelAttributes(BaseModel):
     frames: List[PointcloudSequenceCuboidFrame]
     format_version: Optional[FormatVersion] = None
 
 
 # Text
-@dataclass
-class TextAnnotation:
+class TextAnnotation(BaseModel):
     start: int
     end: int
     category_id: int
 
 
-@dataclass
-class TextLabelAttributes:
+class TextLabelAttributes(BaseModel):
     annotations: List[TextAnnotation]
     format_version: Optional[FormatVersion] = None
 
@@ -377,8 +383,7 @@ LabelAttributes = Union[
 ]
 
 
-@dataclass
-class Label:
+class Label(BaseModel):
     sample_uuid: str
     label_type: TaskType
     label_status: LabelStatus
@@ -396,45 +401,38 @@ class Label:
 # # Sample #
 # ##########
 # Image
-@dataclass
-class ImageSampleAttributes:
+class ImageSampleAttributes(BaseModel):
     image: URL
 
 
 # Image sequence
-@dataclass
 class ImageFrame(ImageSampleAttributes):
     name: Optional[str] = None
 
 
-@dataclass
-class ImageSequenceSampleAttributes:
+class ImageSequenceSampleAttributes(BaseModel):
     frames: List[ImageFrame]
 
 
 # Point cloud
-@dataclass
-class PCD:
+class PCD(BaseModel):
     url: str
     type: PCDType = "pcd"
 
 
-@dataclass
-class XYZW:
+class XYZW(BaseModel):
     qx: float
     qy: float
     qz: float
     qw: float
 
 
-@dataclass
-class EgoPose:
+class EgoPose(BaseModel):
     position: XYZ
     heading: XYZW
 
 
-@dataclass
-class PointcloudSampleAttributes:
+class PointcloudSampleAttributes(BaseModel):
     pcd: PCD
     ego_pose: Optional[EgoPose] = None
     default_z: Optional[float] = None
@@ -443,14 +441,12 @@ class PointcloudSampleAttributes:
 
 
 # Point cloud sequence
-@dataclass
-class PointcloudSequenceSampleAttributes:
+class PointcloudSequenceSampleAttributes(BaseModel):
     frames: List[PointcloudSampleAttributes]
 
 
 # Text
-@dataclass
-class TextSampleAttributes:
+class TextSampleAttributes(BaseModel):
     text: str
 
 
@@ -463,8 +459,7 @@ SampleAttributes = Union[
 ]
 
 
-@dataclass
-class Sample:
+class Sample(BaseModel):
     uuid: str
     name: str
     attributes: SampleAttributes
@@ -479,20 +474,17 @@ class Sample:
 ########################
 # Dataset and labelset #
 ########################
-@dataclass
-class User:
+class User(BaseModel):
     username: str
     created_at: str
 
 
-@dataclass
-class Collaborator:
+class Collaborator(BaseModel):
     user: User
     role: Role
 
 
-@dataclass
-class TaskAttributeCategory:
+class TaskAttributeCategory(BaseModel):
     name: str
     id: int
     color: Optional[Union[RGB, RGBA]] = None
@@ -500,21 +492,18 @@ class TaskAttributeCategory:
     dimensions: Optional[XYZ] = None
 
 
-@dataclass
-class TaskAttributes:
+class TaskAttributes(BaseModel):
     format_version: Optional[FormatVersion] = None
     categories: Optional[List[TaskAttributeCategory]] = None
 
 
-@dataclass
-class Owner:
+class Owner(BaseModel):
     username: str
     created_at: str
     email: Optional[str] = None
 
 
-@dataclass
-class Statistics:
+class Statistics(BaseModel):
     prelabeled_count: int
     labeled_count: int
     reviewed_count: int
@@ -523,8 +512,7 @@ class Statistics:
     samples_count: int
 
 
-@dataclass
-class Labelset:
+class Labelset(BaseModel):
     name: str
     description: str
     uuid: Optional[str] = None
@@ -537,16 +525,14 @@ class Labelset:
     stats: Optional[Dict[str, Any]] = None
 
 
-@dataclass
-class LabelStats:
+class LabelStats(BaseModel):
     TOTAL: Optional[int] = None
     LABELED: Optional[int] = None
     UNLABELED: Optional[int] = None
     PRELABELED: Optional[int] = None
 
 
-@dataclass
-class Dataset:
+class Dataset(BaseModel):
     name: str
     description: str
     data_type: DataType

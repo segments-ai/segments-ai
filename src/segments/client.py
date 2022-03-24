@@ -1,11 +1,9 @@
-from dacite import from_dict
 from typing import IO, Any, Dict, List, Optional, Union
 from typing_extensions import Literal
 import urllib.parse
 import requests
-import numpy.typing as npt
+from pydantic import parse_obj_as
 from .typehints import (
-    DACITE_CONFIG,
     AWSFields,
     AuthHeader,
     Collaborator,
@@ -24,6 +22,8 @@ from .typehints import (
     TaskType,
     Category,
 )
+
+# import numpy.typing as npt
 
 
 class SegmentsClient:
@@ -79,17 +79,18 @@ class SegmentsClient:
             user: The user for which to get the datasets. Leave empty to get datasets of current user. Defaults to None.
 
         Returns:
-            A list of dataclasses representing the datasets.
+            A list of classes representing the datasets.
         """
 
         if user is not None:
             r = self.get("/users/{}/datasets/".format(user))
         else:
             r = self.get("/user/datasets/")
-        datasets = [
-            from_dict(data_class=Dataset, data=dataset, config=DACITE_CONFIG)
-            for dataset in r.json()
-        ]
+        # datasets = [
+        #     from_dict(data_class=Dataset, data=dataset, config=DACITE_CONFIG)
+        #     for dataset in r.json()
+        # ]
+        datasets = parse_obj_as(List[Dataset], r.json())
 
         return datasets
 
@@ -100,11 +101,12 @@ class SegmentsClient:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
 
         Returns:
-            Dataset: a dataclass representing the dataset.
+            Dataset: a class representing the dataset.
         """
 
         r = self.get("/datasets/{}/".format(dataset_identifier))
-        dataset = from_dict(data_class=Dataset, data=r.json(), config=DACITE_CONFIG)
+        # dataset = from_dict(data_class=Dataset, data=r.json(), config=DACITE_CONFIG)
+        dataset = Dataset.parse_obj(r.json())
 
         return dataset
 
@@ -136,7 +138,7 @@ class SegmentsClient:
             enable_ratings: Enable star-ratings for labeled images. Defaults to False.
 
         Returns:
-            A dataclass representing the newly created dataset.
+            A class representing the newly created dataset.
         """
 
         if task_attributes is None:
@@ -145,9 +147,10 @@ class SegmentsClient:
                 "categories": [{"id": 0, "name": "object"}],
             }
         try:
-            from_dict(
-                data_class=TaskAttributes, data=task_attributes, config=DACITE_CONFIG
-            )
+            # from_dict(
+            #     data_class=TaskAttributes, data=task_attributes, config=DACITE_CONFIG
+            # )
+            TaskAttributes.parse_obj(task_attributes)
         except Exception as e:
             raise Exception(
                 e,
@@ -168,7 +171,8 @@ class SegmentsClient:
                 "data_type": "IMAGE",
             }
             r = self.post("/user/datasets/", payload)
-            dataset = from_dict(data_class=Dataset, data=r.json(), config=DACITE_CONFIG)
+            # dataset = from_dict(data_class=Dataset, data=r.json(), config=DACITE_CONFIG)
+            dataset = Dataset.parse_obj(r.json())
 
             return dataset
 
@@ -200,7 +204,7 @@ class SegmentsClient:
             enable_ratings: Enable star-ratings for labeled images.
 
         Returns:
-            A dataclass representing the updated dataset.
+            A class representing the updated dataset.
         """
 
         payload: Dict[str, Any] = {}
@@ -234,7 +238,8 @@ class SegmentsClient:
 
         r = self.patch("/datasets/{}/".format(dataset_identifier), payload)
         print("Updated " + dataset_identifier)
-        dataset = from_dict(data_class=Dataset, data=r.json(), config=DACITE_CONFIG)
+        # dataset = from_dict(data_class=Dataset, data=r.json(), config=DACITE_CONFIG)
+        dataset = Dataset.parse_obj(r.json())
 
         return dataset
 
@@ -258,13 +263,14 @@ class SegmentsClient:
             role: The role of the collaborator to be added. One of labeler, reviewer, admin. Defaults to labeler.
 
         Returns:
-            A dataclass containing the newly added collaborator with its role.
+            A class containing the newly added collaborator with its role.
         """
         payload = {"user": username, "role": role}
         r = self.post("/datasets/{}/collaborators/".format(dataset_identifier), payload)
-        collaborator = from_dict(
-            data_class=Collaborator, data=r.json(), config=DACITE_CONFIG
-        )
+        # collaborator = from_dict(
+        #     data_class=Collaborator, data=r.json(), config=DACITE_CONFIG
+        # )
+        collaborator = Collaborator.parse_obj(r.json())
 
         return collaborator
 
@@ -289,7 +295,7 @@ class SegmentsClient:
         dataset_identifier: str,
         name: Optional[str] = None,
         label_status: Optional[Union[LabelStatus, List[LabelStatus]]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: Optional[Union[List[str], str]] = None,
         sort: Literal["name", "created", "priority"] = "name",
         direction: Literal["asc", "desc"] = "asc",
         per_page: int = 1000,
@@ -308,7 +314,7 @@ class SegmentsClient:
             page: Pagination parameter indicating the page to return. Defaults to 1.
 
         Returns:
-            A list of dataclasses representing the samples.
+            A list of classes representing the samples.
         """
 
         # pagination
@@ -336,8 +342,6 @@ class SegmentsClient:
 
         # sorting
         sort_dict = {"name": "name", "created": "created_at", "priority": "priority"}
-        # assert sort in sort_dict
-        # assert direction in ["asc", "desc"]
         if sort != "name":
             direction_str = "" if direction == "asc" else "-"
             sort_str = sort_dict[sort]
@@ -349,10 +353,7 @@ class SegmentsClient:
         for result in results:
             result.pop("label", None)
 
-        results = [
-            from_dict(data_class=Sample, data=result, config=DACITE_CONFIG)
-            for result in results
-        ]
+        results = parse_obj_as(List[Sample], results)
 
         return results
 
@@ -364,7 +365,7 @@ class SegmentsClient:
             labelset: If defined, this additionally returns the label for the given labelset. Defaults to None.
 
         Returns:
-            A dataclass representing the sample
+            A class representing the sample
         """
 
         query_string = "/samples/{}/".format(uuid)
@@ -373,7 +374,7 @@ class SegmentsClient:
             query_string += "?labelset={}".format(labelset)
 
         r = self.get(query_string)
-        sample = from_dict(data_class=Sample, data=r.json(), config=DACITE_CONFIG)
+        sample = Sample.parse_obj(r.json())
 
         return sample
 
@@ -384,7 +385,7 @@ class SegmentsClient:
         attributes: Dict[str, Any],
         metadata: Optional[Dict[str, Any]] = None,
         priority: float = 0,
-        embedding: Optional[Union[npt.NDArray[Any], List[float]]] = None,
+        embedding: Any = None,  # embedding: Optional[Union[npt.NDArray[Any], List[float]]] = None
     ) -> Sample:
         """Add a sample to a dataset.
 
@@ -397,13 +398,11 @@ class SegmentsClient:
             embedding: Embedding of this sample represented by an array of floats.
 
         Returns:
-            A dataclass representing the newly created sample.
+            A class representing the newly created sample.
         """
 
         try:
-            from_dict(
-                data_class=SampleAttributes, data=attributes, config=DACITE_CONFIG
-            )
+            parse_obj_as(SampleAttributes, attributes)
         except Exception as e:
             raise Exception(
                 e,
@@ -426,7 +425,7 @@ class SegmentsClient:
 
             r = self.post("/datasets/{}/samples/".format(dataset_identifier), payload)
             print("Added " + name)
-            sample = from_dict(data_class=Sample, data=r.json(), config=DACITE_CONFIG)
+            sample = Sample.parse_obj(r.json())
 
             return sample
 
@@ -452,7 +451,7 @@ class SegmentsClient:
             embedding: Embedding of this sample represented by an array of floats.
 
         Returns:
-            A dataclass representing the updated sample.
+            A class representing the updated sample.
         """
 
         payload: Dict[str, Any] = {}
@@ -474,7 +473,8 @@ class SegmentsClient:
 
         r = self.patch("/samples/{}/".format(uuid), payload)
         print("Updated " + uuid)
-        sample = from_dict(data_class=Sample, data=r.json(), config=DACITE_CONFIG)
+        # sample = from_dict(data_class=Sample, data=r.json(), config=DACITE_CONFIG)
+        sample = Sample.parse_obj(r.json())
 
         return sample
 
@@ -498,11 +498,11 @@ class SegmentsClient:
             labelset: The labelset this label belongs to. Defaults to 'ground-truth'.
 
         Returns:
-            A dataclass representing the label.
+            A class representing the label.
         """
 
         r = self.get("/labels/{}/{}/".format(sample_uuid, labelset))
-        label = from_dict(data_class=Label, data=r.json(), config=DACITE_CONFIG)
+        label = Label.parse_obj(r.json())
 
         return label
 
@@ -524,11 +524,11 @@ class SegmentsClient:
             score: The label score. Defaults to None.
 
         Returns:
-            A dataclass representing the newly created label.
+            A class representing the newly created label.
         """
 
         try:
-            from_dict(data_class=LabelAttributes, data=attributes, config=DACITE_CONFIG)
+            parse_obj_as(LabelAttributes, attributes)
         except Exception as e:
             raise Exception(
                 e,
@@ -544,7 +544,7 @@ class SegmentsClient:
                 payload["score"] = score
 
             r = self.put("/labels/{}/{}/".format(sample_uuid, labelset), payload)
-            label = from_dict(data_class=Label, data=r.json(), config=DACITE_CONFIG)
+            label = Label.parse_obj(r.json())
 
             return label
 
@@ -566,7 +566,7 @@ class SegmentsClient:
             score: The label score. Defaults to None.
 
         Returns:
-            A dataclass representing the updated label.
+            A class representing the updated label.
         """
 
         payload: Dict[str, Any] = {}
@@ -581,7 +581,7 @@ class SegmentsClient:
             payload["score"] = score
 
         r = self.patch("/labels/{}/{}/".format(sample_uuid, labelset), payload)
-        label = from_dict(data_class=Label, data=r.json(), config=DACITE_CONFIG)
+        label = Label.parse_obj(r.json())
 
         return label
 
@@ -605,14 +605,11 @@ class SegmentsClient:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
 
         Returns:
-            A list of dataclasses representing the labelsets.
+            A list of classes representing the labelsets.
         """
 
         r = self.get("/datasets/{}/labelsets/".format(dataset_identifier))
-        labelsets = [
-            from_dict(data_class=Labelset, data=labelset, config=DACITE_CONFIG)
-            for labelset in r.json()
-        ]
+        labelsets = parse_obj_as(List[Labelset], r.json())
 
         return labelsets
 
@@ -624,11 +621,11 @@ class SegmentsClient:
             name: The name of the labelset.
 
         Returns:
-            A dataclass representing the labelset.
+            A class representing the labelset.
         """
 
         r = self.get("/datasets/{}/labelsets/{}/".format(dataset_identifier, name))
-        labelset = from_dict(data_class=Labelset, data=r.json(), config=DACITE_CONFIG)
+        labelset = Labelset.parse_obj(r.json())
 
         return labelset
 
@@ -643,7 +640,7 @@ class SegmentsClient:
             description: The labelset description.
 
         Returns:
-            A dataclass representing the labelset.
+            A class representing the labelset.
         """
 
         payload = {
@@ -652,7 +649,7 @@ class SegmentsClient:
             "attributes": "{}",
         }
         r = self.post("/datasets/{}/labelsets/".format(dataset_identifier), payload)
-        labelset = from_dict(data_class=Labelset, data=r.json(), config=DACITE_CONFIG)
+        labelset = Labelset.parse_obj(r.json())
 
         return labelset
 
@@ -676,14 +673,11 @@ class SegmentsClient:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
 
         Returns:
-            A list of dataclasses representing the releases.
+            A list of classes representing the releases.
         """
 
         r = self.get("/datasets/{}/releases/".format(dataset_identifier))
-        releases = [
-            from_dict(data_class=Release, data=release, config=DACITE_CONFIG)
-            for release in r.json()
-        ]
+        releases = parse_obj_as(List[Release], r.json())
 
         return releases
 
@@ -695,11 +689,11 @@ class SegmentsClient:
             name: The name of the release.
 
         Returns:
-            A dataclass representing the release.
+            A class representing the release.
         """
 
         r = self.get("/datasets/{}/releases/{}/".format(dataset_identifier, name))
-        release = from_dict(data_class=Release, data=r.json(), config=DACITE_CONFIG)
+        release = Release.parse_obj(r.json())
 
         return release
 
@@ -714,12 +708,13 @@ class SegmentsClient:
             description: The release description.
 
         Returns:
-            A dataclass representing the newly created release.
+            A class representing the newly created release.
         """
 
         payload = {"name": name, "description": description}
         r = self.post("/datasets/{}/releases/".format(dataset_identifier), payload)
-        release = from_dict(data_class=Release, data=r.json(), config=DACITE_CONFIG)
+        print(r.json())
+        release = Release.parse_obj(r.json())
 
         return release
 
@@ -744,24 +739,21 @@ class SegmentsClient:
             filename: The file name. Defaults to label.png.
 
         Returns:
-            A dataclass representing the uploaded file.
+            A class representing the uploaded file.
         """
 
         r = self.post("/assets/", {"filename": filename})
-        presigned_post_fields: PresignedPostFields = from_dict(
-            data_class=PresignedPostFields,
-            data=r.json()["presignedPostFields"],
-            config=DACITE_CONFIG,
+        presigned_post_fields = PresignedPostFields.parse_obj(
+            r.json()["presignedPostFields"]
         )
         response_aws = self._upload_to_aws(
             file, presigned_post_fields.url, presigned_post_fields.fields
         )
-        f = from_dict(data_class=File, data=r.json(), config=DACITE_CONFIG)
+        f = File.parse_obj(r.json())
 
         return f
 
     # Error handling: https://stackoverflow.com/questions/16511337/correct-way-to-try-except-using-python-requests-module
-
     def _get_auth_header(self) -> Optional[AuthHeader]:
         if self.api_key:
             return {"Authorization": "APIKey {}".format(self.api_key)}
@@ -771,10 +763,10 @@ class SegmentsClient:
     def get(self, endpoint: str, auth: bool = True) -> requests.Response:
         headers = self._get_auth_header() if auth else None
 
+        r = self.api_session.get(
+            urllib.parse.urljoin(self.api_url, endpoint), headers=headers
+        )
         try:
-            r = self.api_session.get(
-                urllib.parse.urljoin(self.api_url, endpoint), headers=headers
-            )
             r.raise_for_status()
         except requests.exceptions.HTTPError as errh:
             print("{} | {}".format(errh, r.json()))
@@ -786,12 +778,12 @@ class SegmentsClient:
     ) -> requests.Response:
         headers = self._get_auth_header() if auth else None
 
+        r = self.api_session.post(
+            urllib.parse.urljoin(self.api_url, endpoint),
+            json=data,  # data=data
+            headers=headers,
+        )
         try:
-            r = self.api_session.post(
-                urllib.parse.urljoin(self.api_url, endpoint),
-                json=data,  # data=data
-                headers=headers,
-            )
             r.raise_for_status()
         except requests.exceptions.HTTPError as errh:
             print("{} | {}".format(errh, r.json()))
@@ -803,12 +795,12 @@ class SegmentsClient:
     ) -> requests.Response:
         headers = self._get_auth_header() if auth else None
 
+        r = self.api_session.put(
+            urllib.parse.urljoin(self.api_url, endpoint),
+            json=data,  # data=data
+            headers=headers,
+        )
         try:
-            r = self.api_session.put(
-                urllib.parse.urljoin(self.api_url, endpoint),
-                json=data,  # data=data
-                headers=headers,
-            )
             r.raise_for_status()
         except requests.exceptions.HTTPError as errh:
             print("{} | {}".format(errh, r.json()))
@@ -820,12 +812,12 @@ class SegmentsClient:
     ) -> requests.Response:
         headers = self._get_auth_header() if auth else None
 
+        r = self.api_session.patch(
+            urllib.parse.urljoin(self.api_url, endpoint),
+            json=data,  # data=data
+            headers=headers,
+        )
         try:
-            r = self.api_session.patch(
-                urllib.parse.urljoin(self.api_url, endpoint),
-                json=data,  # data=data
-                headers=headers,
-            )
             r.raise_for_status()
         except requests.exceptions.HTTPError as errh:
             print("{} | {}".format(errh, r.json()))
@@ -837,12 +829,12 @@ class SegmentsClient:
     ) -> requests.Response:
         headers = self._get_auth_header() if auth else None
 
+        r = self.api_session.delete(
+            urllib.parse.urljoin(self.api_url, endpoint),
+            json=data,  # data=data
+            headers=headers,
+        )
         try:
-            r = self.api_session.delete(
-                urllib.parse.urljoin(self.api_url, endpoint),
-                json=data,  # data=data
-                headers=headers,
-            )
             r.raise_for_status()
         except requests.exceptions.HTTPError as errh:
             print("{}".format(errh))
