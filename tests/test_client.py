@@ -1,7 +1,6 @@
 import json
 import os
-from dotenv import load_dotenv
-from unittest import TestCase, main
+import unittest
 from segments.client import SegmentsClient
 from segments.typehints import (
     Collaborator,
@@ -16,25 +15,23 @@ from segments.typehints import (
 ##############
 # Base class #
 ##############
-class Test(TestCase):
+class Test(unittest.TestCase):
     def setUp(self):
-        ENV_PATH = "/Users/arnouthillen/python-sdk-improvements/.env"
-        load_dotenv(dotenv_path=ENV_PATH)
-        API_KEY = os.getenv("API_KEY")
-        self.owner = os.getenv("OWNER")
-        self.path = os.getenv("TESTS_PATH")
+        API_KEY = os.getenv("API_KEY", "")
+        self.owner = os.getenv("OWNER", "")
+        self.path = "tests"
         self.client = SegmentsClient(api_key=API_KEY)
-        self.datasets = json.loads(os.getenv("DATASETS"))
+        self.datasets = json.loads(os.getenv("DATASETS", ""))
         # First sample uuid.
-        self.uuids = json.loads(os.getenv("UUIDS"))
+        self.uuids = json.loads(os.getenv("UUIDS", ""))
         # First sample of first dataset.
-        self.labelsets = json.loads(os.getenv("LABELSETS"))
+        self.labelsets = json.loads(os.getenv("LABELSETS", ""))
         # Releases of first dataset.
-        self.releases = json.loads(os.getenv("RELEASES"))
+        self.releases = json.loads(os.getenv("RELEASES", ""))
         # Sample attribute type of the datasets.
-        self.sample_attributes = json.loads(os.getenv("SAMPLE_ATTRIBUTES"))
+        self.sample_attributes = json.loads(os.getenv("SAMPLE_ATTRIBUTES", ""))
         # Label attribute type of the datasets.
-        self.label_attributes = json.loads(os.getenv("LABEL_ATTRIBUTES"))
+        self.label_attributes = json.loads(os.getenv("LABEL_ATTRIBUTES", ""))
 
     def tearDown(self):
         self.client.close()
@@ -124,10 +121,10 @@ class TestDataset(Test):
             self.client.delete_dataset(self.owner + "/add_dataset")
 
     def test_add_delete_dataset_collaborator(self):
+        dataset_identifier = self.owner + "/" + self.datasets[0]
+        username = "admin-arnout"
+        role = "admin"
         try:
-            dataset_identifier = self.owner + "/" + self.datasets[0]
-            username = "admin-arnout"
-            role = "admin"
             collaborator = self.client.add_dataset_collaborator(
                 dataset_identifier, username, role
             )
@@ -164,7 +161,6 @@ class TestSample(Test):
         for i in range(len(self.uuids)):
             sample = self.client.get_sample(self.uuids[i], labelset)
             self.assertIsInstance(sample, Sample)
-            self.assertIsInstance(sample.attributes)
 
     def test_add_update_delete_sample(self):
         dataset_identifier = self.owner + "/"
@@ -221,11 +217,11 @@ class TestLabelset(Test):
             self.assertIsInstance(labelset, Labelset)
 
     def test_add_delete_labelset(self):
+        # Add labelset.
+        dataset_identifier = self.owner + "/" + self.datasets[0]
+        name = "labelset4"
+        description = "Test add_delete_labelset description."
         try:
-            # Add labelset.
-            dataset_identifier = self.owner + "/" + self.datasets[0]
-            name = "labelset4"
-            description = "Test add_delete_labelset description."
             labelset = self.client.add_labelset(dataset_identifier, name, description)
             self.assertIsInstance(labelset, Labelset)
         finally:
@@ -279,10 +275,10 @@ class TestAsset(Test):
         super().tearDown()
 
     def test_upload_asset(self):
-        with open(self.path + "test.png", "rb") as f:
+        with open(self.path + "/fixtures/test.png", "rb") as f:
             test_file = self.client.upload_asset(f, "test.png")
             self.assertIsInstance(test_file, File)
 
 
 if __name__ == "__main__":
-    main()
+    unittest.main()
