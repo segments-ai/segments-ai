@@ -1,8 +1,7 @@
 # https://www.immersivelimit.com/tutorials/create-coco-annotations-from-scratch/#coco-dataset-format
-from dataclasses import dataclass
 import os
 import json
-from typing import Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 from tqdm import tqdm
 import numpy as np
 from PIL import Image
@@ -11,16 +10,16 @@ from skimage.measure import regionprops
 from pycocotools import mask
 from .typehints import Dataset
 from .utils import get_semantic_bitmap
-from dacite import from_dict
-import numpy.typing as npt
+from pydantic import BaseModel
+# import numpy.typing as npt
+
 
 RGB = Tuple[int, int, int]
 RGBA = Tuple[int, int, int, int]
 ColorMap = List[RGBA]
 
 
-@dataclass
-class Category:
+class Category(BaseModel):
     id: int
     name: str
     color: RGB
@@ -88,8 +87,11 @@ class IdGenerator:
 
     def get_color(self, cat_id: int) -> RGB:
         def random_color(base: RGB, max_dist: int = 30) -> RGB:
-            new_color = base + np.random.randint(  # : npt.NDArray[3, npt.Int64]
-                low=-max_dist, high=max_dist + 1, size=3
+            new_color = (
+                base
+                + np.random.randint(  # new_color: npt.NDArray[3, npt.Int64] = base + np.random.randint(
+                    low=-max_dist, high=max_dist + 1, size=3
+                )
             )
             rgb = tuple(np.maximum(0, np.minimum(255, new_color)))
             return rgb
@@ -117,7 +119,7 @@ class IdGenerator:
         return rgb2id(color), color
 
 
-def rgb2id(color: Union[npt.NDArray[3], RGB]) -> int:
+def rgb2id(color: Any) -> int:  # rgb2id(color: Union[npt.NDArray[3], RGB]) -> int:
     if isinstance(color, np.ndarray) and len(color.shape) == 3:
         if color.dtype == np.uint8:
             color = color.astype(np.int32)
@@ -125,11 +127,15 @@ def rgb2id(color: Union[npt.NDArray[3], RGB]) -> int:
     return int(color[0] + 256 * color[1] + 256 * 256 * color[2])
 
 
-def id2rgb(id_map: npt.NDArray) -> Union[npt.NDArray[3], RGB]:
+def id2rgb(
+    id_map: Any,
+) -> Any:  # id2rgb(id_map:npt.NDArray) -> Union[npt.NDArray[3], RGB]:
     if isinstance(id_map, np.ndarray):
         id_map_copy = id_map.copy()
         rgb_shape = tuple(list(id_map.shape) + [3])
-        rgb_map: npt.NDArray[3] = np.zeros(rgb_shape, dtype=np.uint8)
+        rgb_map = np.zeros(
+            rgb_shape, dtype=np.uint8
+        )  # rgb_map: npt.NDArray[3] = np.zeros(rgb_shape, dtype=np.uint8)
         for i in range(3):
             rgb_map[..., i] = id_map_copy % 256
             id_map_copy //= 256
@@ -146,7 +152,10 @@ def get_color(id: int) -> RGB:
     return COLORMAP[id][0:3]
 
 
-def colorize(img: npt.NDArray, colormap: Optional[ColorMap] = None) -> npt.NDArray:
+def colorize(
+    img: Any, colormap: Optional[ColorMap] = None
+) -> Any:  # def colorize(img: npt.NDArray, colormap: Optional[ColorMap] = None) -> npt.NDArray:
+
     indices = np.unique(img)
     indices = indices[indices != 0]
 
@@ -163,7 +172,12 @@ def colorize(img: npt.NDArray, colormap: Optional[ColorMap] = None) -> npt.NDArr
     return colored_img
 
 
-def get_bbox(binary_mask: npt.NDArray) -> Union[Tuple[int, int, int, int], bool]:
+def get_bbox(
+    binary_mask: Any,
+) -> Union[
+    Tuple[int, int, int, int], bool
+]:  # def get_bbox(binary_mask: npt.NDArray) -> Union[Tuple[int, int, int, int], bool]:
+
     regions = regionprops(np.uint8(binary_mask))
     if len(regions) == 1:
         bbox = regions[0].bbox

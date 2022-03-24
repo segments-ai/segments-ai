@@ -2,9 +2,10 @@ from io import BytesIO
 from typing import Any, Dict, Optional, Tuple, Union
 import requests
 import numpy as np
+
+# import numpy.typing as npt
 from PIL import Image, ExifTags
 from .typehints import Dataset, Release
-import numpy.typing as npt
 
 session = requests.Session()
 adapter = requests.adapters.HTTPAdapter(max_retries=3)
@@ -13,7 +14,7 @@ session.mount("https://", adapter)
 
 
 def bitmap2file(
-    bitmap: npt.NDArray[np.uint32],
+    bitmap: Any,  # npt.NDArray[np.uint32],
     is_segmentation_bitmap: bool = True,
 ) -> BytesIO:
     """Convert a label bitmap to a file with the proper format.
@@ -38,10 +39,10 @@ def bitmap2file(
 
 
 def get_semantic_bitmap(
-    instance_bitmap: npt.NDArray[np.uint32],
+    instance_bitmap: Any,  # npt.NDArray[np.uint32],
     annotations: Dict[str, Any],
     id_increment: int = 1,
-) -> Optional[npt.NDArray[np.uint32]]:
+) -> Any:  # Optional[npt.NDArray[np.uint32]]:
     """Convert an instance bitmap and annotations dict into a segmentation bitmap.
 
     Args:
@@ -149,7 +150,7 @@ def load_image_from_url(url: str, save_filename: Optional[str] = None) -> Image:
 
 def load_label_bitmap_from_url(
     url: str, save_filename: Optional[str] = None
-) -> npt.NDArray[np.uint32]:
+) -> Any:  # npt.NDArray[np.uint32]:
     """Load a label bitmap from url.
 
     Args:
@@ -160,7 +161,7 @@ def load_label_bitmap_from_url(
         A numpy np.uint32 array.
     """
 
-    def extract_bitmap(bitmap: Image) -> npt.NDArray[np.uint32]:
+    def extract_bitmap(bitmap: Image) -> Any:  # npt.NDArray[np.uint32]:
         bitmap = np.array(bitmap)
         bitmap[:, :, 3] = 0
         bitmap = bitmap.view(np.uint32).squeeze(2)

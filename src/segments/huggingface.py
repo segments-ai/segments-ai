@@ -4,12 +4,11 @@ import requests
 from PIL import Image
 from .typehints import Release
 from .utils import load_image_from_url, load_label_bitmap_from_url
-import datasets
 
 
 def release2dataset(
     release: Release, download_images: bool = True
-) -> Optional[datasets.Dataset]:
+) -> Any:  # def release2dataset(release: Release, download_images: bool = True) -> Optional[datasets.Dataset]:
     try:
         import datasets
     except ImportError:
