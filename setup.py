@@ -28,7 +28,6 @@ setup(
         # Type hints
         "typing",
         "typing_extensions",
-        "enum",
         "mypy",
         "pydantic",
         # Documentation
