@@ -102,42 +102,74 @@ class File(BaseModel):
 #####################################
 # Object and image level attributes #
 #####################################
-class ObjectAttribute(BaseModel):
-    # Select and checkbox
+# class ObjectAttribute(BaseModel):
+#     # Select and checkbox
+#     name: str
+#     input_type: InputType
+#     default_value: Optional[Union[str, float, bool]] = None
+#     # Text
+#     values: Optional[List[str]] = None
+#     # Number
+#     min: Optional[float] = None
+#     max: Optional[float] = None
+#     step: Optional[float] = None
+
+#     def __post_init__(self):
+#         # Select
+#         if isinstance(self.values, list):
+#             assert self.input_type == "select"  # InputType.select
+#         # Text/select
+#         if isinstance(self.default_value, str):
+#             assert (
+#                 self.input_type == "text"
+#                 or self.input_type
+#                 == "select"  # InputType.text or self.input_type == InputType.select
+#             )
+#         # Number
+#         if (
+#             isinstance(self.min, float)
+#             or isinstance(self.max, float)
+#             or isinstance(self.step, float)
+#             or isinstance(self.default_value, float)
+#         ):
+#             assert self.input_type == "number"  # InputType.number
+#         # Checkbox
+#         if isinstance(self.default_value, bool):
+#             assert self.input_type == "checkbox"  # InputType.checkbox
+class SelectObjectAttribute(BaseModel):
     name: str
-    input_type: InputType
-    default_value: Optional[Union[str, float, bool]] = None
-    # Text
-    values: Optional[List[str]] = None
-    # Number
+    input_type: Literal["select"]
+    values: List[str]
+    default_value: Optional[str] = None
+
+
+class TextObjectAttribute(BaseModel):
+    name: str
+    input_type: Literal["text"]
+    default_value: Optional[str] = None
+
+
+class NumberObjectAttribute(BaseModel):
+    name: str
+    input_type: Literal["number"]
+    default_value: Optional[float] = None
     min: Optional[float] = None
     max: Optional[float] = None
     step: Optional[float] = None
 
-    def __post_init__(self):
-        # Select
-        if isinstance(self.values, list):
-            assert self.input_type == "select"  # InputType.select
-        # Text/select
-        if isinstance(self.default_value, str):
-            assert (
-                self.input_type == "text"
-                or self.input_type
-                == "select"  # InputType.text or self.input_type == InputType.select
-            )
-        # Number
-        if (
-            isinstance(self.min, float)
-            or isinstance(self.max, float)
-            or isinstance(self.step, float)
-            or isinstance(self.default_value, float)
-        ):
-            assert self.input_type == "number"  # InputType.number
-        # Checkbox
-        if isinstance(self.default_value, bool):
-            assert self.input_type == "checkbox"  # InputType.checkbox
+
+class CheckboxObjectAttribute(BaseModel):
+    name: str
+    input_type: Literal["checkbox"]
+    default_value: Optional[bool] = None
 
 
+ObjectAttribute = Union[
+    SelectObjectAttribute,
+    TextObjectAttribute,
+    NumberObjectAttribute,
+    CheckboxObjectAttribute,
+]
 ObjectAttributes = List[ObjectAttribute]
 ImageAttributes = Dict[str, str]
 
