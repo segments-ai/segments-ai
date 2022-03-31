@@ -1,6 +1,7 @@
 import json
 import os
 import unittest
+import numpy as np
 from segments.client import SegmentsClient
 from segments.typehints import (
     Collaborator,
@@ -23,7 +24,7 @@ class Test(unittest.TestCase):
         self.client = SegmentsClient(api_key=API_KEY)
         self.datasets = json.loads(os.getenv("DATASETS", ""))
         # First sample uuid.
-        self.uuids = json.loads(os.getenv("UUIDS", ""))
+        self.sample_uuids = json.loads(os.getenv("SAMPLE_UUIDS", ""))
         # First sample of first dataset.
         self.labelsets = json.loads(os.getenv("LABELSETS", ""))
         # Releases of first dataset.
@@ -158,20 +159,76 @@ class TestSample(Test):
 
     def test_get_sample(self):
         labelset = "ground-truth"
-        for i in range(len(self.uuids)):
-            sample = self.client.get_sample(self.uuids[i], labelset)
+        for i in range(len(self.sample_uuids)):
+            sample = self.client.get_sample(self.sample_uuids[i], labelset)
             self.assertIsInstance(sample, Sample)
 
     def test_add_update_delete_sample(self):
-        dataset_identifier = self.owner + "/"
-        metadata = {}
+        metadata = {"weather": "sunny", "camera_id": 3}
         priority = 0
-        embedding = []
-        name = ""
-        # try:
-        #     for dataset in self.datasets:
-        #     attributes =
-        # finally:
+        # embedding = np.zeros(100).tolist()
+        name = "Test sample"
+        attributes_dict = {
+            "image": {"image": {"url": "url"}},
+            "image-sequence": {
+                "frames": [{"image": {"url": "url"}}, {"image": {"url": ""}}]
+            },
+            "pointcloud": {
+                "pcd": {"url": "url", "type": "kitti"},
+                "ego_pose": {
+                    "position": {"x": 0, "y": 0, "z": 0},
+                    "heading": {"qx": 0, "qy": 0, "qz": 0, "qw": 0},
+                },
+                "default_z": -1,
+                "name": "test_name",
+                "timestamp": 1000,
+            },
+            "pointcloud-sequence": {
+                "frames": [
+                    {
+                        "pcd": {"url": "url", "type": "kitti"},
+                        "ego_pose": {
+                            "position": {"x": 0, "y": 0, "z": 0},
+                            "heading": {"qx": 0, "qy": 0, "qz": 0, "qw": 0},
+                        },
+                        "default_z": -1,
+                        "name": "test_name",
+                        "timestamp": 1000,
+                    },
+                    {
+                        "pcd": {"url": "url", "type": "kitti"},
+                        "ego_pose": {
+                            "position": {"x": 0, "y": 0, "z": 0},
+                            "heading": {"qx": 0, "qy": 0, "qz": 0, "qw": 0},
+                        },
+                        "default_z": -1,
+                        "name": "test_name",
+                        "timestamp": 1000,
+                    },
+                ]
+            },
+            "text": {"text": "This is a test sentence."},
+        }
+        for sample_attribute, dataset in zip(self.sample_attributes, self.datasets):
+            dataset_identifier = self.owner + "/" + dataset
+            attributes = attributes_dict[sample_attribute]
+            try:
+                sample = self.client.add_sample(
+                    dataset_identifier,
+                    name,
+                    attributes,
+                    metadata,
+                    priority,  # embedding
+                )
+                sample = self.client.update_sample(
+                    sample.uuid,
+                    name,
+                    attributes,
+                    metadata,
+                    priority,  # embedding
+                )
+            finally:
+                self.client.delete_sample(sample.uuid)
 
 
 #########
@@ -186,12 +243,17 @@ class TestLabel(Test):
 
     def test_get_label(self):
         labelset = "ground-truth"
-        for i in range(len(self.uuids)):
-            label = self.client.get_label(self.uuids[i], labelset)
+        for i in range(len(self.sample_uuids)):
+            label = self.client.get_label(self.sample_uuids[i], labelset)
             self.assertIsInstance(label, Label)
 
     def test_add_update_delete_label(self):
-        pass
+        label_attributes = {}
+        labelset = "ground-truth"
+        label_status = "PRELABELED"
+        score = 0
+        for sample_uuid in self.sample_uuids:
+            pass
 
 
 ############
