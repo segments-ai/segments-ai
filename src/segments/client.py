@@ -145,8 +145,8 @@ class SegmentsClient:
             TaskAttributes.parse_obj(task_attributes)
         except Exception as e:
             raise Exception(
-                e,
                 "Did you use the right task attributes? Please refer to the online documentation: https://docs.segments.ai/reference/categories-and-task-attributes#object-attribute-format.",
+                e,
             )
         else:
             payload: Dict[str, Any] = {
@@ -372,7 +372,9 @@ class SegmentsClient:
         attributes: Dict[str, Any],
         metadata: Optional[Dict[str, Any]] = None,
         priority: float = 0,
-        embedding: Any = None,  # embedding: Optional[Union[npt.NDArray[Any], List[float]]] = None
+        embedding: Optional[
+            List[float]
+        ] = None,  # embedding: Optional[Union[npt.NDArray[Any], List[float]]] = None
     ) -> Sample:
         """Add a sample to a dataset.
 
@@ -389,11 +391,11 @@ class SegmentsClient:
         """
 
         try:
-            parse_obj_as(SampleAttributes, attributes)
+            sample_attributes = parse_obj_as(SampleAttributes, attributes)
         except Exception as e:
             raise Exception(
-                e,
                 "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
+                e,
             )
         else:
             payload: Dict[str, Any] = {
@@ -495,8 +497,8 @@ class SegmentsClient:
     def add_label(
         self,
         sample_uuid: str,
-        labelset: str,
         attributes: Dict[str, Any],
+        labelset: str = "ground-truth",
         label_status: LabelStatus = "PRELABELED",
         score: Optional[float] = None,
     ) -> Label:
@@ -504,8 +506,8 @@ class SegmentsClient:
 
         Args:
             sample_uuid: The sample uuid.
-            labelset: The labelset this label belongs to.
             attributes: The label attributes. Please refer to the online documentation.
+            labelset: The labelset this label belongs to. Defaults to 'ground-truth'.
             label_status: The label status. Defaults to 'PRELABELED'.
             score: The label score. Defaults to None.
 
@@ -514,11 +516,11 @@ class SegmentsClient:
         """
 
         try:
-            parse_obj_as(LabelAttributes, attributes)
+            label_attributes = parse_obj_as(LabelAttributes, attributes)
         except Exception as e:
             raise Exception(
-                e,
                 "Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.",
+                e,
             )
         else:
             payload: Dict[str, Any] = {
@@ -537,8 +539,8 @@ class SegmentsClient:
     def update_label(
         self,
         sample_uuid: str,
-        labelset: str,
         attributes: Dict[str, Any],
+        labelset: str = "ground-truth",
         label_status: LabelStatus = "PRELABELED",
         score: Optional[float] = None,
     ) -> Label:
@@ -546,8 +548,8 @@ class SegmentsClient:
 
         Args:
             sample_uuid: The sample uuid.
-            labelset: The labelset this label belongs to.
             attributes: The label attributes. Please refer to the online documentation.
+            labelset: The labelset this label belongs to. Defaults to 'ground-truth'.
             label_status: The label status. Defaults to 'PRELABELED'.
             score: The label score. Defaults to None.
 
@@ -699,7 +701,6 @@ class SegmentsClient:
 
         payload = {"name": name, "description": description}
         r = self.post("/datasets/{}/releases/".format(dataset_identifier), payload)
-        print(r.json())
         release = Release.parse_obj(r.json())
 
         return release
