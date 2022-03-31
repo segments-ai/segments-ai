@@ -1,18 +1,18 @@
 # https://www.immersivelimit.com/tutorials/create-coco-annotations-from-scratch/#coco-dataset-format
 import os
 import json
+import numpy as np
+
+# import numpy.typing as npt
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 from tqdm import tqdm
-import numpy as np
 from PIL import Image
 from skimage import img_as_ubyte
 from skimage.measure import regionprops
 from pycocotools import mask
+from pydantic import BaseModel
 from .typehints import Dataset
 from .utils import get_semantic_bitmap
-from pydantic import BaseModel
-
-# import numpy.typing as npt
 
 
 RGB = Tuple[int, int, int]

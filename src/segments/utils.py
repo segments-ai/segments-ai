@@ -1,7 +1,7 @@
-from io import BytesIO
-from typing import Any, Dict, Optional, Tuple, Union
 import requests
 import numpy as np
+from io import BytesIO
+from typing import Any, Dict, Optional, Tuple, Union
 from PIL import Image, ExifTags
 from .typehints import Dataset, Release
 
