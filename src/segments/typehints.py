@@ -102,54 +102,20 @@ class File(BaseModel):
 #####################################
 # Object and image level attributes #
 #####################################
-# class ObjectAttribute(BaseModel):
-#     # Select and checkbox
-#     name: str
-#     input_type: InputType
-#     default_value: Optional[Union[str, float, bool]] = None
-#     # Text
-#     values: Optional[List[str]] = None
-#     # Number
-#     min: Optional[float] = None
-#     max: Optional[float] = None
-#     step: Optional[float] = None
-
-#     def __post_init__(self):
-#         # Select
-#         if isinstance(self.values, list):
-#             assert self.input_type == "select"  # InputType.select
-#         # Text/select
-#         if isinstance(self.default_value, str):
-#             assert (
-#                 self.input_type == "text"
-#                 or self.input_type
-#                 == "select"  # InputType.text or self.input_type == InputType.select
-#             )
-#         # Number
-#         if (
-#             isinstance(self.min, float)
-#             or isinstance(self.max, float)
-#             or isinstance(self.step, float)
-#             or isinstance(self.default_value, float)
-#         ):
-#             assert self.input_type == "number"  # InputType.number
-#         # Checkbox
-#         if isinstance(self.default_value, bool):
-#             assert self.input_type == "checkbox"  # InputType.checkbox
-class SelectObjectAttribute(BaseModel):
+class SelectTaskAttribute(BaseModel):
     name: str
     input_type: Literal["select"]
     values: List[str]
     default_value: Optional[str] = None
 
 
-class TextObjectAttribute(BaseModel):
+class TextTaskAttribute(BaseModel):
     name: str
     input_type: Literal["text"]
     default_value: Optional[str] = None
 
 
-class NumberObjectAttribute(BaseModel):
+class NumberTaskAttribute(BaseModel):
     name: str
     input_type: Literal["number"]
     default_value: Optional[float] = None
@@ -158,20 +124,20 @@ class NumberObjectAttribute(BaseModel):
     step: Optional[float] = None
 
 
-class CheckboxObjectAttribute(BaseModel):
+class CheckboxTaskAttribute(BaseModel):
     name: str
     input_type: Literal["checkbox"]
     default_value: Optional[bool] = None
 
 
-ObjectAttribute = Union[
-    SelectObjectAttribute,
-    TextObjectAttribute,
-    NumberObjectAttribute,
-    CheckboxObjectAttribute,
+TaskAttribute = Union[
+    SelectTaskAttribute,
+    TextTaskAttribute,
+    NumberTaskAttribute,
+    CheckboxTaskAttribute,
 ]
-ObjectAttributes = List[ObjectAttribute]
-ImageAttributes = Dict[str, str]
+ObjectAttributes = List[TaskAttribute]
+ImageAttributes = List[TaskAttribute]
 
 # #########
 # # Label #
@@ -192,14 +158,11 @@ class ImageSegmentationLabelAttributes(BaseModel):
 
 # Image vector
 # https://stackoverflow.com/questions/51575931/class-inheritance-in-python-3-7-dataclasses
-class _ImageVectorAnnotationBase(BaseModel):
+class ImageVectorAnnotation(BaseModel):
     id: int
     category_id: int
     points: List[List[float]]
     type: ImageVectorAnnotationType
-
-
-class ImageVectorAnnotation(_ImageVectorAnnotationBase):
     attributes: Optional[ObjectAttributes] = None
 
 
@@ -210,10 +173,9 @@ class ImageVectorLabelAttributes(BaseModel):
 
 
 # Image sequence vector
-class ImageSequenceVectorAnnotation(_ImageVectorAnnotationBase):
+class ImageSequenceVectorAnnotation(ImageVectorAnnotation):
     track_id: int
     is_keyframe: bool = False
-    attributes: Optional[ObjectAttributes] = None
 
 
 class ImageVectorFrame(BaseModel):
@@ -243,16 +205,13 @@ class XYZ(BaseModel):
 
 # Point cloud cuboid
 # https://stackoverflow.com/questions/51575931/class-inheritance-in-python-3-7-dataclasses
-class _PointcloudCuboidAnnotationBase(BaseModel):
+class PointcloudCuboidAnnotation(BaseModel):
     id: int
     category_id: int
     position: XYZ
     dimensions: XYZ
     yaw: float
     type: PointcloudAnnotationType
-
-
-class PointcloudCuboidAnnotation(_PointcloudCuboidAnnotationBase):
     attributes: Optional[ObjectAttributes] = None
 
 
@@ -282,10 +241,9 @@ class PointcloudSequenceSegmentationLabelAttributes(BaseModel):
 
 
 # Point cloud sequence cuboid
-class PointcloudSequenceCuboidAnnotation(_PointcloudCuboidAnnotationBase):
+class PointcloudSequenceCuboidAnnotation(PointcloudCuboidAnnotation):
     track_id: int
     is_keyframe: bool = False
-    attributes: Optional[ObjectAttributes] = None
 
 
 class PointcloudSequenceCuboidFrame(BaseModel):
