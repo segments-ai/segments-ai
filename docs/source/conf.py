@@ -30,20 +30,19 @@ release = "0.1"
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    # "myst_parser",
-    # "nbsphinx",
-    "autoapi.extension",
-    "sphinx.ext.duration",
-    "sphinx.ext.autosectionlabel",
     "sphinx.ext.autodoc",
-    "sphinx.ext.autosummary",
     "sphinx.ext.napoleon",
+    "myst_parser",
+    "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
+    "sphinx.ext.doctest",
+    "sphinx_copybutton",
+    "sphinx_autodoc_typehints",
 ]
-autosummary_generate = True
-autoapi_type = "python"
-autoapi_dirs = ["../../src/segments/"]
-autodoc_typehints = "description"
+# Tell myst-parser to assign header anchors for h1-h3.
+myst_heading_anchors = 3
+
+suppress_warnings = ["myst.header"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]

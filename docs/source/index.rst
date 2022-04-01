@@ -6,14 +6,28 @@
 Welcome to Segments.ai's documentation
 ======================================
 
+**my-package**
+===============
+
+.. automodule:: my_package
+
+Contents
+--------
+
 .. toctree::
-   :maxdepth: 4
-   :caption: Contents:
+   :maxdepth: 2
+   :caption: Getting started:
 
-.. rubric:: Modules
+   installation
+   overview
+   CHANGELOG
 
-.. autosummary::
-   :toctree: generated
+.. toctree::
+   :hidden:
+   :caption: Development
+
+
+
 
 Indices and tables
 ==================
@@ -21,3 +35,4 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+

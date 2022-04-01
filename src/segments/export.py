@@ -88,11 +88,8 @@ class IdGenerator:
 
     def get_color(self, cat_id: int) -> RGB:
         def random_color(base: RGB, max_dist: int = 30) -> RGB:
-            new_color = (
-                base
-                + np.random.randint(  # new_color: npt.NDArray[3, npt.Int64] = base + np.random.randint(
-                    low=-max_dist, high=max_dist + 1, size=3
-                )
+            new_color = (  # new_color: npt.NDArray[3, npt.Int64]
+                base + np.random.randint(low=-max_dist, high=max_dist + 1, size=3)
             )
             rgb = tuple(np.maximum(0, np.minimum(255, new_color)))
             return rgb
@@ -130,7 +127,7 @@ def rgb2id(color: Any) -> int:  # rgb2id(color: Union[npt.NDArray[3], RGB]) -> i
 
 def id2rgb(
     id_map: Any,
-) -> Any:  # id2rgb(id_map:npt.NDArray) -> Union[npt.NDArray[3], RGB]:
+) -> Any:  # id2rgb(id_map: npt.NDArray) -> Union[npt.NDArray[3], RGB]:
     if isinstance(id_map, np.ndarray):
         id_map_copy = id_map.copy()
         rgb_shape = tuple(list(id_map.shape) + [3])
@@ -187,7 +184,7 @@ def get_bbox(
         return False
 
 
-def export_coco_instance(dataset: Dataset, export_folder: str) -> Tuple[str, str]:
+def export_coco_instance(dataset: Any, export_folder: str) -> Tuple[str, str]:
     # Create export folder
     # export_folder = os.path.join(export_folder, dataset.dataset_identifier, dataset.release['name'])
     os.makedirs(export_folder, exist_ok=True)
@@ -346,7 +343,7 @@ def export_coco_instance(dataset: Dataset, export_folder: str) -> Tuple[str, str
     return file_name, dataset.image_dir
 
 
-def export_coco_panoptic(dataset: Dataset, export_folder: str) -> Tuple[str, str]:
+def export_coco_panoptic(dataset: Any, export_folder: str) -> Tuple[str, str]:
     # Create export folder
     # export_folder = os.path.join(export_folder, dataset.dataset_identifier, dataset.release['name'])
     os.makedirs(export_folder, exist_ok=True)
@@ -522,7 +519,7 @@ def export_coco_panoptic(dataset: Dataset, export_folder: str) -> Tuple[str, str
 
 
 def export_image(
-    dataset: Dataset, export_folder: str, export_format: str, id_increment: int
+    dataset: Any, export_folder: str, export_format: str, id_increment: int
 ) -> str:
     # Create export folder
     # export_folder = os.path.join(export_folder, dataset.dataset_identifier, dataset.release['name'])

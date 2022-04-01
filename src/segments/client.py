@@ -1,8 +1,10 @@
-from typing import IO, Any, Dict, List, Optional, Union
-from typing_extensions import Literal
 import urllib.parse
 import requests
+import os
+from typing import IO, Any, Dict, List, Optional, Union
+from typing_extensions import Literal
 from pydantic import parse_obj_as
+from dotenv import load_dotenv, find_dotenv
 from .typehints import (
     AWSFields,
     AuthHeader,
@@ -39,8 +41,14 @@ class SegmentsClient:
 
     """
 
-    def __init__(self, api_key: str, api_url: str = "https://api.segments.ai/"):
-        self.api_key = api_key
+    def __init__(
+        self, api_key: Optional[str] = None, api_url: str = "https://api.segments.ai/"
+    ):
+        if api_key is None:
+            load_dotenv(find_dotenv())
+            self.api_key = os.getenv("API_KEY")
+        else:
+            self.api_key = api_key
         self.api_url = api_url
 
         # https://realpython.com/python-requests/#performance
@@ -97,7 +105,7 @@ class SegmentsClient:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
 
         Returns:
-            Dataset: a class representing the dataset.
+            A class representing the dataset.
         """
 
         r = self.get("/datasets/{}/".format(dataset_identifier))
@@ -490,6 +498,7 @@ class SegmentsClient:
         """
 
         r = self.get("/labels/{}/{}/".format(sample_uuid, labelset))
+        print(r.json())
         label = Label.parse_obj(r.json())
 
         return label
@@ -701,6 +710,7 @@ class SegmentsClient:
 
         payload = {"name": name, "description": description}
         r = self.post("/datasets/{}/releases/".format(dataset_identifier), payload)
+        print(r.json())
         release = Release.parse_obj(r.json())
 
         return release

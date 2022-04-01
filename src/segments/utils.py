@@ -1,5 +1,7 @@
 import requests
 import numpy as np
+import PIL
+import json
 from io import BytesIO
 from typing import Any, Dict, Optional, Tuple, Union
 from PIL import Image, ExifTags
@@ -20,11 +22,20 @@ def bitmap2file(
     """Convert a label bitmap to a file with the proper format.
 
     Args:
-        bitmap: A numpy array where each unique value represents an instance id.
+        bitmap (np.uint32): A numpy array where each unique value represents an instance id.
 
     Returns:
-        object: a file object.
+        A file object.
     """
+
+    # Convert bitmap to np.uint32, if it is not already
+    if bitmap.dtype == "uint32":
+        pass
+    elif bitmap.dtype == "uint8":
+        bitmap = np.uint32(bitmap)
+    else:
+        assert False
+
     if is_segmentation_bitmap:
         bitmap2 = np.copy(bitmap)
         bitmap2 = bitmap2[:, :, None].view(np.uint8)
@@ -46,12 +57,12 @@ def get_semantic_bitmap(
     """Convert an instance bitmap and annotations dict into a segmentation bitmap.
 
     Args:
-        instance_bitmap: A numpy array where each unique value represents an instance id.
+        instance_bitmap (np.uint32): A numpy array where each unique value represents an instance id.
         annotations: An annotations dictionary.
         id_increment: Increment the category ids with this number. Defaults to 1.
 
     Returns:
-        A numpy array where each unique value represents a category id.
+        np.uint32: a numpy array where each unique value represents a category id.
     """
 
     if instance_bitmap is None or annotations is None:
@@ -75,7 +86,7 @@ def export_dataset(
     """Export a dataset to a different format.
 
     Args:
-        dataset: A dataset object, resulting from client.get_dataset().
+        dataset: A dataset class, resulting from client.get_dataset().
         export_folder: The folder to export the dataset to. Defaults to '.'.
         export_format: The destination format. Can be 'coco-panoptic' (default), 'coco-instance', 'yolo', 'instance', 'instance-color', 'semantic', 'semantic-color'.
         id_increment: Increment the category ids with this number. Defaults to 1. Ignored unless export_format is 'semantic' or 'semantic-color'.
@@ -126,10 +137,10 @@ def export_dataset(
         return export_image(dataset, export_folder, export_format, id_increment)
     else:
         print("Supported export formats: coco-panoptic, coco-instance, yolo")
-        return None
+        return
 
 
-def load_image_from_url(url: str, save_filename: Optional[str] = None) -> Image:
+def load_image_from_url(url: str, save_filename: Optional[str] = None) -> PIL.Image:
     """Load an image from url.
 
     Args:
@@ -143,7 +154,10 @@ def load_image_from_url(url: str, save_filename: Optional[str] = None) -> Image:
     # urllib.request.urlretrieve(url, save_filename)
 
     if save_filename is not None:
-        image.save(save_filename)
+        if "exif" in image.info:
+            image.save(save_filename, exif=image.info["exif"])
+        else:
+            image.save(save_filename)
 
     return image
 
@@ -158,10 +172,10 @@ def load_label_bitmap_from_url(
         save_filename: The filename to save to.
 
     Returns:
-        A numpy np.uint32 array.
+        np.uint32: a numpy np.uint32 array.
     """
 
-    def extract_bitmap(bitmap: Image) -> Any:  # npt.NDArray[np.uint32]:
+    def extract_bitmap(bitmap: PIL.Image) -> Any:  # npt.NDArray[np.uint32]:
         bitmap = np.array(bitmap)
         bitmap[:, :, 3] = 0
         bitmap = bitmap.view(np.uint32).squeeze(2)
@@ -179,10 +193,10 @@ def load_label_bitmap_from_url(
 def load_release(release: Release) -> requests.Response:
     release_file = release.attributes.url
     content = requests.get(release_file)
-    return content
+    return json.loads(content.content)
 
 
-def handle_exif_rotation(image: Image) -> Image:
+def handle_exif_rotation(image: PIL.Image) -> PIL.Image:
     try:
         for orientation in ExifTags.TAGS.keys():
             if ExifTags.TAGS[orientation] == "Orientation":

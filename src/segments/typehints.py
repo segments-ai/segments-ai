@@ -52,7 +52,7 @@ class AuthHeader(TypedDict):
 # Release #
 ###########
 class URL(BaseModel):
-    url: Optional[str] = None
+    url: str  # Optional[str] = None
 
 
 class Release(BaseModel):
@@ -139,9 +139,9 @@ TaskAttribute = Union[
 ObjectAttributes = List[TaskAttribute]
 ImageAttributes = List[TaskAttribute]
 
-# #########
-# # Label #
-# #########
+#########
+# Label #
+#########
 class Annotation(BaseModel):
     id: int
     category_id: int
@@ -295,9 +295,9 @@ class Label(BaseModel):
     reviewed_by: Optional[str] = None
 
 
-# ##########
-# # Sample #
-# ##########
+##########
+# Sample #
+##########
 # Image
 class ImageSampleAttributes(BaseModel):
     image: URL

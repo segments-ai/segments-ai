@@ -1,13 +1,13 @@
 import os
 import json
-from typing import Any, Optional, Union, Dict, List
 import requests
+from typing import Any, Optional, Union, Dict, List
 from urllib.parse import urlparse
 from multiprocessing.pool import ThreadPool
-from .typehints import Label, LabelStatus, Release
 from tqdm import tqdm
-from .utils import load_image_from_url, load_label_bitmap_from_url, handle_exif_rotation
 from PIL import Image
+from .typehints import Label, LabelStatus, Release
+from .utils import load_image_from_url, load_label_bitmap_from_url, handle_exif_rotation
 
 
 class SegmentsDataset:
@@ -17,6 +17,7 @@ class SegmentsDataset:
         release_file: Path to a release file, or a release class resulting from client.get_release().
         labelset: The labelset that should be loaded. Defaults to 'ground-truth'.
         filter_by: A list of label statuses to filter by. Defaults to None.
+        filter_by_metadata (dict, optional): a dict of metadata key:value pairs to filter by. Filters are ANDed together. Defaults to None.
         segments_dir: The directory where the data will be downloaded to for caching. Set to None to disable caching. Defaults to 'segments'.
         preload: Whether the data should be pre-downloaded when the dataset is initialized. Ignored if segments_dir is None. Defaults to True.
 
@@ -25,9 +26,10 @@ class SegmentsDataset:
     # https://stackoverflow.com/questions/682504/what-is-a-clean-pythonic-way-to-have-multiple-constructors-in-python
     def __init__(
         self,
-        release_file: Union[str, Release],
+        release_file: Any,
         labelset: str = "ground-truth",
         filter_by: Optional[Union[LabelStatus, List[LabelStatus]]] = None,
+        filter_by_metadata: Optional[Dict[str, str]] = None,
         segments_dir: str = "segments",
         preload: bool = True,
     ):
@@ -37,6 +39,7 @@ class SegmentsDataset:
         )
         if self.filter_by is not None:
             self.filter_by = [s.lower() for s in self.filter_by]
+        self.filter_by_metadata = filter_by_metadata
         self.segments_dir = segments_dir
         self.caching_enabled = segments_dir is not None
         self.preload = preload
@@ -46,7 +49,7 @@ class SegmentsDataset:
             with open(release_file) as f:
                 self.release = json.load(f)
         else:  # If it's a release object
-            release_file = release_file.attributes.url
+            release_file = release_file["attributes"]["url"]
             content = requests.get(release_file)
             self.release = json.loads(content.content)
         self.release_file = release_file
@@ -112,10 +115,18 @@ class SegmentsDataset:
 
                 if label_status in self.filter_by:
                     filtered_samples.append(sample)
-        else:
-            filtered_samples = samples
+            samples = filtered_samples
 
-        self.samples = filtered_samples
+        if self.filter_by_metadata is not None:
+            filtered_samples = []
+            for sample in samples:
+                if (
+                    self.filter_by_metadata.items() <= sample["metadata"].items()
+                ):  # https://stackoverflow.com/a/41579450/1542912
+                    filtered_samples.append(sample)
+            samples = filtered_samples
+
+        self.samples = samples
 
         # # Preload all samples (sequentially)
         # for i in tqdm(range(self.__len__())):

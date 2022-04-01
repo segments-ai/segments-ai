@@ -2,6 +2,7 @@ import json
 import os
 import unittest
 import numpy as np
+from dotenv import load_dotenv, find_dotenv
 from segments.client import SegmentsClient
 from segments.typehints import (
     Collaborator,
@@ -18,6 +19,7 @@ from segments.typehints import (
 ##############
 class Test(unittest.TestCase):
     def setUp(self):
+        load_dotenv(find_dotenv())
         API_KEY = os.getenv("API_KEY", "")
         self.owner = os.getenv("DATASET_OWNER", "")
         self.path = "tests"
