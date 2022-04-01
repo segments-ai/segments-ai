@@ -12,7 +12,6 @@ import numpy as np
 from PIL import Image
 from skimage import img_as_ubyte
 from skimage.measure import regionprops
-from pycocotools import mask
 
 from .utils import get_semantic_bitmap
 
@@ -121,6 +120,12 @@ def get_bbox(binary_mask):
 
 
 def export_coco_instance(dataset, export_folder, **kwargs):
+    try:
+        from pycocotools import mask as pctmask
+    except ImportError:
+        print('Please install pycocotools first: pip install pycocotools. Or on Windows: pip install pycocotools-windows')
+        return
+
     # Create export folder
     # export_folder = os.path.join(export_folder, dataset.dataset_identifier, dataset.release['name'])
     os.makedirs(export_folder, exist_ok=True)
@@ -198,7 +203,7 @@ def export_coco_instance(dataset, export_folder, **kwargs):
                     
                 y0, x0, y1, x1 = bbox
                 # rle = mask.encode(np.asfortranarray(instance_mask))
-                rle = mask.encode(np.array(instance_mask[:,:,None], dtype=np.uint8, order='F'))[0] # https://github.com/matterport/Mask_RCNN/issues/387#issuecomment-522671380
+                rle = pctmask.encode(np.array(instance_mask[:,:,None], dtype=np.uint8, order='F'))[0] # https://github.com/matterport/Mask_RCNN/issues/387#issuecomment-522671380
         #         instance_mask_crop = instance_mask[y0:y1, x0:x1]
         #         rle = mask.encode(np.asfortranarray(instance_mask_crop))
         #         plt.imshow(instance_mask_crop)
