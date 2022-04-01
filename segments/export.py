@@ -120,7 +120,7 @@ def get_bbox(binary_mask):
         return False
 
 
-def export_coco_instance(dataset, export_folder):
+def export_coco_instance(dataset, export_folder, **kwargs):
     # Create export folder
     # export_folder = os.path.join(export_folder, dataset.dataset_identifier, dataset.release['name'])
     os.makedirs(export_folder, exist_ok=True)
@@ -252,7 +252,7 @@ def export_coco_instance(dataset, export_folder):
 
 
 
-def export_coco_panoptic(dataset, export_folder):
+def export_coco_panoptic(dataset, export_folder, **kwargs):
     # Create export folder
     # export_folder = os.path.join(export_folder, dataset.dataset_identifier, dataset.release['name'])
     os.makedirs(export_folder, exist_ok=True)
@@ -393,7 +393,7 @@ def export_coco_panoptic(dataset, export_folder):
     return file_name, dataset.image_dir
 
 
-def export_image(dataset, export_folder, export_format, id_increment):
+def export_image(dataset, export_folder, export_format, id_increment, **kwargs):
     # Create export folder
     # export_folder = os.path.join(export_folder, dataset.dataset_identifier, dataset.release['name'])
     os.makedirs(export_folder, exist_ok=True)
@@ -456,7 +456,7 @@ def export_image(dataset, export_folder, export_format, id_increment):
     return dataset.image_dir
 
 
-def export_yolo(dataset, export_folder):
+def export_yolo(dataset, export_folder, **kwargs):
     if dataset.task_type not in ['vector', 'bboxes']:
         print('You can only export bounding box datasets to YOLO format.')
         return
@@ -469,8 +469,13 @@ def export_yolo(dataset, export_folder):
 
         if 'annotations' in sample and sample['annotations'] is not None and len(sample['annotations']) > 0:
             image_name = os.path.splitext(os.path.basename(sample['name']))[0]
-            image_width = sample['image'].width
-            image_height = sample['image'].height
+
+            if 'image_width' in kwargs and 'image_height' in kwargs:
+                image_width = kwargs['image_width']
+                image_height = kwargs['image_height']
+            else:
+                image_width = sample['image'].width
+                image_height = sample['image'].height
             
             file_name = '{}/{}.txt'.format(dataset.image_dir, image_name)
     #         print(file_name)       

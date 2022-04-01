@@ -65,7 +65,7 @@ def get_semantic_bitmap(instance_bitmap, annotations, id_increment=1):
     semantic_label = instance2semantic[np.array(instance_bitmap, np.uint32)]
     return semantic_label
 
-def export_dataset(dataset, export_folder='.', export_format='coco-panoptic', id_increment=1):
+def export_dataset(dataset, export_folder='.', export_format='coco-panoptic', id_increment=1, **kwargs):
     """Export a dataset to a different format.
 
     Args:
@@ -80,22 +80,22 @@ def export_dataset(dataset, export_folder='.', export_format='coco-panoptic', id
         if not dataset.task_type in ['segmentation-bitmap', 'segmentation-bitmap-highres']:
             raise ValueError('Only datasets of type "segmentation-bitmap" and "segmentation-bitmap-highres" can be exported to this format.')
         from .export import export_coco_panoptic
-        return export_coco_panoptic(dataset, export_folder)
+        return export_coco_panoptic(dataset, export_folder, **kwargs)
     elif export_format == 'coco-instance':
         if not dataset.task_type in ['segmentation-bitmap', 'segmentation-bitmap-highres']:
             raise ValueError('Only datasets of type "segmentation-bitmap" and "segmentation-bitmap-highres" can be exported to this format.')
         from .export import export_coco_instance
-        return export_coco_instance(dataset, export_folder)
+        return export_coco_instance(dataset, export_folder, **kwargs)
     elif export_format == 'yolo':
         if not dataset.task_type in ['vector', 'bboxes']:
             raise ValueError('Only datasets of type "vector" and "bboxes" can be exported to this format.')
         from .export import export_yolo
-        return export_yolo(dataset, export_folder)
+        return export_yolo(dataset, export_folder, **kwargs)
     elif export_format in ['semantic-color', 'instance-color', 'semantic', 'instance']:
         if not dataset.task_type in ['segmentation-bitmap', 'segmentation-bitmap-highres']:
             raise ValueError('Only datasets of type "segmentation-bitmap" and "segmentation-bitmap-highres" can be exported to this format.')
         from .export import export_image
-        return export_image(dataset, export_folder, export_format, id_increment)
+        return export_image(dataset, export_folder, export_format, id_increment, **kwargs)
     else:
         print('Supported export formats: coco-panoptic, coco-instance, yolo')
         return
