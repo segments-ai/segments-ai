@@ -38,7 +38,7 @@ class Test(unittest.TestCase):
         )
         # Label attribute type of the datasets.
         self.label_attribute_types = json.loads(os.getenv("LABEL_ATTRIBUTE_TYPES", ""))
-        self.TIME_INTERVAL = 0.1  # Wait for api call to complete
+        self.TIME_INTERVAL = 0.2  # Wait for api call to complete
 
     def tearDown(self):
         self.client.close()
