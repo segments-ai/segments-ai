@@ -24,6 +24,7 @@ from .typehints import (
     TaskType,
     Category,
 )
+from devtools import debug
 
 # import numpy.typing as npt
 
@@ -498,8 +499,9 @@ class SegmentsClient:
         """
 
         r = self.get("/labels/{}/{}/".format(sample_uuid, labelset))
-        print(r.json())
+        debug(r.json())
         label = Label.parse_obj(r.json())
+        debug(label)
 
         return label
 
@@ -710,7 +712,6 @@ class SegmentsClient:
 
         payload = {"name": name, "description": description}
         r = self.post("/datasets/{}/releases/".format(dataset_identifier), payload)
-        print(r.json())
         release = Release.parse_obj(r.json())
 
         return release

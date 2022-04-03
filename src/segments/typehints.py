@@ -55,12 +55,16 @@ class URL(BaseModel):
     url: str  # Optional[str] = None
 
 
+class EmptyAttribute(BaseModel):
+    pass
+
+
 class Release(BaseModel):
     uuid: str
     name: str
     description: str
     release_type: ReleaseType
-    attributes: URL
+    attributes: Union[URL, EmptyAttribute]
     status: Status
     status_info: str
     created_at: str

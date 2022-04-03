@@ -2,6 +2,7 @@ import json
 import os
 import unittest
 import numpy as np
+import time
 from dotenv import load_dotenv, find_dotenv
 from segments.client import SegmentsClient
 from segments.typehints import (
@@ -37,6 +38,7 @@ class Test(unittest.TestCase):
         )
         # Label attribute type of the datasets.
         self.label_attribute_types = json.loads(os.getenv("LABEL_ATTRIBUTE_TYPES", ""))
+        self.TIME_INTERVAL = 0.1  # Wait for api call to complete
 
     def tearDown(self):
         self.client.close()
@@ -249,13 +251,13 @@ class TestLabel(Test):
     def tearDown(self):
         super().tearDown()
 
-    def test_get_label(self):
-        labelset = "ground-truth"
-        for sample_uuid in self.sample_uuids:
-            label = self.client.get_label(sample_uuid, labelset)
-            self.assertIsInstance(label, Label)
+    # def test_get_label(self):
+    #     labelset = "ground-truth"
+    #     for sample_uuid in self.sample_uuids:
+    #         label = self.client.get_label(sample_uuid, labelset)
+    #         self.assertIsInstance(label, Label)
 
-    def test_add_update_delete_label(self):
+    def test_add_update_get_delete_label(self):
         task_attributes = [
             {
                 "name": "color",
@@ -503,15 +505,22 @@ class TestLabel(Test):
         ):
             attributes = label_attributes[label_attribute_type]
             try:
+                # Add
                 label = self.client.add_label(
                     sample_uuid, attributes, labelset, label_status, score
                 )
                 self.assertIsInstance(label, Label)
+                # Update
                 label = self.client.update_label(
                     sample_uuid, attributes, labelset, label_status, score
                 )
                 self.assertIsInstance(label, Label)
+                # Get
+                label = self.client.get_label(sample_uuid, labelset)
+                self.assertIsInstance(label, Label)
             finally:
+                # Delete
+                time.sleep(self.TIME_INTERVAL)
                 self.client.delete_label(sample_uuid, labelset)
 
 
@@ -582,6 +591,7 @@ class TestRelease(Test):
             self.assertIsInstance(release, Release)
         finally:
             # Delete release
+            time.sleep(self.TIME_INTERVAL)
             self.client.delete_release(dataset_identifier, name)
 
 
