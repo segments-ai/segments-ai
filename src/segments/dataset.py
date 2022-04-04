@@ -26,7 +26,7 @@ class SegmentsDataset:
     # https://stackoverflow.com/questions/682504/what-is-a-clean-pythonic-way-to-have-multiple-constructors-in-python
     def __init__(
         self,
-        release_file: Any,
+        release_file: Union[str, Release],
         labelset: str = "ground-truth",
         filter_by: Optional[Union[LabelStatus, List[LabelStatus]]] = None,
         filter_by_metadata: Optional[Dict[str, str]] = None,
@@ -49,7 +49,7 @@ class SegmentsDataset:
             with open(release_file) as f:
                 self.release = json.load(f)
         else:  # If it's a release object
-            release_file = release_file["attributes"]["url"]
+            release_file = release_file.attributes.url
             content = requests.get(release_file)
             self.release = json.loads(content.content)
         self.release_file = release_file

@@ -52,11 +52,7 @@ class AuthHeader(TypedDict):
 # Release #
 ###########
 class URL(BaseModel):
-    url: str  # Optional[str] = None
-
-
-class EmptyAttribute(BaseModel):
-    pass
+    url: Optional[str] = None  # TODO Does not return an URL when adding a release.
 
 
 class Release(BaseModel):
@@ -64,7 +60,7 @@ class Release(BaseModel):
     name: str
     description: str
     release_type: ReleaseType
-    attributes: Union[URL, EmptyAttribute]
+    attributes: URL
     status: Status
     status_info: str
     created_at: str
