@@ -32,11 +32,11 @@ setup(
         "pydantic",
         # Documentation
         "sphinx",
-        "furo",
+        "furo"  # "sphinx-book-theme<=0.2",  # 0.3 does not support Python 3.6
         "myst_parser",
         "sphinx-autobuild",
     ],
-    python_requires=">=3.6.0",
+    python_requires=">=3.6",
     classifiers=[
         "Development Status :: 5 - Production/Stable",  # Chose either "3 - Alpha", "4 - Beta" or "5 - Production/Stable" as the current state of your package
         "Intended Audience :: Developers",  # Define that your audience are developers

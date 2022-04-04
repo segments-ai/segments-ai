@@ -9,14 +9,16 @@
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
+#
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath("../../src/segments/"))
+sys.path.insert(0, os.path.abspath(os.path.join("..", "..", "src")))
+
 
 # -- Project information -----------------------------------------------------
 
-project = "Segments.ai"
+project = "Segments.ai Documentation"
 copyright = "2022, Arnout Hillen"
 author = "Arnout Hillen"
 
@@ -32,21 +34,14 @@ release = "0.1"
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
-    "myst_parser",
     "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
     "sphinx.ext.doctest",
-    "sphinx_copybutton",
-    "sphinx_autodoc_typehints",
+    "myst_parser",
 ]
-# Tell myst-parser to assign header anchors for h1-h3.
-myst_heading_anchors = 3
-
-suppress_warnings = ["myst.header"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
-
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -58,8 +53,14 @@ exclude_patterns = []
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-
-html_theme = "furo"  # "sphinx_book_theme"
+#
+html_theme = "furo"  # TODO Change to sphinx-book-theme (currently cannot be found - gives error).
+html_theme_options = {
+    "repository_url": "https://github.com/segments-ai/segments-ai",
+    "use_repository_button": True,
+}
+html_logo = "../logo.svg"
+html_title = "Segments.ai Documentation"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
