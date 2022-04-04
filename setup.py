@@ -29,7 +29,6 @@ setup(
         # Type hints
         "typing",
         "typing_extensions",
-        "mypy",
         "pydantic",
         # Documentation
         "sphinx",
