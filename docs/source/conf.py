@@ -15,11 +15,10 @@ import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join("..", "..", "src")))
 
-
 # -- Project information -----------------------------------------------------
 
-project = "Segments.ai Documentation"
-copyright = "2022, Arnout Hillen"
+project = "Segments.ai Python SDK"
+copyright = "2022, Segments.ai"
 author = "Arnout Hillen"
 
 # The full version, including alpha/beta/rc tags
@@ -38,7 +37,9 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.doctest",
     "myst_parser",
+    "sphinx_copybutton",
 ]
+autodoc_typehints = "description"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -46,7 +47,7 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = []
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -54,13 +55,13 @@ exclude_patterns = []
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "furo"  # TODO Change to sphinx-book-theme (currently cannot be found - gives error).
+html_theme = "sphinx_book_theme"
 html_theme_options = {
     "repository_url": "https://github.com/segments-ai/segments-ai",
     "use_repository_button": True,
 }
 html_logo = "../logo.svg"
-html_title = "Segments.ai Documentation"
+html_title = "Segments.ai Python SDK"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

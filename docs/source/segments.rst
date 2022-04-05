@@ -1,61 +1,33 @@
-segments package
-================
+Python SDK
+==========
 
-Submodules
-----------
-
-segments.client module
-----------------------
-
-.. automodule:: segments.client
+Client
+------
+.. autoclass:: segments.client.SegmentsClient
    :members:
-   :undoc-members:
-   :show-inheritance:
 
-segments.dataset module
------------------------
-
-.. automodule:: segments.dataset
+Dataset
+-------
+.. autoclass:: segments.dataset.SegmentsDataset
    :members:
-   :undoc-members:
-   :show-inheritance:
 
-segments.export module
-----------------------
-
-.. automodule:: segments.export
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-segments.huggingface module
----------------------------
-
+Hugging Face
+------------
 .. automodule:: segments.huggingface
    :members:
-   :undoc-members:
-   :show-inheritance:
 
-segments.typehints module
--------------------------
-
-.. automodule:: segments.typehints
+Export
+------
+.. automodule:: segments.export
    :members:
-   :undoc-members:
-   :show-inheritance:
 
-segments.utils module
----------------------
-
+Utils
+-----
 .. automodule:: segments.utils
    :members:
-   :undoc-members:
-   :show-inheritance:
 
-Module contents
----------------
-
-.. automodule:: segments
+Segments Types
+-------------------
+.. automodule:: segments.typehints
    :members:
-   :undoc-members:
-   :show-inheritance:
+
