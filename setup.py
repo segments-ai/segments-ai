@@ -30,11 +30,14 @@ setup(
         "typing",
         "typing_extensions",
         "pydantic",
+        "types-Pillow",
+        "types-requests",
         # Documentation
         "sphinx",
-        "furo"  # "sphinx-book-theme<=0.2",  # 0.3 does not support Python 3.6
+        "sphinx-book-theme<=0.2",  # 0.3 does not support Python 3.6
         "myst_parser",
         "sphinx-autobuild",
+        "sphinx-copybutton",
     ],
     python_requires=">=3.6",
     classifiers=[
@@ -43,10 +46,16 @@ setup(
         "Topic :: Software Development :: Build Tools",
         "License :: OSI Approved :: MIT License",  # Again, pick a license
         "Programming Language :: Python :: 3",  # Specify which python versions that you want to support
+        "Programming Language :: Python :: 3 :: Only",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Typing :: Typed",
+        "Operating System :: Microsoft :: Windows",
+        "Operating System :: POSIX",
+        "Operating System :: Unix",
+        "Operating System :: MacOS",
     ],
 )
