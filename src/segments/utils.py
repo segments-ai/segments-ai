@@ -1,10 +1,10 @@
 import requests
 import numpy as np
-import PIL
 import json
 from io import BytesIO
 from typing import Any, Dict, Optional, Tuple, Union
 from PIL import Image, ExifTags
+from typing_extensions import Literal
 from .typehints import Dataset, Release
 
 # import numpy.typing as npt
@@ -80,7 +80,15 @@ def get_semantic_bitmap(
 def export_dataset(
     dataset: Dataset,
     export_folder: str = ".",
-    export_format: str = "coco-panoptic",
+    export_format: Literal[
+        "coco-panoptic",
+        "coco-instance",
+        "yolo",
+        "instance",
+        "instance-color",
+        "semantic",
+        "semantic-color",
+    ] = "coco-panoptic",
     id_increment: int = 1,
 ) -> Optional[Union[Tuple[str, str], str]]:
     """Export a dataset to a different format.
@@ -88,7 +96,7 @@ def export_dataset(
     Args:
         dataset: A dataset class, resulting from client.get_dataset().
         export_folder: The folder to export the dataset to. Defaults to '.'.
-        export_format: The destination format. Can be 'coco-panoptic' (default), 'coco-instance', 'yolo', 'instance', 'instance-color', 'semantic', 'semantic-color'.
+        export_format: The destination format. Defaults to 'coco-panoptic'.
         id_increment: Increment the category ids with this number. Defaults to 1. Ignored unless export_format is 'semantic' or 'semantic-color'.
 
     """
@@ -140,7 +148,7 @@ def export_dataset(
         return
 
 
-def load_image_from_url(url: str, save_filename: Optional[str] = None) -> PIL.Image:
+def load_image_from_url(url: str, save_filename: Optional[str] = None) -> Image.Image:
     """Load an image from url.
 
     Args:
@@ -175,7 +183,10 @@ def load_label_bitmap_from_url(
         np.uint32: a numpy np.uint32 array.
     """
 
-    def extract_bitmap(bitmap: PIL.Image) -> Any:  # npt.NDArray[np.uint32]:
+    def extract_bitmap(
+        bitmap: Image.Image,
+    ) -> Any:  # def extract_bitmap(bitmap: Image.Image) -> npt.NDArray[np.uint32]:
+
         bitmap = np.array(bitmap)
         bitmap[:, :, 3] = 0
         bitmap = bitmap.view(np.uint32).squeeze(2)
@@ -196,7 +207,8 @@ def load_release(release: Release) -> requests.Response:
     return json.loads(content.content)
 
 
-def handle_exif_rotation(image: PIL.Image) -> PIL.Image:
+def handle_exif_rotation(image: Image.Image) -> Image.Image:
+
     try:
         for orientation in ExifTags.TAGS.keys():
             if ExifTags.TAGS[orientation] == "Orientation":

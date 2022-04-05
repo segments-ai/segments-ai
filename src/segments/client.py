@@ -24,7 +24,6 @@ from .typehints import (
     TaskType,
     Category,
 )
-from devtools import debug
 
 # import numpy.typing as npt
 
@@ -33,8 +32,8 @@ class SegmentsClient:
     """SegmentsClient class.
 
     Args:
-        api_key: Your Segments.ai API key.
-        api_url: URL of the Segments.ai API.
+        api_key: Your Segments.ai API key. If none given, reads 'API_KEY' from the environment. Defaults to None.
+        api_url: URL of the Segments.ai API. Defaults to 'https://api.segments.ai/'.
 
     Attributes:
         api_key: Your Segments.ai API key.
@@ -132,8 +131,8 @@ class SegmentsClient:
         Args:
             name: The dataset name. Example: flowers.
             description: The dataset description. Defaults to ''.
-            task_type: The dataset's task type. One of 'segmentation-bitmap', 'segmentation-bitmap-highres', 'vector', 'bboxes', 'keypoints'. Defaults to 'segmentation-bitmap', 'pointcloud-segmentation', 'pointcloud-detection'.
-            task_attributes: The dataset's task attributes. Defaults to None.
+            task_type: The dataset's task type. Defaults to 'segmentation-bitmap'.
+            task_attributes: The dataset's task attributes. Please refer to the online documentation: https://docs.segments.ai/reference/categories-and-task-attributes#object-attribute-format. Defaults to None.
             category: The dataset category. Defaults to 'other'.
             public: The dataset visibility. Defaults to False.
             readme: The dataset readme. Defaults to ''.
@@ -193,15 +192,15 @@ class SegmentsClient:
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
-            description: The dataset description.
-            task_type: The dataset's task type. One of 'segmentation-bitmap', 'segmentation-bitmap-highres', 'vector', 'bboxes', 'keypoints', 'pointcloud-segmentation', 'pointcloud-detection'.
-            task_attributes: The dataset's task attributes.
-            category: The dataset category.
-            public: The dataset visibility.
-            readme: The dataset readme.
-            enable_skip_labeling: Enable the skip button in the labeling workflow.
-            enable_skip_reviewing: Enable the skip button in the reviewing workflow.
-            enable_ratings: Enable star-ratings for labeled images.
+            description: The dataset description. Defaults to None.
+            task_type: The dataset's task type. Defaults to None.
+            task_attributes: The dataset's task attributes. Please refer to the online documentation: https://docs.segments.ai/reference/categories-and-task-attributes#object-attribute-format. Defaults to None.
+            category: The dataset category. Defaults to None.
+            public: The dataset visibility. Defaults to None.
+            readme: The dataset readme. Defaults to None.
+            enable_skip_labeling: Enable the skip button in the labeling workflow. Defaults to None.
+            enable_skip_reviewing: Enable the skip button in the reviewing workflow. Defaults to None.
+            enable_ratings: Enable star-ratings for labeled images. Defaults to None.
 
         Returns:
             A class representing the updated dataset.
@@ -259,7 +258,7 @@ class SegmentsClient:
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
             username: The username of the collaborator to be added.
-            role: The role of the collaborator to be added. One of labeler, reviewer, admin. Defaults to labeler.
+            role: The role of the collaborator to be added. Defaults to labeler.
 
         Returns:
             A class containing the newly added collaborator with its role.
@@ -499,9 +498,7 @@ class SegmentsClient:
         """
 
         r = self.get("/labels/{}/{}/".format(sample_uuid, labelset))
-        debug(r.json())
         label = Label.parse_obj(r.json())
-        debug(label)
 
         return label
 
@@ -517,7 +514,7 @@ class SegmentsClient:
 
         Args:
             sample_uuid: The sample uuid.
-            attributes: The label attributes. Please refer to the online documentation.
+            attributes: The label attributes. Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.
             labelset: The labelset this label belongs to. Defaults to 'ground-truth'.
             label_status: The label status. Defaults to 'PRELABELED'.
             score: The label score. Defaults to None.
@@ -559,7 +556,7 @@ class SegmentsClient:
 
         Args:
             sample_uuid: The sample uuid.
-            attributes: The label attributes. Please refer to the online documentation.
+            attributes: The label attributes. Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.
             labelset: The labelset this label belongs to. Defaults to 'ground-truth'.
             label_status: The label status. Defaults to 'PRELABELED'.
             score: The label score. Defaults to None.
