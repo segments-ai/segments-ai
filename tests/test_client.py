@@ -1,9 +1,9 @@
 import json
 import os
-import unittest
-import numpy as np
 import time
-from dotenv import load_dotenv, find_dotenv
+import unittest
+
+from dotenv import find_dotenv, load_dotenv
 from segments.client import SegmentsClient
 from segments.typehints import (
     Collaborator,
@@ -14,6 +14,7 @@ from segments.typehints import (
     Release,
     Sample,
 )
+
 
 ##############
 # Base class #

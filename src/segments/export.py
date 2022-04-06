@@ -1,19 +1,19 @@
 # https://www.immersivelimit.com/tutorials/create-coco-annotations-from-scratch/#coco-dataset-format
-import os
 import json
-import numpy as np
+import os
 
 # import numpy.typing as npt
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
-from tqdm import tqdm
+
+import numpy as np
 from PIL import Image
-from skimage import img_as_ubyte
-from skimage.measure import regionprops
 from pycocotools import mask
 from pydantic import BaseModel
-from .typehints import Dataset
-from .utils import get_semantic_bitmap
-
+from segments.typehints import Dataset
+from segments.utils import get_semantic_bitmap
+from skimage import img_as_ubyte
+from skimage.measure import regionprops
+from tqdm import tqdm
 
 RGB = Tuple[int, int, int]
 RGBA = Tuple[int, int, int, int]
@@ -65,6 +65,7 @@ COLORMAP: ColorMap = [
     (255, 84, 127, 255),
     (255, 170, 127, 255),
 ]
+
 
 # https://github.com/cocodataset/panopticapi/blob/master/panopticapi/utils.py
 class IdGenerator:

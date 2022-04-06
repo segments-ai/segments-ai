@@ -1,11 +1,12 @@
-import requests
-import numpy as np
 import json
 from io import BytesIO
 from typing import Any, Dict, Optional, Tuple, Union
-from PIL import Image, ExifTags
+
+import numpy as np
+import requests
+from PIL import ExifTags, Image
+from segments.typehints import Dataset, Release
 from typing_extensions import Literal
-from .typehints import Dataset, Release
 
 # import numpy.typing as npt
 
@@ -103,44 +104,44 @@ def export_dataset(
 
     print("Exporting dataset. This may take a while...")
     if export_format == "coco-panoptic":
-        if not dataset.task_type in [
+        if dataset.task_type not in [
             "segmentation-bitmap",
             "segmentation-bitmap-highres",
         ]:
             raise ValueError(
                 'Only datasets of type "segmentation-bitmap" and "segmentation-bitmap-highres" can be exported to this format.'
             )
-        from .export import export_coco_panoptic
+        from segments.export import export_coco_panoptic
 
         return export_coco_panoptic(dataset, export_folder)
     elif export_format == "coco-instance":
-        if not dataset.task_type in [
+        if dataset.task_type not in [
             "segmentation-bitmap",
             "segmentation-bitmap-highres",
         ]:
             raise ValueError(
                 'Only datasets of type "segmentation-bitmap" and "segmentation-bitmap-highres" can be exported to this format.'
             )
-        from .export import export_coco_instance
+        from segments.export import export_coco_instance
 
         return export_coco_instance(dataset, export_folder)
     elif export_format == "yolo":
-        if not dataset.task_type in ["vector", "bboxes"]:
+        if dataset.task_type not in ["vector", "bboxes"]:
             raise ValueError(
                 'Only datasets of type "vector" and "bboxes" can be exported to this format.'
             )
-        from .export import export_yolo
+        from segments.export import export_yolo
 
         return export_yolo(dataset, export_folder)
     elif export_format in ["semantic-color", "instance-color", "semantic", "instance"]:
-        if not dataset.task_type in [
+        if dataset.task_type not in [
             "segmentation-bitmap",
             "segmentation-bitmap-highres",
         ]:
             raise ValueError(
                 'Only datasets of type "segmentation-bitmap" and "segmentation-bitmap-highres" can be exported to this format.'
             )
-        from .export import export_image
+        from segments.export import export_image
 
         return export_image(dataset, export_folder, export_format, id_increment)
     else:

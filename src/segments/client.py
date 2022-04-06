@@ -1,13 +1,16 @@
-import urllib.parse
-import requests
 import os
+import urllib.parse
 from typing import IO, Any, Dict, List, Optional, Union
-from typing_extensions import Literal
+
+import requests
+from dotenv import find_dotenv, load_dotenv
 from pydantic import parse_obj_as
-from dotenv import load_dotenv, find_dotenv
+from typing_extensions import Literal
+
 from .typehints import (
-    AWSFields,
     AuthHeader,
+    AWSFields,
+    Category,
     Collaborator,
     Dataset,
     File,
@@ -22,7 +25,6 @@ from .typehints import (
     SampleAttributes,
     TaskAttributes,
     TaskType,
-    Category,
 )
 
 # import numpy.typing as npt
@@ -248,7 +250,7 @@ class SegmentsClient:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
         """
 
-        r = self.delete("/datasets/{}/".format(dataset_identifier))
+        self.delete("/datasets/{}/".format(dataset_identifier))
 
     def add_dataset_collaborator(
         self, dataset_identifier: str, username: str, role: Role = "labeler"
@@ -278,7 +280,7 @@ class SegmentsClient:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
             username: The username of the collaborator to be deleted.
         """
-        r = self.delete(
+        self.delete(
             "/datasets/{}/collaborators/{}".format(dataset_identifier, username),
         )
 
@@ -399,7 +401,7 @@ class SegmentsClient:
         """
 
         try:
-            sample_attributes = parse_obj_as(SampleAttributes, attributes)
+            parse_obj_as(SampleAttributes, attributes)
         except Exception as e:
             raise Exception(
                 "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
@@ -481,7 +483,7 @@ class SegmentsClient:
             uuid: The sample uuid.
         """
 
-        r = self.delete("/samples/{}/".format(uuid))
+        self.delete("/samples/{}/".format(uuid))
 
     ##########
     # Labels #
@@ -524,7 +526,7 @@ class SegmentsClient:
         """
 
         try:
-            label_attributes = parse_obj_as(LabelAttributes, attributes)
+            parse_obj_as(LabelAttributes, attributes)
         except Exception as e:
             raise Exception(
                 "Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.",
@@ -589,7 +591,7 @@ class SegmentsClient:
             labelset: The labelset this label belongs to.
         """
 
-        r = self.delete("/labels/{}/{}/".format(sample_uuid, labelset))
+        self.delete("/labels/{}/{}/".format(sample_uuid, labelset))
 
     #############
     # Labelsets #
@@ -657,7 +659,7 @@ class SegmentsClient:
             name: The name of the labelset.
         """
 
-        r = self.delete("/datasets/{}/labelsets/{}/".format(dataset_identifier, name))
+        self.delete("/datasets/{}/labelsets/{}/".format(dataset_identifier, name))
 
     ############
     # Releases #
@@ -721,7 +723,7 @@ class SegmentsClient:
             name: The name of the release.
         """
 
-        r = self.delete("/datasets/{}/releases/{}/".format(dataset_identifier, name))
+        self.delete("/datasets/{}/releases/{}/".format(dataset_identifier, name))
 
     ##########
     # Assets #
@@ -741,7 +743,7 @@ class SegmentsClient:
         presigned_post_fields = PresignedPostFields.parse_obj(
             r.json()["presignedPostFields"]
         )
-        response_aws = self._upload_to_aws(
+        self._upload_to_aws(
             file, presigned_post_fields.url, presigned_post_fields.fields
         )
         f = File.parse_obj(r.json())

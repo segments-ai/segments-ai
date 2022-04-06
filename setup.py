@@ -26,12 +26,15 @@ setup(
         'pycocotools;platform_system!="Windows"',
         'pycocotools-windows;platform_system=="Windows"',
         "python-dotenv",
+        "flake8",
+        "isort",
         # Type hints
         "typing",
         "typing_extensions",
         "pydantic",
         "types-Pillow",
         "types-requests",
+        # "mypy",
         # Documentation
         "sphinx",
         "sphinx-book-theme<=0.2",  # 0.3 does not support Python 3.6

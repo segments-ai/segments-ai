@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional, Union
-from typing_extensions import TypedDict, Literal
+
 from pydantic import BaseModel
+from typing_extensions import Literal, TypedDict
 
 ####################################
 # Enums, constants and other types #
@@ -138,6 +139,7 @@ TaskAttribute = Union[
 ]
 ObjectAttributes = List[TaskAttribute]
 ImageAttributes = List[TaskAttribute]
+
 
 #########
 # Label #

@@ -1,9 +1,10 @@
 import json
-import requests
 from typing import Any, Dict
+
+import requests
 from PIL import Image
-from .typehints import Release
-from .utils import load_image_from_url, load_label_bitmap_from_url
+from segments.typehints import Release
+from segments.utils import load_image_from_url, load_label_bitmap_from_url
 
 
 def release2dataset(
@@ -87,7 +88,7 @@ def release2dataset(
     for sample in samples:
         try:
             del sample["labels"]["ground-truth"]["attributes"]["format_version"]
-        except:
+        except Exception:
             pass
 
         data_row: Dict[str, Any] = {}
@@ -158,7 +159,7 @@ def release2dataset(
         def download_image(data_row: Dict[str, Any]) -> Dict[str, Any]:
             try:
                 data_row["image"] = load_image_from_url(data_row["image.url"])
-            except:
+            except Exception:
                 data_row["image"] = None
             return data_row
 
@@ -170,7 +171,7 @@ def release2dataset(
                 data_row["label.segmentation_bitmap"] = Image.fromarray(
                     segmentation_bitmap
                 )
-            except:
+            except Exception:
                 data_row["label.segmentation_bitmap"] = Image.new(
                     "RGB", (1, 1)
                 )  # None not possible?

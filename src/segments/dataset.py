@@ -1,13 +1,18 @@
-import os
 import json
-import requests
-from typing import Any, Optional, Union, Dict, List
-from urllib.parse import urlparse
+import os
 from multiprocessing.pool import ThreadPool
-from tqdm import tqdm
+from typing import Any, Dict, List, Optional, Union
+from urllib.parse import urlparse
+
+import requests
 from PIL import Image
-from .typehints import Label, LabelStatus, Release
-from .utils import load_image_from_url, load_label_bitmap_from_url, handle_exif_rotation
+from segments.typehints import LabelStatus, Release
+from segments.utils import (
+    handle_exif_rotation,
+    load_image_from_url,
+    load_label_bitmap_from_url,
+)
+from tqdm import tqdm
 
 
 class SegmentsDataset:
@@ -67,7 +72,7 @@ class SegmentsDataset:
         )
 
         # First some checks
-        if not self.labelset in [
+        if self.labelset not in [
             labelset["name"] for labelset in self.release["dataset"]["labelsets"]
         ]:
             print('There is no labelset with name "{}".'.format(self.labelset))
@@ -150,8 +155,8 @@ class SegmentsDataset:
         ):
             print("Preloading all samples. This may take a while...")
             with ThreadPool(16) as pool:
-                # r = list(tqdm(pool.imap_unordered(self.__getitem__, range(num_samples)), total=num_samples))
-                r = list(
+                # list(tqdm(pool.imap_unordered(self.__getitem__, range(num_samples)), total=num_samples))
+                list(
                     tqdm(
                         pool.imap_unordered(_load_image, range(num_samples)),
                         total=num_samples,
@@ -232,7 +237,7 @@ class SegmentsDataset:
         # Load the image
         try:
             image, image_filename = self._load_image_from_cache(sample)
-        except:
+        except Exception:
             print(
                 "Something went wrong loading sample {}:".format(sample["name"]), sample
             )
@@ -259,7 +264,7 @@ class SegmentsDataset:
                 )
                 attributes = label["attributes"]
                 annotations = attributes["annotations"]
-            except:
+            except Exception:
                 segmentation_bitmap = attributes = annotations = None
 
             item.update(
@@ -280,7 +285,7 @@ class SegmentsDataset:
                 label = sample["labels"][self.labelset]
                 attributes = label["attributes"]
                 annotations = attributes["annotations"]
-            except:
+            except Exception:
                 attributes = annotations = None
 
             item.update({"annotations": annotations, "attributes": attributes})
