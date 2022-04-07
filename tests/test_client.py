@@ -25,7 +25,12 @@ class Test(unittest.TestCase):
         API_KEY = os.getenv("API_KEY", "")
         self.owner = os.getenv("DATASET_OWNER", "")
         self.path = "tests"
-        self.client = SegmentsClient(api_key=API_KEY)
+        self.url = os.getenv("API_URL")
+        self.client = (
+            SegmentsClient(api_key=API_KEY, api_url=self.url)
+            if self.url is not None
+            else SegmentsClient(api_key=API_KEY)
+        )
         self.datasets = json.loads(os.getenv("DATASETS", ""))
         # First sample uuid.
         self.sample_uuids = json.loads(os.getenv("SAMPLE_UUIDS", ""))
