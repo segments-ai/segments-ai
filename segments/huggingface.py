@@ -261,7 +261,7 @@ def release2dataset(release, download_images=True):
     }
 
     ## Create readme.md
-    with open('data/dataset_card_template.md', 'r') as f:
+    with open(os.path.join(os.path.dirname(__file__), 'data', 'dataset_card_template.md'), 'r') as f:
         template = Template(f.read())
         readme = template.substitute(info)
         dataset.readme = readme
