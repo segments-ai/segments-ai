@@ -3,8 +3,9 @@ from typing import Any, Dict
 
 import requests
 from PIL import Image
-from segments.typehints import Release
-from segments.utils import load_image_from_url, load_label_bitmap_from_url
+
+from .typehints import Release
+from .utils import load_image_from_url, load_label_bitmap_from_url
 
 
 def release2dataset(

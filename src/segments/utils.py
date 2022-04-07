@@ -5,8 +5,9 @@ from typing import Any, Dict, Optional, Tuple, Union
 import numpy as np
 import requests
 from PIL import ExifTags, Image
-from segments.typehints import Dataset, Release
 from typing_extensions import Literal
+
+from .typehints import Dataset, Release
 
 # import numpy.typing as npt
 
@@ -111,7 +112,7 @@ def export_dataset(
             raise ValueError(
                 'Only datasets of type "segmentation-bitmap" and "segmentation-bitmap-highres" can be exported to this format.'
             )
-        from segments.export import export_coco_panoptic
+        from .export import export_coco_panoptic
 
         return export_coco_panoptic(dataset, export_folder)
     elif export_format == "coco-instance":
@@ -122,7 +123,7 @@ def export_dataset(
             raise ValueError(
                 'Only datasets of type "segmentation-bitmap" and "segmentation-bitmap-highres" can be exported to this format.'
             )
-        from segments.export import export_coco_instance
+        from .export import export_coco_instance
 
         return export_coco_instance(dataset, export_folder)
     elif export_format == "yolo":
@@ -130,7 +131,7 @@ def export_dataset(
             raise ValueError(
                 'Only datasets of type "vector" and "bboxes" can be exported to this format.'
             )
-        from segments.export import export_yolo
+        from .export import export_yolo
 
         return export_yolo(dataset, export_folder)
     elif export_format in ["semantic-color", "instance-color", "semantic", "instance"]:
@@ -141,7 +142,7 @@ def export_dataset(
             raise ValueError(
                 'Only datasets of type "segmentation-bitmap" and "segmentation-bitmap-highres" can be exported to this format.'
             )
-        from segments.export import export_image
+        from .export import export_image
 
         return export_image(dataset, export_folder, export_format, id_increment)
     else:

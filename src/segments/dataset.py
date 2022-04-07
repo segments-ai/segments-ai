@@ -6,13 +6,10 @@ from urllib.parse import urlparse
 
 import requests
 from PIL import Image
-from segments.typehints import LabelStatus, Release
-from segments.utils import (
-    handle_exif_rotation,
-    load_image_from_url,
-    load_label_bitmap_from_url,
-)
 from tqdm import tqdm
+
+from .typehints import LabelStatus, Release
+from .utils import handle_exif_rotation, load_image_from_url, load_label_bitmap_from_url
 
 
 class SegmentsDataset:

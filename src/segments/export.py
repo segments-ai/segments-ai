@@ -9,11 +9,12 @@ import numpy as np
 from PIL import Image
 from pycocotools import mask
 from pydantic import BaseModel
-from segments.typehints import Dataset
-from segments.utils import get_semantic_bitmap
 from skimage import img_as_ubyte
 from skimage.measure import regionprops
 from tqdm import tqdm
+
+from .typehints import Dataset
+from .utils import get_semantic_bitmap
 
 RGB = Tuple[int, int, int]
 RGBA = Tuple[int, int, int, int]

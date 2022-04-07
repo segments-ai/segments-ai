@@ -49,6 +49,8 @@ class SegmentsClient:
         if api_key is None:
             load_dotenv(find_dotenv())
             self.api_key = os.getenv("API_KEY")
+            if self.api_key is None:
+                raise ValueError("")
         else:
             self.api_key = api_key
         self.api_url = api_url
@@ -583,12 +585,12 @@ class SegmentsClient:
 
         return label
 
-    def delete_label(self, sample_uuid: str, labelset: str) -> None:
+    def delete_label(self, sample_uuid: str, labelset: str = "ground-truth") -> None:
         """Delete a label.
 
         Args:
             sample_uuid: The sample uuid.
-            labelset: The labelset this label belongs to.
+            labelset: The labelset this label belongs to. Defaults to 'ground-truth'.
         """
 
         self.delete("/labels/{}/{}/".format(sample_uuid, labelset))

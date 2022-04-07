@@ -18,6 +18,7 @@ LabelStatus = Literal[
 TaskType = Literal[
     "segmentation-bitmap",
     "segmentation-bitmap-highres",
+    "image-vector-sequence",
     "bboxes",
     "vector",
     "pointcloud-cuboid",
@@ -26,7 +27,6 @@ TaskType = Literal[
     "pointcloud-segmentation-sequence",
     "text-named-entities",
     "text-span-categorization",
-    "image-vector-sequence",
     "",
 ]
 DataType = Literal["IMAGE"]
