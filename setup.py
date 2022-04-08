@@ -18,7 +18,7 @@ setup(
         "vision",
     ],  # Keywords that define your package best
     install_requires=[
-        "numpy",
+        "numpy",  # Change to >= 1.20 if we decide to drop python 3.7 support (numpy 1.20+ includes type stubs).
         "requests",
         "Pillow",
         "scikit-image",
@@ -26,22 +26,29 @@ setup(
         'pycocotools;platform_system!="Windows"',
         'pycocotools-windows;platform_system=="Windows"',
         "python-dotenv",
-        "flake8",
-        "isort",
         # Type hints
         "typing",
         "typing_extensions",
         "pydantic",
         "types-Pillow",
         "types-requests",
-        # "mypy",
-        # Documentation
-        "sphinx",
-        "sphinx-book-theme<=0.2",  # 0.3 does not support Python 3.6
-        "myst_parser",
-        "sphinx-autobuild",
-        "sphinx-copybutton",
     ],
+    extras_require={  # Install with: pip install segments-ai[dev]
+        "dev": [
+            # Style
+            "black",
+            "flake8",
+            "isort",
+            # Type hints
+            "mypy",
+            # Documentation
+            "sphinx",
+            "sphinx-book-theme<=0.2",  # 0.3 does not support python 3.6.
+            "myst_parser",
+            "sphinx-autobuild",
+            "sphinx-copybutton",
+        ]
+    },
     python_requires=">=3.6",
     classifiers=[
         "Development Status :: 5 - Production/Stable",  # Chose either "3 - Alpha", "4 - Beta" or "5 - Production/Stable" as the current state of your package
