@@ -2,14 +2,12 @@ import json
 from io import BytesIO
 from typing import Any, Dict, Optional, Tuple, Union
 
-import numpy as np
+import numpy as np  # import numpy.typing as npt
 import requests
 from PIL import ExifTags, Image
+from segments.typing import Dataset, Release
 from typing_extensions import Literal
 
-from .typehints import Dataset, Release
-
-# import numpy.typing as npt
 
 session = requests.Session()
 adapter = requests.adapters.HTTPAdapter(max_retries=3)

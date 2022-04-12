@@ -40,6 +40,11 @@ extensions = [
     "sphinx_copybutton",
 ]
 autodoc_typehints = "description"
+autodoc_member_order = "bysource"
+
+# Remove the prompt when copying examples
+copybutton_prompt_text = r">>> |\.\.\. "
+copybutton_prompt_is_regexp = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]

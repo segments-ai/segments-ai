@@ -5,7 +5,7 @@ import unittest
 
 from dotenv import find_dotenv, load_dotenv
 from segments.client import SegmentsClient
-from segments.typehints import (
+from segments.typing import (
     Collaborator,
     Dataset,
     File,
@@ -22,13 +22,12 @@ from segments.typehints import (
 class Test(unittest.TestCase):
     def setUp(self):
         load_dotenv(find_dotenv())
-        API_KEY = os.getenv("API_KEY", "")
+        API_KEY = os.getenv("API_KEY")
+        API_URL = os.getenv("API_URL")
         self.owner = os.getenv("DATASET_OWNER", "")
-        self.path = "tests"
-        self.url = os.getenv("API_URL")
         self.client = (
-            SegmentsClient(api_key=API_KEY, api_url=self.url)
-            if self.url is not None
+            SegmentsClient(api_key=API_KEY, api_url=API_URL)
+            if API_URL is not None
             else SegmentsClient(api_key=API_KEY)
         )
         self.datasets = json.loads(os.getenv("DATASETS", ""))
@@ -44,7 +43,7 @@ class Test(unittest.TestCase):
         )
         # Label attribute type of the datasets.
         self.label_attribute_types = json.loads(os.getenv("LABEL_ATTRIBUTE_TYPES", ""))
-        self.TIME_INTERVAL = 0.2  # Wait for api call to complete
+        self.TIME_INTERVAL = 0.2  # Wait for api call to complete.
 
     def tearDown(self):
         self.client.close()
@@ -612,7 +611,7 @@ class TestAsset(Test):
         super().tearDown()
 
     def test_upload_asset(self):
-        with open(self.path + "/fixtures/test.png", "rb") as f:
+        with open("tests/fixtures/test.png", "rb") as f:
             test_file = self.client.upload_asset(f, "test.png")
             self.assertIsInstance(test_file, File)
 

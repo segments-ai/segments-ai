@@ -3,9 +3,9 @@ from typing import Any, Dict, List, Optional, Union
 from pydantic import BaseModel
 from typing_extensions import Literal, TypedDict
 
-####################################
-# Enums, constants and other types #
-####################################
+#######################################
+# Literals, constants and other types #
+#######################################
 LabelStatus = Literal[
     "REVIEWED",
     "REVIEWING_IN_PROGRESS",
@@ -53,7 +53,9 @@ class AuthHeader(TypedDict):
 # Release #
 ###########
 class URL(BaseModel):
-    url: Optional[str] = None  # TODO Does not return an URL when adding a release.
+    url: Optional[
+        str
+    ] = None  # TODO remove optional (e.g., does not return an URL when adding a release).
 
 
 class Release(BaseModel):

@@ -4,10 +4,8 @@ from typing import IO, Any, Dict, List, Optional, Union
 
 import requests
 from dotenv import find_dotenv, load_dotenv
-from pydantic import parse_obj_as
-from typing_extensions import Literal
-
-from .typehints import (
+from pydantic import ValidationError, parse_obj_as
+from segments.typing import (
     AuthHeader,
     AWSFields,
     Category,
@@ -26,6 +24,7 @@ from .typehints import (
     TaskAttributes,
     TaskType,
 )
+from typing_extensions import Literal
 
 # import numpy.typing as npt
 
@@ -34,13 +33,33 @@ class SegmentsClient:
     """SegmentsClient class.
 
     Args:
-        api_key: Your Segments.ai API key. If none given, reads 'API_KEY' from the environment. Defaults to None.
-        api_url: URL of the Segments.ai API. Defaults to 'https://api.segments.ai/'.
+        api_key: Your Segments.ai API key. If no api key given, reads `API_KEY` from the environment. Defaults to `None`.
+        api_url: URL of the Segments.ai API. Defaults to https://api.segments.ai/.
 
     Attributes:
         api_key: Your Segments.ai API key.
         api_url: URL of the Segments.ai API.
 
+    Raises:
+        KeyError: If `API_KEY` is not found in the `.env` file.
+        ValueError: If an invalid api key is used.
+
+    Examples:
+        Import the segments package in your python file and set up a client with an API key. An API key can be created on your user account page.
+
+        >>> from segments import SegmentsClient
+        ...
+        >>> api_key = 'YOUR_API_KEY'
+        >>> client = SegmentsClient(api_key)
+        'Initialized successfully.'
+
+        Or store your api key in a .env file (API_KEY = ...):
+
+        >>> from segments import SegmentsClient
+        ...
+        >>> client = SegmentsClient()
+        'Found an api key in your environment.'
+        'Initialized successfully.'
     """
 
     def __init__(
@@ -50,7 +69,9 @@ class SegmentsClient:
             load_dotenv(find_dotenv())
             self.api_key = os.getenv("API_KEY")
             if self.api_key is None:
-                raise ValueError("")
+                raise KeyError("Did you set API_KEY in your .env file?")
+            else:
+                print("Found an api key in your .env file.")
         else:
             self.api_key = api_key
         self.api_url = api_url
@@ -73,13 +94,35 @@ class SegmentsClient:
         elif r.status_code == 426:
             pass
         else:
-            raise Exception("Something went wrong. Did you use the right api key?")
+            raise ValueError("Something went wrong. Did you use the right api key?")
 
     # https://stackoverflow.com/questions/48160728/resourcewarning-unclosed-socket-in-python-3-unit-test
     def close(self) -> None:
+        """Close SegmentsClient connections.
+
+        Examples:
+            You can manually close the segments client's connections:
+
+            >>> client = SegmentsClient()
+            >>> client.get_datasets()
+            >>> client.close()
+
+            Or use the segments client as a context manager:
+
+            >>> with SegmentsClient() as client:
+            >>>     client.get_datasets()
+
+        """
         self.api_session.close()
         self.s3_session.close()
         print("Closed successfully.")
+
+    # Use SegmentsClient as a context manager (e.g., with SegmentsClient() as client: client.add_dataset()).
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
 
     ############
     # Datasets #
@@ -88,10 +131,18 @@ class SegmentsClient:
         """Get a list of datasets.
 
         Args:
-            user: The user for which to get the datasets. Leave empty to get datasets of current user. Defaults to None.
+            user: The user for which to get the datasets. Leave empty to get datasets of current user. Defaults to `None`.
 
         Returns:
             A list of classes representing the datasets.
+
+        Raises:
+            ValidationError: If pydantic validation of the datasets fails.
+
+        Examples:
+            >>> datasets = client.get_datasets()
+            >>> for dataset in datasets:
+            >>>     print(dataset.name, dataset.description)
         """
 
         if user is not None:
@@ -110,6 +161,15 @@ class SegmentsClient:
 
         Returns:
             A class representing the dataset.
+
+        Raises:
+            ValidationError: If pydantic validation of the dataset fails.
+
+        Examples:
+            >>> dataset_identifier = 'jane/flowers'
+            ...
+            >>> dataset = client.get_dataset(dataset_identifier)
+            >>> print(dataset)
         """
 
         r = self.get("/datasets/{}/".format(dataset_identifier))
@@ -146,6 +206,19 @@ class SegmentsClient:
 
         Returns:
             A class representing the newly created dataset.
+
+        Raises:
+            ValidationError: If pydantic validation of the task attributes fails.
+            ValidationError: If pydantic validation of the dataset fails.
+
+        Examples:
+            >>> dataset_name = 'flowers'
+            >>> description = 'A dataset containing flowers of all kinds.'
+            >>> task_type = 'segmentation-bitmap'
+            ...
+            >>> dataset = client.add_dataset(dataset_name, description, task_type)
+            >>> print(dataset)
+
         """
 
         if task_attributes is None:
@@ -155,11 +228,11 @@ class SegmentsClient:
             }
         try:
             TaskAttributes.parse_obj(task_attributes)
-        except Exception as e:
-            raise Exception(
+        except ValidationError as e:
+            print(
                 "Did you use the right task attributes? Please refer to the online documentation: https://docs.segments.ai/reference/categories-and-task-attributes#object-attribute-format.",
-                e,
             )
+            raise e
         else:
             payload: Dict[str, Any] = {
                 "name": name,
@@ -208,6 +281,16 @@ class SegmentsClient:
 
         Returns:
             A class representing the updated dataset.
+
+        Raises:
+            ValidationError: If pydantic validation of the dataset fails.
+
+        Examples:
+            >>> dataset_identifier = 'jane/flowers'
+            >>> description = 'A dataset containing flowers of all kinds.'
+            ...
+            >>> dataset = client.update_dataset(dataset_identifier, description)
+            >>> print(dataset)
         """
 
         payload: Dict[str, Any] = {}
@@ -250,6 +333,10 @@ class SegmentsClient:
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
+
+        Examples:
+            >>> dataset_identifier = 'jane/flowers'
+            >>> client.delete_dataset(dataset_identifier)
         """
 
         self.delete("/datasets/{}/".format(dataset_identifier))
@@ -266,6 +353,16 @@ class SegmentsClient:
 
         Returns:
             A class containing the newly added collaborator with its role.
+
+        Raises:
+            ValidationError: If pydantic validation of the collaborator fails.
+
+        Examples
+            >>> dataset_identifier = 'jane/flowers'
+            >>> username = 'john'
+            >>> role = 'reviewer'
+            ...
+            >>> client.add_dataset_collaborator(dataset_identifier, username, role)
         """
         payload = {"user": username, "role": role}
         r = self.post("/datasets/{}/collaborators/".format(dataset_identifier), payload)
@@ -281,6 +378,9 @@ class SegmentsClient:
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
             username: The username of the collaborator to be deleted.
+
+        Examples:
+
         """
         self.delete(
             "/datasets/{}/collaborators/{}".format(dataset_identifier, username),
@@ -314,6 +414,16 @@ class SegmentsClient:
 
         Returns:
             A list of classes representing the samples.
+
+        Raises:
+            ValidationError: If pydantic validation of the samples fails.
+
+        Examples:
+            >>> dataset_identifier = 'jane/flowers'
+            >>> samples = client.get_samples(dataset_identifier)
+            ...
+            >>> for sample in samples:
+            >>>     print(sample['name'], sample['uuid'])
         """
 
         # pagination
@@ -365,6 +475,13 @@ class SegmentsClient:
 
         Returns:
             A class representing the sample
+
+        Raises:
+            ValidationError: If pydantic validation of the sample fails.
+
+        Examples:
+            >>> sample = client.get_sample(uuid='602a3eec-a61c-4a77-9fcc-3037ce5e9606')
+            >>> print(sample)
         """
 
         query_string = "/samples/{}/".format(uuid)
@@ -393,22 +510,46 @@ class SegmentsClient:
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
             name: The name of the sample.
-            attributes: The sample attributes. Please refer to the online documentation.
+            attributes: The sample attributes. Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.
             metadata: Any sample metadata. Example: {'weather': 'sunny', 'camera_id': 3}.
             priority: Priority in the labeling queue. Samples with higher values will be labeled first. Defaults to 0.
             embedding: Embedding of this sample represented by an array of floats.
 
         Returns:
             A class representing the newly created sample.
+
+        Raises:
+            ValidationError: If pydantic validation of the sample attributes fails.
+            ValidationError: If pydantic validation of the sample fails.
+
+        Examples:
+            >>> dataset_identifier = 'jane/flowers'
+            >>> name = 'violet.jpg'
+            >>> attributes = {
+            ...     'image': {
+            ...         'url': 'https://example.com/violet.jpg'
+            ...     }
+            ... }
+            ...
+            >>> # metadata and priority are optional fields
+            >>> metadata = {
+            ...     'city': 'London',
+            ...     'weather': 'cloudy',
+            ...     'robot_id': 3
+            ... }
+            >>> priority = 10 # Samples with higher priority value will be labeled first. Default is 0.
+            ...
+            >>> sample = client.add_sample(dataset_identifier, name, attributes, metadata, priority)
+            >>> print(sample)
         """
 
         try:
             parse_obj_as(SampleAttributes, attributes)
-        except Exception as e:
-            raise Exception(
+        except ValidationError as e:
+            print(
                 "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
-                e,
             )
+            raise e
         else:
             payload: Dict[str, Any] = {
                 "name": name,
@@ -453,6 +594,21 @@ class SegmentsClient:
 
         Returns:
             A class representing the updated sample.
+
+        Raises:
+            ValidationError: If pydantic validation of the sample fails.
+
+        Examples:
+            >>> uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
+            >>> metadata = {
+            ...     'city': 'London',
+            ...     'weather': 'cloudy',
+            ...     'robot_id': 3
+            ... }
+            >>> priority = 10 # Samples with higher priority value will be labeled first. Default is 0.
+            ...
+            >>> sample = client.update_sample(uuid, metadata=metadata, priority=priority)
+            >>> print(sample)
         """
 
         payload: Dict[str, Any] = {}
@@ -483,6 +639,9 @@ class SegmentsClient:
 
         Args:
             uuid: The sample uuid.
+
+        Examples:
+            >>> client.delete_sample(uuid='602a3eec-a61c-4a77-9fcc-3037ce5e9606')
         """
 
         self.delete("/samples/{}/".format(uuid))
@@ -499,6 +658,15 @@ class SegmentsClient:
 
         Returns:
             A class representing the label.
+
+        Raises:
+            ValidationError: If pydantic validation of the label fails.
+
+        Examples:
+            >>> sample_uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
+            ...
+            >>> label = client.get_label(sample_uuid)
+            >>> print(label)
         """
 
         r = self.get("/labels/{}/{}/".format(sample_uuid, labelset))
@@ -525,15 +693,38 @@ class SegmentsClient:
 
         Returns:
             A class representing the newly created label.
+
+        Raises:
+            ValidationError: If pydantic validation of the attributes fails.
+            ValidationError: If pydantic validation of the label fails.
+
+        Examples:
+            >>> sample_uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
+            >>> attributes = {
+            ...     'format_version': '0.1',
+            ...     'annotations': [
+            ...         {
+            ...             'id': 1,
+            ...             'category_id': 1,
+            ...             'type': 'bbox',
+            ...             'points': [
+            ...                 [12.34, 56.78],
+            ...                 [90.12, 34.56]
+            ...             ]
+            ...         },
+            ...     ]
+            ... }
+            ...
+            >>> client.add_label(sample_uuid, attributes)
         """
 
         try:
             parse_obj_as(LabelAttributes, attributes)
-        except Exception as e:
-            raise Exception(
+        except ValidationError as e:
+            print(
                 "Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.",
-                e,
             )
+            raise e
         else:
             payload: Dict[str, Any] = {
                 "label_status": label_status,
@@ -567,6 +758,28 @@ class SegmentsClient:
 
         Returns:
             A class representing the updated label.
+
+        Raises:
+            ValidationError: If pydantic validation of the label fails.
+
+        Examples:
+            >>> sample_uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
+            >>> attributes = {
+            ...     'format_version': '0.1',
+            ...     'annotations': [
+            ...         {
+            ...             'id': 1,
+            ...             'category_id': 1,
+            ...             'type': 'bbox',
+            ...             'points': [
+            ...             [12.34, 56.78],
+            ...             [90.12, 34.56]
+            ...             ]
+            ...         },
+            ...     ]
+            ... }
+            ...
+            >>> client.update_label(sample_uuid, attributes)
         """
 
         payload: Dict[str, Any] = {}
@@ -591,6 +804,12 @@ class SegmentsClient:
         Args:
             sample_uuid: The sample uuid.
             labelset: The labelset this label belongs to. Defaults to 'ground-truth'.
+
+        Examples:
+            >>> sample_uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
+            >>> labelset = 'ground-truth'
+            ...
+            >>> client.delete_label(sample_uuid, labelset)
         """
 
         self.delete("/labels/{}/{}/".format(sample_uuid, labelset))
@@ -606,6 +825,16 @@ class SegmentsClient:
 
         Returns:
             A list of classes representing the labelsets.
+
+        Raises:
+            ValidationError: If pydantic validation of the labelsets fails.
+
+        Examples:
+            >>> dataset_identifier = 'jane/flowers'
+            >>> labelsets = client.get_labelsets(dataset_identifier)
+            ...
+            >>> for labelset in labelsets:
+            >>>     print(labelset.name, labelset.description)
         """
 
         r = self.get("/datasets/{}/labelsets/".format(dataset_identifier))
@@ -622,6 +851,16 @@ class SegmentsClient:
 
         Returns:
             A class representing the labelset.
+
+        Raises:
+            ValidationError: If pydantic validation of the labelset fails.
+
+        Examples:
+            >>> dataset_identifier = 'jane/flowers'
+            >>> name = 'model-predictions'
+            ...
+            >>> labelset = client.get_labelset(dataset_identifier, name)
+            >>> print(labelset)
         """
 
         r = self.get("/datasets/{}/labelsets/{}/".format(dataset_identifier, name))
@@ -641,6 +880,15 @@ class SegmentsClient:
 
         Returns:
             A class representing the labelset.
+
+        Raises:
+            ValidationError: If pydantic validation of the labelset fails.
+
+        Examples:
+            >>> dataset_identifier = 'jane/flowers'
+            >>> name = 'model-predictions-resnet50'
+            ...
+            >>> client.add_labelset(dataset_identifier, name)
         """
 
         payload = {
@@ -659,6 +907,12 @@ class SegmentsClient:
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
             name: The name of the labelset.
+
+        Examples:
+            >>> dataset_identifier = 'jane/flowers'
+            >>> name = 'model-predictions'
+            ...
+            >>> client.delete_labelset(dataset_identifier, name)
         """
 
         self.delete("/datasets/{}/labelsets/{}/".format(dataset_identifier, name))
@@ -674,6 +928,16 @@ class SegmentsClient:
 
         Returns:
             A list of classes representing the releases.
+
+        Raises:
+            ValidationError: If pydantic validation of the releases fails.
+
+        Examples:
+            >>> dataset_identifier = 'jane/flowers'
+            >>> releases = client.get_releases(dataset_identifier)
+            ...
+            >>> for release in releases:
+            >>>     print(release.name, release.description, release.attributes.url)
         """
 
         r = self.get("/datasets/{}/releases/".format(dataset_identifier))
@@ -690,6 +954,16 @@ class SegmentsClient:
 
         Returns:
             A class representing the release.
+
+        Raises:
+            ValidationError: If pydantic validation of the release fails.
+
+        Examples:
+            >>> dataset_identifier = 'jane/flowers'
+            >>> name = 'v0.1'
+            ...
+            >>> release = client.get_release(dataset_identifier, name)
+            >>> print(release)
         """
 
         r = self.get("/datasets/{}/releases/{}/".format(dataset_identifier, name))
@@ -709,6 +983,17 @@ class SegmentsClient:
 
         Returns:
             A class representing the newly created release.
+
+        Raises:
+            ValidationError: If pydantic validation of the release fails.
+
+        Examples:
+            >>> dataset_identifier = 'jane/flowers'
+            >>> name = 'v0.1'
+            >>> description = 'My first release.'
+            ...
+            >>> release = client.add_release(dataset_identifier, name, description)
+            >>> print(release)
         """
 
         payload = {"name": name, "description": description}
@@ -723,6 +1008,12 @@ class SegmentsClient:
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
             name: The name of the release.
+
+        Examples:
+            >>> dataset_identifier = 'jane/flowers'
+            >>> name = 'v0.1'
+            ...
+            >>> client.delete_release(dataset_identifier, name)
         """
 
         self.delete("/datasets/{}/releases/{}/".format(dataset_identifier, name))
@@ -739,6 +1030,16 @@ class SegmentsClient:
 
         Returns:
             A class representing the uploaded file.
+
+        Raises:
+            ValidationError: If pydantic validation of the file fails.
+
+        Examples:
+            >>> filename = '/home/jane/flowers/violet.jpg'
+            >>> with open(filename, 'rb') as f:
+            >>>    asset = client.upload_asset(f, filename='violet.jpg')
+            ...
+            >>> image_url = asset.url
         """
 
         r = self.post("/assets/", {"filename": filename})

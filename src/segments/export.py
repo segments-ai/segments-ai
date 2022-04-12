@@ -1,20 +1,17 @@
 # https://www.immersivelimit.com/tutorials/create-coco-annotations-from-scratch/#coco-dataset-format
 import json
 import os
-
-# import numpy.typing as npt
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
-import numpy as np
+import numpy as np  # import numpy.typing as npt
 from PIL import Image
 from pycocotools import mask
 from pydantic import BaseModel
+from segments.typing import Dataset
+from segments.utils import get_semantic_bitmap
 from skimage import img_as_ubyte
 from skimage.measure import regionprops
 from tqdm import tqdm
-
-from .typehints import Dataset
-from .utils import get_semantic_bitmap
 
 RGB = Tuple[int, int, int]
 RGBA = Tuple[int, int, int, int]
@@ -605,10 +602,9 @@ def export_image(
     return dataset.image_dir
 
 
-def export_yolo(dataset: Dataset, export_folder: str) -> Optional[str]:
+def export_yolo(dataset: Any, export_folder: str) -> str:
     if dataset.task_type not in ["vector", "bboxes"]:
-        print("You can only export bounding box datasets to YOLO format.")
-        return None
+        raise ValueError("You can only export bounding box datasets to YOLO format.")
 
     if dataset.task_type == "vector":
         print(

@@ -4,8 +4,8 @@ from typing import Any, Dict
 import requests
 from PIL import Image
 
-from .typehints import Release
-from .utils import load_image_from_url, load_label_bitmap_from_url
+from segments.typing import Release
+from segments.utils import load_image_from_url, load_label_bitmap_from_url
 
 
 def release2dataset(
@@ -13,11 +13,11 @@ def release2dataset(
 ) -> Any:  # def release2dataset(release: Release, download_images: bool = True) -> Optional[datasets.Dataset]:
     try:
         import datasets
-    except ImportError:
+    except ImportError as e:
         print(
             "Please install HuggingFace datasets first: pip install --upgrade datasets"
         )
-        return None
+        raise e
 
     content = requests.get(release.attributes.url)
     release_dict = json.loads(content.content)
@@ -80,8 +80,7 @@ def release2dataset(
         )
 
     else:
-        print("This type of dataset is not yet supported.")
-        assert False
+        raise ValueError("This type of dataset is not yet supported.")
 
     samples = release_dict["dataset"]["samples"]
 
@@ -89,7 +88,7 @@ def release2dataset(
     for sample in samples:
         try:
             del sample["labels"]["ground-truth"]["attributes"]["format_version"]
-        except Exception:
+        except (KeyError, TypeError):
             pass
 
         data_row: Dict[str, Any] = {}

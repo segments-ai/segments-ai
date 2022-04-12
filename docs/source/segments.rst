@@ -28,6 +28,6 @@ Utils
 
 Segments Types
 -------------------
-.. automodule:: segments.typehints
+.. automodule:: segments.typing
    :members:
 

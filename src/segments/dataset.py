@@ -6,10 +6,13 @@ from urllib.parse import urlparse
 
 import requests
 from PIL import Image
+from segments.typing import LabelStatus, Release
+from segments.utils import (
+    handle_exif_rotation,
+    load_image_from_url,
+    load_label_bitmap_from_url,
+)
 from tqdm import tqdm
-
-from .typehints import LabelStatus, Release
-from .utils import handle_exif_rotation, load_image_from_url, load_label_bitmap_from_url
 
 
 class SegmentsDataset:
@@ -22,6 +25,10 @@ class SegmentsDataset:
         filter_by_metadata (dict, optional): a dict of metadata key:value pairs to filter by. Filters are ANDed together. Defaults to None.
         segments_dir: The directory where the data will be downloaded to for caching. Set to None to disable caching. Defaults to 'segments'.
         preload: Whether the data should be pre-downloaded when the dataset is initialized. Ignored if segments_dir is None. Defaults to True.
+
+    Raises:
+        ValueError: If the release task type is not one of: 'segmentation-bitmap', 'segmentation-bitmap-highres', 'image-vector-sequence', 'bboxes', 'vector', 'pointcloud-cuboid', 'pointcloud-cuboid-sequence', 'pointcloud-segmentation', 'pointcloud-segmentation-sequence', 'text-named-entities', or 'text-span-categorization'.
+        ValueError: If there is no labelset with this name.
 
     """
 
@@ -72,23 +79,27 @@ class SegmentsDataset:
         if self.labelset not in [
             labelset["name"] for labelset in self.release["dataset"]["labelsets"]
         ]:
-            print('There is no labelset with name "{}".'.format(self.labelset))
-            return
+            raise ValueError(
+                'There is no labelset with name "{}".'.format(self.labelset)
+            )
 
         self.task_type = self.release["dataset"]["task_type"]
         if self.task_type not in [
             "segmentation-bitmap",
             "segmentation-bitmap-highres",
-            "vector",
+            "image-vector-sequence",
             "bboxes",
-            "keypoints",
-            "pointcloud-detection",
+            "vector",
+            "pointcloud-cuboid",
+            "pointcloud-cuboid-sequence",
             "pointcloud-segmentation",
+            "pointcloud-segmentation-sequence",
+            "text-named-entities",
+            "text-span-categorization",
         ]:
-            print(
-                'You can only create a dataset for tasks of type "segmentation-bitmap", "segmentation-bitmap-highres", "vector", "bboxes", "keypoints", "pointcloud-detection", or "pointcloud-segmentation" for now.'
+            raise ValueError(
+                "You can only create a dataset for tasks of type 'segmentation-bitmap', 'segmentation-bitmap-highres', 'image-vector-sequence', 'bboxes', 'vector', 'pointcloud-cuboid', 'pointcloud-cuboid-sequence', 'pointcloud-segmentation', 'pointcloud-segmentation-sequence', 'text-named-entities', or 'text-span-categorization', for now."
             )
-            return
 
         self.load_dataset()
 
@@ -282,7 +293,7 @@ class SegmentsDataset:
                 label = sample["labels"][self.labelset]
                 attributes = label["attributes"]
                 annotations = attributes["annotations"]
-            except Exception:
+            except (KeyError, TypeError):
                 attributes = annotations = None
 
             item.update({"annotations": annotations, "attributes": attributes})
