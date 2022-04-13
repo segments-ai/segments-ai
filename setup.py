@@ -18,7 +18,7 @@ setup(
         "vision",
     ],  # Keywords that define your package best
     install_requires=[
-        "numpy",  # Change to >= 1.20 if we decide to drop python 3.7 support (numpy 1.20+ includes type stubs).
+        "numpy",  # Change to >= 1.20 if we drop python 3.7 support (numpy 1.20+ includes type stubs).
         "requests",
         "Pillow",
         "scikit-image",
@@ -43,10 +43,11 @@ setup(
             "mypy",
             # Documentation
             "sphinx",
-            "sphinx-book-theme<=0.2",  # 0.3 does not support python 3.6.
+            "furo",
             "myst_parser",
             "sphinx-autobuild",
             "sphinx-copybutton",
+            "sphinxext-opengraph",
         ]
     },
     python_requires=">=3.6",

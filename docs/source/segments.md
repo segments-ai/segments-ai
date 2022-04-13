@@ -1,33 +1,45 @@
-Python SDK
-==========
+# Python SDK
 
-Client
-------
+## Client
+
+```{eval-rst}
 .. autoclass:: segments.client.SegmentsClient
    :members:
+```
 
-Dataset
--------
+## Dataset
+
+```{eval-rst}
 .. autoclass:: segments.dataset.SegmentsDataset
    :members:
+```
 
-Hugging Face
-------------
+## Hugging Face
+
+```{eval-rst}
 .. automodule:: segments.huggingface
    :members:
+```
 
-Export
-------
+## Export
+
+```{eval-rst}
 .. automodule:: segments.export
    :members:
+```
 
-Utils
------
+## Utils
+
+```{eval-rst}
 .. automodule:: segments.utils
    :members:
+```
 
-Segments Types
--------------------
+## Types
+
+```{eval-rst}
 .. automodule:: segments.typing
    :members:
+```
+
 
