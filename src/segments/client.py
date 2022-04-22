@@ -47,19 +47,23 @@ class SegmentsClient:
     Examples:
         Import the segments package in your python file and set up a client with an API key. An API key can be created on your user account page.
 
+        ```python
         >>> from segments import SegmentsClient
-        ...
+
         >>> api_key = 'YOUR_API_KEY'
         >>> client = SegmentsClient(api_key)
         'Initialized successfully.'
+        ```
 
-        Or store your api key in a .env file (API_KEY = ...):
+        Or store your api key in a `.env` file (SEGMENTS_API_KEY = ...):
 
+        ```python
         >>> from segments import SegmentsClient
-        ...
+
         >>> client = SegmentsClient()
-        'Found an api key in your environment.'
+        'Found a Segments api key in your environment.'
         'Initialized successfully.'
+        ```
     """
 
     def __init__(
@@ -67,11 +71,11 @@ class SegmentsClient:
     ):
         if api_key is None:
             load_dotenv(find_dotenv())
-            self.api_key = os.getenv("API_KEY")
+            self.api_key = os.getenv("SEGMENTS_API_KEY")
             if self.api_key is None:
                 raise KeyError("Did you set API_KEY in your .env file?")
             else:
-                print("Found an api key in your .env file.")
+                print("Found a Segments api key in your .env file.")
         else:
             self.api_key = api_key
         self.api_url = api_url

@@ -27,7 +27,6 @@ setup(
         'pycocotools-windows;platform_system=="Windows"',
         "python-dotenv",
         # Type hints
-        "typing",
         "typing_extensions",
         "pydantic",
         "types-Pillow",
