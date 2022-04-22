@@ -3,7 +3,6 @@ import urllib.parse
 from typing import IO, Any, Dict, List, Optional, Union
 
 import requests
-from dotenv import find_dotenv, load_dotenv
 from pydantic import ValidationError, parse_obj_as
 from segments.typing import (
     AuthHeader,
@@ -46,36 +45,27 @@ class SegmentsClient:
 
     Examples:
         Import the segments package in your python file and set up a client with an API key. An API key can be created on your user account page.
-
-        ```python
         >>> from segments import SegmentsClient
-
         >>> api_key = 'YOUR_API_KEY'
         >>> client = SegmentsClient(api_key)
         'Initialized successfully.'
-        ```
 
-        Or store your api key in a `.env` file (SEGMENTS_API_KEY = ...):
-
-        ```python
+        Or store your Segments API key in your environment (SEGMENTS_API_KEY = "API KEY"):
         >>> from segments import SegmentsClient
-
         >>> client = SegmentsClient()
-        'Found a Segments api key in your environment.'
+        'Found a Segments API key in your environment.'
         'Initialized successfully.'
-        ```
     """
 
     def __init__(
         self, api_key: Optional[str] = None, api_url: str = "https://api.segments.ai/"
     ):
         if api_key is None:
-            load_dotenv(find_dotenv())
             self.api_key = os.getenv("SEGMENTS_API_KEY")
             if self.api_key is None:
-                raise KeyError("Did you set API_KEY in your .env file?")
+                raise KeyError("Did you set SEGMENTS_API_KEY in your environment?")
             else:
-                print("Found a Segments api key in your .env file.")
+                print("Found a Segments API key in your environment.")
         else:
             self.api_key = api_key
         self.api_url = api_url
@@ -105,14 +95,12 @@ class SegmentsClient:
         """Close SegmentsClient connections.
 
         Examples:
-            You can manually close the segments client's connections:
-
+            You can manually close the Segments client's connections:
             >>> client = SegmentsClient()
             >>> client.get_datasets()
             >>> client.close()
 
-            Or use the segments client as a context manager:
-
+            Or use the Segments client as a context manager:
             >>> with SegmentsClient() as client:
             >>>     client.get_datasets()
 
@@ -171,7 +159,6 @@ class SegmentsClient:
 
         Examples:
             >>> dataset_identifier = 'jane/flowers'
-            ...
             >>> dataset = client.get_dataset(dataset_identifier)
             >>> print(dataset)
         """
@@ -219,7 +206,6 @@ class SegmentsClient:
             >>> dataset_name = 'flowers'
             >>> description = 'A dataset containing flowers of all kinds.'
             >>> task_type = 'segmentation-bitmap'
-            ...
             >>> dataset = client.add_dataset(dataset_name, description, task_type)
             >>> print(dataset)
 
@@ -292,7 +278,6 @@ class SegmentsClient:
         Examples:
             >>> dataset_identifier = 'jane/flowers'
             >>> description = 'A dataset containing flowers of all kinds.'
-            ...
             >>> dataset = client.update_dataset(dataset_identifier, description)
             >>> print(dataset)
         """
@@ -365,7 +350,6 @@ class SegmentsClient:
             >>> dataset_identifier = 'jane/flowers'
             >>> username = 'john'
             >>> role = 'reviewer'
-            ...
             >>> client.add_dataset_collaborator(dataset_identifier, username, role)
         """
         payload = {"user": username, "role": role}
@@ -384,7 +368,9 @@ class SegmentsClient:
             username: The username of the collaborator to be deleted.
 
         Examples:
-
+            >>> dataset_identifier = 'jane/flowers'
+            >>> username = 'john'
+            >>> client.delete_dataset_collaborator(dataset_identifier, username)
         """
         self.delete(
             "/datasets/{}/collaborators/{}".format(dataset_identifier, username),
@@ -425,9 +411,8 @@ class SegmentsClient:
         Examples:
             >>> dataset_identifier = 'jane/flowers'
             >>> samples = client.get_samples(dataset_identifier)
-            ...
             >>> for sample in samples:
-            >>>     print(sample['name'], sample['uuid'])
+            >>>     print(sample.name, sample.uuid)
         """
 
         # pagination
@@ -484,7 +469,8 @@ class SegmentsClient:
             ValidationError: If pydantic validation of the sample fails.
 
         Examples:
-            >>> sample = client.get_sample(uuid='602a3eec-a61c-4a77-9fcc-3037ce5e9606')
+            >>> uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
+            >>> sample = client.get_sample(uuid)
             >>> print(sample)
         """
 
@@ -534,15 +520,13 @@ class SegmentsClient:
             ...         'url': 'https://example.com/violet.jpg'
             ...     }
             ... }
-            ...
-            >>> # metadata and priority are optional fields
+            >>> # Metadata and priority are optional fields.
             >>> metadata = {
             ...     'city': 'London',
             ...     'weather': 'cloudy',
             ...     'robot_id': 3
             ... }
             >>> priority = 10 # Samples with higher priority value will be labeled first. Default is 0.
-            ...
             >>> sample = client.add_sample(dataset_identifier, name, attributes, metadata, priority)
             >>> print(sample)
         """
@@ -610,7 +594,6 @@ class SegmentsClient:
             ...     'robot_id': 3
             ... }
             >>> priority = 10 # Samples with higher priority value will be labeled first. Default is 0.
-            ...
             >>> sample = client.update_sample(uuid, metadata=metadata, priority=priority)
             >>> print(sample)
         """
@@ -645,7 +628,8 @@ class SegmentsClient:
             uuid: The sample uuid.
 
         Examples:
-            >>> client.delete_sample(uuid='602a3eec-a61c-4a77-9fcc-3037ce5e9606')
+            >>> uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
+            >>> client.delete_sample(uuid)
         """
 
         self.delete("/samples/{}/".format(uuid))
@@ -668,7 +652,6 @@ class SegmentsClient:
 
         Examples:
             >>> sample_uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
-            ...
             >>> label = client.get_label(sample_uuid)
             >>> print(label)
         """
@@ -718,7 +701,6 @@ class SegmentsClient:
             ...         },
             ...     ]
             ... }
-            ...
             >>> client.add_label(sample_uuid, attributes)
         """
 
@@ -776,13 +758,12 @@ class SegmentsClient:
             ...             'category_id': 1,
             ...             'type': 'bbox',
             ...             'points': [
-            ...             [12.34, 56.78],
-            ...             [90.12, 34.56]
+            ...                 [12.34, 56.78],
+            ...                 [90.12, 34.56]
             ...             ]
             ...         },
             ...     ]
             ... }
-            ...
             >>> client.update_label(sample_uuid, attributes)
         """
 
@@ -812,7 +793,6 @@ class SegmentsClient:
         Examples:
             >>> sample_uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
             >>> labelset = 'ground-truth'
-            ...
             >>> client.delete_label(sample_uuid, labelset)
         """
 
@@ -836,7 +816,6 @@ class SegmentsClient:
         Examples:
             >>> dataset_identifier = 'jane/flowers'
             >>> labelsets = client.get_labelsets(dataset_identifier)
-            ...
             >>> for labelset in labelsets:
             >>>     print(labelset.name, labelset.description)
         """
@@ -862,7 +841,6 @@ class SegmentsClient:
         Examples:
             >>> dataset_identifier = 'jane/flowers'
             >>> name = 'model-predictions'
-            ...
             >>> labelset = client.get_labelset(dataset_identifier, name)
             >>> print(labelset)
         """
@@ -873,14 +851,14 @@ class SegmentsClient:
         return labelset
 
     def add_labelset(
-        self, dataset_identifier: str, name: str, description: str = ""
+        self, dataset_identifier: str, name: str, description: Optional[str] = None
     ) -> Labelset:
         """Add a labelset to a dataset.
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
             name: The name of the labelset.
-            description: The labelset description.
+            description: The labelset description. Defaults to None.
 
         Returns:
             A class representing the labelset.
@@ -891,9 +869,11 @@ class SegmentsClient:
         Examples:
             >>> dataset_identifier = 'jane/flowers'
             >>> name = 'model-predictions-resnet50'
-            ...
             >>> client.add_labelset(dataset_identifier, name)
         """
+
+        if description is None:
+            description = ""
 
         payload = {
             "name": name,
@@ -915,7 +895,6 @@ class SegmentsClient:
         Examples:
             >>> dataset_identifier = 'jane/flowers'
             >>> name = 'model-predictions'
-            ...
             >>> client.delete_labelset(dataset_identifier, name)
         """
 
@@ -939,7 +918,6 @@ class SegmentsClient:
         Examples:
             >>> dataset_identifier = 'jane/flowers'
             >>> releases = client.get_releases(dataset_identifier)
-            ...
             >>> for release in releases:
             >>>     print(release.name, release.description, release.attributes.url)
         """
@@ -965,7 +943,6 @@ class SegmentsClient:
         Examples:
             >>> dataset_identifier = 'jane/flowers'
             >>> name = 'v0.1'
-            ...
             >>> release = client.get_release(dataset_identifier, name)
             >>> print(release)
         """
@@ -976,14 +953,14 @@ class SegmentsClient:
         return release
 
     def add_release(
-        self, dataset_identifier: str, name: str, description: str = ""
+        self, dataset_identifier: str, name: str, description: Optional[str] = None
     ) -> Release:
         """Add a release to a dataset.
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
             name: The name of the release.
-            description: The release description.
+            description: The release description. Defaults to None.
 
         Returns:
             A class representing the newly created release.
@@ -995,10 +972,12 @@ class SegmentsClient:
             >>> dataset_identifier = 'jane/flowers'
             >>> name = 'v0.1'
             >>> description = 'My first release.'
-            ...
             >>> release = client.add_release(dataset_identifier, name, description)
             >>> print(release)
         """
+
+        if description is None:
+            description = ""
 
         payload = {"name": name, "description": description}
         r = self.post("/datasets/{}/releases/".format(dataset_identifier), payload)
@@ -1016,7 +995,6 @@ class SegmentsClient:
         Examples:
             >>> dataset_identifier = 'jane/flowers'
             >>> name = 'v0.1'
-            ...
             >>> client.delete_release(dataset_identifier, name)
         """
 
@@ -1030,7 +1008,7 @@ class SegmentsClient:
 
         Args:
             file: A file object.
-            filename: The file name. Defaults to label.png.
+            filename: The file name. Defaults to 'label.png'.
 
         Returns:
             A class representing the uploaded file.
@@ -1041,9 +1019,10 @@ class SegmentsClient:
         Examples:
             >>> filename = '/home/jane/flowers/violet.jpg'
             >>> with open(filename, 'rb') as f:
-            >>>    asset = client.upload_asset(f, filename='violet.jpg')
-            ...
+            >>>     filename = 'violet.jpg'
+            >>>     asset = client.upload_asset(f, filename)
             >>> image_url = asset.url
+            >>> print(image_url)
         """
 
         r = self.post("/assets/", {"filename": filename})
