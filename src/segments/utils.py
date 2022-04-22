@@ -200,7 +200,7 @@ def load_label_bitmap_from_url(
     return bitmap
 
 
-def load_release(release: Release) -> requests.Response:
+def load_release(release: Release) -> Any:
     release_file = release.attributes.url
     content = requests.get(release_file)
     return json.loads(content.content)

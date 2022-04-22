@@ -32,19 +32,19 @@ class SegmentsClient:
     """SegmentsClient class.
 
     Args:
-        api_key: Your Segments.ai API key. If no api key given, reads `API_KEY` from the environment. Defaults to `None`.
+        api_key: Your Segments.ai API key. If no api key given, reads SEGMENTS_API_KEY from the environment. Defaults to None.
         api_url: URL of the Segments.ai API. Defaults to https://api.segments.ai/.
 
     Attributes:
-        api_key: Your Segments.ai API key.
-        api_url: URL of the Segments.ai API.
+        api_key: Your Segments API key.
+        api_url: URL of the Segments API.
 
     Raises:
-        KeyError: If `API_KEY` is not found in the `.env` file.
-        ValueError: If an invalid api key is used.
+        KeyError: If SEGMENTS_API_KEY is not found in your environment.
+        ValueError: If an invalid API key is used.
 
     Examples:
-        Import the segments package in your python file and set up a client with an API key. An API key can be created on your user account page.
+        Import the Segments package in your python file and set up a client with an API key. An API key can be created on your user account page.
         >>> from segments import SegmentsClient
         >>> api_key = 'YOUR_API_KEY'
         >>> client = SegmentsClient(api_key)
@@ -171,12 +171,12 @@ class SegmentsClient:
     def add_dataset(
         self,
         name: str,
-        description: str = "",
+        description: Optional[str] = None,
         task_type: TaskType = "segmentation-bitmap",
         task_attributes: Optional[Dict[str, Any]] = None,
         category: Category = "other",
         public: bool = False,
-        readme: str = "",
+        readme: Optional[str] = None,
         enable_skip_labeling: bool = True,
         enable_skip_reviewing: bool = False,
         enable_ratings: bool = False,
@@ -185,12 +185,12 @@ class SegmentsClient:
 
         Args:
             name: The dataset name. Example: flowers.
-            description: The dataset description. Defaults to ''.
+            description: The dataset description. Defaults to None.
             task_type: The dataset's task type. Defaults to 'segmentation-bitmap'.
             task_attributes: The dataset's task attributes. Please refer to the online documentation: https://docs.segments.ai/reference/categories-and-task-attributes#object-attribute-format. Defaults to None.
             category: The dataset category. Defaults to 'other'.
             public: The dataset visibility. Defaults to False.
-            readme: The dataset readme. Defaults to ''.
+            readme: The dataset readme. Defaults to None.
             enable_skip_labeling: Enable the skip button in the labeling workflow. Defaults to True.
             enable_skip_reviewing: Enable the skip button in the reviewing workflow. Defaults to False.
             enable_ratings: Enable star-ratings for labeled images. Defaults to False.
@@ -211,11 +211,18 @@ class SegmentsClient:
 
         """
 
+        if description is None:
+            description = ""
+
+        if readme is None:
+            readme = ""
+
         if task_attributes is None:
             task_attributes = {
                 "format_version": "0.1",
                 "categories": [{"id": 0, "name": "object"}],
             }
+
         try:
             TaskAttributes.parse_obj(task_attributes)
         except ValidationError as e:
