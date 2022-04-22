@@ -8,7 +8,6 @@ from PIL import ExifTags, Image
 from segments.typing import Dataset, Release
 from typing_extensions import Literal
 
-
 session = requests.Session()
 adapter = requests.adapters.HTTPAdapter(max_retries=3)
 session.mount("http://", adapter)

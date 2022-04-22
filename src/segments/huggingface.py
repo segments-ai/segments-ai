@@ -3,7 +3,6 @@ from typing import Any, Dict
 
 import requests
 from PIL import Image
-
 from segments.typing import Release
 from segments.utils import load_image_from_url, load_label_bitmap_from_url
 
