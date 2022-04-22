@@ -43,6 +43,7 @@ class SegmentsDataset:
         >>> export_dataset(dataset, export_format)
 
         Alternatively, you can use the initialized SegmentsDataset to loop through the samples and labels, and visualize or process them in any way you please:
+
         >>> import matplotlib.pyplot as plt
         >>> from segments.utils import get_semantic_bitmap
         >>> for sample in dataset:

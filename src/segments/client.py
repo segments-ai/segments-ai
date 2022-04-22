@@ -32,7 +32,7 @@ class SegmentsClient:
     """SegmentsClient class.
 
     Args:
-        api_key: Your Segments.ai API key. If no api key given, reads SEGMENTS_API_KEY from the environment. Defaults to None.
+        api_key: Your Segments.ai API key. If no API key given, reads SEGMENTS_API_KEY from the environment. Defaults to None.
         api_url: URL of the Segments.ai API. Defaults to https://api.segments.ai/.
 
     Attributes:
@@ -88,19 +88,22 @@ class SegmentsClient:
         elif r.status_code == 426:
             pass
         else:
-            raise ValueError("Something went wrong. Did you use the right api key?")
+            raise ValueError("Something went wrong. Did you use the right API key?")
 
     # https://stackoverflow.com/questions/48160728/resourcewarning-unclosed-socket-in-python-3-unit-test
     def close(self) -> None:
         """Close SegmentsClient connections.
 
         Examples:
+
             You can manually close the Segments client's connections:
+
             >>> client = SegmentsClient()
             >>> client.get_datasets()
             >>> client.close()
 
             Or use the Segments client as a context manager:
+
             >>> with SegmentsClient() as client:
             >>>     client.get_datasets()
 
