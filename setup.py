@@ -25,7 +25,6 @@ setup(
         "tqdm",
         'pycocotools;platform_system!="Windows"',
         'pycocotools-windows;platform_system=="Windows"',
-        "python-dotenv",
         # Type hints
         "typing_extensions",
         "pydantic",
