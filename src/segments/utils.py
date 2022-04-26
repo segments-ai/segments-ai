@@ -13,8 +13,8 @@ from typing_extensions import Literal
 
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
 if TYPE_CHECKING:
-    from segments.typing import Release
     from segments.dataset import SegmentsDataset
+    from segments.typing import Release
 
 session = requests.Session()
 adapter = requests.adapters.HTTPAdapter(max_retries=3)  # type:ignore

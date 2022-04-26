@@ -874,7 +874,7 @@ class SegmentsClient:
         Raises:
             :exc:`~pydantic.ValidationError`: If pydantic validation of the labelsets fails.
             :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.TimeoutError` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
+            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
 
         Examples:
             >>> dataset_identifier = 'jane/flowers'
@@ -901,7 +901,7 @@ class SegmentsClient:
         Raises:
             :exc:`~pydantic.ValidationError`: If pydantic validation of the labelset fails.
             :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.TimeoutError` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
+            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
 
         Examples:
             >>> dataset_identifier = 'jane/flowers'

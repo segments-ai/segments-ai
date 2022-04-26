@@ -1,7 +1,6 @@
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
 from __future__ import annotations
 
-
 # https://www.immersivelimit.com/tutorials/create-coco-annotations-from-scratch/#coco-dataset-format
 import json
 import os
