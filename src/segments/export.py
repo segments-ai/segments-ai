@@ -1,17 +1,24 @@
+# https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
+from __future__ import annotations
+
+
 # https://www.immersivelimit.com/tutorials/create-coco-annotations-from-scratch/#coco-dataset-format
 import json
 import os
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np  # import numpy.typing as npt
 from PIL import Image
 from pycocotools import mask
 from pydantic import BaseModel
-from segments.typing import Dataset
 from segments.utils import get_semantic_bitmap
 from skimage import img_as_ubyte
 from skimage.measure import regionprops
 from tqdm import tqdm
+
+# https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
+if TYPE_CHECKING:
+    from segments.dataset import SegmentsDataset
 
 RGB = Tuple[int, int, int]
 RGBA = Tuple[int, int, int, int]
@@ -117,6 +124,14 @@ class IdGenerator:
 
 
 def rgb2id(color: Any) -> int:  # rgb2id(color: Union[npt.NDArray[3], RGB]) -> int:
+    """Convert rgb to an id.
+
+    Args:
+        color: An RGB value.
+
+    Returns:
+        The id.
+    """
     if isinstance(color, np.ndarray) and len(color.shape) == 3:
         if color.dtype == np.uint8:
             color = color.astype(np.int32)
@@ -127,6 +142,14 @@ def rgb2id(color: Any) -> int:  # rgb2id(color: Union[npt.NDArray[3], RGB]) -> i
 def id2rgb(
     id_map: Any,
 ) -> Any:  # id2rgb(id_map: npt.NDArray) -> Union[npt.NDArray[3], RGB]:
+    """Convert a color id to an rgb.
+
+    Args:
+        id_map: An id map.
+
+    Returns:
+        An rgb.
+    """
     if isinstance(id_map, np.ndarray):
         id_map_copy = id_map.copy()
         rgb_shape = tuple(list(id_map.shape) + [3])
@@ -183,7 +206,16 @@ def get_bbox(
         return False
 
 
-def export_coco_instance(dataset: Any, export_folder: str) -> Tuple[str, str]:
+def export_coco_instance(
+    dataset: SegmentsDataset, export_folder: str
+) -> Tuple[str, Optional[str]]:
+    """Export a Segments dataset as a coco instance.
+
+    Args:
+        dataset: A :class:`SegmentsDataset`.
+        export_folder: TODO
+
+    """
     # Create export folder
     # export_folder = os.path.join(export_folder, dataset.dataset_identifier, dataset.release['name'])
     os.makedirs(export_folder, exist_ok=True)
@@ -273,8 +305,8 @@ def export_coco_instance(dataset: Any, export_folder: str) -> Tuple[str, str]:
                 # bbox = get_bbox(instance_mask)
 
                 y0, x0, y1, x1 = bbox
-                # rle = mask.encode(np.asfortranarray(instance_mask))
-                rle = mask.encode(
+                # rle = mask.encode(np.asfortranarray(instance_ mask))
+                rle = mask.encode(  # type:ignore
                     np.array(instance_mask[:, :, None], dtype=np.uint8, order="F")
                 )[
                     0
@@ -336,13 +368,13 @@ def export_coco_instance(dataset: Any, export_folder: str) -> Tuple[str, str]:
     with open(file_name, "w") as f:
         json.dump(json_data, f)
 
-    print(
-        "Exported to {}. Images and labels in {}".format(file_name, dataset.image_dir)
-    )
-    return file_name, dataset.image_dir
+    print(f"Exported to {file_name}. Images and labels in {dataset.image_dir}")
+    return file_name, dataset.image_dir  # type:ignore
 
 
-def export_coco_panoptic(dataset: Any, export_folder: str) -> Tuple[str, str]:
+def export_coco_panoptic(
+    dataset: SegmentsDataset, export_folder: str
+) -> Tuple[str, Optional[str]]:
     # Create export folder
     # export_folder = os.path.join(export_folder, dataset.dataset_identifier, dataset.release['name'])
     os.makedirs(export_folder, exist_ok=True)
@@ -453,9 +485,7 @@ def export_coco_panoptic(dataset: Any, export_folder: str) -> Tuple[str, str]:
             )
 
         file_name = os.path.splitext(os.path.basename(sample["name"]))[0]
-        label_file_name = "{}_label_{}_coco-panoptic.png".format(
-            file_name, dataset.labelset
-        )
+        label_file_name = f"{file_name}_label_{dataset.labelset}_coco-panoptic.png"
         annotations.append(
             {
                 "segments_info": segments_info,
@@ -480,7 +510,7 @@ def export_coco_panoptic(dataset: Any, export_folder: str) -> Tuple[str, str]:
         # Image.fromarray(img_as_ubyte(instance_label_colored)).save(export_file)
 
         # Panoptic png
-        export_file = os.path.join(dataset.image_dir, label_file_name)
+        export_file = os.path.join(dataset.image_dir, label_file_name)  # type:ignore
         Image.fromarray(panoptic_label).save(export_file)
 
         # # Semantic png
@@ -511,15 +541,13 @@ def export_coco_panoptic(dataset: Any, export_folder: str) -> Tuple[str, str]:
     with open(file_name, "w") as f:
         json.dump(json_data, f)
 
-    print(
-        "Exported to {}. Images and labels in {}".format(file_name, dataset.image_dir)
-    )
+    print(f"Exported to {file_name}. Images and labels in {dataset.image_dir}")
     return file_name, dataset.image_dir
 
 
 def export_image(
-    dataset: Any, export_folder: str, export_format: str, id_increment: int
-) -> str:
+    dataset: SegmentsDataset, export_folder: str, export_format: str, id_increment: int
+) -> Optional[str]:
     # Create export folder
     # export_folder = os.path.join(export_folder, dataset.dataset_identifier, dataset.release['name'])
     os.makedirs(export_folder, exist_ok=True)
@@ -556,8 +584,8 @@ def export_image(
             # Instance png
             instance_label = sample["segmentation_bitmap"]
             export_file = os.path.join(
-                dataset.image_dir,
-                "{}_label_{}_instance.png".format(file_name, dataset.labelset),
+                dataset.image_dir,  # type:ignore
+                f"{file_name}_label_{dataset.labelset}_instance.png",  # type:ignore
             )
             instance_label.save(export_file)
 
@@ -566,8 +594,8 @@ def export_image(
             instance_label = sample["segmentation_bitmap"]
             instance_label_colored = colorize(np.uint8(instance_label))
             export_file = os.path.join(
-                dataset.image_dir,
-                "{}_label_{}_instance_colored.png".format(file_name, dataset.labelset),
+                dataset.image_dir,  # type:ignore
+                f"{file_name}_label_{dataset.labelset}_instance_colored.png",  # type:ignore
             )
             Image.fromarray(img_as_ubyte(instance_label_colored)).save(export_file)
 
@@ -578,8 +606,8 @@ def export_image(
                 instance_label, sample["annotations"], id_increment
             )
             export_file = os.path.join(
-                dataset.image_dir,
-                "{}_label_{}_semantic.png".format(file_name, dataset.labelset),
+                dataset.image_dir,  # type:ignore
+                f"{file_name}_label_{dataset.labelset}_semantic.png",  # type:ignore
             )
             Image.fromarray(img_as_ubyte(semantic_label)).save(export_file)
 
@@ -593,16 +621,16 @@ def export_image(
                 np.uint8(semantic_label), colormap=[c["color"] for c in categories]
             )
             export_file = os.path.join(
-                dataset.image_dir,
-                "{}_label_{}_semantic_colored.png".format(file_name, dataset.labelset),
+                dataset.image_dir,  # type:ignore
+                f"{file_name}_label_{dataset.labelset}_semantic_colored.png",  # type:ignore
             )
             Image.fromarray(img_as_ubyte(semantic_label_colored)).save(export_file)
 
-    print("Exported to {}".format(dataset.image_dir))
+    print(f"Exported to {dataset.image_dir}")
     return dataset.image_dir
 
 
-def export_yolo(dataset: Any, export_folder: str) -> str:
+def export_yolo(dataset: SegmentsDataset, export_folder: str) -> Optional[str]:
     if dataset.task_type not in ["vector", "bboxes"]:
         raise ValueError("You can only export bounding box datasets to YOLO format.")
 
@@ -623,7 +651,7 @@ def export_yolo(dataset: Any, export_folder: str) -> str:
             image_width = sample["image"].width
             image_height = sample["image"].height
 
-            file_name = "{}/{}.txt".format(dataset.image_dir, image_name)
+            file_name = f"{dataset.image_dir}/{image_name}.txt"
             #         print(file_name)
 
             with open(file_name, "w") as f:
@@ -650,5 +678,5 @@ def export_yolo(dataset: Any, export_folder: str) -> str:
                             )
                         )
 
-    print("Exported. Images and labels in {}".format(dataset.image_dir))
+    print(f"Exported. Images and labels in {dataset.image_dir}")
     return dataset.image_dir

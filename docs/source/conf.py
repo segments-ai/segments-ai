@@ -33,12 +33,10 @@ release = "0.1"
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
-    # "sphinx.ext.intersphinx",
+    "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
-    # "sphinx.ext.doctest",
     "myst_parser",
     "sphinx_copybutton",
-    "sphinxext.opengraph",
 ]
 autodoc_typehints = "description"
 autodoc_member_order = "bysource"
@@ -80,3 +78,12 @@ html_title = "Python SDK"
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 # html_static_path = ["_static"]
+
+# Intersphinx
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/", None),
+    "numpy": ("http://docs.scipy.org/doc/numpy/", None),
+    "PIL": ("https://pillow.readthedocs.io/en/stable/", None),
+    "pydantic": ("https://prompt-build--pydantic-docs.netlify.app/", None),
+    "requests": ("https://docs.python-requests.org/en/latest/", None),
+}

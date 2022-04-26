@@ -1,4 +1,3 @@
-
 # Client
 
 ```{eval-rst}
@@ -13,19 +12,19 @@
    :members:
 ```
 
-# Hugging Face
+# HuggingFace
 
 ```{eval-rst}
 .. automodule:: segments.huggingface
    :members:
 ```
 
-# Export
+<!-- # Export
 
 ```{eval-rst}
 .. automodule:: segments.export
    :members:
-```
+``` -->
 
 # Utils
 
@@ -34,11 +33,9 @@
    :members:
 ```
 
-# Types
+<!-- # Types
 
 ```{eval-rst}
 .. automodule:: segments.typing
    :members:
-```
-
-
+``` -->

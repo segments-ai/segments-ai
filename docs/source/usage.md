@@ -1,6 +1,6 @@
 # Installation
 
-To use the Python SDK, first install it using pip:
+To use the Python SDK, first install it using `pip`:
 
 ```{code-block} bash
 

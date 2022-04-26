@@ -1,12 +1,14 @@
+# https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
+from __future__ import annotations
+
 import json
 import os
 from multiprocessing.pool import ThreadPool
-from typing import Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from urllib.parse import urlparse
 
 import requests
 from PIL import Image
-from segments.typing import LabelStatus, Release
 from segments.utils import (
     handle_exif_rotation,
     load_image_from_url,
@@ -14,20 +16,24 @@ from segments.utils import (
 )
 from tqdm import tqdm
 
+# https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
+if TYPE_CHECKING:
+    from segments.typing import LabelStatus, Release
+
 
 class SegmentsDataset:
     """SegmentsDataset class.
 
     Args:
-        release_file: Path to a release file, or a release class resulting from client.get_release().
-        labelset: The labelset that should be loaded. Defaults to 'ground-truth'.
-        filter_by: A list of label statuses to filter by. Defaults to None.
-        filter_by_metadata (dict, optional): a dict of metadata key:value pairs to filter by. Filters are ANDed together. Defaults to None.
-        segments_dir: The directory where the data will be downloaded to for caching. Set to None to disable caching. Defaults to 'segments'.
-        preload: Whether the data should be pre-downloaded when the dataset is initialized. Ignored if segments_dir is None. Defaults to True.
+        release_file: Path to a release file, or a release class resulting from ``client.get_release()``.
+        labelset: The labelset that should be loaded. Defaults to ``'ground-truth'``.
+        filter_by: A list of label statuses to filter by. Defaults to ``None``.
+        filter_by_metadata (dict, optional): a dict of metadata key:value pairs to filter by. Filters are ANDed together. Defaults to ``None``.
+        segments_dir: The directory where the data will be downloaded to for caching. Set to `None` to disable caching. Defaults to ``'segments'``.
+        preload: Whether the data should be pre-downloaded when the dataset is initialized. Ignored if ``segments_dir`` is ``None``. Defaults to ``True``.
 
     Raises:
-        ValueError: If the release task type is not one of: 'segmentation-bitmap', 'segmentation-bitmap-highres', 'image-vector-sequence', 'bboxes', 'vector', 'pointcloud-cuboid', 'pointcloud-cuboid-sequence', 'pointcloud-segmentation', 'pointcloud-segmentation-sequence', 'text-named-entities', or 'text-span-categorization'.
+        ValueError: If the release task type is not one of: ``'segmentation-bitmap'``, ``'segmentation-bitmap-highres'``, ``'image-vector-sequence'``, ``'bboxes'``, ``'vector'``, ``'pointcloud-cuboid'``, ``'pointcloud-cuboid-sequence'``, ``'pointcloud-segmentation'``, ``'pointcloud-segmentation-sequence'``, ``'text-named-entities'``, or ``'text-span-categorization'``.
         ValueError: If there is no labelset with this name.
 
     Examples:
@@ -42,7 +48,7 @@ class SegmentsDataset:
         >>> export_format = 'coco-panoptic'
         >>> export_dataset(dataset, export_format)
 
-        Alternatively, you can use the initialized SegmentsDataset to loop through the samples and labels, and visualize or process them in any way you please:
+        Alternatively, you can use the initialized :class:`SegmentsDataset` to loop through the samples and labels, and visualize or process them in any way you please:
 
         >>> import matplotlib.pyplot as plt
         >>> from segments.utils import get_semantic_bitmap
@@ -75,10 +81,12 @@ class SegmentsDataset:
     ):
         self.labelset = labelset
         self.filter_by = (
-            [filter_by] if isinstance(filter_by, LabelStatus) else filter_by
+            [filter_by]
+            if filter_by is not None and not isinstance(filter_by, list)
+            else filter_by
         )
-        if self.filter_by is not None:
-            self.filter_by = [s.lower() for s in self.filter_by]
+        # if self.filter_by is not None:
+        #     self.filter_by = [s.lower() for s in self.filter_by]
         self.filter_by_metadata = filter_by_metadata
         self.segments_dir = segments_dir
         self.caching_enabled = segments_dir is not None
@@ -89,8 +97,8 @@ class SegmentsDataset:
             with open(release_file) as f:
                 self.release = json.load(f)
         else:  # If it's a release object
-            release_file = release_file.attributes.url
-            content = requests.get(release_file)
+            release_file_url = release_file.attributes.url  # type:ignore
+            content = requests.get(release_file_url)  # type:ignore
             self.release = json.loads(content.content)
         self.release_file = release_file
 
@@ -110,9 +118,7 @@ class SegmentsDataset:
         if self.labelset not in [
             labelset["name"] for labelset in self.release["dataset"]["labelsets"]
         ]:
-            raise ValueError(
-                'There is no labelset with name "{}".'.format(self.labelset)
-            )
+            raise ValueError(f"There is no labelset with name '{self.labelset}'.")
 
         self.task_type = self.release["dataset"]["task_type"]
         if self.task_type not in [
@@ -157,7 +163,7 @@ class SegmentsDataset:
                 else:
                     label_status = "unlabeled"
 
-                if label_status in self.filter_by:
+                if self.filter_by is not None and label_status in self.filter_by:
                     filtered_samples.append(sample)
             samples = filtered_samples
 
@@ -202,7 +208,7 @@ class SegmentsDataset:
                     )
                 )
 
-        print("Initialized dataset with {} images.".format(num_samples))
+        print(f"Initialized dataset with {num_samples} images.")
 
     def _load_image_from_cache(self, sample):
         sample_name = os.path.splitext(sample["name"])[0]
@@ -210,13 +216,15 @@ class SegmentsDataset:
         image_url_parsed = urlparse(image_url)
         url_extension = os.path.splitext(image_url_parsed.path)[1]
         # image_filename_rel = '{}{}'.format(sample['uuid'], url_extension)
-        image_filename_rel = "{}{}".format(sample_name, url_extension)
+        image_filename_rel = f"{sample_name}{url_extension}"
 
         if image_url_parsed.scheme == "s3":
             image = None
         else:
             if self.caching_enabled:
-                image_filename = os.path.join(self.image_dir, image_filename_rel)
+                image_filename = os.path.join(
+                    self.image_dir, image_filename_rel  # type:ignore
+                )
                 if not os.path.exists(image_filename):
                     image = load_image_from_url(image_url, image_filename)
                 else:
@@ -239,8 +247,8 @@ class SegmentsDataset:
         if self.caching_enabled:
             # segmentation_bitmap_filename = os.path.join(self.image_dir, '{}{}'.format(label['uuid'], url_extension))
             segmentation_bitmap_filename = os.path.join(
-                self.image_dir,
-                "{}_label_{}{}".format(sample_name, labelset, url_extension),
+                self.image_dir,  # type:ignore
+                f"{sample_name}_label_{labelset}{url_extension}",  # type:ignore
             )
             if not os.path.exists(segmentation_bitmap_filename):
                 segmentation_bitmap = load_label_bitmap_from_url(
@@ -277,9 +285,7 @@ class SegmentsDataset:
         try:
             image, image_filename = self._load_image_from_cache(sample)
         except Exception:
-            print(
-                "Something went wrong loading sample {}:".format(sample["name"]), sample
-            )
+            print(f"Something went wrong loading sample {sample['name']}:", sample)
             raise
 
         item = {

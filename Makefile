@@ -8,5 +8,5 @@ run-checks :
 	isort --check .
 	black --check .
 	flake8 .
-	# mypy .
+	mypy .
 	python -m unittest

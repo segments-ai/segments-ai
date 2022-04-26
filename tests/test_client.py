@@ -3,7 +3,8 @@ import os
 import time
 import unittest
 
-from dotenv import find_dotenv, load_dotenv
+from pydantic import ValidationError
+from requests import HTTPError
 from segments.client import SegmentsClient
 from segments.typing import (
     Collaborator,
@@ -21,9 +22,8 @@ from segments.typing import (
 ##############
 class Test(unittest.TestCase):
     def setUp(self):
-        load_dotenv(find_dotenv())
-        API_KEY = os.getenv("API_KEY")
-        API_URL = os.getenv("API_URL")
+        API_KEY = os.getenv("SEGMENTS_API_KEY")
+        API_URL = os.getenv("SEGMENTS_API_URL")
         self.owner = os.getenv("DATASET_OWNER", "")
         self.client = (
             SegmentsClient(api_key=API_KEY, api_url=API_URL)
@@ -68,6 +68,11 @@ class TestDataset(Test):
         dataset_identifier = self.owner + "/" + self.datasets[0]
         dataset = self.client.get_dataset(dataset_identifier)
         self.assertIsInstance(dataset, Dataset)
+
+    def test_get_dataset_httperror(self):
+        with self.assertRaises(HTTPError):
+            wrong_dataset_identifier = "abcde"
+            self.client.get_dataset(wrong_dataset_identifier)
 
     def test_add_update_delete_dataset(self):
         arguments = {
@@ -132,6 +137,16 @@ class TestDataset(Test):
             # Delete dataset
             self.client.delete_dataset(self.owner + "/add_dataset")
 
+    def test_update_dataset_httperror(self):
+        with self.assertRaises(HTTPError):
+            wrong_dataset_identifier = "abcde"
+            self.client.update_dataset(wrong_dataset_identifier)
+
+    def test_delete_dataset_httperror(self):
+        with self.assertRaises(HTTPError):
+            wrong_dataset_identifier = "abcde"
+            self.client.delete_dataset(wrong_dataset_identifier)
+
     def test_add_delete_dataset_collaborator(self):
         dataset_identifier = self.owner + "/" + self.datasets[0]
         username = "admin-arnout"
@@ -143,6 +158,22 @@ class TestDataset(Test):
             self.assertIsInstance(collaborator, Collaborator)
         finally:
             self.client.delete_dataset_collaborator(dataset_identifier, username)
+
+    def test_delete_dataset_collaborator_httperror(self):
+        # Wrong dataset identifier and wrong username
+        with self.assertRaises(HTTPError):
+            wrong_dataset_identifier = "abcde"
+            wrong_username = "abcde"
+            self.client.delete_dataset_collaborator(
+                wrong_dataset_identifier, wrong_username
+            )
+        # Right dataset identifier and wrong username
+        with self.assertRaises(HTTPError):
+            right_dataset_identifier = self.owner + "/" + self.datasets[0]
+            wrong_username = "abcde"
+            self.client.delete_dataset_collaborator(
+                right_dataset_identifier, wrong_username
+            )
 
 
 ##########
@@ -168,11 +199,21 @@ class TestSample(Test):
         for sample in samples:
             self.assertIsInstance(sample, Sample)
 
+    def test_get_samples_httperror(self):
+        with self.assertRaises(HTTPError):
+            wrong_dataset_identifier = "abcde"
+            self.client.get_samples(wrong_dataset_identifier)
+
     def test_get_sample(self):
         labelset = "ground-truth"
         for i in range(len(self.sample_uuids)):
             sample = self.client.get_sample(self.sample_uuids[i], labelset)
             self.assertIsInstance(sample, Sample)
+
+    def test_get_sample_httperror(self):
+        with self.assertRaises(HTTPError):
+            wrong_uuid = "12345"
+            self.client.get_sample(wrong_uuid)
 
     def test_add_update_delete_sample(self):
         metadata = {"weather": "sunny", "camera_id": 3}
@@ -243,7 +284,17 @@ class TestSample(Test):
                 )
                 self.assertIsInstance(sample, Sample)
             finally:
-                self.client.delete_sample(sample.uuid)
+                self.client.delete_sample(sample.uuid)  # type:ignore
+
+    def test_update_sample_httperror(self):
+        with self.assertRaises(HTTPError):
+            wrong_uuid = "12345"
+            self.client.update_sample(wrong_uuid)
+
+    def test_delete_sample_httperror(self):
+        with self.assertRaises(HTTPError):
+            wrong_uuid = "12345"
+            self.client.delete_sample(wrong_uuid)
 
 
 #########
@@ -528,6 +579,18 @@ class TestLabel(Test):
                 time.sleep(self.TIME_INTERVAL)
                 self.client.delete_label(sample_uuid, labelset)
 
+    def test_add_label_validationerror(self):
+        with self.assertRaises(ValidationError):
+            wrong_sample_uuid = "12345"
+            wrong_attributes = {}
+            self.client.add_label(wrong_sample_uuid, wrong_attributes)
+
+    def test_update_label_httperror(self):
+        with self.assertRaises(HTTPError):
+            wrong_sample_uuid = "12345"
+            wrong_attributes = {}
+            self.client.update_label(wrong_sample_uuid, wrong_attributes)
+
 
 ############
 # Labelset #
@@ -545,11 +608,28 @@ class TestLabelset(Test):
         for labelset in labelsets:
             self.assertIsInstance(labelset, Labelset)
 
+    def test_get_labelsets_httperror(self):
+        with self.assertRaises(HTTPError):
+            wrong_dataset_identifier = "abcde"
+            self.client.get_labelsets(wrong_dataset_identifier)
+
     def test_get_labelset(self):
         dataset_identifier = self.owner + "/" + self.datasets[0]
         for i in range(len(self.labelsets)):
             labelset = self.client.get_labelset(dataset_identifier, self.labelsets[i])
             self.assertIsInstance(labelset, Labelset)
+
+    def test_get_labelset_httperror(self):
+        # Wrong dataset identifier and wrong name
+        with self.assertRaises(HTTPError):
+            wrong_dataset_identifier = "abcde"
+            wrong_name = "abcde"
+            self.client.get_labelset(wrong_dataset_identifier, wrong_name)
+        # Right dataset identifier and wrong name
+        with self.assertRaises(HTTPError):
+            right_dataset_identifier = self.owner + "/" + self.datasets[0]
+            wrong_name = "abcde"
+            self.client.get_labelset(right_dataset_identifier, wrong_name)
 
     def test_add_delete_labelset(self):
         # Add labelset.
@@ -562,6 +642,24 @@ class TestLabelset(Test):
         finally:
             # Delete labelset.
             self.client.delete_labelset(dataset_identifier, name)
+
+    def test_add_labelset_httperror(self):
+        with self.assertRaises(HTTPError):
+            wrong_dataset_identifier = "abcde"
+            wrong_name = "abcde"
+            self.client.add_labelset(wrong_dataset_identifier, wrong_name)
+
+    def test_delete_labelset_httperror(self):
+        # Wrong dataset identifier and wrong name
+        with self.assertRaises(HTTPError):
+            wrong_dataset_identifier = "abcde"
+            wrong_name = "abcde"
+            self.client.delete_labelset(wrong_dataset_identifier, wrong_name)
+        # Right dataset identifier and wrong name
+        with self.assertRaises(HTTPError):
+            right_dataset_identifier = self.owner + "/" + self.datasets[0]
+            wrong_name = "abcde"
+            self.client.delete_labelset(right_dataset_identifier, wrong_name)
 
 
 ###########
@@ -580,11 +678,28 @@ class TestRelease(Test):
         for release in releases:
             self.assertIsInstance(release, Release)
 
+    def test_get_releases_httperror(self):
+        with self.assertRaises(HTTPError):
+            wrong_dataset_identifier = "abcde"
+            self.client.get_releases(wrong_dataset_identifier)
+
     def test_get_release(self):
         dataset_identifier = self.owner + "/" + self.datasets[0]
         for i in range(len(self.releases)):
             release = self.client.get_release(dataset_identifier, self.releases[i])
             self.assertIsInstance(release, Release)
+
+    def test_get_release_httperror(self):
+        # Wrong dataset identifier and wrong name
+        with self.assertRaises(HTTPError):
+            wrong_dataset_identifier = "abcde"
+            wrong_name = "abcde"
+            self.client.get_release(wrong_dataset_identifier, wrong_name)
+        # Right dataset identifier and wrong name
+        with self.assertRaises(HTTPError):
+            right_dataset_identifier = self.owner + "/" + self.datasets[0]
+            wrong_name = "abcde"
+            self.client.get_release(right_dataset_identifier, wrong_name)
 
     def test_add_delete_release(self):
         dataset_identifier = self.owner + "/" + self.datasets[0]
@@ -598,6 +713,25 @@ class TestRelease(Test):
             # Delete release
             time.sleep(self.TIME_INTERVAL)
             self.client.delete_release(dataset_identifier, name)
+
+    def test_add_release_httperror(self):
+        # Wrong dataset identifier and wrong name
+        with self.assertRaises(HTTPError):
+            wrong_dataset_identifier = "abcde"
+            wrong_name = "abcde"
+            self.client.add_release(wrong_dataset_identifier, wrong_name)
+
+    def test_delete_release_httperror(self):
+        # Wrong dataset identifier and wrong name
+        with self.assertRaises(HTTPError):
+            wrong_dataset_identifier = "abcde"
+            wrong_name = "abcde"
+            self.client.delete_release(wrong_dataset_identifier, wrong_name)
+        # Right dataset identifier and wrong name
+        with self.assertRaises(HTTPError):
+            right_dataset_identifier = self.owner + "/" + self.datasets[0]
+            wrong_name = "abcde"
+            self.client.delete_release(right_dataset_identifier, wrong_name)
 
 
 #########

@@ -1,15 +1,35 @@
+# https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
+from __future__ import annotations
+
 import json
-from typing import Any, Dict
+from typing import TYPE_CHECKING, Any, Dict
 
 import requests
 from PIL import Image
-from segments.typing import Release
 from segments.utils import load_image_from_url, load_label_bitmap_from_url
+
+# https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
+if TYPE_CHECKING:
+    from segments.typing import Release
 
 
 def release2dataset(
     release: Release, download_images: bool = True
 ) -> Any:  # def release2dataset(release: Release, download_images: bool = True) -> Optional[datasets.Dataset]:
+    """Create a HuggingFace dataset from a Segments.ai release.
+
+    Args:
+        release: A Segments release.
+        download_images: If images need to be downloaded from an AWS S3 url. Defaults to ``True``.
+
+    Returns:
+        A HuggingFace dataset.
+
+    Raises:
+        ImportError: If HuggingFace datasets is not installed.
+        ValueError: If the type of dataset is not yet supported.
+
+    """
     try:
         import datasets
     except ImportError as e:
@@ -18,7 +38,7 @@ def release2dataset(
         )
         raise e
 
-    content = requests.get(release.attributes.url)
+    content = requests.get(release.attributes.url)  # type:ignore
     release_dict = json.loads(content.content)
 
     task_type = release_dict["dataset"]["task_type"]
@@ -139,8 +159,8 @@ def release2dataset(
             dataset_dict[key].append(data_row[key])
 
     # Create the HF Dataset and flatten it
-    dataset = datasets.Dataset.from_dict(dataset_dict, features)
-    dataset = dataset.flatten()
+    dataset = datasets.Dataset.from_dict(dataset_dict, features)  # type:ignore
+    dataset = dataset.flatten()  # type:ignore
 
     # Optionally download the images
     if (

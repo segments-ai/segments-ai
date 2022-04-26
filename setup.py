@@ -45,7 +45,6 @@ setup(
             "myst_parser",
             "sphinx-autobuild",
             "sphinx-copybutton",
-            "sphinxext-opengraph",
         ]
     },
     python_requires=">=3.6",

@@ -8,17 +8,15 @@ contain the root `toctree` directive.
 # Welcome to Segments.ai Python SDK documentation!
 
 ```{toctree}
-:maxdepth: 4
+:maxdepth: 2
+:caption: Contents
 
 usage
 segments
-
 ```
 
-# Indices and tables
+<!-- # Indices and tables
 
 * {ref}`genindex`
 * {ref}`modindex`
-* {ref}`search`
-
-
+* {ref}`search` -->
