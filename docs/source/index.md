@@ -11,8 +11,12 @@ contain the root `toctree` directive.
 :maxdepth: 2
 :caption: Contents
 
-usage
-segments
+install
+client
+dataset
+huggingface
+utils
+types
 ```
 
 <!-- # Indices and tables

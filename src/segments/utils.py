@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import json
 from io import BytesIO
-from multiprocessing.sharedctypes import Value
 from typing import TYPE_CHECKING, Any, Dict, Mapping, Optional, Tuple, Union
 
 import numpy as np  # import numpy.typing as npt
@@ -67,7 +66,7 @@ def get_semantic_bitmap(
     Args:
         instance_bitmap: A :class:`numpy.ndarray` with :class:`numpy.uint32` dtype where each unique value represents an instance id.
         annotations: An annotations dictionary.
-        id_increment: Increment the category ids with this number. Defaults to `1`.
+        id_increment: Increment the category ids with this number. Defaults to ``1``.
 
     Returns:
         A :class:`numpy.ndarray` with :class:`numpy.uint32` dtype where each unique value represents a category id.
@@ -106,10 +105,10 @@ def export_dataset(
     """Export a dataset to a different format.
 
     Args:
-        dataset: A :class:`SegmentsDataset`.
-        export_folder: The folder to export the dataset to. Defaults to `'.'`.
-        export_format: The destination format. Defaults to `'coco-panoptic'`.
-        id_increment: Increment the category ids with this number. Defaults to `1`. Ignored unless export_format is `'semantic'` or `'semantic-color'`.
+        dataset: A :class:`.SegmentsDataset`.
+        export_folder: The folder to export the dataset to. Defaults to ``'.'``.
+        export_format: The destination format. Defaults to ``'coco-panoptic'``.
+        id_increment: Increment the category ids with this number. Defaults to ``1``. Ignored unless export_format is ``'semantic'`` or ``'semantic-color'``.
 
     Returns:
         TODO
@@ -169,7 +168,7 @@ def load_image_from_url(url: str, save_filename: Optional[str] = None) -> Image.
         save_filename: The filename to save to.
 
     Returns:
-        A :class:`PIL` image.
+        A PIL image.
     """
     image = Image.open(BytesIO(session.get(url).content))
     # urllib.request.urlretrieve(url, save_filename)
@@ -230,13 +229,13 @@ def load_release(release: Release) -> Any:
 
 
 def handle_exif_rotation(image: Image.Image) -> Image.Image:
-    """Handle the exif rotation of a :class:`PIL` image.
+    """Handle the exif rotation of a PIL image.
 
     Args:
-        image: A :class:`PIL` image.
+        image: A PIL image.
 
     Returns:
-        A possibly rotated :class:`PIL` image.
+        A possibly rotated PIL image.
     """
 
     def get_key_by_value(dictionary: Mapping[int, str], value: str) -> int:

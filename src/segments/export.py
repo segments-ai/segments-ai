@@ -78,9 +78,9 @@ class IdGenerator:
     Given semantic category unique ID will be generated and its RGB encoding will
     have color close to the predefined semantic category color.
     The RGB encoding used is ID = R * 256 * G + 256 * 256 + B.
-    Class constructor takes dictionary {id: category_info}, where all semantic
+    Class constructor takes dictionary ``{id: category_info}``, where all semantic
     class ids are presented and category_info record is a dict with fields
-    'isthing' and 'color'
+    ``'isthing'`` and ``'color'``
     """
 
     def __init__(self, categories: Dict[int, Category]):
@@ -211,7 +211,7 @@ def export_coco_instance(
     """Export a Segments dataset as a coco instance.
 
     Args:
-        dataset: A :class:`SegmentsDataset`.
+        dataset: A :class:`.SegmentsDataset`.
         export_folder: TODO
 
     """

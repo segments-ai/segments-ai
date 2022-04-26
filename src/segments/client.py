@@ -42,7 +42,7 @@ class SegmentsClient:
 
     Args:
         api_key: Your Segments.ai API key. If no API key given, reads ``SEGMENTS_API_KEY`` from the environment. Defaults to ``None``.
-        api_url: URL of the Segments.ai API. Defaults to https://api.segments.ai/.
+        api_url: URL of the Segments.ai API. Defaults to ``'https://api.segments.ai/'``.
 
     Raises:
         EnvironmentError: If ``SEGMENTS_API_KEY`` is not found in your environment.
@@ -693,7 +693,7 @@ class SegmentsClient:
 
         Args:
             sample_uuid: The sample uuid.
-            labelset: The labelset this label belongs to. Defaults to `'ground-truth'``.
+            labelset: The labelset this label belongs to. Defaults to ``'ground-truth'```.
 
         Returns:
             A label.
@@ -845,7 +845,7 @@ class SegmentsClient:
 
         Args:
             sample_uuid: The sample uuid.
-            labelset: The labelset this label belongs to. Defaults to `'ground-truth'``.
+            labelset: The labelset this label belongs to. Defaults to ``'ground-truth'``.
 
         Raises:
             :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
@@ -1089,7 +1089,7 @@ class SegmentsClient:
 
         Args:
             file: A file object.
-            filename: The file name. Defaults to `'label.png'`.
+            filename: The file name. Defaults to ``'label.png'``.
 
         Returns:
             A class representing the uploaded file.

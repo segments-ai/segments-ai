@@ -45,6 +45,7 @@ setup(
             "myst_parser",
             "sphinx-autobuild",
             "sphinx-copybutton",
+            "autodoc_pydantic",
         ]
     },
     python_requires=">=3.6",
