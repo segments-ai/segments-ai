@@ -794,7 +794,7 @@ class SegmentsClient:
             sample_uuid: The sample uuid.
             attributes: The label attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/sample-and-label-types/label-types>`__.
             labelset: The labelset this label belongs to. Defaults to ``'ground-truth'``.
-            label_status: The label status. Defaults to `'PRELABELED'`.
+            label_status: The label status. Defaults to ``'PRELABELED'``.
             score: The label score. Defaults to ``None``.
 
         Returns:
