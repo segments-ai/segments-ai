@@ -87,8 +87,8 @@ def export_dataset(dataset, export_folder='.', export_format='coco-panoptic', id
         from .export import export_coco_instance
         return export_coco_instance(dataset, export_folder, **kwargs)
     elif export_format == 'yolo':
-        if not dataset.task_type in ['vector', 'bboxes']:
-            raise ValueError('Only datasets of type "vector" and "bboxes" can be exported to this format.')
+        if not dataset.task_type in ['vector', 'bboxes', 'image-vector-sequence']:
+            raise ValueError('Only datasets of type "vector", "bboxes" and "image-vector-sequence" can be exported to this format.')
         from .export import export_yolo
         return export_yolo(dataset, export_folder, **kwargs)
     elif export_format in ['semantic-color', 'instance-color', 'semantic', 'instance']:

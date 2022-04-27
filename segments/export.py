@@ -460,20 +460,64 @@ def export_image(dataset, export_folder, export_format, id_increment, **kwargs):
     print('Exported to {}'.format(dataset.image_dir))
     return dataset.image_dir
 
+def write_yolo_file(file_name, annotations, image_width, image_height):
+    with open(file_name, 'w') as f:
+        for annotation in annotations:
+            if annotation['type'] == 'bbox':
+                category_id = annotation['category_id']
+                [[x0, y0], [x1, y1]] = annotation['points']
+
+                # Normalize
+                x0, x1 = x0 / image_width, x1 / image_width
+                y0, y1 = y0 / image_height, y1 / image_height
+
+                # Get center, width and height of bbox
+                x_center = (x0 + x1) / 2
+                y_center = (y0 + y1) / 2
+                width = abs(x1 - x0)
+                height = abs(y1 - y0)
+
+                # Save it to the file
+#                 print(category_id, x_center, y_center, width, height)
+                f.write('{} {:.6f} {:.6f} {:.6f} {:.6f}\n'.format(category_id, x_center, y_center, width, height))
 
 def export_yolo(dataset, export_folder, **kwargs):
-    if dataset.task_type not in ['vector', 'bboxes']:
+    if dataset.task_type not in ['vector', 'bboxes', 'image-vector-sequence']:
         print('You can only export bounding box datasets to YOLO format.')
         return
 
     if dataset.task_type == 'vector':
         print('Only bounding box annotations will be processed. Polygon, polyline and keypoint annotations will be ignored.')
 
-    for i in tqdm(range(len(dataset))):        
-        sample = dataset[i]
-
-        if 'annotations' in sample and sample['annotations'] is not None and len(sample['annotations']) > 0:
+    if dataset.task_type == 'image-vector-sequence':
+        print('Note that the sequences will be exported as individual frames, disregarding the tracking information.')
+        for i in tqdm(range(len(dataset))):
+            sample = dataset[i]
             image_name = os.path.splitext(os.path.basename(sample['name']))[0]
+
+            # Get the image width and height
+            if 'image_width' in kwargs and 'image_height' in kwargs:
+                image_width = kwargs['image_width']
+                image_height = kwargs['image_height']
+            else:
+                assert False, 'Please provide image_width and image_height parameters.'
+
+            for j, frame in enumerate(sample['labels']['ground-truth']['attributes']['frames']):
+                # Construct the file name from image and frame name
+                try:
+                    frame_name = sample['attributes']['frames'][j]['name']
+                except:
+                    frame_name = '{:05d}'.format(j+1)
+                file_name = '{}/{}-{}.txt'.format(dataset.image_dir, image_name, frame_name)
+
+                if 'annotations' in frame and frame['annotations'] is not None and len(frame['annotations']) > 0:
+                    annotations = frame['annotations']
+                    write_yolo_file(file_name, annotations, image_width, image_height)
+    else:
+        for i in tqdm(range(len(dataset))):        
+            sample = dataset[i]
+            image_name = os.path.splitext(os.path.basename(sample['name']))[0]
+            file_name = '{}/{}.txt'.format(dataset.image_dir, image_name)
 
             if 'image_width' in kwargs and 'image_height' in kwargs:
                 image_width = kwargs['image_width']
@@ -481,29 +525,10 @@ def export_yolo(dataset, export_folder, **kwargs):
             else:
                 image_width = sample['image'].width
                 image_height = sample['image'].height
-            
-            file_name = '{}/{}.txt'.format(dataset.image_dir, image_name)
-    #         print(file_name)       
-            
-            with open(file_name, 'w') as f:
-                for annotation in sample['annotations']:
-                    if annotation['type'] == 'bbox':
-                        category_id = annotation['category_id']
-                        [[x0, y0], [x1, y1]] = annotation['points']
 
-                        # Normalize
-                        x0, x1 = x0 / image_width, x1 / image_width
-                        y0, y1 = y0 / image_height, y1 / image_height
-
-                        # Get center, width and height of bbox
-                        x_center = (x0 + x1) / 2
-                        y_center = (y0 + y1) / 2
-                        width = abs(x1 - x0)
-                        height = abs(y1 - y0)
-
-                        # Save it to the file
-        #                 print(category_id, x_center, y_center, width, height)
-                        f.write('{} {:.6f} {:.6f} {:.6f} {:.6f}\n'.format(category_id, x_center, y_center, width, height))
+            if 'annotations' in sample and sample['annotations'] is not None and len(sample['annotations']) > 0:
+                annotations = sample['annotations']
+                write_yolo_file(file_name, annotations, image_width, image_height)
 
     print('Exported. Images and labels in {}'.format(dataset.image_dir))
     return dataset.image_dir

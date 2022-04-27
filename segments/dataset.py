@@ -53,8 +53,8 @@ class SegmentsDataset():
             return
 
         self.task_type = self.release['dataset']['task_type']
-        if self.task_type not in ['segmentation-bitmap', 'segmentation-bitmap-highres', 'vector', 'bboxes', 'keypoints', 'pointcloud-detection', 'pointcloud-segmentation']:
-            print('You can only create a dataset for tasks of type "segmentation-bitmap", "segmentation-bitmap-highres", "vector", "bboxes", "keypoints", "pointcloud-detection", or "pointcloud-segmentation" for now.')
+        if self.task_type not in ['segmentation-bitmap', 'segmentation-bitmap-highres', 'vector', 'bboxes', 'keypoints', 'image-vector-sequence', 'pointcloud-detection', 'pointcloud-segmentation']:
+            print('You can only create a dataset for tasks of type "segmentation-bitmap", "segmentation-bitmap-highres", "vector", "bboxes", "keypoints", "image-vector-sequence", "pointcloud-detection", or "pointcloud-segmentation" for now.')
             return
         
         self.load_dataset()
@@ -168,7 +168,7 @@ class SegmentsDataset():
     def __getitem__(self, index):
         sample = self.samples[index]
 
-        if self.task_type == 'pointcloud-segmentation' or self.task_type == 'pointcloud-detection':
+        if self.task_type in ['pointcloud-segmentation', 'pointcloud-detection', 'image-vector-sequence']:
             return sample
         
         # Load the image
