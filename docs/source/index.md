@@ -5,13 +5,21 @@ You can adapt this file completely to your liking, but it should at least
 contain the root `toctree` directive.
 -->
 
-# Welcome to Segments.ai Python SDK documentation!
+# Python SDK
+
+The Python SDK is a convenient wrapper for the API.
+
+```{eval-rst}
+.. image:: _static/landingpage.svg
+   :alt: Segments.ai images
+```
 
 ```{toctree}
 :maxdepth: 2
 :caption: Contents
 
 install
+quickstart
 client
 dataset
 huggingface
@@ -19,8 +27,10 @@ utils
 types
 ```
 
-<!-- # Indices and tables
+<!--
+# Indices and tables
 
 * {ref}`genindex`
 * {ref}`modindex`
-* {ref}`search` -->
+* {ref}`search`
+-->

@@ -35,11 +35,17 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
+    # "sphinx.ext.autosummary",
     "myst_parser",
     "sphinx_copybutton",
 ]
+
+# Autodoc
 autodoc_typehints = "description"
 autodoc_member_order = "bysource"
+
+# Autosummary
+# autosummary_generate = True
 
 # Remove the prompt when copying examples
 copybutton_prompt_text = r">>> |\.\.\. "
@@ -58,7 +64,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#
+
 html_theme = "furo"
 html_theme_options = {
     # - Shpinx book theme options:
@@ -70,8 +76,8 @@ html_theme_options = {
     # Furo will automatically add a small edit button to each document, when the documentation is generated on Read the Docs using a GitHub repository as the source.
 }
 pygments_style = "sphinx"
-pygments_dark_style = "monokai"  # furo
-html_logo = "../logo.svg"
+pygments_dark_style = "monokai"  # Furo
+html_logo = "_static/logo.svg"
 html_title = "Python SDK"
 
 # Add any paths that contain custom static files (such as style sheets) here,
