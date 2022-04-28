@@ -1,4 +1,3 @@
-# https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
 from __future__ import annotations
 
 import json
@@ -106,9 +105,9 @@ def export_dataset(
 
     Args:
         dataset: A :class:`.SegmentsDataset`.
-        export_folder: The folder to export the dataset to. Defaults to ``'.'``.
-        export_format: The destination format. Defaults to ``'coco-panoptic'``.
-        id_increment: Increment the category ids with this number. Defaults to ``1``. Ignored unless export_format is ``'semantic'`` or ``'semantic-color'``.
+        export_folder: The folder to export the dataset to. Defaults to ``.``.
+        export_format: The destination format. Defaults to ``coco-panoptic``.
+        id_increment: Increment the category ids with this number. Defaults to ``1``. Ignored unless export_format is ``semantic`` or ``semantic-color``.
 
     Returns:
         TODO

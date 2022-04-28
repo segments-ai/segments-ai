@@ -1,4 +1,3 @@
-# https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
 from __future__ import annotations
 
 import os
@@ -33,27 +32,21 @@ if TYPE_CHECKING:
 
 # import numpy.typing as npt
 
+# Request exception: :exc:`requests.RequestException`: Super class of :exc:`requests.ConnectionError` (thrown in the event of a network problem), :exc:`requests.Timeout` (thrown if a request times out) and :exc:`requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
+
 
 class SegmentsClient:
-    """A client with a connection to Segments.ai
+    """A client with a connection to the Segments.ai platform.
 
     Note:
         Please refer to the `Python SDK quickstart <https://docs.segments.ai/tutorials/python-sdk-quickstart>`__ for a full example of working with the Python SDK.
-
-    Args:
-        api_key: Your Segments.ai API key. If no API key given, reads ``SEGMENTS_API_KEY`` from the environment. Defaults to ``None``.
-        api_url: URL of the Segments.ai API. Defaults to ``'https://api.segments.ai/'``.
-
-    Raises:
-        EnvironmentError: If ``SEGMENTS_API_KEY`` is not found in your environment.
-        ValueError: If an invalid API key is used.
 
     Examples:
         First install the SDK.
 
         >>> pip install segments-ai --upgrade
 
-        Import the Segments package in your python file and set up a client with an API key. An API key can be created on your user account page.
+        Import the ``segments`` package in your python file and set up a client with an API key. An API key can be created on your `user account page <https://segments.ai/account>`__.
 
         >>> from segments import SegmentsClient
         >>> api_key = 'YOUR_API_KEY'
@@ -66,6 +59,19 @@ class SegmentsClient:
         >>> client = SegmentsClient()
         'Found a Segments API key in your environment.'
         'Initialized successfully.'
+
+        You can also use the client as a context manager:
+
+        >>> with SegmentsClient() as client:
+        >>>     client.get_datasets()
+
+    Args:
+        api_key: Your Segments.ai API key. If no API key given, reads ``SEGMENTS_API_KEY`` from the environment. Defaults to ``None``.
+        api_url: URL of the Segments.ai API. Defaults to ``https://api.segments.ai/``.
+
+    Raises:
+        EnvironmentError: If ``SEGMENTS_API_KEY`` is not found in your environment.
+        ValueError: If an invalid API key is used.
     """
 
     def __init__(
@@ -106,7 +112,7 @@ class SegmentsClient:
                 raise ValueError("Something went wrong. Did you use the right API key?")
 
     # https://stackoverflow.com/questions/48160728/resourcewarning-unclosed-socket-in-python-3-unit-test
-    def close(self) -> None:
+    def _close(self) -> None:
         """Close :class:`SegmentsClient` connections.
 
         Examples:
@@ -116,7 +122,7 @@ class SegmentsClient:
             >>> client.get_datasets()
             >>> client.close()
 
-            Or use the Segments client as a context manager:
+            Or use the client as a context manager:
 
             >>> with SegmentsClient() as client:
             >>>     client.get_datasets()
@@ -131,7 +137,7 @@ class SegmentsClient:
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self.close()
+        self._close()
 
     ############
     # Datasets #
@@ -139,21 +145,20 @@ class SegmentsClient:
     def get_datasets(self, user: Optional[str] = None) -> List[Dataset]:
         """Get a list of datasets.
 
-        Args:
-            user: The user for which to get the datasets. Leave empty to get datasets of current user. Defaults to ``None``.
-
-        Returns:
-            A list of datasets.
-
-        Raises:
-            :exc:`~pydantic.ValidationError`: If pydantic validation of the datasets fails.
-            :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
-
         Examples:
             >>> datasets = client.get_datasets()
             >>> for dataset in datasets:
             >>>     print(dataset.name, dataset.description)
+
+        Args:
+            user: The user for which to get the datasets. Leave empty to get datasets of current user. Defaults to ``None``.
+
+        Raises:
+            :exc:`pydantic.ValidationError`: If pydantic validation of the datasets fails.
+            :exc:`requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
+
+        Returns:
+            A list of datasets.
         """
 
         if user is not None:
@@ -168,21 +173,20 @@ class SegmentsClient:
     def get_dataset(self, dataset_identifier: str) -> Dataset:
         """Get a dataset.
 
-        Args:
-            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: `jane/flowers`.
-
-        Returns:
-            A dataset.
-
-        Raises:
-            :exc:`~pydantic.ValidationError`: If pydantic validation of the dataset fails.
-            :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
-
         Examples:
             >>> dataset_identifier = 'jane/flowers'
             >>> dataset = client.get_dataset(dataset_identifier)
             >>> print(dataset)
+
+        Args:
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+
+        Raises:
+            :exc:`pydantic.ValidationError`: If pydantic validation of the dataset fails.
+            :exc:`requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
+
+        Returns:
+            A dataset.
         """
 
         r = self._get(f"/datasets/{dataset_identifier}/")
@@ -205,33 +209,54 @@ class SegmentsClient:
     ) -> Dataset:
         """Add a dataset.
 
-        Args:
-            name: The dataset name. Example: ``'flowers'``.
-            description: The dataset description. Defaults to ``None``.
-            task_type: The dataset's task type. Defaults to ``'segmentation-bitmap'``.
-            task_attributes: The dataset's task attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/categories-and-task-attributes#object-attribute-format>`__. Defaults to ``None``.
-            category: The dataset category. Defaults to ``'other'``.
-            public: The dataset visibility. Defaults to ``False``.
-            readme: The dataset readme. Defaults to ``None``.
-            enable_skip_labeling: Enable the skip button in the labeling workflow. Defaults to ``True``.
-            enable_skip_reviewing: Enable the skip button in the reviewing workflow. Defaults to ``False``.
-            enable_ratings: Enable star-ratings for labeled images. Defaults to ``False``.
-
-        Returns:
-            A newly created dataset.
-
-        Raises:
-            :exc:`~pydantic.ValidationError`: If pydantic validation of the task attributes fails.
-            :exc:`~pydantic.ValidationError`: If pydantic validation of the dataset fails.
-            :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
-
         Examples:
             >>> dataset_name = 'flowers'
             >>> description = 'A dataset containing flowers of all kinds.'
             >>> task_type = 'segmentation-bitmap'
             >>> dataset = client.add_dataset(dataset_name, description, task_type)
             >>> print(dataset)
+
+        +-------------------------------------------+---------------------------------------+
+        | Task type                                 | Value                                 |
+        +===========================================+=======================================+
+        | Image segmentation labels (bitmap)        | ``segmentation-bitmap``               |
+        +-------------------------------------------+---------------------------------------+
+        | Image bounding box labels                 | ``bboxes``                            |
+        +-------------------------------------------+---------------------------------------+
+        | Image vector labels                       | ``vector``                            |
+        +-------------------------------------------+---------------------------------------+
+        | Pointcloud cuboid labels                  | ``pointcloud-cuboid``                 |
+        +-------------------------------------------+---------------------------------------+
+        | Pointcloud cuboid labels (sequence)       | ``pointcloud-cuboid-sequence``        |
+        +-------------------------------------------+---------------------------------------+
+        | Pointcloud segmentation labels            | ``pointcloud-segmentation``           |
+        +-------------------------------------------+---------------------------------------+
+        | Pointcloud segmentation labels (sequence) | ``pointcloud-segmentation-sequence``  |
+        +-------------------------------------------+---------------------------------------+
+        | Text named entity labels                  | ``text-named-entities``               |
+        +-------------------------------------------+---------------------------------------+
+        | Text span categorization labels           | ``text-span-categorization``          |
+        +-------------------------------------------+---------------------------------------+
+
+        Args:
+            name: The dataset name. Example: ``flowers``.
+            description: The dataset description. Defaults to ``None``.
+            task_type: The dataset's task type. Defaults to ``segmentation-bitmap``.
+            task_attributes: The dataset's task attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/categories-and-task-attributes#object-attribute-format>`__. Defaults to ``None``.
+            category: The dataset category. Defaults to ``other``.
+            public: The dataset visibility. Defaults to ``False``.
+            readme: The dataset readme. Defaults to ``None``.
+            enable_skip_labeling: Enable the skip button in the labeling workflow. Defaults to ``True``.
+            enable_skip_reviewing: Enable the skip button in the reviewing workflow. Defaults to ``False``.
+            enable_ratings: Enable star-ratings for labeled images. Defaults to ``False``.
+
+        Raises:
+            :exc:`pydantic.ValidationError`: If pydantic validation of the task attributes fails.
+            :exc:`pydantic.ValidationError`: If pydantic validation of the dataset fails.
+            :exc:`requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
+
+        Returns:
+            A newly created dataset.
         """
 
         if description is None:
@@ -287,8 +312,14 @@ class SegmentsClient:
     ) -> Dataset:
         """Update a dataset.
 
+        Examples:
+            >>> dataset_identifier = 'jane/flowers'
+            >>> description = 'A dataset containing flowers of all kinds.'
+            >>> dataset = client.update_dataset(dataset_identifier, description)
+            >>> print(dataset)
+
         Args:
-            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``'jane/flowers'``.
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
             description: The dataset description. Defaults to ``None``.
             task_type: The dataset's task type. Defaults to ``None``.
             task_attributes: The dataset's task attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/categories-and-task-attributes#object-attribute-format>`__. Defaults to ``None``.
@@ -299,19 +330,12 @@ class SegmentsClient:
             enable_skip_reviewing: Enable the skip button in the reviewing workflow. Defaults to ``None``.
             enable_ratings: Enable star-ratings for labeled images. Defaults to ``None``.
 
+        Raises:
+            :exc:`pydantic.ValidationError`: If pydantic validation of the dataset fails.
+            :exc:`requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
+
         Returns:
             An updated dataset.
-
-        Raises:
-            :exc:`~pydantic.ValidationError`: If pydantic validation of the dataset fails.
-            :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
-
-        Examples:
-            >>> dataset_identifier = 'jane/flowers'
-            >>> description = 'A dataset containing flowers of all kinds.'
-            >>> dataset = client.update_dataset(dataset_identifier, description)
-            >>> print(dataset)
         """
 
         payload: Dict[str, Any] = {}
@@ -352,16 +376,15 @@ class SegmentsClient:
     def delete_dataset(self, dataset_identifier: str) -> None:
         """Delete a dataset.
 
-        Args:
-            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``'jane/flowers'``.
-
-        Raises:
-            :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
-
         Examples:
             >>> dataset_identifier = 'jane/flowers'
             >>> client.delete_dataset(dataset_identifier)
+
+        Args:
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+
+        Raises:
+            :exc:`requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
         """
 
         self._delete(f"/datasets/{dataset_identifier}/")
@@ -371,24 +394,23 @@ class SegmentsClient:
     ) -> Collaborator:
         """Add a collaborator to a dataset.
 
-        Args:
-            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``'jane/flowers'``.
-            username: The username of the collaborator to be added.
-            role: The role of the collaborator to be added. Defaults to ``'labeler'``.
-
-        Returns:
-            A class containing the newly added collaborator with its role.
-
-        Raises:
-            :exc:`~pydantic.ValidationError`: If pydantic validation of the collaborator fails.
-            :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
-
         Examples
             >>> dataset_identifier = 'jane/flowers'
             >>> username = 'john'
             >>> role = 'reviewer'
             >>> client.add_dataset_collaborator(dataset_identifier, username, role)
+
+        Args:
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+            username: The username of the collaborator to be added.
+            role: The role of the collaborator to be added. Defaults to ``labeler``.
+
+        Raises:
+            :exc:`pydantic.ValidationError`: If pydantic validation of the collaborator fails.
+            :exc:`requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
+
+        Returns:
+            A class containing the newly added collaborator with its role.
         """
         payload = {"user": username, "role": role}
         r = self._post(f"/datasets/{dataset_identifier}/collaborators/", payload)
@@ -401,18 +423,17 @@ class SegmentsClient:
     ) -> None:
         """Delete a dataset collaborator.
 
-        Args:
-            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``'jane/flowers'``.
-            username: The username of the collaborator to be deleted.
-
-        Raises:
-            :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
-
         Examples:
             >>> dataset_identifier = 'jane/flowers'
             >>> username = 'john'
             >>> client.delete_dataset_collaborator(dataset_identifier, username)
+
+        Args:
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+            username: The username of the collaborator to be deleted.
+
+        Raises:
+            :exc:`requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
         """
         self._delete(
             f"/datasets/{dataset_identifier}/collaborators/{username}",
@@ -434,29 +455,28 @@ class SegmentsClient:
     ) -> List[Sample]:
         """Get the samples in a dataset.
 
-        Args:
-            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``'jane/flowers'``.
-            name: Name to filter by. Defaults to None (no filtering).
-            label_status: List of label statuses to filter by. Defaults to None (no filtering).
-            metadata: List of 'key:value' metadata attributes to filter by. Defaults to ``None`` (no filtering).
-            sort: What to sort results by. One of ``'name'``, ``'created'``, ``'priority'``. Defaults to ``'name'``.
-            direction: Sorting direction. One of ``'asc'`` (ascending) or ``'desc'`` (descending). Defaults to ``'asc'``.
-            per_page: Pagination parameter indicating the maximum number of samples to return. Defaults to ``1000``.
-            page: Pagination parameter indicating the page to return. Defaults to ``1``.
-
-        Returns:
-            A list of samples.
-
-        Raises:
-            :exc:`~pydantic.ValidationError`: If pydantic validation of the samples fails.
-            :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
-
         Examples:
             >>> dataset_identifier = 'jane/flowers'
             >>> samples = client.get_samples(dataset_identifier)
             >>> for sample in samples:
             >>>     print(sample.name, sample.uuid)
+
+        Args:
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+            name: Name to filter by. Defaults to None (no filtering).
+            label_status: List of label statuses to filter by. Defaults to None (no filtering).
+            metadata: List of 'key:value' metadata attributes to filter by. Defaults to ``None`` (no filtering).
+            sort: What to sort results by. One of ``name``, ``created``, ``priority``. Defaults to ``name``.
+            direction: Sorting direction. One of ``asc`` (ascending) or ``desc`` (descending). Defaults to ``asc``.
+            per_page: Pagination parameter indicating the maximum number of samples to return. Defaults to ``1000``.
+            page: Pagination parameter indicating the page to return. Defaults to ``1``.
+
+        Raises:
+            :exc:`pydantic.ValidationError`: If pydantic validation of the samples fails.
+            :exc:`requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
+
+        Returns:
+            A list of samples.
         """
 
         # pagination
@@ -502,21 +522,21 @@ class SegmentsClient:
     def get_sample(self, uuid: str, labelset: Optional[str] = None) -> Sample:
         """Get a sample.
 
-        Args:
-            uuid: The sample uuid.
-            labelset: If defined, this additionally returns the label for the given labelset. Defaults to ``None``.
-
-        Returns:
-            A sample
-
-        Raises:
-            :exc:`~pydantic.ValidationError`: If pydantic validation of the samples fails.
-            :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
         Examples:
             >>> uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
             >>> sample = client.get_sample(uuid)
             >>> print(sample)
+
+        Args:
+            uuid: The sample uuid.
+            labelset: If defined, this additionally returns the label for the given labelset. Defaults to ``None``.
+
+        Raises:
+            :exc:`pydantic.ValidationError`: If pydantic validation of the samples fails.
+            :exc:`requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
+
+        Returns:
+            A sample
         """
 
         query_string = f"/samples/{uuid}/"
@@ -542,22 +562,8 @@ class SegmentsClient:
     ) -> Sample:
         """Add a sample to a dataset.
 
-        Args:
-            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``'jane/flowers'``.
-            name: The name of the sample.
-            attributes: The sample attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/sample-and-label-types/sample-types>`__.
-            metadata: Any sample metadata. Example: ``{'weather': 'sunny', 'camera_id': 3}``.
-            priority: Priority in the labeling queue. Samples with higher values will be labeled first. Defaults to ``0``.
-            embedding: Embedding of this sample represented by an array of floats.
+        The content of the ``attributes`` field depends on the `sample type <https://docs.segments.ai/reference/sample-and-label-types/sample-types>`__.
 
-        Returns:
-            A newly created sample.
-
-        Raises:
-            :exc:`~pydantic.ValidationError`: If pydantic validation of the sample attributes fails.
-            :exc:`~pydantic.ValidationError`: If pydantic validation of the samples fails.
-            :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
         Examples:
             >>> dataset_identifier = 'jane/flowers'
             >>> name = 'violet.jpg'
@@ -575,6 +581,27 @@ class SegmentsClient:
             >>> priority = 10 # Samples with higher priority value will be labeled first. Default is 0.
             >>> sample = client.add_sample(dataset_identifier, name, attributes, metadata, priority)
             >>> print(sample)
+
+        Args:
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+            name: The name of the sample.
+            attributes: The sample attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/sample-and-label-types/sample-types>`__.
+            metadata: Any sample metadata. Example: ``{'weather': 'sunny', 'camera_id': 3}``.
+            priority: Priority in the labeling queue. Samples with higher values will be labeled first. Defaults to ``0``.
+            embedding: Embedding of this sample represented by an array of floats.
+
+        Raises:
+            :exc:`pydantic.ValidationError`: If pydantic validation of the sample attributes fails.
+            :exc:`pydantic.ValidationError`: If pydantic validation of the samples fails.
+            :exc:`requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
+
+        Returns:
+            A newly created sample.
+
+        If the image is on your local computer, you should first upload it to a cloud storage service like Amazon S3, Google Cloud Storage, Imgur, or `our asset storage service <https://docs.segments.ai/reference/python-sdk#upload-a-file-as-an-asset>`__.
+
+        Note:
+            If you create a sample with a URL from a public S3 bucket and you see an error on the platform, make sure to `properly configure your bucket's CORS settings <https://docs.aws.amazon.com/AmazonS3/latest/dev/cors.html>`__.
         """
 
         try:
@@ -618,21 +645,6 @@ class SegmentsClient:
     ) -> Sample:
         """Update a sample.
 
-        Args:
-            uuid: The sample uuid.
-            name: The name of the sample.
-            attributes: The sample attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/sample-and-label-types/sample-types>`__.
-            metadata: Any sample metadata. Example: ``{'weather': 'sunny', 'camera_id': 3}``.
-            priority: Priority in the labeling queue. Samples with higher values will be labeled first. Default is ``0``.
-            embedding: Embedding of this sample represented by list of floats.
-
-        Returns:
-            An updated sample.
-
-        Raises:
-            :exc:`~pydantic.ValidationError`: If pydantic validation of the samples fails.
-            :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
         Examples:
             >>> uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
             >>> metadata = {
@@ -643,6 +655,21 @@ class SegmentsClient:
             >>> priority = 10 # Samples with higher priority value will be labeled first. Default is 0.
             >>> sample = client.update_sample(uuid, metadata=metadata, priority=priority)
             >>> print(sample)
+
+        Args:
+            uuid: The sample uuid.
+            name: The name of the sample.
+            attributes: The sample attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/sample-and-label-types/sample-types>`__.
+            metadata: Any sample metadata. Example: ``{'weather': 'sunny', 'camera_id': 3}``.
+            priority: Priority in the labeling queue. Samples with higher values will be labeled first. Default is ``0``.
+            embedding: Embedding of this sample represented by list of floats.
+
+        Raises:
+            :exc:`pydantic.ValidationError`: If pydantic validation of the samples fails.
+            :exc:`requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
+
+        Returns:
+            An updated sample.
         """
 
         payload: Dict[str, Any] = {}
@@ -671,16 +698,15 @@ class SegmentsClient:
     def delete_sample(self, uuid: str) -> None:
         """Delete a sample.
 
+        Examples:
+            >>> uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
+            >>> client.delete_sample(uuid)
+
         Args:
             uuid: The sample uuid.
 
         Raises:
-            :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
-
-        Examples:
-            >>> uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
-            >>> client.delete_sample(uuid)
+            :exc:`requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
         """
 
         self._delete(f"/samples/{uuid}/")
@@ -691,22 +717,21 @@ class SegmentsClient:
     def get_label(self, sample_uuid: str, labelset: str = "ground-truth") -> Label:
         """Get a label.
 
-        Args:
-            sample_uuid: The sample uuid.
-            labelset: The labelset this label belongs to. Defaults to ``'ground-truth'```.
-
-        Returns:
-            A label.
-
-        Raises:
-            :exc:`~pydantic.ValidationError`: If pydantic validation of the label fails.
-            :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
-
         Examples:
             >>> sample_uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
             >>> label = client.get_label(sample_uuid)
             >>> print(label)
+
+        Args:
+            sample_uuid: The sample uuid.
+            labelset: The labelset this label belongs to. Defaults to ``ground-truth```.
+
+        Raises:
+            :exc:`pydantic.ValidationError`: If pydantic validation of the label fails.
+            :exc:`requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
+
+        Returns:
+            A label.
         """
 
         r = self._get(f"/labels/{sample_uuid}/{labelset}/")
@@ -724,21 +749,9 @@ class SegmentsClient:
     ) -> Label:
         """Add a label to a sample.
 
-        Args:
-            sample_uuid: The sample uuid.
-            attributes: The label attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/sample-and-label-types/label-types>`__.
-            labelset: The labelset this label belongs to. Defaults to ``'ground-truth'``.
-            label_status: The label status. Defaults to ``'PRELABELED'``.
-            score: The label score. Defaults to ``None``.
+        A label is added to a sample in relation to a `label set`, such as the default `ground-truth` label set, or a newly created label set for `uploading model predictions <https://docs.segments.ai/guides/upload-model-predictions>`__. You can create a new label set by clicking the "Add new label set" link on the Samples tab.
 
-        Returns:
-            A newly created label.
-
-        Raises:
-            :exc:`~pydantic.ValidationError`: If pydantic validation of the attributes fails.
-            :exc:`~pydantic.ValidationError`: If pydantic validation of the label fails.
-            :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
+        The content of the ``attributes`` field depends on the `label type <https://docs.segments.ai/reference/sample-and-label-types/label-types>`__.
 
         Examples:
             >>> sample_uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
@@ -757,6 +770,21 @@ class SegmentsClient:
             ...     ]
             ... }
             >>> client.add_label(sample_uuid, attributes)
+
+        Args:
+            sample_uuid: The sample uuid.
+            attributes: The label attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/sample-and-label-types/label-types>`__.
+            labelset: The labelset this label belongs to. Defaults to ``ground-truth``.
+            label_status: The label status. Defaults to ``PRELABELED``.
+            score: The label score. Defaults to ``None``.
+
+        Raises:
+            :exc:`pydantic.ValidationError`: If pydantic validation of the attributes fails.
+            :exc:`pydantic.ValidationError`: If pydantic validation of the label fails.
+            :exc:`requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
+
+        Returns:
+            A newly created label.
         """
 
         try:
@@ -790,21 +818,6 @@ class SegmentsClient:
     ) -> Label:
         """Update a label.
 
-        Args:
-            sample_uuid: The sample uuid.
-            attributes: The label attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/sample-and-label-types/label-types>`__.
-            labelset: The labelset this label belongs to. Defaults to ``'ground-truth'``.
-            label_status: The label status. Defaults to ``'PRELABELED'``.
-            score: The label score. Defaults to ``None``.
-
-        Returns:
-            An updated label.
-
-        Raises:
-            :exc:`~pydantic.ValidationError`: If pydantic validation of the label fails.
-            :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
-
         Examples:
             >>> sample_uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
             >>> attributes = {
@@ -822,6 +835,20 @@ class SegmentsClient:
             ...     ]
             ... }
             >>> client.update_label(sample_uuid, attributes)
+
+        Args:
+            sample_uuid: The sample uuid.
+            attributes: The label attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/sample-and-label-types/label-types>`__.
+            labelset: The labelset this label belongs to. Defaults to ``ground-truth``.
+            label_status: The label status. Defaults to ``PRELABELED``.
+            score: The label score. Defaults to ``None``.
+
+        Raises:
+            :exc:`pydantic.ValidationError`: If pydantic validation of the label fails.
+            :exc:`requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
+
+        Returns:
+            An updated label.
         """
 
         payload: Dict[str, Any] = {}
@@ -843,18 +870,17 @@ class SegmentsClient:
     def delete_label(self, sample_uuid: str, labelset: str = "ground-truth") -> None:
         """Delete a label.
 
-        Args:
-            sample_uuid: The sample uuid.
-            labelset: The labelset this label belongs to. Defaults to ``'ground-truth'``.
-
-        Raises:
-            :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
-
         Examples:
             >>> sample_uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
             >>> labelset = 'ground-truth'
             >>> client.delete_label(sample_uuid, labelset)
+
+        Args:
+            sample_uuid: The sample uuid.
+            labelset: The labelset this label belongs to. Defaults to ``ground-truth``.
+
+        Raises:
+            :exc:`requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
         """
 
         self._delete(f"/labels/{sample_uuid}/{labelset}/")
@@ -865,22 +891,21 @@ class SegmentsClient:
     def get_labelsets(self, dataset_identifier: str) -> List[Labelset]:
         """Get the labelsets in a dataset.
 
-        Args:
-            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``'jane/flowers'``.
-
-        Returns:
-            A list of labelsets.
-
-        Raises:
-            :exc:`~pydantic.ValidationError`: If pydantic validation of the labelsets fails.
-            :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
-
         Examples:
             >>> dataset_identifier = 'jane/flowers'
             >>> labelsets = client.get_labelsets(dataset_identifier)
             >>> for labelset in labelsets:
             >>>     print(labelset.name, labelset.description)
+
+        Args:
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+
+        Raises:
+            :exc:`pydantic.ValidationError`: If pydantic validation of the labelsets fails.
+            :exc:`requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
+
+        Returns:
+            A list of labelsets.
         """
 
         r = self._get(f"/datasets/{dataset_identifier}/labelsets/")
@@ -891,23 +916,22 @@ class SegmentsClient:
     def get_labelset(self, dataset_identifier: str, name: str) -> Labelset:
         """Get a labelset.
 
-        Args:
-            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``'jane/flowers'``.
-            name: The name of the labelset.
-
-        Returns:
-            A labelset.
-
-        Raises:
-            :exc:`~pydantic.ValidationError`: If pydantic validation of the labelset fails.
-            :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
-
         Examples:
             >>> dataset_identifier = 'jane/flowers'
             >>> name = 'model-predictions'
             >>> labelset = client.get_labelset(dataset_identifier, name)
             >>> print(labelset)
+
+        Args:
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+            name: The name of the labelset.
+
+        Raises:
+            :exc:`pydantic.ValidationError`: If pydantic validation of the labelset fails.
+            :exc:`requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
+
+        Returns:
+            A labelset.
         """
 
         r = self._get(f"/datasets/{dataset_identifier}/labelsets/{name}/")
@@ -920,23 +944,22 @@ class SegmentsClient:
     ) -> Labelset:
         """Add a labelset to a dataset.
 
-        Args:
-            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``'jane/flowers'``.
-            name: The name of the labelset.
-            description: The labelset description. Defaults to ``None``.
-
-        Returns:
-            A labelset.
-
-        Raises:
-            :exc:`~pydantic.ValidationError`: If pydantic validation of the labelset fails.
-            :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
-
         Examples:
             >>> dataset_identifier = 'jane/flowers'
             >>> name = 'model-predictions-resnet50'
             >>> client.add_labelset(dataset_identifier, name)
+
+        Args:
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+            name: The name of the labelset.
+            description: The labelset description. Defaults to ``None``.
+
+        Raises:
+            :exc:`pydantic.ValidationError`: If pydantic validation of the labelset fails.
+            :exc:`requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
+
+        Returns:
+            A labelset.
         """
 
         if description is None:
@@ -955,18 +978,17 @@ class SegmentsClient:
     def delete_labelset(self, dataset_identifier: str, name: str) -> None:
         """Delete a labelset.
 
-        Args:
-            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``'jane/flowers'``.
-            name: The name of the labelset.
-
-        Raises:
-            :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
-
         Examples:
             >>> dataset_identifier = 'jane/flowers'
             >>> name = 'model-predictions'
             >>> client.delete_labelset(dataset_identifier, name)
+
+        Args:
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+            name: The name of the labelset.
+
+        Raises:
+            :exc:`requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
         """
 
         self._delete(f"/datasets/{dataset_identifier}/labelsets/{name}/")
@@ -977,22 +999,21 @@ class SegmentsClient:
     def get_releases(self, dataset_identifier: str) -> List[Release]:
         """Get the releases in a dataset.
 
-        Args:
-            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``'jane/flowers'``.
-
-        Returns:
-            A list of releases.
-
-        Raises:
-            :exc:`~pydantic.ValidationError`: If pydantic validation of the releases fails.
-            :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
-
         Examples:
             >>> dataset_identifier = 'jane/flowers'
             >>> releases = client.get_releases(dataset_identifier)
             >>> for release in releases:
             >>>     print(release.name, release.description, release.attributes.url)
+
+        Args:
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+
+        Raises:
+            :exc:`pydantic.ValidationError`: If pydantic validation of the releases fails.
+            :exc:`requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
+
+        Returns:
+            A list of releases.
         """
 
         r = self._get(f"/datasets/{dataset_identifier}/releases/")
@@ -1003,23 +1024,22 @@ class SegmentsClient:
     def get_release(self, dataset_identifier: str, name: str) -> Release:
         """Get a release.
 
-        Args:
-            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``'jane/flowers'``.
-            name: The name of the release.
-
-        Returns:
-            A release.
-
-        Raises:
-            :exc:`~pydantic.ValidationError`: If pydantic validation of the release fails.
-            :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
-
         Examples:
             >>> dataset_identifier = 'jane/flowers'
             >>> name = 'v0.1'
             >>> release = client.get_release(dataset_identifier, name)
             >>> print(release)
+
+        Args:
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+            name: The name of the release.
+
+        Raises:
+            :exc:`pydantic.ValidationError`: If pydantic validation of the release fails.
+            :exc:`requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
+
+        Returns:
+            A release.
         """
 
         r = self._get(f"/datasets/{dataset_identifier}/releases/{name}/")
@@ -1032,25 +1052,24 @@ class SegmentsClient:
     ) -> Release:
         """Add a release to a dataset.
 
-        Args:
-            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``'jane/flowers'``.
-            name: The name of the release.
-            description: The release description. Defaults to ``None``.
-
-        Returns:
-            A newly created release.
-
-        Raises:
-            :exc:`~pydantic.ValidationError`: If pydantic validation of the release fails.
-            :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
-
         Examples:
             >>> dataset_identifier = 'jane/flowers'
             >>> name = 'v0.1'
             >>> description = 'My first release.'
             >>> release = client.add_release(dataset_identifier, name, description)
             >>> print(release)
+
+        Args:
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+            name: The name of the release.
+            description: The release description. Defaults to ``None``.
+
+        Raises:
+            :exc:`pydantic.ValidationError`: If pydantic validation of the release fails.
+            :exc:`requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
+
+        Returns:
+            A newly created release.
         """
 
         if description is None:
@@ -1065,18 +1084,17 @@ class SegmentsClient:
     def delete_release(self, dataset_identifier: str, name: str) -> None:
         """Delete a release.
 
-        Args:
-            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``'jane/flowers'``.
-            name: The name of the release.
-
-        Raises:
-            :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
-
         Examples:
             >>> dataset_identifier = 'jane/flowers'
             >>> name = 'v0.1'
             >>> client.delete_release(dataset_identifier, name)
+
+        Args:
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+            name: The name of the release.
+
+        Raises:
+            :exc:`requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
         """
 
         self._delete(f"/datasets/{dataset_identifier}/releases/{name}/")
@@ -1087,18 +1105,6 @@ class SegmentsClient:
     def upload_asset(self, file: IO, filename: str = "label.png") -> File:
         """Upload an asset.
 
-        Args:
-            file: A file object.
-            filename: The file name. Defaults to ``'label.png'``.
-
-        Returns:
-            A class representing the uploaded file.
-
-        Raises:
-            :exc:`~pydantic.ValidationError`: If pydantic validation of the file fails.
-            :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
-
         Examples:
             >>> filename = '/home/jane/flowers/violet.jpg'
             >>> with open(filename, 'rb') as f:
@@ -1106,6 +1112,17 @@ class SegmentsClient:
             >>>     asset = client.upload_asset(f, filename)
             >>> image_url = asset.url
             >>> print(image_url)
+
+        Args:
+            file: A file object.
+            filename: The file name. Defaults to ``label.png``.
+
+        Raises:
+            :exc:`pydantic.ValidationError`: If pydantic validation of the file fails.
+            :exc:`requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
+
+        Returns:
+            A class representing the uploaded file.
         """
 
         r = self._post("/assets/", {"filename": filename})
@@ -1130,12 +1147,11 @@ class SegmentsClient:
             endpoint: The API endpoint.
             auth: If we want to authorize the request. Defaults to ``True``.
 
-        Returns:
-            The `requests` library response.
-
         Raises:
-            :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
+            :exc:`requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
+
+        Returns:
+            The ``requests`` library response.
         """
 
         headers = self._get_auth_header() if auth else None
@@ -1157,12 +1173,11 @@ class SegmentsClient:
             data: The JSON data. Defaults to ``None``.
             auth: If we want to authorize the request with the API key. Defaults to ``True``.
 
-        Returns:
-            The `requests` library response.
-
         Raises:
-            :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
+            :exc:`requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
+
+        Returns:
+            The ``requests`` library response.
         """
         headers = self._get_auth_header() if auth else None
 
@@ -1185,12 +1200,11 @@ class SegmentsClient:
             data: The JSON data. Defaults to ``None``.
             auth: If we want to authorize the request with the API key. Defaults to True.
 
-        Returns:
-            The `requests` library response.
-
         Raises:
-            :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
+            :exc:`requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
+
+        Returns:
+            The ``requests`` library response.
         """
         headers = self._get_auth_header() if auth else None
 
@@ -1213,12 +1227,11 @@ class SegmentsClient:
             data: The JSON data. Defaults to ``None``.
             auth: If we want to authorize the request with the API key. Defaults to True.
 
-        Returns:
-            The `requests` library response.
-
         Raises:
-            :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
+            :exc:`requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
+
+        Returns:
+            The ``requests`` library response.
         """
         headers = self._get_auth_header() if auth else None
 
@@ -1241,12 +1254,11 @@ class SegmentsClient:
             data: The JSON data. Defaults to ``None``.
             auth: If we want to authorize the request with the API key. Defaults to ``True``.
 
-        Returns:
-            The `requests` library response.
-
         Raises:
-            :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
+            :exc:`requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
+
+        Returns:
+            The ``requests`` library response.
         """
         headers = self._get_auth_header() if auth else None
 
@@ -1263,8 +1275,7 @@ class SegmentsClient:
         """Get the authorization header with the API key.
 
         Returns:
-            The authorization header or `None` if there is no API key.
-
+            The authorization header or ``None`` if there is no API key.
         """
         return {"Authorization": f"APIKey {self.api_key}"} if self.api_key else None
 
@@ -1278,12 +1289,11 @@ class SegmentsClient:
             url: The request's url.
             aws_fields: The AWS fields.
 
-        Returns:
-            The `requests` library response.
-
         Raises:
-            :exc:`~requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
-            :exc:`~requests.RequestException`: Super class of :exc:`~requests.ConnectionError` (thrown in the event of a network problem), :exc:`~requests.Timeout` (thrown if a request times out) and :exc:`~requests.TooManyRedirects` (thrown if a request exceeds the configured number of maximum redirections).
+            :exc:`requests.HTTPError`: If the response status code is 4XX (client error) or 5XX (server error).
+
+        Returns:
+            The ``requests`` library response.
         """
         files = {"file": file}
         r = self.s3_session.post(url, files=files, data=aws_fields)

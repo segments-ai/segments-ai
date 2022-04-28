@@ -1,4 +1,3 @@
-# https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
 from __future__ import annotations
 
 # https://www.immersivelimit.com/tutorials/create-coco-annotations-from-scratch/#coco-dataset-format
@@ -79,8 +78,8 @@ class IdGenerator:
     have color close to the predefined semantic category color.
     The RGB encoding used is ID = R * 256 * G + 256 * 256 + B.
     Class constructor takes dictionary ``{id: category_info}``, where all semantic
-    class ids are presented and category_info record is a dict with fields
-    ``'isthing'`` and ``'color'``
+    class ids are presented and ``category_info`` record is a dict with fields
+    ``isthing`` and ``color``
     """
 
     def __init__(self, categories: Dict[int, Category]):
