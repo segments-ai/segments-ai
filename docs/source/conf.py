@@ -17,12 +17,17 @@ sys.path.insert(0, os.path.abspath(os.path.join("..", "..", "src")))
 
 # -- Project information -----------------------------------------------------
 
+from datetime import datetime
+from src.segments.version import VERSION, SHORT_VERSION
+
 project = "Segments.ai Python SDK"
-copyright = "2022, Segments.ai"
+copyright = f"{datetime.today().year}, Segments.ai"
 author = "Arnout Hillen"
 
 # The full version, including alpha/beta/rc tags
-release = "0.1"
+# release = "0.1"
+version = SHORT_VERSION
+release = VERSION
 
 
 # -- General configuration ---------------------------------------------------
@@ -38,6 +43,7 @@ extensions = [
     # "sphinx.ext.autosummary",
     "myst_parser",
     "sphinx_copybutton",
+    "sphinx_autodoc_typehints",
 ]
 
 # Autodoc
@@ -46,6 +52,15 @@ autodoc_member_order = "bysource"
 
 # Autosummary
 # autosummary_generate = True
+
+# Intersphinx
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "PIL": ("https://pillow.readthedocs.io/en/stable/", None),
+    "pydantic": ("https://prompt-build--pydantic-docs.netlify.app/", None),
+    "requests": ("https://docs.python-requests.org/en/stable/", None),
+}
 
 # Remove the prompt when copying examples
 copybutton_prompt_text = r">>> |\.\.\. "
@@ -71,9 +86,9 @@ html_theme_options = {
     # "repository_url": "https://github.com/segments-ai/segments-ai",
     # "use_repository_button": True,
     # - Furo options (https://pradyunsg.me/furo/customisation/):
+    # Furo will automatically add a small edit button to each document, when the documentation is generated on Read the Docs using a GitHub repository as the source.
     # "announcement": "<em>Important</em> announcement!",
     "sidebar_hide_name": True,
-    # Furo will automatically add a small edit button to each document, when the documentation is generated on Read the Docs using a GitHub repository as the source.
 }
 pygments_style = "sphinx"
 pygments_dark_style = "monokai"  # Furo
@@ -83,13 +98,4 @@ html_title = "Python SDK"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-# html_static_path = ["_static"]
-
-# Intersphinx
-intersphinx_mapping = {
-    "python": ("https://docs.python.org/", None),
-    "numpy": ("https://numpy.org/doc/stable/", None),
-    "PIL": ("https://pillow.readthedocs.io/en/stable/", None),
-    "pydantic": ("https://prompt-build--pydantic-docs.netlify.app/", None),
-    "requests": ("https://docs.python-requests.org/en/stable/", None),
-}
+html_static_path = ["_static"]

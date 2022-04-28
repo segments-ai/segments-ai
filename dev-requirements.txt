@@ -1,0 +1,18 @@
+# Style
+flake8
+
+# Code formatting
+black
+isort
+
+# Type checking
+mypy
+
+# Documentation
+sphinx
+furo
+myst_parser
+sphinx-autobuild
+sphinx-copybutton
+autodoc_pydantic
+sphinx_autodoc_typehints

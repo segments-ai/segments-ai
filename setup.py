@@ -1,10 +1,43 @@
 from distutils.core import setup
+from typing import List
+
+# https://github.com/allenai/python-package-template
+def read_requirements(filename: str) -> List[str]:
+    with open(filename) as requirements_file:
+        import re
+
+        def fix_url_dependencies(req: str) -> str:
+            """Pip and setuptools disagree about how URL dependencies should be handled."""
+            m = re.match(
+                r"^(git\+)?(https|ssh)://(git@)?github\.com/([\w-]+)/(?P<name>[\w-]+)\.git",
+                req,
+            )
+            if m is None:
+                return req
+            else:
+                return f"{m.group('name')} @ {req}"
+
+        requirements = []
+        for line in requirements_file:
+            line = line.strip()
+            if line.startswith("#") or len(line) <= 0:
+                continue
+            requirements.append(fix_url_dependencies(line))
+    return requirements
+
+
+# version.py defines the VERSION and VERSION_SHORT variables.
+# We use exec here so we don't import cached_path whilst setting up.
+VERSION = {}  # type: ignore
+with open("src/segments/version.py", "r") as version_file:
+    exec(version_file.read(), VERSION)
 
 setup(
     name="segments-ai",  # How you named your package folder (MyLib)
     package_dir={"": "src"},
     packages=["segments"],  # Chose the same as "name"
-    version="0.58",  # Start with a small number and increase it with every change you make
+    # version="0.58",  # Start with a small number and increase it with every change you make
+    version=VERSION["VERSION"],
     license="MIT",  # Chose a license from here: https://help.github.com/articles/licensing-a-repository
     description="",  # Give a short description about your library
     author="Segments.ai",  # Type in your name
@@ -17,37 +50,10 @@ setup(
         "labeling",
         "vision",
     ],  # Keywords that define your package best
-    install_requires=[
-        "numpy",  # Change to >= 1.20 if we drop python 3.7 support (numpy 1.20+ includes type stubs).
-        "requests",
-        "Pillow",
-        "scikit-image",
-        "tqdm",
-        'pycocotools;platform_system!="Windows"',
-        'pycocotools-windows;platform_system=="Windows"',
-        # Type hints
-        "typing_extensions",
-        "pydantic",
-        "types-Pillow",
-        "types-requests",
-    ],
-    extras_require={  # Install with: pip install segments-ai[dev]
-        "dev": [
-            # Style
-            "black",
-            "flake8",
-            "isort",
-            # Type hints
-            "mypy",
-            # Documentation
-            "sphinx",
-            "furo",
-            "myst_parser",
-            "sphinx-autobuild",
-            "sphinx-copybutton",
-            "autodoc_pydantic",
-        ]
-    },
+    install_requires=read_requirements("requirements.txt"),
+    extras_require={
+        "dev": read_requirements("dev-requirements.txt")
+    },  # Install with: pip install segments-ai[dev]
     python_requires=">=3.6",
     classifiers=[
         "Development Status :: 5 - Production/Stable",  # Chose either "3 - Alpha", "4 - Beta" or "5 - Production/Stable" as the current state of your package
