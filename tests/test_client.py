@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import os
 import time
@@ -46,7 +48,7 @@ class Test(unittest.TestCase):
         self.TIME_INTERVAL = 0.2  # Wait for API call to complete.
 
     def tearDown(self):
-        self.client.close()
+        self.client._close()
 
 
 ###########
