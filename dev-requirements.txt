@@ -14,5 +14,4 @@ furo
 myst_parser
 sphinx-autobuild
 sphinx-copybutton
-autodoc_pydantic
 sphinx_autodoc_typehints
