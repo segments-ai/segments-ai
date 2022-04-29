@@ -38,7 +38,7 @@ setup(
     package_dir={"": "src"},
     packages=["segments"],  # Chose the same as "name"
     # version="0.58",  # Start with a small number and increase it with every change you make
-    version="0.69" # VERSION["VERSION"],
+    version="0.69",  # VERSION["VERSION"],
     license="MIT",  # Chose a license from here: https://help.github.com/articles/licensing-a-repository
     description="",  # Give a short description about your library
     author="Segments.ai",  # Type in your name
