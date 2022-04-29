@@ -13,19 +13,21 @@ if TYPE_CHECKING:
     from segments.typing import Release
 
 
-def release2dataset(release: Release, download_images: bool = True) -> datasets.Dataset:
+def release2dataset(
+    release: Release, download_images: bool = True
+) -> datasets.Dataset:  # type:ignore
     """Create a HuggingFace dataset from a Segments.ai release.
 
     Args:
         release: A Segments release.
-        download_images: If images need to be downloaded from an AWS S3 url. Defaults to ``True``.
+        download_images: If images need to be downloaded from an AWS S3 url. Defaults to :obj:`True`.
+
+    Returns:
+        A HuggingFace dataset.
 
     Raises:
         ImportError: If HuggingFace datasets is not installed.
         ValueError: If the type of dataset is not yet supported.
-
-    Returns:
-        A HuggingFace dataset.
     """
     try:
         import datasets

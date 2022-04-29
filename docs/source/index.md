@@ -20,11 +20,7 @@ The Python SDK is a convenient wrapper for the API.
 
 install
 quickstart
-client
-dataset
-huggingface
-utils
-types
+reference
 ```
 
 <!--

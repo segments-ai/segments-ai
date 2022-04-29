@@ -28,7 +28,7 @@ def bitmap2file(
 
     Args:
         bitmap: A :class:`numpy.ndarray` with :class:`numpy.uint32` dtype where each unique value represents an instance id.
-        is_segmentation_bitmap: If this is a segmentation bitmap. Defaults to True.
+        is_segmentation_bitmap: If this is a segmentation bitmap. Defaults to :obj:`True`.
 
     Returns:
         A file object.
@@ -107,7 +107,7 @@ def export_dataset(
         dataset: A :class:`.SegmentsDataset`.
         export_folder: The folder to export the dataset to. Defaults to ``.``.
         export_format: The destination format. Defaults to ``coco-panoptic``.
-        id_increment: Increment the category ids with this number. Defaults to ``1``. Ignored unless export_format is ``semantic`` or ``semantic-color``.
+        id_increment: Increment the category ids with this number. Defaults to ``1``. Ignored unless ``export_format`` is ``semantic`` or ``semantic-color``.
 
     Returns:
         TODO
@@ -196,7 +196,7 @@ def load_label_bitmap_from_url(
 
     def extract_bitmap(
         bitmap: Image.Image,
-    ) -> Any:  # def extract_bitmap(bitmap: Image.Image) -> npt.NDArray[np.uint32]:
+    ) -> Any:  # npt.NDArray[np.uint32]:
 
         bitmap = np.array(bitmap)  # type:ignore
         bitmap[:, :, 3] = 0  # type:ignore

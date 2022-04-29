@@ -4,7 +4,9 @@
 # list see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-# -- Path setup --------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# Path setup
+# -----------------------------------------------------------------------------
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -15,7 +17,9 @@ import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join("..", "..", "src")))
 
-# -- Project information -----------------------------------------------------
+# -----------------------------------------------------------------------------
+# Project information
+# -----------------------------------------------------------------------------
 
 from datetime import datetime
 from src.segments.version import VERSION, SHORT_VERSION
@@ -29,8 +33,9 @@ author = "Arnout Hillen"
 version = SHORT_VERSION
 release = VERSION
 
-
-# -- General configuration ---------------------------------------------------
+# -----------------------------------------------------------------------------
+# General configuration
+# -----------------------------------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -44,11 +49,17 @@ extensions = [
     "myst_parser",
     "sphinx_copybutton",
     "sphinx_autodoc_typehints",
+    # "autoapi.extension",
 ]
+
+# Napoleon
+napoleon_google_docstring = True
+napoleon_numpy_docstring = False
 
 # Autodoc
 autodoc_typehints = "description"
 autodoc_member_order = "bysource"
+# autodoc_class_signature = "separated"
 
 # Autosummary
 # autosummary_generate = True
@@ -66,6 +77,10 @@ intersphinx_mapping = {
 copybutton_prompt_text = r">>> |\.\.\. "
 copybutton_prompt_is_regexp = True
 
+# AutoAPI
+# autoapi_type = "python"
+# autoapi_dirs = ["../../src/segments/"]
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
@@ -74,8 +89,9 @@ templates_path = ["_templates"]
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
-
-# -- Options for HTML output -------------------------------------------------
+# -----------------------------------------------------------------------------
+# Options for HTML output
+# -----------------------------------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
@@ -92,8 +108,10 @@ html_theme_options = {
 }
 pygments_style = "sphinx"
 pygments_dark_style = "monokai"  # Furo
-html_logo = "_static/logo.svg"
+html_logo = "_static/logo_blue_background.png"
 html_title = "Python SDK"
+html_favicon = "_static/favicon.ico"
+
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

@@ -19,7 +19,6 @@ from segments import SegmentsClient
 import json
 ​
 # You can find your api key at https://segments.ai/account
-
 api_key = 'YOUR_API_KEY_HERE'
 ​
 client = SegmentsClient(api_key)

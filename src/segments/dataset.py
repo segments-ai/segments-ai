@@ -23,6 +23,18 @@ if TYPE_CHECKING:
 class SegmentsDataset:
     """SegmentsDataset class.
 
+    Args:
+        release_file: Path to a release file, or a release class resulting from ``client.get_release()``.
+        labelset: The labelset that should be loaded. Defaults to ``ground-truth``.
+        filter_by: A list of label statuses to filter by. Defaults to :obj:`None`.
+        filter_by_metadata: a dict of metadata key:value pairs to filter by. Filters are ANDed together. Defaults to :obj:`None`.
+        segments_dir: The directory where the data will be downloaded to for caching. Set to `None` to disable caching. Defaults to ``segments``.
+        preload: Whether the data should be pre-downloaded when the dataset is initialized. Ignored if ``segments_dir`` is :obj:`None`. Defaults to :obj:`True`.
+
+    Raises:
+        ValueError: If the release task type is not one of: ``segmentation-bitmap``, ``segmentation-bitmap-highres``, ``image-vector-sequence``, ``bboxes``, ``vector``, ``pointcloud-cuboid``, ``pointcloud-cuboid-sequence``, ``pointcloud-segmentation``, ``pointcloud-segmentation-sequence``, ``text-named-entities``, or ``text-span-categorization``.
+        ValueError: If there is no labelset with this name.
+
     Examples:
         >>> # pip install -U segments-ai
         >>> from segments import SegmentsClient, SegmentsDataset
@@ -53,18 +65,6 @@ class SegmentsDataset:
         >>>     semantic_bitmap = get_semantic_bitmap(sample['segmentation_bitmap'], sample['annotations'])
         >>>     plt.imshow(semantic_bitmap)
         >>>     plt.show()
-
-    Args:
-        release_file: Path to a release file, or a release class resulting from ``client.get_release()``.
-        labelset: The labelset that should be loaded. Defaults to ``ground-truth``.
-        filter_by: A list of label statuses to filter by. Defaults to ``None``.
-        filter_by_metadata: a dict of metadata key:value pairs to filter by. Filters are ANDed together. Defaults to ``None``.
-        segments_dir: The directory where the data will be downloaded to for caching. Set to `None` to disable caching. Defaults to ``segments``.
-        preload: Whether the data should be pre-downloaded when the dataset is initialized. Ignored if ``segments_dir`` is ``None``. Defaults to ``True``.
-
-    Raises:
-        ValueError: If the release task type is not one of: ``segmentation-bitmap``, ``segmentation-bitmap-highres``, ``image-vector-sequence``, ``bboxes``, ``vector``, ``pointcloud-cuboid``, ``pointcloud-cuboid-sequence``, ``pointcloud-segmentation``, ``pointcloud-segmentation-sequence``, ``text-named-entities``, or ``text-span-categorization``.
-        ValueError: If there is no labelset with this name.
     """
 
     # https://stackoverflow.com/questions/682504/what-is-a-clean-pythonic-way-to-have-multiple-constructors-in-python
