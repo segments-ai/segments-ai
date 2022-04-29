@@ -89,6 +89,7 @@ class Release(BaseModel):
 #         "x-amz-signature": str,
 #     },
 # )
+AWSFields = Dict[str, Any]
 
 
 class PresignedPostFields(BaseModel):

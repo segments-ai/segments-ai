@@ -11,7 +11,7 @@ from pydantic import ValidationError, parse_obj_as
 if TYPE_CHECKING:
     from segments.typing import (
         AuthHeader,
-        # AWSFields,
+        AWSFields,
         Category,
         Collaborator,
         Dataset,
@@ -517,7 +517,7 @@ class SegmentsClient:
 
         results = parse_obj_as(List[Sample], results)
 
-        return results
+        return results  # type:ignore
 
     def get_sample(self, uuid: str, labelset: Optional[str] = None) -> Sample:
         """Get a sample.
@@ -603,7 +603,7 @@ class SegmentsClient:
         """
 
         try:
-            parse_obj_as(SampleAttributes, attributes)
+            parse_obj_as(SampleAttributes, attributes)  # type:ignore
         except ValidationError as e:
             print(
                 "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
@@ -787,7 +787,7 @@ class SegmentsClient:
         """
 
         try:
-            parse_obj_as(LabelAttributes, attributes)
+            parse_obj_as(LabelAttributes, attributes)  # type:ignore
         except ValidationError as e:
             print(
                 "Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.",
@@ -1279,7 +1279,7 @@ class SegmentsClient:
         return {"Authorization": f"APIKey {self.api_key}"} if self.api_key else None
 
     def _upload_to_aws(
-        self, file: IO, url: str, aws_fields: Dict[str, Any]  # AWSFields
+        self, file: IO, url: str, aws_fields: AWSFields
     ) -> requests.Response:
         """Upload file to AWS.
 
