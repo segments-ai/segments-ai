@@ -1,6 +1,7 @@
 from distutils.core import setup
 from typing import List
 
+
 # https://github.com/allenai/python-package-template
 def read_requirements(filename: str) -> List[str]:
     with open(filename) as requirements_file:
