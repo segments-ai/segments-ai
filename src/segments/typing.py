@@ -76,19 +76,19 @@ class Release(BaseModel):
 # File #
 ########
 # https://stackoverflow.com/questions/60003444/typeddict-when-keys-have-invalid-names
-AWSFields = TypedDict(
-    "AWSFields",
-    {
-        "acl": str,
-        "Content-Type": str,
-        "key": str,
-        "x-amz-algorithm": str,
-        "x-amz-credential": str,
-        "x-amz-date": str,
-        "policy": str,
-        "x-amz-signature": str,
-    },
-)
+# AWSFields = TypedDict(
+#     "AWSFields",
+#     {
+#         "acl": str,
+#         "Content-Type": str,
+#         "key": str,
+#         "x-amz-algorithm": str,
+#         "x-amz-credential": str,
+#         "x-amz-date": str,
+#         "policy": str,
+#         "x-amz-signature": str,
+#     },
+# )
 
 
 class PresignedPostFields(BaseModel):

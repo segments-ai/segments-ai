@@ -28,7 +28,7 @@ class SegmentsDataset:
         labelset: The labelset that should be loaded. Defaults to ``ground-truth``.
         filter_by: A list of label statuses to filter by. Defaults to :obj:`None`.
         filter_by_metadata: a dict of metadata key:value pairs to filter by. Filters are ANDed together. Defaults to :obj:`None`.
-        segments_dir: The directory where the data will be downloaded to for caching. Set to `None` to disable caching. Defaults to ``segments``.
+        segments_dir: The directory where the data will be downloaded to for caching. Set to :obj:`None` to disable caching. Defaults to ``segments``.
         preload: Whether the data should be pre-downloaded when the dataset is initialized. Ignored if ``segments_dir`` is :obj:`None`. Defaults to :obj:`True`.
 
     Raises:

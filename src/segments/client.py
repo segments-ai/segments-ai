@@ -11,7 +11,7 @@ from pydantic import ValidationError, parse_obj_as
 if TYPE_CHECKING:
     from segments.typing import (
         AuthHeader,
-        AWSFields,
+        # AWSFields,
         Category,
         Collaborator,
         Dataset,
@@ -1279,7 +1279,7 @@ class SegmentsClient:
         return {"Authorization": f"APIKey {self.api_key}"} if self.api_key else None
 
     def _upload_to_aws(
-        self, file: IO, url: str, aws_fields: AWSFields
+        self, file: IO, url: str, aws_fields: Dict[str, Any]  # AWSFields
     ) -> requests.Response:
         """Upload file to AWS.
 
