@@ -5,7 +5,7 @@ Pillow
 scikit-image
 tqdm
 pycocotools;platform_system!="Windows"
-pycocotools-windows;platform_system=="Windows"$
+pycocotools-windows;platform_system=="Windows"
 
 # Type hints
 typing_extensions
