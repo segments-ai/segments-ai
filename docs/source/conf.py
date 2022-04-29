@@ -53,12 +53,15 @@ extensions = [
     # "autoapi.extension",
 ]
 
+add_module_names = False
+
 # Napoleon
 napoleon_google_docstring = True
 napoleon_numpy_docstring = False
 
 # Autodoc
 autodoc_typehints = "description"
+autodoc_typehints_format = "short"
 autodoc_member_order = "bysource"
 # autodoc_class_signature = "separated"
 
