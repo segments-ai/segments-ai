@@ -29,16 +29,16 @@ def read_requirements(filename: str) -> List[str]:
 
 # version.py defines the VERSION and VERSION_SHORT variables.
 # We use exec here so we don't import cached_path whilst setting up.
-VERSION = {}  # type: ignore
-with open("segments/version.py", "r") as version_file:
-    exec(version_file.read(), VERSION)
+# VERSION = {}  # type: ignore
+# with open("src/segments/version.py", "r") as version_file:
+#     exec(version_file.read(), VERSION)
 
 setup(
     name="segments-ai",  # How you named your package folder (MyLib)
     package_dir={"": "src"},
     packages=["segments"],  # Chose the same as "name"
     # version="0.58",  # Start with a small number and increase it with every change you make
-    version=VERSION["VERSION"],
+    version="0.69" # VERSION["VERSION"],
     license="MIT",  # Chose a license from here: https://help.github.com/articles/licensing-a-repository
     description="",  # Give a short description about your library
     author="Segments.ai",  # Type in your name
