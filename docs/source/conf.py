@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.abspath(os.path.join("..", "..", "src")))
 
 from datetime import datetime
 
-from src.segments.version import SHORT_VERSION, VERSION
+from segments.version import SHORT_VERSION, VERSION
 
 project = "Segments.ai Python SDK"
 copyright = f"{datetime.today().year}, Segments.ai"
