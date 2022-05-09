@@ -1,15 +1,15 @@
-# Quickstart
+<!-- # Quickstart
 
 On the Segments.ai web platform you can create datasets, upload samples, create releases and download labels. All of these - and more - can also be done programmatically with the Python SDK.
 
 ```{seealso}
-This tutorial walks you through the most common Python SDK functions. The complete list of functions is documented in detail in the [Python SDK reference](https://docs.segments.ai/reference/python-sdk).
+This tutorial walks you through the most common Python SDK functions. The complete list of functions is documented in detail in the [Python SDK reference](./reference.md#python-sdk).
 ```
 
 First install the Segments.ai Python SDK using pip:
 
 ```{code-block} bash
-$ pip install -U segments-ai
+pip install --upgrade segments-ai
 ```
 
 Import the necessary packages, and initialize the Segments client using your API key:
@@ -26,7 +26,7 @@ Import the necessary packages, and initialize the Segments client using your API
 
 ## Create a new dataset
 
-Let's create a new image segmentation dataset programmatically using [client.add_dataset()](https://docs.segments.ai/reference/python-sdk#create-a-dataset). Note that this dataset will be created under the user account corresponding to the API key.
+Let's create a new image segmentation dataset programmatically using [client.add_dataset()](./reference.md#client). Note that this dataset will be created under the user account corresponding to the API key.
 
 ```{tip}
 The format of the ``task_attributes`` field is documented [here](https://docs.segments.ai/reference/categories-and-task-attributes).
@@ -61,7 +61,7 @@ The format of the ``task_attributes`` field is documented [here](https://docs.se
 
 ## Add samples to a dataset
 
-Now let's upload some images to this dataset using [client.add_sample()](https://docs.segments.ai/reference/python-sdk#create-a-sample).
+Now let's upload some images to this dataset using [client.add_sample()](./reference.md#client).
 
 ```{code-block} python
 >>> dataset = 'jane/pets' # a dataset is always referred to as user/dataset
@@ -92,7 +92,7 @@ Now let's upload some images to this dataset using [client.add_sample()](https:/
 >>>     print(json.dumps(sample, indent=4))
 ```
 
-We can verify that the dataset now contains 3 images using [client.get_samples()](https://docs.segments.ai/reference/python-sdk#list-samples).
+We can verify that the dataset now contains 3 images using [client.get_samples()](./reference.md#client).
 
 ```{code-block} python
 >>> samples = client.get_samples(dataset)
@@ -103,7 +103,7 @@ Now switch to the Segments.ai web platform and label the three images you just u
 
 ## Get the label of a sample
 
-Once you've labeled some samples, you can programmatically retrieve their labels using [client.get_label()](https://docs.segments.ai/reference/python-sdk#list-samples).
+Once you've labeled some samples, you can programmatically retrieve their labels using [client.get_label()](./reference.md#client).
 
 ```{code-block} python
 >>> dataset = 'jane/pets'
@@ -144,6 +144,6 @@ When working with image segmentation datasets, you'll probably want to visualize
 
 ## What's next?
 
-The Python SDK offers many more functions besides the ones that were shown here. Have a look at the [reference](https://docs.segments.ai/reference/python-sdk) for the full list.
+The Python SDK offers many more functions besides the ones that were shown here. Have a look at the [reference](./reference.md#python-sdk) for the full list.
 
-The Python SDK can also be used to upload labels into Segments.ai. This is particularly useful for setting up [model-assisted labeling](https://docs.segments.ai/tutorials/model-assisted-labeling) workflows, where you verify and correct model predictions instead of labeling from scratch.
+The Python SDK can also be used to upload labels into Segments.ai. This is particularly useful for setting up [model-assisted labeling](https://docs.segments.ai/tutorials/model-assisted-labeling) workflows, where you verify and correct model predictions instead of labeling from scratch. -->

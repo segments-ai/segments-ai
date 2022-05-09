@@ -9,18 +9,17 @@ contain the root `toctree` directive.
 
 The Python SDK is a convenient wrapper for the API.
 
-```{eval-rst}
-.. image:: _static/landingpage.svg
-   :alt: Segments.ai images
-```
-
 ```{toctree}
 :maxdepth: 2
 :caption: Contents
 
-install
-quickstart
-reference
+setup
+client
+dataset
+utils
+exceptions
+huggingface
+types
 ```
 
 <!--

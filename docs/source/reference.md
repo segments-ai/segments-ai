@@ -1,4 +1,4 @@
-# Python SDK
+<!-- # Python SDK
 
 ## Client
 
@@ -38,4 +38,4 @@
 .. automodule:: segments.typing
    :members:
    :undoc-members:
-```
+``` -->
