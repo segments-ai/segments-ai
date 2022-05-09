@@ -46,11 +46,10 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
-    # "sphinx.ext.autosummary",
     "myst_parser",
     "sphinx_copybutton",
     "sphinx_autodoc_typehints",
-    # "autoapi.extension",
+    "sphinxcontrib.autodoc_pydantic",
 ]
 
 add_module_names = False
@@ -64,6 +63,7 @@ autodoc_typehints = "description"
 autodoc_typehints_format = "short"
 autodoc_member_order = "bysource"
 # autodoc_class_signature = "separated"
+autodoc_typehints_description_target = "documented"
 
 # Autosummary
 # autosummary_generate = True
@@ -76,6 +76,9 @@ intersphinx_mapping = {
     "pydantic": ("https://prompt-build--pydantic-docs.netlify.app/", None),
     "requests": ("https://docs.python-requests.org/en/stable/", None),
 }
+
+# Myst
+myst_heading_anchors = 2
 
 # Remove the prompt when copying examples
 copybutton_prompt_text = r">>> |\.\.\. "
