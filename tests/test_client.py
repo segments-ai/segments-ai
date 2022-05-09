@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import json
 import os
 import time
@@ -23,7 +21,7 @@ from segments.typing import (
 # Base class #
 ##############
 class Test(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         API_KEY = os.getenv("SEGMENTS_API_KEY")
         API_URL = os.getenv("SEGMENTS_API_URL")
         self.owner = os.getenv("DATASET_OWNER", "")
@@ -47,7 +45,7 @@ class Test(unittest.TestCase):
         self.label_attribute_types = json.loads(os.getenv("LABEL_ATTRIBUTE_TYPES", ""))
         self.TIME_INTERVAL = 0.2  # Wait for API call to complete.
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         self.client._close()
 
 
@@ -55,28 +53,28 @@ class Test(unittest.TestCase):
 # Dataset #
 ###########
 class TestDataset(Test):
-    def setUp(self):
+    def setUp(self) -> None:
         super().setUp()
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         super().tearDown()
 
-    def test_get_datasets(self):
+    def test_get_datasets(self) -> None:
         datasets = self.client.get_datasets()
         for dataset in datasets:
             self.assertIsInstance(dataset, Dataset)
 
-    def test_get_dataset(self):
+    def test_get_dataset(self) -> None:
         dataset_identifier = self.owner + "/" + self.datasets[0]
         dataset = self.client.get_dataset(dataset_identifier)
         self.assertIsInstance(dataset, Dataset)
 
-    def test_get_dataset_httperror(self):
+    def test_get_dataset_httperror(self) -> None:
         with self.assertRaises(HTTPError):
             wrong_dataset_identifier = "abcde"
             self.client.get_dataset(wrong_dataset_identifier)
 
-    def test_add_update_delete_dataset(self):
+    def test_add_update_delete_dataset(self) -> None:
         arguments = {
             "name": "add_dataset",
             "description": "Test add_update_delete_dataset.",
@@ -139,17 +137,17 @@ class TestDataset(Test):
             # Delete dataset
             self.client.delete_dataset(self.owner + "/add_dataset")
 
-    def test_update_dataset_httperror(self):
+    def test_update_dataset_httperror(self) -> None:
         with self.assertRaises(HTTPError):
             wrong_dataset_identifier = "abcde"
             self.client.update_dataset(wrong_dataset_identifier)
 
-    def test_delete_dataset_httperror(self):
+    def test_delete_dataset_httperror(self) -> None:
         with self.assertRaises(HTTPError):
             wrong_dataset_identifier = "abcde"
             self.client.delete_dataset(wrong_dataset_identifier)
 
-    def test_add_delete_dataset_collaborator(self):
+    def test_add_delete_dataset_collaborator(self) -> None:
         dataset_identifier = self.owner + "/" + self.datasets[0]
         username = "admin-arnout"
         role = "admin"
@@ -161,7 +159,7 @@ class TestDataset(Test):
         finally:
             self.client.delete_dataset_collaborator(dataset_identifier, username)
 
-    def test_delete_dataset_collaborator_httperror(self):
+    def test_delete_dataset_collaborator_httperror(self) -> None:
         # Wrong dataset identifier and wrong username
         with self.assertRaises(HTTPError):
             wrong_dataset_identifier = "abcde"
@@ -182,13 +180,13 @@ class TestDataset(Test):
 # Sample #
 ##########
 class TestSample(Test):
-    def setUp(self):
+    def setUp(self) -> None:
         super().setUp()
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         super().tearDown()
 
-    def test_get_samples(self):
+    def test_get_samples(self) -> None:
         dataset_identifier = self.owner + "/" + self.datasets[0]
         name = None
         label_status = None
@@ -201,23 +199,23 @@ class TestSample(Test):
         for sample in samples:
             self.assertIsInstance(sample, Sample)
 
-    def test_get_samples_httperror(self):
+    def test_get_samples_httperror(self) -> None:
         with self.assertRaises(HTTPError):
             wrong_dataset_identifier = "abcde"
             self.client.get_samples(wrong_dataset_identifier)
 
-    def test_get_sample(self):
+    def test_get_sample(self) -> None:
         labelset = "ground-truth"
         for i in range(len(self.sample_uuids)):
             sample = self.client.get_sample(self.sample_uuids[i], labelset)
             self.assertIsInstance(sample, Sample)
 
-    def test_get_sample_httperror(self):
+    def test_get_sample_httperror(self) -> None:
         with self.assertRaises(HTTPError):
             wrong_uuid = "12345"
             self.client.get_sample(wrong_uuid)
 
-    def test_add_update_delete_sample(self):
+    def test_add_update_delete_sample(self) -> None:
         metadata = {"weather": "sunny", "camera_id": 3}
         priority = 0
         # embedding = np.zeros(100).tolist()
@@ -288,12 +286,12 @@ class TestSample(Test):
             finally:
                 self.client.delete_sample(sample.uuid)  # type:ignore
 
-    def test_update_sample_httperror(self):
+    def test_update_sample_httperror(self) -> None:
         with self.assertRaises(HTTPError):
             wrong_uuid = "12345"
             self.client.update_sample(wrong_uuid)
 
-    def test_delete_sample_httperror(self):
+    def test_delete_sample_httperror(self) -> None:
         with self.assertRaises(HTTPError):
             wrong_uuid = "12345"
             self.client.delete_sample(wrong_uuid)
@@ -303,19 +301,19 @@ class TestSample(Test):
 # Label #
 #########
 class TestLabel(Test):
-    def setUp(self):
+    def setUp(self) -> None:
         super().setUp()
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         super().tearDown()
 
-    # def test_get_label(self):
+    # def test_get_label(self) -> None:
     #     labelset = "ground-truth"
     #     for sample_uuid in self.sample_uuids:
     #         label = self.client.get_label(sample_uuid, labelset)
     #         self.assertIsInstance(label, Label)
 
-    def test_add_update_get_delete_label(self):
+    def test_add_update_get_delete_label(self) -> None:
         task_attributes = [
             {
                 "name": "color",
@@ -581,13 +579,13 @@ class TestLabel(Test):
                 time.sleep(self.TIME_INTERVAL)
                 self.client.delete_label(sample_uuid, labelset)
 
-    def test_add_label_validationerror(self):
+    def test_add_label_validationerror(self) -> None:
         with self.assertRaises(ValidationError):
             wrong_sample_uuid = "12345"
             wrong_attributes = {}
             self.client.add_label(wrong_sample_uuid, wrong_attributes)
 
-    def test_update_label_httperror(self):
+    def test_update_label_httperror(self) -> None:
         with self.assertRaises(HTTPError):
             wrong_sample_uuid = "12345"
             wrong_attributes = {}
@@ -598,30 +596,30 @@ class TestLabel(Test):
 # Labelset #
 ############
 class TestLabelset(Test):
-    def setUp(self):
+    def setUp(self) -> None:
         super().setUp()
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         super().tearDown()
 
-    def test_get_labelsets(self):
+    def test_get_labelsets(self) -> None:
         dataset_identifier = self.owner + "/" + self.datasets[0]
         labelsets = self.client.get_labelsets(dataset_identifier)
         for labelset in labelsets:
             self.assertIsInstance(labelset, Labelset)
 
-    def test_get_labelsets_httperror(self):
+    def test_get_labelsets_httperror(self) -> None:
         with self.assertRaises(HTTPError):
             wrong_dataset_identifier = "abcde"
             self.client.get_labelsets(wrong_dataset_identifier)
 
-    def test_get_labelset(self):
+    def test_get_labelset(self) -> None:
         dataset_identifier = self.owner + "/" + self.datasets[0]
         for i in range(len(self.labelsets)):
             labelset = self.client.get_labelset(dataset_identifier, self.labelsets[i])
             self.assertIsInstance(labelset, Labelset)
 
-    def test_get_labelset_httperror(self):
+    def test_get_labelset_httperror(self) -> None:
         # Wrong dataset identifier and wrong name
         with self.assertRaises(HTTPError):
             wrong_dataset_identifier = "abcde"
@@ -633,7 +631,7 @@ class TestLabelset(Test):
             wrong_name = "abcde"
             self.client.get_labelset(right_dataset_identifier, wrong_name)
 
-    def test_add_delete_labelset(self):
+    def test_add_delete_labelset(self) -> None:
         # Add labelset.
         dataset_identifier = self.owner + "/" + self.datasets[0]
         name = "labelset4"
@@ -645,13 +643,13 @@ class TestLabelset(Test):
             # Delete labelset.
             self.client.delete_labelset(dataset_identifier, name)
 
-    def test_add_labelset_httperror(self):
+    def test_add_labelset_httperror(self) -> None:
         with self.assertRaises(HTTPError):
             wrong_dataset_identifier = "abcde"
             wrong_name = "abcde"
             self.client.add_labelset(wrong_dataset_identifier, wrong_name)
 
-    def test_delete_labelset_httperror(self):
+    def test_delete_labelset_httperror(self) -> None:
         # Wrong dataset identifier and wrong name
         with self.assertRaises(HTTPError):
             wrong_dataset_identifier = "abcde"
@@ -668,30 +666,30 @@ class TestLabelset(Test):
 # Release #
 ###########
 class TestRelease(Test):
-    def setUp(self):
+    def setUp(self) -> None:
         super().setUp()
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         super().tearDown()
 
-    def test_get_releases(self):
+    def test_get_releases(self) -> None:
         dataset_identifier = self.owner + "/" + self.datasets[0]
         releases = self.client.get_releases(dataset_identifier)
         for release in releases:
             self.assertIsInstance(release, Release)
 
-    def test_get_releases_httperror(self):
+    def test_get_releases_httperror(self) -> None:
         with self.assertRaises(HTTPError):
             wrong_dataset_identifier = "abcde"
             self.client.get_releases(wrong_dataset_identifier)
 
-    def test_get_release(self):
+    def test_get_release(self) -> None:
         dataset_identifier = self.owner + "/" + self.datasets[0]
         for i in range(len(self.releases)):
             release = self.client.get_release(dataset_identifier, self.releases[i])
             self.assertIsInstance(release, Release)
 
-    def test_get_release_httperror(self):
+    def test_get_release_httperror(self) -> None:
         # Wrong dataset identifier and wrong name
         with self.assertRaises(HTTPError):
             wrong_dataset_identifier = "abcde"
@@ -703,7 +701,7 @@ class TestRelease(Test):
             wrong_name = "abcde"
             self.client.get_release(right_dataset_identifier, wrong_name)
 
-    def test_add_delete_release(self):
+    def test_add_delete_release(self) -> None:
         dataset_identifier = self.owner + "/" + self.datasets[0]
         name = "v0.4"
         description = "Test release description."
@@ -716,14 +714,14 @@ class TestRelease(Test):
             time.sleep(self.TIME_INTERVAL)
             self.client.delete_release(dataset_identifier, name)
 
-    def test_add_release_httperror(self):
+    def test_add_release_httperror(self) -> None:
         # Wrong dataset identifier and wrong name
         with self.assertRaises(HTTPError):
             wrong_dataset_identifier = "abcde"
             wrong_name = "abcde"
             self.client.add_release(wrong_dataset_identifier, wrong_name)
 
-    def test_delete_release_httperror(self):
+    def test_delete_release_httperror(self) -> None:
         # Wrong dataset identifier and wrong name
         with self.assertRaises(HTTPError):
             wrong_dataset_identifier = "abcde"
@@ -740,13 +738,13 @@ class TestRelease(Test):
 # Asset #
 #########
 class TestAsset(Test):
-    def setUp(self):
+    def setUp(self) -> None:
         super().setUp()
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         super().tearDown()
 
-    def test_upload_asset(self):
+    def test_upload_asset(self) -> None:
         with open("tests/fixtures/test.png", "rb") as f:
             test_file = self.client.upload_asset(f, "test.png")
             self.assertIsInstance(test_file, File)
