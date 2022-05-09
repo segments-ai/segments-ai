@@ -53,7 +53,7 @@ setup(
     ],  # Keywords that define your package best
     install_requires=read_requirements("requirements.txt"),
     extras_require={
-        "dev": read_requirements("dev-requirements.txt")
+        "dev": read_requirements("dev_requirements.txt")
     },  # Install with: pip install segments-ai[dev]
     python_requires=">=3.6",
     classifiers=[
