@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import json
+import logging
 from io import BytesIO
 from typing import TYPE_CHECKING, Any, Dict, Mapping, Optional, Tuple, Union
 
-import numpy as np  # import numpy.typing as npt
+import numpy as np
 import requests
 from PIL import ExifTags, Image
 from typing_extensions import Literal
@@ -14,10 +15,14 @@ if TYPE_CHECKING:
     from segments.dataset import SegmentsDataset
     from segments.typing import Release
 
+    # import numpy.typing as npt
+
 session = requests.Session()
 adapter = requests.adapters.HTTPAdapter(max_retries=3)  # type:ignore
 session.mount("http://", adapter)
 session.mount("https://", adapter)
+
+logger = logging.getLogger(__name__)
 
 
 def bitmap2file(
@@ -29,7 +34,6 @@ def bitmap2file(
     Args:
         bitmap: A :class:`numpy.ndarray` with :class:`numpy.uint32` dtype where each unique value represents an instance id.
         is_segmentation_bitmap: If this is a segmentation bitmap. Defaults to :obj:`True`.
-
     Returns:
         A file object.
     """
@@ -66,7 +70,6 @@ def get_semantic_bitmap(
         instance_bitmap: A :class:`numpy.ndarray` with :class:`numpy.uint32` dtype where each unique value represents an instance id.
         annotations: An annotations dictionary.
         id_increment: Increment the category ids with this number. Defaults to ``1``.
-
     Returns:
         A :class:`numpy.ndarray` with :class:`numpy.uint32` dtype where each unique value represents a category id.
     """
@@ -108,13 +111,12 @@ def export_dataset(
         export_folder: The folder to export the dataset to. Defaults to ``.``.
         export_format: The destination format. Defaults to ``coco-panoptic``.
         id_increment: Increment the category ids with this number. Defaults to ``1``. Ignored unless ``export_format`` is ``semantic`` or ``semantic-color``.
-
     Returns:
         TODO
 
     """
 
-    print("Exporting dataset. This may take a while...")
+    logger.info("Exporting dataset. This may take a while...")
     if export_format == "coco-panoptic":
         if dataset.task_type not in [
             "segmentation-bitmap",

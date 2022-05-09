@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel
@@ -76,20 +74,20 @@ class Release(BaseModel):
 # File #
 ########
 # https://stackoverflow.com/questions/60003444/typeddict-when-keys-have-invalid-names
-# AWSFields = TypedDict(
-#     "AWSFields",
-#     {
-#         "acl": str,
-#         "Content-Type": str,
-#         "key": str,
-#         "x-amz-algorithm": str,
-#         "x-amz-credential": str,
-#         "x-amz-date": str,
-#         "policy": str,
-#         "x-amz-signature": str,
-#     },
-# )
-AWSFields = Dict[str, Any]
+AWSFields = TypedDict(
+    "AWSFields",
+    {
+        "acl": str,
+        "Content-Type": str,
+        "key": str,
+        "x-amz-algorithm": str,
+        "x-amz-credential": str,
+        "x-amz-date": str,
+        "policy": str,
+        "x-amz-signature": str,
+    },
+)
+# AWSFields = Dict[str, Any]
 
 
 class PresignedPostFields(BaseModel):
@@ -142,9 +140,10 @@ TaskAttribute = Union[
     NumberTaskAttribute,
     CheckboxTaskAttribute,
 ]
-ObjectAttributes = List[TaskAttribute]
-ImageAttributes = List[TaskAttribute]
-
+# ObjectAttributes = List[TaskAttribute]
+# ImageAttributes = List[TaskAttribute]
+ObjectAttributes = Dict[str, str]
+ImageAttributes = Dict[str, str]
 
 #########
 # Label #

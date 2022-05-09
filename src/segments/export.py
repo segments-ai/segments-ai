@@ -2,10 +2,11 @@ from __future__ import annotations
 
 # https://www.immersivelimit.com/tutorials/create-coco-annotations-from-scratch/#coco-dataset-format
 import json
+import logging
 import os
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union
 
-import numpy as np  # import numpy.typing as npt
+import numpy as np
 from PIL import Image
 from pycocotools import mask
 from pydantic import BaseModel
@@ -16,11 +17,15 @@ from tqdm import tqdm
 
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
 if TYPE_CHECKING:
+    # import numpy.typing as npt
     from segments.dataset import SegmentsDataset
+
 
 RGB = Tuple[int, int, int]
 RGBA = Tuple[int, int, int, int]
 ColorMap = List[RGBA]
+
+logger = logging.getLogger(__name__)
 
 
 class Category(BaseModel):
@@ -289,7 +294,7 @@ def export_coco_instance(
             ):
                 if instance["id"] not in regions:
                     # Only happens when the instance has 0 labeled pixels, which should not happen.
-                    print(
+                    logger.info(
                         f'Skipping instance with 0 labeled pixels: {sample["file_name"]}, instance_id: {instance["id"]}, category_id: {category_id}'
                     )
                     continue
@@ -366,7 +371,7 @@ def export_coco_instance(
     with open(file_name, "w") as f:
         json.dump(json_data, f)
 
-    print(f"Exported to {file_name}. Images and labels in {dataset.image_dir}")
+    logger.info(f"Exported to {file_name}. Images and labels in {dataset.image_dir}")
     return file_name, dataset.image_dir  # type:ignore
 
 
@@ -452,7 +457,7 @@ def export_coco_panoptic(
 
             if instance["id"] not in regions:
                 # Only happens when the instance has 0 labeled pixels, which should not happen.
-                print(
+                logger.info(
                     f'Skipping instance with 0 labeled pixels: {sample["file_name"]}, instance_id: {instance["id"]}, category_id: {category_id}'
                 )
                 continue
@@ -539,7 +544,7 @@ def export_coco_panoptic(
     with open(file_name, "w") as f:
         json.dump(json_data, f)
 
-    print(f"Exported to {file_name}. Images and labels in {dataset.image_dir}")
+    logger.info(f"Exported to {file_name}. Images and labels in {dataset.image_dir}")
     return file_name, dataset.image_dir
 
 
@@ -624,7 +629,7 @@ def export_image(
             )
             Image.fromarray(img_as_ubyte(semantic_label_colored)).save(export_file)
 
-    print(f"Exported to {dataset.image_dir}")
+    logger.info(f"Exported to {dataset.image_dir}")
     return dataset.image_dir
 
 
@@ -633,7 +638,7 @@ def export_yolo(dataset: SegmentsDataset, export_folder: str) -> Optional[str]:
         raise ValueError("You can only export bounding box datasets to YOLO format.")
 
     if dataset.task_type == "vector":
-        print(
+        logger.info(
             "Only bounding box annotations will be processed. Polygon, polyline and keypoint annotations will be ignored."
         )
 
@@ -650,7 +655,7 @@ def export_yolo(dataset: SegmentsDataset, export_folder: str) -> Optional[str]:
             image_height = sample["image"].height
 
             file_name = f"{dataset.image_dir}/{image_name}.txt"
-            #         print(file_name)
+            # print(file_name)
 
             with open(file_name, "w") as f:
                 for annotation in sample["annotations"]:
@@ -669,12 +674,12 @@ def export_yolo(dataset: SegmentsDataset, export_folder: str) -> Optional[str]:
                         height = abs(y1 - y0)
 
                         # Save it to the file
-                        #                 print(category_id, x_center, y_center, width, height)
+                        # print(category_id, x_center, y_center, width, height)
                         f.write(
                             "{} {:.6f} {:.6f} {:.6f} {:.6f}\n".format(
                                 category_id, x_center, y_center, width, height
                             )
                         )
 
-    print(f"Exported. Images and labels in {dataset.image_dir}")
+    logger.info(f"Exported. Images and labels in {dataset.image_dir}")
     return dataset.image_dir

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 from multiprocessing.pool import ThreadPool
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
@@ -19,11 +20,13 @@ from tqdm import tqdm
 if TYPE_CHECKING:
     from segments.typing import LabelStatus, Release
 
+logger = logging.getLogger(__name__)
+
 
 class SegmentsDataset:
     """SegmentsDataset class.
 
-    >>> # pip install -U segments-ai
+    >>> # pip install --upgrade segments-ai
     >>> from segments import SegmentsClient, SegmentsDataset
     >>> from segments.utils import export_dataset
     >>> # Initialize a SegmentsDataset from the release file
@@ -41,7 +44,7 @@ class SegmentsDataset:
     >>> for sample in dataset:
     >>>     # Print the sample name and list of labeled objects
     >>>     print(sample['name'])
-    >>>     print(sample['annotations'])
+    >>>     logger.info(sample['annotations'])
     >>>     # Show the image
     >>>     plt.imshow(sample['image'])
     >>>     plt.show()
@@ -60,7 +63,6 @@ class SegmentsDataset:
         filter_by_metadata: a dict of metadata key:value pairs to filter by. Filters are ANDed together. Defaults to :obj:`None`.
         segments_dir: The directory where the data will be downloaded to for caching. Set to :obj:`None` to disable caching. Defaults to ``segments``.
         preload: Whether the data should be pre-downloaded when the dataset is initialized. Ignored if ``segments_dir`` is :obj:`None`. Defaults to :obj:`True`.
-
     Raises:
         ValueError: If the release task type is not one of: ``segmentation-bitmap``, ``segmentation-bitmap-highres``, ``image-vector-sequence``, ``bboxes``, ``vector``, ``pointcloud-cuboid``, ``pointcloud-cuboid-sequence``, ``pointcloud-segmentation``, ``pointcloud-segmentation-sequence``, ``text-named-entities``, or ``text-span-categorization``.
         ValueError: If there is no labelset with this name.
@@ -138,7 +140,7 @@ class SegmentsDataset:
         self.load_dataset()
 
     def load_dataset(self) -> None:
-        print("Initializing dataset...")
+        logger.info("Initializing dataset...")
 
         # Setup cache
         if (
@@ -195,7 +197,7 @@ class SegmentsDataset:
             and self.task_type
             not in ["pointcloud-segmentation", "pointcloud-detection"]
         ):
-            print("Preloading all samples. This may take a while...")
+            logger.info("Preloading all samples. This may take a while...")
             with ThreadPool(16) as pool:
                 # list(tqdm(pool.imap_unordered(self.__getitem__, range(num_samples)), total=num_samples))
                 list(
@@ -205,7 +207,7 @@ class SegmentsDataset:
                     )
                 )
 
-        print(f"Initialized dataset with {num_samples} images.")
+        logger.info(f"Initialized dataset with {num_samples} images.")
 
     def _load_image_from_cache(self, sample):
         sample_name = os.path.splitext(sample["name"])[0]
@@ -282,7 +284,9 @@ class SegmentsDataset:
         try:
             image, image_filename = self._load_image_from_cache(sample)
         except Exception:
-            print(f"Something went wrong loading sample {sample['name']}:", sample)
+            logger.error(
+                f"Something went wrong loading sample {sample['name']}:", sample
+            )
             raise
 
         item = {

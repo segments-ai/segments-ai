@@ -8,7 +8,7 @@ class SegmentsError(Exception):
         """
         Args:
             message: An informative message about the exception.
-            cause: The cause of the exception raised by Python or another library. Defaults to ``None``.
+            cause: The cause of the exception raised by Python or another library. Defaults to :obj:`None`.
         """
         super().__init__(message, cause)
         self.message = message

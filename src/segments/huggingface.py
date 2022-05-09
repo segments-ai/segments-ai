@@ -1,30 +1,31 @@
 from __future__ import annotations
 
 import json
+import logging
 from typing import TYPE_CHECKING, Any, Dict
 
+import datasets
 import requests
 from PIL import Image
 from segments.utils import load_image_from_url, load_label_bitmap_from_url
 
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
 if TYPE_CHECKING:
-    import datasets
     from segments.typing import Release
+
+logger = logging.getLogger(__name__)
 
 
 def release2dataset(
     release: Release, download_images: bool = True
 ) -> datasets.Dataset:  # type:ignore
-    """Create a HuggingFace dataset from a Segments.ai release.
+    """Create a Huggingface dataset from a release.
 
     Args:
         release: A Segments release.
         download_images: If images need to be downloaded from an AWS S3 url. Defaults to :obj:`True`.
-
     Returns:
         A HuggingFace dataset.
-
     Raises:
         ImportError: If HuggingFace datasets is not installed.
         ValueError: If the type of dataset is not yet supported.
@@ -32,7 +33,7 @@ def release2dataset(
     try:
         import datasets
     except ImportError as e:
-        print(
+        logger.error(
             "Please install HuggingFace datasets first: pip install --upgrade datasets"
         )
         raise e
@@ -149,7 +150,7 @@ def release2dataset(
 
         data_rows.append(data_row)
 
-    print(data_rows)
+    logger.info(data_rows)
 
     # Now transform to column format
     dataset_dict: Dict[str, Any] = {key: [] for key in features.keys()}
