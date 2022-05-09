@@ -1,6 +1,6 @@
 # General
 numpy # Change to >= 1.20 if we drop python 3.7 support (numpy 1.20+ includes type stubs).
-requests
+requests==2.26.0
 Pillow
 scikit-image
 tqdm

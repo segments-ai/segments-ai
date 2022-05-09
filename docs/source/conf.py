@@ -88,6 +88,10 @@ copybutton_prompt_is_regexp = True
 # autoapi_type = "python"
 # autoapi_dirs = ["../../src/segments/"]
 
+# Autodoc pydantic
+autodoc_pydantic_model_show_json = False
+autodoc_pydantic_model_show_config = False
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 

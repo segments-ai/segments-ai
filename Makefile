@@ -17,4 +17,4 @@ format :
 	isort .
 	black .
 	flynt .
-	# flake8 .
+	flake8 .

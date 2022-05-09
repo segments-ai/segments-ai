@@ -20,6 +20,7 @@ import pydantic
 import requests
 from pydantic import parse_obj_as
 from segments.exceptions import (
+    APILimitError,
     AuthenticationError,
     NetworkError,
     TimeoutError,
@@ -33,7 +34,7 @@ from typing_extensions import Literal
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
 if TYPE_CHECKING:
     from pydantic import BaseModel
-    from segments.client import SegmentsClient
+    from segments import SegmentsClient
     from segments.typing import (
         AuthHeader,
         AWSFields,
@@ -71,9 +72,10 @@ def exception_handler(f: Callable[..., requests.Response]) -> Callable[..., Any]
     Returns:
         A wrapper function (of this exception handler decorator).
     Raises:
-        :exc:`~segments.exceptions.TimeoutError`: If the request times out - catches :exc:`requests.exceptions.TimeoutError`.
-        :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error) - catches :exc:`requests.HTTPError` and catches :exc:`requests.RequestException`.
         :exc:`~segments.exceptions.ValidationError`: If pydantic validation of the response fails - catches :exc:`pydantic.ValidationError`.
+        :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+        :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error) - catches :exc:`requests.HTTPError` and catches :exc:`requests.RequestException`.
+        :exc:`~segments.exceptions.TimeoutError`: If the request times out - catches :exc:`requests.exceptions.TimeoutError`.
     """
 
     def wrapper_function(
@@ -81,9 +83,14 @@ def exception_handler(f: Callable[..., requests.Response]) -> Callable[..., Any]
     ) -> Any:
         try:
             r: requests.Response = f(*args, **kwargs)
+            r_json = r.json()
             r.raise_for_status()
+            # Check if the API limit is exceeded
+            message = r_json.get("message", "")
+            if message.startswith("You have exceeded"):
+                raise APILimitError(message)
             if pydantic_model is not None:
-                r = parse_obj_as(pydantic_model, r.json())
+                r = parse_obj_as(pydantic_model, r_json)
         except requests.exceptions.Timeout as e:
             # Maybe set up for a retry, or continue in a retry loop
             raise TimeoutError(cause=e)
@@ -225,8 +232,9 @@ class SegmentsClient:
             A list of datasets.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If pydantic validation of the datasets fails.
-            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
         if user is not None:
@@ -249,8 +257,9 @@ class SegmentsClient:
             A dataset.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If pydantic validation of the dataset fails.
-            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
         r = self._get(f"/datasets/{dataset_identifier}/", pydantic_model=Dataset)
@@ -316,8 +325,9 @@ class SegmentsClient:
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If pydantic validation of the task attributes fails.
             :exc:`~segments.exceptions.ValidationError`: If pydantic validation of the dataset fails.
-            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
         if description is None:
@@ -392,8 +402,9 @@ class SegmentsClient:
             An updated dataset.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If pydantic validation of the dataset fails.
-            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
         payload: Dict[str, Any] = {}
@@ -441,8 +452,9 @@ class SegmentsClient:
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
         Raises:
-            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
 
         """
 
@@ -466,8 +478,9 @@ class SegmentsClient:
             A class containing the newly added collaborator with its role.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If pydantic validation of the collaborator fails.
-            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
         payload = {"user": username, "role": role}
         r = self._post(
@@ -491,8 +504,9 @@ class SegmentsClient:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
             username: The username of the collaborator to be deleted.
         Raises:
-            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
         self._delete(
             f"/datasets/{dataset_identifier}/collaborators/{username}",
@@ -532,8 +546,9 @@ class SegmentsClient:
             A list of samples.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If pydantic validation of the samples fails.
-            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
         # pagination
@@ -594,8 +609,9 @@ class SegmentsClient:
             A sample
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If pydantic validation of the samples fails.
-            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
         query_string = f"/samples/{uuid}/"
@@ -654,8 +670,9 @@ class SegmentsClient:
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If pydantic validation of the sample attributes fails.
             :exc:`~segments.exceptions.ValidationError`: If pydantic validation of the samples fails.
-            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
         try:
@@ -722,9 +739,10 @@ class SegmentsClient:
         Returns:
             An updated sample.
         Raises:
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.ValidationError`: If pydantic validation of the samples fails.
-            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
             :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
         payload: Dict[str, Any] = {}
@@ -758,8 +776,9 @@ class SegmentsClient:
         Args:
             uuid: The sample uuid.
         Raises:
-            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
         self._delete(f"/samples/{uuid}/")
@@ -781,8 +800,9 @@ class SegmentsClient:
             A label.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If pydantic validation of the label fails.
-            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
         r = self._get(f"/labels/{sample_uuid}/{labelset}/", pydantic_model=Label)
@@ -832,8 +852,9 @@ class SegmentsClient:
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If pydantic validation of the attributes fails.
             :exc:`~segments.exceptions.ValidationError`: If pydantic validation of the label fails.
-            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
         try:
@@ -895,8 +916,9 @@ class SegmentsClient:
             An updated label.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If pydantic validation of the label fails.
-            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
         payload: Dict[str, Any] = {}
@@ -927,8 +949,9 @@ class SegmentsClient:
             sample_uuid: The sample uuid.
             labelset: The labelset this label belongs to. Defaults to ``ground-truth``.
         Raises:
-            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
         self._delete(f"/labels/{sample_uuid}/{labelset}/")
@@ -950,8 +973,9 @@ class SegmentsClient:
             A list of labelsets.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If pydantic validation of the labelsets fails.
-            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
         r = self._get(
@@ -975,8 +999,9 @@ class SegmentsClient:
             A labelset.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If pydantic validation of the labelset fails.
-            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
         r = self._get(
@@ -1002,8 +1027,9 @@ class SegmentsClient:
             A labelset.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If pydantic validation of the labelset fails.
-            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
         if description is None:
@@ -1033,8 +1059,9 @@ class SegmentsClient:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
             name: The name of the labelset.
         Raises:
-            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
         self._delete(f"/datasets/{dataset_identifier}/labelsets/{name}/")
@@ -1056,8 +1083,9 @@ class SegmentsClient:
             A list of releases.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If pydantic validation of the releases fails.
-            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
         r = self._get(
@@ -1081,8 +1109,9 @@ class SegmentsClient:
             A release.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If pydantic validation of the release fails.
-            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
         r = self._get(
@@ -1110,8 +1139,9 @@ class SegmentsClient:
             A newly created release.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If pydantic validation of the release fails.
-            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
         if description is None:
@@ -1137,8 +1167,9 @@ class SegmentsClient:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
             name: The name of the release.
         Raises:
-            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
         self._delete(f"/datasets/{dataset_identifier}/releases/{name}/")
@@ -1165,8 +1196,9 @@ class SegmentsClient:
             A class representing the uploaded file.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If pydantic validation of the file fails.
-            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
         r = self._post("/assets/", {"filename": filename})
@@ -1204,6 +1236,11 @@ class SegmentsClient:
             pydantic_model: The pydantic class to parse the JSON response into. Defaults to :obj:`None`.
         Returns:
             The ``requests`` library response.
+        Raises:
+            :exc:`~segments.exceptions.ValidationError`: If pydantic validation of the response fails - catches :exc:`pydantic.ValidationError`.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error) - catches :exc:`requests.HTTPError` and catches :exc:`requests.RequestException`.
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out - catches :exc:`requests.exceptions.TimeoutError`.
         """
 
         headers = self._get_auth_header() if auth else None
@@ -1231,6 +1268,11 @@ class SegmentsClient:
             pydantic_model: The pydantic class to parse the JSON response into. Defaults to :obj:`None`.
         Returns:
             The ``requests`` library response.
+        Raises:
+            :exc:`~segments.exceptions.ValidationError`: If pydantic validation of the response fails - catches :exc:`pydantic.ValidationError`.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error) - catches :exc:`requests.HTTPError` and catches :exc:`requests.RequestException`.
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out - catches :exc:`requests.exceptions.TimeoutError`.
         """
         headers = self._get_auth_header() if auth else None
 
@@ -1259,6 +1301,11 @@ class SegmentsClient:
             pydantic_model: The pydantic class to parse the JSON response into. Defaults to :obj:`None`.
         Returns:
             The ``requests`` library response.
+        Raises:
+            :exc:`~segments.exceptions.ValidationError`: If pydantic validation of the response fails - catches :exc:`pydantic.ValidationError`.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error) - catches :exc:`requests.HTTPError` and catches :exc:`requests.RequestException`.
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out - catches :exc:`requests.exceptions.TimeoutError`.
         """
         headers = self._get_auth_header() if auth else None
 
@@ -1287,6 +1334,11 @@ class SegmentsClient:
             pydantic_model: The pydantic class to parse the JSON response into. Defaults to :obj:`None`.
         Returns:
             The ``requests`` library response.
+        Raises:
+            :exc:`~segments.exceptions.ValidationError`: If pydantic validation of the response fails - catches :exc:`pydantic.ValidationError`.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error) - catches :exc:`requests.HTTPError` and catches :exc:`requests.RequestException`.
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out - catches :exc:`requests.exceptions.TimeoutError`.
         """
         headers = self._get_auth_header() if auth else None
 
@@ -1315,6 +1367,11 @@ class SegmentsClient:
             pydantic_model: The pydantic class to parse the JSON response into. Defaults to :obj:`None`.
         Returns:
             The ``requests`` library response.
+        Raises:
+            :exc:`~segments.exceptions.ValidationError`: If pydantic validation of the response fails - catches :exc:`pydantic.ValidationError`.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error) - catches :exc:`requests.HTTPError` and catches :exc:`requests.RequestException`.
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out - catches :exc:`requests.exceptions.TimeoutError`.
         """
         headers = self._get_auth_header() if auth else None
 
@@ -1347,8 +1404,9 @@ class SegmentsClient:
         Returns:
             The ``requests`` library response.
         Raises:
-            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
         files = {"file": file}
         r = self.s3_session.post(url, files=files, data=aws_fields)

@@ -1,12 +1,12 @@
 # Style
-flake8
+flake8==3.9.2
 
 # Code formatting
 black
 isort
 
 # Type checking
-mypy
+mypy==0.910
 
 # Documentation
 sphinx
@@ -16,3 +16,8 @@ sphinx-autobuild
 sphinx-copybutton
 sphinx_autodoc_typehints
 autodoc_pydantic
+
+# Testing
+tox==3.24.3
+pytest==6.2.5
+pytest-cov==2.12.1
