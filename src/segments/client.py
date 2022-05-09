@@ -19,7 +19,12 @@ from typing import (
 import pydantic
 import requests
 from pydantic import parse_obj_as
-from segments.exceptions import AuthenticationError, NetworkError, ValidationError
+from segments.exceptions import (
+    AuthenticationError,
+    NetworkError,
+    TimeoutError,
+    ValidationError,
+)
 from typing_extensions import Literal
 
 # import numpy.typing as npt
@@ -81,15 +86,15 @@ def exception_handler(f: Callable[..., requests.Response]) -> Callable[..., Any]
                 r = parse_obj_as(pydantic_model, r.json())
         except requests.exceptions.Timeout as e:
             # Maybe set up for a retry, or continue in a retry loop
-            raise TimeoutError(str(e))
+            raise TimeoutError(cause=e)
         except requests.exceptions.HTTPError as e:
-            logger.error("Unknown error: %s", str(e))
-            raise NetworkError(e)
+            logger.error(f"Unknown error: {e}")
+            raise NetworkError(cause=e)
         except requests.exceptions.RequestException as e:
             # Tell the user their URL was bad and try a different one
-            raise NetworkError(e)
+            raise NetworkError(message="Bad url, please try a different one.", cause=e)
         except pydantic.ValidationError as e:
-            raise ValidationError(str(e))
+            raise ValidationError(cause=e)
 
         return r
 
@@ -145,7 +150,7 @@ class SegmentsClient:
             self.api_key = os.getenv("SEGMENTS_API_KEY")
             if self.api_key is None:
                 raise AuthenticationError(
-                    "Did you set SEGMENTS_API_KEY in your environment?"
+                    message="Did you set SEGMENTS_API_KEY in your environment?"
                 )
             else:
                 logger.info("Found a Segments API key in your environment.")
@@ -174,7 +179,7 @@ class SegmentsClient:
                 pass
             else:
                 raise AuthenticationError(
-                    "Something went wrong. Did you use the right API key?"
+                    message="Something went wrong. Did you use the right API key?"
                 )
 
     # https://stackoverflow.com/questions/48160728/resourcewarning-unclosed-socket-in-python-3-unit-test
@@ -333,7 +338,7 @@ class SegmentsClient:
             logger.error(
                 "Did you use the right task attributes? Please refer to the online documentation: https://docs.segments.ai/reference/categories-and-task-attributes#object-attribute-format.",
             )
-            raise ValidationError(str(e))
+            raise ValidationError(cause=e)
         else:
             payload: Dict[str, Any] = {
                 "name": name,
@@ -423,7 +428,7 @@ class SegmentsClient:
         r = self._patch(
             f"/datasets/{dataset_identifier}/", data=payload, pydantic_model=Dataset
         )
-        logger.info("Updated " + dataset_identifier)
+        logger.info(f"Updated {dataset_identifier}")
 
         return r
 
@@ -571,7 +576,7 @@ class SegmentsClient:
         try:
             results = parse_obj_as(List[Sample], results)
         except pydantic.ValidationError as e:
-            raise ValidationError(str(e))
+            raise ValidationError(cause=e)
 
         return results
 
@@ -659,7 +664,7 @@ class SegmentsClient:
             logger.error(
                 "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
             )
-            raise ValidationError(str(e))
+            raise ValidationError(cause=e)
         else:
             payload: Dict[str, Any] = {
                 "name": name,
@@ -680,7 +685,7 @@ class SegmentsClient:
                 data=payload,
                 pydantic_model=Sample,
             )
-            logger.info("Added " + name)
+            logger.info(f"Added {name}")
 
             return r
 
@@ -740,7 +745,7 @@ class SegmentsClient:
             payload["embedding"] = embedding
 
         r = self._patch(f"/samples/{uuid}/", data=payload, pydantic_model=Sample)
-        logger.info("Updated " + uuid)
+        logger.info(f"Updated {uuid}")
 
         return r
 
@@ -833,11 +838,11 @@ class SegmentsClient:
 
         try:
             parse_obj_as(LabelAttributes, attributes)  # type:ignore
-        except ValidationError as e:
+        except pydantic.ValidationError as e:
             logger.error(
                 "Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.",
             )
-            raise e
+            raise ValidationError(cause=e)
         else:
             payload: Dict[str, Any] = {
                 "label_status": label_status,
@@ -1175,7 +1180,7 @@ class SegmentsClient:
         try:
             f = File.parse_obj(r.json())
         except pydantic.ValidationError as e:
-            raise ValidationError(str(e))
+            raise ValidationError(cause=e)
 
         return f
 

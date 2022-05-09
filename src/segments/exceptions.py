@@ -4,12 +4,18 @@ from typing import Optional
 class SegmentsError(Exception):
     """Base class for exceptions."""
 
-    def __init__(self, message: str, cause: Optional[Exception] = None):
+    def __init__(
+        self, message: Optional[str] = None, cause: Optional[Exception] = None
+    ):
         """
         Args:
             message: An informative message about the exception.
             cause: The cause of the exception raised by Python or another library. Defaults to :obj:`None`.
         """
+
+        if message is None:
+            message = str(cause)
+
         super().__init__(message, cause)
         self.message = message
         self.cause = cause
@@ -32,9 +38,6 @@ class AuthorizationError(SegmentsError):
 
 class NetworkError(SegmentsError):
     """Raised when an HTTPError occurs."""
-
-    def __init__(self, cause: Exception):
-        super().__init__(str(cause), cause)
 
 
 class TimeoutError(SegmentsError):

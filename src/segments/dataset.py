@@ -283,11 +283,11 @@ class SegmentsDataset:
         # Load the image
         try:
             image, image_filename = self._load_image_from_cache(sample)
-        except Exception:
+        except Exception as e:
             logger.error(
-                f"Something went wrong loading sample {sample['name']}:", sample
+                f"Something went wrong loading sample {sample['name']}: {sample}"
             )
-            raise
+            raise e
 
         item = {
             "uuid": sample["uuid"],

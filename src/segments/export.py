@@ -295,7 +295,7 @@ def export_coco_instance(
                 if instance["id"] not in regions:
                     # Only happens when the instance has 0 labeled pixels, which should not happen.
                     logger.info(
-                        f'Skipping instance with 0 labeled pixels: {sample["file_name"]}, instance_id: {instance["id"]}, category_id: {category_id}'
+                        f"Skipping instance with 0 labeled pixels: {sample['file_name']}, instance_id: {instance['id']}, category_id: {category_id}"
                     )
                     continue
 
@@ -458,7 +458,7 @@ def export_coco_panoptic(
             if instance["id"] not in regions:
                 # Only happens when the instance has 0 labeled pixels, which should not happen.
                 logger.info(
-                    f'Skipping instance with 0 labeled pixels: {sample["file_name"]}, instance_id: {instance["id"]}, category_id: {category_id}'
+                    f"Skipping instance with 0 labeled pixels: {sample['file_name']}, instance_id: {instance['id']}, category_id: {category_id}"
                 )
                 continue
 
