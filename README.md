@@ -1,3 +1,3 @@
 # Python SDK
 
-Please refer to [the documentation](https://docs.segments.ai/python-sdk) for installation and usage instructions.
+Please refer to [the documentation](http://segments-python-sdk.rtfd.io/) for installation and usage instructions.
