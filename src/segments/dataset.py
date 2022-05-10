@@ -20,6 +20,10 @@ from tqdm import tqdm
 if TYPE_CHECKING:
     from segments.typing import LabelStatus, Release
 
+
+#############
+# Variables #
+#############
 logger = logging.getLogger(__name__)
 
 

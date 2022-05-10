@@ -4,15 +4,19 @@ import json
 import logging
 from typing import TYPE_CHECKING, Any, Dict
 
-import datasets
 import requests
 from PIL import Image
 from segments.utils import load_image_from_url, load_label_bitmap_from_url
 
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
 if TYPE_CHECKING:
+    import datasets
     from segments.typing import Release
 
+
+#############
+# Variables #
+#############
 logger = logging.getLogger(__name__)
 
 
@@ -22,7 +26,7 @@ def release2dataset(
     """Create a Huggingface dataset from a release.
 
     Args:
-        release: A Segments release.
+        release: A Segments release resulting from :meth:`.get_release`.
         download_images: If images need to be downloaded from an AWS S3 url. Defaults to :obj:`True`.
     Returns:
         A HuggingFace dataset.

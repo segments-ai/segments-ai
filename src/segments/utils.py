@@ -5,7 +5,7 @@ import logging
 from io import BytesIO
 from typing import TYPE_CHECKING, Any, Dict, Mapping, Optional, Tuple, Union
 
-import numpy as np
+import numpy as np  # import numpy.typing as npt
 import requests
 from PIL import ExifTags, Image
 from typing_extensions import Literal
@@ -15,8 +15,10 @@ if TYPE_CHECKING:
     from segments.dataset import SegmentsDataset
     from segments.typing import Release
 
-    # import numpy.typing as npt
 
+#############
+# Variables #
+#############
 session = requests.Session()
 adapter = requests.adapters.HTTPAdapter(max_retries=3)  # type:ignore
 session.mount("http://", adapter)
@@ -36,6 +38,9 @@ def bitmap2file(
         is_segmentation_bitmap: If this is a segmentation bitmap. Defaults to :obj:`True`.
     Returns:
         A file object.
+    Raises:
+        ValueError: If the ``dtype`` is not :class:`np.uint32` or :class:`np.uint8`.
+        ValueError: If the bitmap is not a segmentation bitmap.
     """
 
     # Convert bitmap to np.uint32, if it is not already
@@ -44,14 +49,14 @@ def bitmap2file(
     elif bitmap.dtype == "uint8":
         bitmap = np.uint32(bitmap)
     else:
-        assert False
+        raise ValueError("Only np.ndarrays with np.uint32 dtype can be used.")
 
     if is_segmentation_bitmap:
-        bitmap2 = np.copy(bitmap)
+        bitmap2 = np.copy(bitmap)  # type:ignore
         bitmap2 = bitmap2[:, :, None].view(np.uint8)
         bitmap2[:, :, 3] = 255
     else:
-        assert False
+        raise ValueError("Only segmentation bitmaps can be used.")
 
     f = BytesIO()
     Image.fromarray(bitmap2).save(f, "PNG")
@@ -67,11 +72,11 @@ def get_semantic_bitmap(
     """Convert an instance bitmap and annotations dict into a segmentation bitmap.
 
     Args:
-        instance_bitmap: A :class:`numpy.ndarray` with :class:`numpy.uint32` dtype where each unique value represents an instance id.
+        instance_bitmap: A :class:`numpy.ndarray` with :class:`numpy.uint32` ``dtype`` where each unique value represents an instance id.
         annotations: An annotations dictionary.
         id_increment: Increment the category ids with this number. Defaults to ``1``.
     Returns:
-        A :class:`numpy.ndarray` with :class:`numpy.uint32` dtype where each unique value represents a category id.
+        A :class:`numpy.ndarray` with :class:`numpy.uint32` ``dtype`` where each unique value represents a category id.
     """
 
     if instance_bitmap is None or annotations is None:
@@ -123,7 +128,7 @@ def export_dataset(
             "segmentation-bitmap-highres",
         ]:
             raise ValueError(
-                'Only datasets of type "segmentation-bitmap" and "segmentation-bitmap-highres" can be exported to this format.'
+                "Only datasets of type 'segmentation-bitmap' and 'segmentation-bitmap-highres' can be exported to this format."
             )
         from .export import export_coco_panoptic
 
@@ -134,7 +139,7 @@ def export_dataset(
             "segmentation-bitmap-highres",
         ]:
             raise ValueError(
-                'Only datasets of type "segmentation-bitmap" and "segmentation-bitmap-highres" can be exported to this format.'
+                "Only datasets of type 'segmentation-bitmap' and 'segmentation-bitmap-highres' can be exported to this format."
             )
         from .export import export_coco_instance
 
@@ -142,7 +147,7 @@ def export_dataset(
     elif export_format == "yolo":
         if dataset.task_type not in ["vector", "bboxes"]:
             raise ValueError(
-                'Only datasets of type "vector" and "bboxes" can be exported to this format.'
+                "Only datasets of type 'vector' and 'bboxes' can be exported to this format."
             )
         from .export import export_yolo
 
@@ -153,7 +158,7 @@ def export_dataset(
             "segmentation-bitmap-highres",
         ]:
             raise ValueError(
-                'Only datasets of type "segmentation-bitmap" and "segmentation-bitmap-highres" can be exported to this format.'
+                "Only datasets of type 'segmentation-bitmap' and 'segmentation-bitmap-highres' can be exported to this format."
             )
         from .export import export_image
 
@@ -193,7 +198,7 @@ def load_label_bitmap_from_url(
         save_filename: The filename to save to.
 
     Returns:
-        A :class:`numpy.ndarray` with :class:`numpy.uint32` dtype.
+        A :class:`numpy.ndarray` with :class:`numpy.uint32` ``dtype``.
     """
 
     def extract_bitmap(

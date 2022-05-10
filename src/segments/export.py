@@ -6,7 +6,7 @@ import logging
 import os
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union
 
-import numpy as np
+import numpy as np  # import numpy.typing as npt
 from PIL import Image
 from pycocotools import mask
 from pydantic import BaseModel
@@ -17,14 +17,15 @@ from tqdm import tqdm
 
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
 if TYPE_CHECKING:
-    # import numpy.typing as npt
     from segments.dataset import SegmentsDataset
 
 
+#############
+# Variables #
+#############
 RGB = Tuple[int, int, int]
 RGBA = Tuple[int, int, int, int]
 ColorMap = List[RGBA]
-
 logger = logging.getLogger(__name__)
 
 
@@ -131,7 +132,6 @@ def rgb2id(color: Any) -> int:  # rgb2id(color: Union[npt.NDArray[3], RGB]) -> i
 
     Args:
         color: An RGB value.
-
     Returns:
         The id.
     """
@@ -149,7 +149,6 @@ def id2rgb(
 
     Args:
         id_map: An id map.
-
     Returns:
         An rgb.
     """
@@ -217,7 +216,6 @@ def export_coco_instance(
     Args:
         dataset: A :class:`.SegmentsDataset`.
         export_folder: TODO
-
     """
     # Create export folder
     # export_folder = os.path.join(export_folder, dataset.dataset_identifier, dataset.release['name'])

@@ -145,6 +145,7 @@ TaskAttribute = Union[
 ObjectAttributes = Dict[str, str]
 ImageAttributes = Dict[str, str]
 
+
 #########
 # Label #
 #########
@@ -438,6 +439,8 @@ class LabelStats(BaseModel):
 
 class Dataset(BaseModel):
     name: str
+    cloned_from: str
+    # cloned_from: Optional[int] = None
     description: str
     data_type: DataType
     category: Category
@@ -453,7 +456,6 @@ class Dataset(BaseModel):
     label_stats: LabelStats
     samples_count: Optional[Union[str, int]] = None
     collaborators_count: Optional[int] = None
-    cloned_from: Optional[int] = None
     task_attributes: Optional[TaskAttributes] = None
     labelsets: Optional[List[Labelset]] = None
     role: Optional[str] = None

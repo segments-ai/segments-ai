@@ -1,19 +1,22 @@
+# https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
 from __future__ import annotations
 
 import logging
 import os
 import urllib.parse
+from types import TracebackType
 from typing import (
-    TYPE_CHECKING,
     Any,
     BinaryIO,
     Callable,
     Dict,
     List,
     Optional,
-    Sequence,
     TextIO,
+    Type,
+    TypeVar,
     Union,
+    cast,
 )
 
 import pydantic
@@ -26,45 +29,44 @@ from segments.exceptions import (
     TimeoutError,
     ValidationError,
 )
+from segments.typing import (
+    AuthHeader,
+    AWSFields,
+    Category,
+    Collaborator,
+    Dataset,
+    File,
+    Label,
+    LabelAttributes,
+    Labelset,
+    LabelStatus,
+    PresignedPostFields,
+    Release,
+    Role,
+    Sample,
+    SampleAttributes,
+    TaskAttributes,
+    TaskType,
+)
 from typing_extensions import Literal
 
 # import numpy.typing as npt
 
 
-# https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
-if TYPE_CHECKING:
-    from pydantic import BaseModel
-    from segments import SegmentsClient
-    from segments.typing import (
-        AuthHeader,
-        AWSFields,
-        Category,
-        Collaborator,
-        Dataset,
-        File,
-        Label,
-        LabelAttributes,
-        Labelset,
-        LabelStatus,
-        PresignedPostFields,
-        Release,
-        Role,
-        Sample,
-        SampleAttributes,
-        TaskAttributes,
-        TaskType,
-    )
-
-
+#############
+# Variables #
+#############
 logger = logging.getLogger(__name__)
+T = TypeVar("T")
 
 
 ####################
 # Helper functions #
 ####################
-
-
-def exception_handler(f: Callable[..., requests.Response]) -> Callable[..., Any]:
+# Error handling: https://stackoverflow.com/questions/16511337/correct-way-to-try-except-using-python-requests-module
+def exception_handler(
+    f: Callable[..., requests.Response]
+) -> Callable[..., Union[requests.Response, T]]:
     """Catch exceptions and throw Segments exceptions.
 
     Args:
@@ -79,31 +81,35 @@ def exception_handler(f: Callable[..., requests.Response]) -> Callable[..., Any]
     """
 
     def wrapper_function(
-        *args, pydantic_model: Optional[BaseModel] = None, **kwargs
-    ) -> Any:
+        *args: Any, pydantic_model: Optional[Type[T]] = None, **kwargs: Any
+    ) -> Union[requests.Response, T]:
         try:
-            r: requests.Response = f(*args, **kwargs)
-            r_json = r.json()
+            r = f(*args, **kwargs)
             r.raise_for_status()
-            # Check if the API limit is exceeded
-            message = r_json.get("message", "")
-            if message.startswith("You have exceeded"):
-                raise APILimitError(message)
-            if pydantic_model is not None:
-                r = parse_obj_as(pydantic_model, r_json)
+            if r.content:
+                r_json = r.json()
+                # Check if the API limit is exceeded
+                if isinstance(r_json, dict):
+                    message = r_json.get("message", "")
+                    if message.startswith("You have exceeded"):
+                        raise APILimitError(message)
+                if pydantic_model is not None:
+                    p = parse_obj_as(pydantic_model, r_json)
+                    return p
+            return r
         except requests.exceptions.Timeout as e:
             # Maybe set up for a retry, or continue in a retry loop
-            raise TimeoutError(cause=e)
+            raise TimeoutError(message=str(e))
         except requests.exceptions.HTTPError as e:
-            logger.error(f"Unknown error: {e}")
-            raise NetworkError(cause=e)
-        except requests.exceptions.RequestException as e:
+            raise NetworkError(message=str(e))
+        except requests.exceptions.TooManyRedirects as e:
             # Tell the user their URL was bad and try a different one
             raise NetworkError(message="Bad url, please try a different one.", cause=e)
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Unknown error: {e}")
+            raise NetworkError(message=str(e))
         except pydantic.ValidationError as e:
-            raise ValidationError(cause=e)
-
-        return r
+            raise ValidationError(message=str(e))
 
     return wrapper_function
 
@@ -210,10 +216,15 @@ class SegmentsClient:
         logger.info("Closed successfully.")
 
     # Use SegmentsClient as a context manager (e.g., with SegmentsClient() as client: client.add_dataset()).
-    def __enter__(self) -> SegmentsClient:
+    def __enter__(self):  # type:ignore # -> SegmentsClient
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(
+        self,
+        exc_type: Optional[type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
         self._close()
 
     ############
@@ -242,7 +253,7 @@ class SegmentsClient:
         else:
             r = self._get("/user/datasets/", pydantic_model=List[Dataset])
 
-        return r
+        return cast(List[Dataset], r)
 
     def get_dataset(self, dataset_identifier: str) -> Dataset:
         """Get a dataset.
@@ -264,7 +275,7 @@ class SegmentsClient:
 
         r = self._get(f"/datasets/{dataset_identifier}/", pydantic_model=Dataset)
 
-        return r
+        return cast(Dataset, r)
 
     def add_dataset(
         self,
@@ -348,7 +359,7 @@ class SegmentsClient:
             logger.error(
                 "Did you use the right task attributes? Please refer to the online documentation: https://docs.segments.ai/reference/categories-and-task-attributes#object-attribute-format.",
             )
-            raise ValidationError(cause=e)
+            raise ValidationError(message=str(e))
         else:
             payload: Dict[str, Any] = {
                 "name": name,
@@ -365,7 +376,7 @@ class SegmentsClient:
             }
             r = self._post("/user/datasets/", data=payload, pydantic_model=Dataset)
 
-            return r
+            return cast(Dataset, r)
 
     def update_dataset(
         self,
@@ -441,7 +452,7 @@ class SegmentsClient:
         )
         logger.info(f"Updated {dataset_identifier}")
 
-        return r
+        return cast(Dataset, r)
 
     def delete_dataset(self, dataset_identifier: str) -> None:
         """Delete a dataset.
@@ -519,8 +530,8 @@ class SegmentsClient:
         self,
         dataset_identifier: str,
         name: Optional[str] = None,
-        label_status: Optional[Union[LabelStatus, Sequence[LabelStatus]]] = None,
-        metadata: Optional[Union[str, Sequence[str]]] = None,
+        label_status: Optional[Union[LabelStatus, List[LabelStatus]]] = None,
+        metadata: Optional[Union[str, List[str]]] = None,
         sort: Literal["name", "created", "priority"] = "name",
         direction: Literal["asc", "desc"] = "asc",
         per_page: int = 1000,
@@ -591,7 +602,7 @@ class SegmentsClient:
         try:
             results = parse_obj_as(List[Sample], results)
         except pydantic.ValidationError as e:
-            raise ValidationError(cause=e)
+            raise ValidationError(message=str(e))
 
         return results
 
@@ -619,7 +630,7 @@ class SegmentsClient:
         if labelset is not None:
             query_string += f"?labelset={labelset}"
 
-        r = self._get(query_string, Sample)
+        r = self._get(query_string, pydantic_model=Sample)
 
         return r
 
@@ -631,8 +642,8 @@ class SegmentsClient:
         metadata: Optional[Dict[str, Any]] = None,
         priority: float = 0,
         embedding: Optional[
-            Sequence[float]
-        ] = None,  # embedding: Optional[Union[npt.NDArray[Any], Sequence[float]]] = None
+            List[float]
+        ] = None,  # embedding: Optional[Union[npt.NDArray[Any], List[float]]] = None
     ) -> Sample:
         """Add a sample to a dataset.
 
@@ -681,7 +692,7 @@ class SegmentsClient:
             logger.error(
                 "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
             )
-            raise ValidationError(cause=e)
+            raise ValidationError(message=str(e))
         else:
             payload: Dict[str, Any] = {
                 "name": name,
@@ -714,8 +725,8 @@ class SegmentsClient:
         metadata: Optional[Dict[str, Any]] = None,
         priority: float = 0,
         embedding: Optional[
-            Sequence[float]
-        ] = None,  # Optional[Union[npt.NDArray[Any], Sequence[float]]] = None,
+            List[float]
+        ] = None,  # Optional[Union[npt.NDArray[Any], List[float]]] = None,
     ) -> Sample:
         """Update a sample.
 
@@ -863,7 +874,7 @@ class SegmentsClient:
             logger.error(
                 "Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.",
             )
-            raise ValidationError(cause=e)
+            raise ValidationError(message=str(e))
         else:
             payload: Dict[str, Any] = {
                 "label_status": label_status,
@@ -1201,7 +1212,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        r = self._post("/assets/", {"filename": filename})
+        r = self._post("/assets/", data={"filename": filename})
         presigned_post_fields = PresignedPostFields.parse_obj(
             r.json()["presignedPostFields"]
         )
@@ -1212,21 +1223,19 @@ class SegmentsClient:
         try:
             f = File.parse_obj(r.json())
         except pydantic.ValidationError as e:
-            raise ValidationError(cause=e)
+            raise ValidationError(message=str(e))
 
         return f
 
     ####################
     # Helper functions #
     ####################
-    # Error handling: https://stackoverflow.com/questions/16511337/correct-way-to-try-except-using-python-requests-module
-
     @exception_handler
     def _get(
         self,
         endpoint: str,
         auth: bool = True,
-        pydantic_model: Optional[BaseModel] = None,
+        pydantic_model: Optional[T] = None,
     ) -> requests.Response:
         """Send a GET request.
 
@@ -1257,7 +1266,7 @@ class SegmentsClient:
         endpoint: str,
         data: Optional[Dict[str, Any]] = None,
         auth: bool = True,
-        pydantic_model: Optional[BaseModel] = None,
+        pydantic_model: Optional[T] = None,
     ) -> requests.Response:
         """Send a POST request.
 
@@ -1290,7 +1299,7 @@ class SegmentsClient:
         endpoint: str,
         data: Optional[Dict[str, Any]] = None,
         auth: bool = True,
-        pydantic_model: Optional[BaseModel] = None,
+        pydantic_model: Optional[T] = None,
     ) -> requests.Response:
         """Send a PUT request.
 
@@ -1323,7 +1332,7 @@ class SegmentsClient:
         endpoint: str,
         data: Optional[Dict[str, Any]] = None,
         auth: bool = True,
-        pydantic_model: Optional[BaseModel] = None,
+        pydantic_model: Optional[T] = None,
     ) -> requests.Response:
         """Send a PATCH request.
 
@@ -1356,7 +1365,7 @@ class SegmentsClient:
         endpoint: str,
         data: Optional[Dict[str, Any]] = None,
         auth: bool = True,
-        pydantic_model: Optional[BaseModel] = None,
+        pydantic_model: Optional[T] = None,
     ) -> requests.Response:
         """Send a DELETE request.
 
