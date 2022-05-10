@@ -55,7 +55,7 @@ setup(
     extras_require={
         "dev": read_requirements("requirements_dev.txt")
     },  # Install with: pip install segments-ai[dev]
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     classifiers=[
         "Development Status :: 3 - Alpha",  # Chose either "3 - Alpha", "4 - Beta" or "5 - Production/Stable" as the current state of your package
         "Intended Audience :: Developers",  # Define that your audience are developers
@@ -63,7 +63,6 @@ setup(
         "License :: OSI Approved :: MIT License",  # Again, pick a license
         "Programming Language :: Python :: 3",  # Specify which python versions that you want to support
         "Programming Language :: Python :: 3 :: Only",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",

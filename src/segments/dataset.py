@@ -100,8 +100,8 @@ class SegmentsDataset:
             with open(release_file) as f:
                 self.release = json.load(f)
         else:  # If it's a release object
-            release_file_url = release_file.attributes.url  # type:ignore
-            content = requests.get(release_file_url)  # type:ignore
+            release_file_url = release_file.attributes.url
+            content = requests.get(release_file_url)
             self.release = json.loads(content.content)
         self.release_file = release_file
 
@@ -225,9 +225,7 @@ class SegmentsDataset:
             image = None
         else:
             if self.caching_enabled:
-                image_filename = os.path.join(
-                    self.image_dir, image_filename_rel  # type:ignore
-                )
+                image_filename = os.path.join(self.image_dir, image_filename_rel)
                 if not os.path.exists(image_filename):
                     image = load_image_from_url(image_url, image_filename)
                 else:
@@ -250,8 +248,8 @@ class SegmentsDataset:
         if self.caching_enabled:
             # segmentation_bitmap_filename = os.path.join(self.image_dir, '{}{}'.format(label['uuid'], url_extension))
             segmentation_bitmap_filename = os.path.join(
-                self.image_dir,  # type:ignore
-                f"{sample_name}_label_{labelset}{url_extension}",  # type:ignore
+                self.image_dir,
+                f"{sample_name}_label_{labelset}{url_extension}",
             )
             if not os.path.exists(segmentation_bitmap_filename):
                 segmentation_bitmap = load_label_bitmap_from_url(

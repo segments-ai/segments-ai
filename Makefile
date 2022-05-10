@@ -7,9 +7,7 @@ docs :
 checks :
 	isort --check .
 	black --check .
-	# flynt --check .
-	# flake8 .
-	mypy .
+	# mypy src tests
 	python -m unittest
 
 .PHONY : format

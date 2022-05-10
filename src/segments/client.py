@@ -19,6 +19,7 @@ from typing import (
     cast,
 )
 
+import numpy.typing as npt
 import pydantic
 import requests
 from pydantic import parse_obj_as
@@ -49,9 +50,6 @@ from segments.typing import (
     TaskType,
 )
 from typing_extensions import Literal
-
-# import numpy.typing as npt
-
 
 #############
 # Variables #
@@ -175,7 +173,7 @@ class SegmentsClient:
         # https://stackoverflow.com/questions/21371809/cleanly-setting-max-retries-on-python-requests-get-or-post-method
         # https://stackoverflow.com/questions/23013220/max-retries-exceeded-with-url-in-requests
         self.api_session = requests.Session()
-        adapter = requests.adapters.HTTPAdapter(max_retries=3)  # type:ignore
+        adapter = requests.adapters.HTTPAdapter(max_retries=3)
         self.api_session.mount("http://", adapter)
         self.api_session.mount("https://", adapter)
 
@@ -216,12 +214,12 @@ class SegmentsClient:
         logger.info("Closed successfully.")
 
     # Use SegmentsClient as a context manager (e.g., with SegmentsClient() as client: client.add_dataset()).
-    def __enter__(self):  # type:ignore # -> SegmentsClient
+    def __enter__(self) -> SegmentsClient:
         return self
 
     def __exit__(
         self,
-        exc_type: Optional[type[BaseException]],
+        exc_type: Optional[Type[BaseException]],
         exc_value: Optional[BaseException],
         traceback: Optional[TracebackType],
     ) -> None:
@@ -641,9 +639,7 @@ class SegmentsClient:
         attributes: Dict[str, Any],
         metadata: Optional[Dict[str, Any]] = None,
         priority: float = 0,
-        embedding: Optional[
-            List[float]
-        ] = None,  # embedding: Optional[Union[npt.NDArray[Any], List[float]]] = None
+        embedding: Optional[Union[npt.NDArray[Any], List[float]]] = None,
     ) -> Sample:
         """Add a sample to a dataset.
 
@@ -687,7 +683,7 @@ class SegmentsClient:
         """
 
         try:
-            parse_obj_as(SampleAttributes, attributes)  # type:ignore
+            parse_obj_as(SampleAttributes, attributes)
         except pydantic.ValidationError as e:
             logger.error(
                 "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
@@ -724,9 +720,7 @@ class SegmentsClient:
         attributes: Optional[Dict[str, Any]] = None,
         metadata: Optional[Dict[str, Any]] = None,
         priority: float = 0,
-        embedding: Optional[
-            List[float]
-        ] = None,  # Optional[Union[npt.NDArray[Any], List[float]]] = None,
+        embedding: Optional[Union[npt.NDArray[Any], List[float]]] = None,
     ) -> Sample:
         """Update a sample.
 
@@ -869,7 +863,7 @@ class SegmentsClient:
         """
 
         try:
-            parse_obj_as(LabelAttributes, attributes)  # type:ignore
+            parse_obj_as(LabelAttributes, attributes)
         except pydantic.ValidationError as e:
             logger.error(
                 "Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.",

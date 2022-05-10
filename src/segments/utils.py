@@ -5,7 +5,8 @@ import logging
 from io import BytesIO
 from typing import TYPE_CHECKING, Any, Dict, Mapping, Optional, Tuple, Union
 
-import numpy as np  # import numpy.typing as npt
+import numpy as np
+import numpy.typing as npt
 import requests
 from PIL import ExifTags, Image
 from typing_extensions import Literal
@@ -20,7 +21,7 @@ if TYPE_CHECKING:
 # Variables #
 #############
 session = requests.Session()
-adapter = requests.adapters.HTTPAdapter(max_retries=3)  # type:ignore
+adapter = requests.adapters.HTTPAdapter(max_retries=3)
 session.mount("http://", adapter)
 session.mount("https://", adapter)
 
@@ -28,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 
 def bitmap2file(
-    bitmap: Any,  # npt.NDArray[np.uint32],
+    bitmap: npt.NDArray[np.uint32],
     is_segmentation_bitmap: bool = True,
 ) -> BytesIO:
     """Convert a label bitmap to a file with the proper format.
@@ -52,7 +53,7 @@ def bitmap2file(
         raise ValueError("Only np.ndarrays with np.uint32 dtype can be used.")
 
     if is_segmentation_bitmap:
-        bitmap2 = np.copy(bitmap)  # type:ignore
+        bitmap2 = np.copy(bitmap)
         bitmap2 = bitmap2[:, :, None].view(np.uint8)
         bitmap2[:, :, 3] = 255
     else:
@@ -65,10 +66,10 @@ def bitmap2file(
 
 
 def get_semantic_bitmap(
-    instance_bitmap: Any,  # npt.NDArray[np.uint32],
+    instance_bitmap: npt.NDArray[np.uint32],
     annotations: Dict[str, Any],
     id_increment: int = 1,
-) -> Any:  # Optional[npt.NDArray[np.uint32]]:
+) -> Optional[npt.NDArray[np.uint32]]:
     """Convert an instance bitmap and annotations dict into a segmentation bitmap.
 
     Args:
@@ -82,14 +83,10 @@ def get_semantic_bitmap(
     if instance_bitmap is None or annotations is None:
         return None
 
-    instance2semantic = [0] * (
-        max([a["id"] for a in annotations], default=0) + 1  # type:ignore
-    )
+    instance2semantic = [0] * (max([a["id"] for a in annotations], default=0) + 1)
     for annotation in annotations:
-        instance2semantic[annotation["id"]] = (  # type:ignore
-            annotation["category_id"] + id_increment  # type:ignore
-        )
-    instance2semantic = np.array(instance2semantic)  # type:ignore
+        instance2semantic[annotation["id"]] = annotation["category_id"] + id_increment
+    instance2semantic = np.array(instance2semantic)
 
     semantic_label = instance2semantic[np.array(instance_bitmap, np.uint32)]
     return semantic_label
@@ -190,7 +187,7 @@ def load_image_from_url(url: str, save_filename: Optional[str] = None) -> Image.
 
 def load_label_bitmap_from_url(
     url: str, save_filename: Optional[str] = None
-) -> Any:  # npt.NDArray[np.uint32]:
+) -> npt.NDArray[np.uint32]:
     """Load a label bitmap from url.
 
     Args:
@@ -203,11 +200,11 @@ def load_label_bitmap_from_url(
 
     def extract_bitmap(
         bitmap: Image.Image,
-    ) -> Any:  # npt.NDArray[np.uint32]:
+    ) -> npt.NDArray[np.uint32]:
 
-        bitmap = np.array(bitmap)  # type:ignore
-        bitmap[:, :, 3] = 0  # type:ignore
-        bitmap = bitmap.view(np.uint32).squeeze(2)  # type:ignore
+        bitmap = np.array(bitmap)
+        bitmap[:, :, 3] = 0
+        bitmap = bitmap.view(np.uint32).squeeze(2)
         return bitmap
 
     bitmap = Image.open(BytesIO(session.get(url).content))
@@ -230,7 +227,7 @@ def load_release(release: Release) -> Any:
 
     """
     release_file = release.attributes.url
-    content = requests.get(release_file)  # type:ignore
+    content = requests.get(release_file)
     return json.loads(content.content)
 
 

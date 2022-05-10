@@ -6,7 +6,8 @@ import logging
 import os
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union
 
-import numpy as np  # import numpy.typing as npt
+import numpy as np
+import numpy.typing as npt
 from PIL import Image
 from pycocotools import mask
 from pydantic import BaseModel
@@ -127,7 +128,7 @@ class IdGenerator:
         return rgb2id(color), color
 
 
-def rgb2id(color: Any) -> int:  # rgb2id(color: Union[npt.NDArray[3], RGB]) -> int:
+def rgb2id(color: Union[npt.NDArray[3], RGB]) -> int:
     """Convert rgb to an id.
 
     Args:
@@ -142,9 +143,7 @@ def rgb2id(color: Any) -> int:  # rgb2id(color: Union[npt.NDArray[3], RGB]) -> i
     return int(color[0] + 256 * color[1] + 256 * 256 * color[2])
 
 
-def id2rgb(
-    id_map: Any,
-) -> Any:  # id2rgb(id_map: npt.NDArray) -> Union[npt.NDArray[3], RGB]:
+def id2rgb(id_map: npt.NDArray) -> Union[npt.NDArray[3], RGB]:
     """Convert a color id to an rgb.
 
     Args:
@@ -174,9 +173,7 @@ def get_color(id: int) -> RGB:
     return COLORMAP[id][0:3]
 
 
-def colorize(
-    img: Any, colormap: Optional[ColorMap] = None
-) -> Any:  # def colorize(img: npt.NDArray, colormap: Optional[ColorMap] = None) -> npt.NDArray:
+def colorize(img: npt.NDArray, colormap: Optional[ColorMap] = None) -> npt.NDArray:
 
     indices = np.unique(img)
     indices = indices[indices != 0]
@@ -194,11 +191,7 @@ def colorize(
     return colored_img
 
 
-def get_bbox(
-    binary_mask: Any,
-) -> Union[
-    Tuple[int, int, int, int], bool
-]:  # def get_bbox(binary_mask: npt.NDArray) -> Union[Tuple[int, int, int, int], bool]:
+def get_bbox(binary_mask: npt.NDArray) -> Union[Tuple[int, int, int, int], bool]:
 
     regions = regionprops(np.uint8(binary_mask))
     if len(regions) == 1:
@@ -307,7 +300,7 @@ def export_coco_instance(
 
                 y0, x0, y1, x1 = bbox
                 # rle = mask.encode(np.asfortranarray(instance_ mask))
-                rle = mask.encode(  # type:ignore
+                rle = mask.encode(
                     np.array(instance_mask[:, :, None], dtype=np.uint8, order="F")
                 )[
                     0
@@ -370,7 +363,7 @@ def export_coco_instance(
         json.dump(json_data, f)
 
     logger.info(f"Exported to {file_name}. Images and labels in {dataset.image_dir}")
-    return file_name, dataset.image_dir  # type:ignore
+    return file_name, dataset.image_dir
 
 
 def export_coco_panoptic(
@@ -511,7 +504,7 @@ def export_coco_panoptic(
         # Image.fromarray(img_as_ubyte(instance_label_colored)).save(export_file)
 
         # Panoptic png
-        export_file = os.path.join(dataset.image_dir, label_file_name)  # type:ignore
+        export_file = os.path.join(dataset.image_dir, label_file_name)
         Image.fromarray(panoptic_label).save(export_file)
 
         # # Semantic png
@@ -585,8 +578,8 @@ def export_image(
             # Instance png
             instance_label = sample["segmentation_bitmap"]
             export_file = os.path.join(
-                dataset.image_dir,  # type:ignore
-                f"{file_name}_label_{dataset.labelset}_instance.png",  # type:ignore
+                dataset.image_dir,
+                f"{file_name}_label_{dataset.labelset}_instance.png",
             )
             instance_label.save(export_file)
 
@@ -595,8 +588,8 @@ def export_image(
             instance_label = sample["segmentation_bitmap"]
             instance_label_colored = colorize(np.uint8(instance_label))
             export_file = os.path.join(
-                dataset.image_dir,  # type:ignore
-                f"{file_name}_label_{dataset.labelset}_instance_colored.png",  # type:ignore
+                dataset.image_dir,
+                f"{file_name}_label_{dataset.labelset}_instance_colored.png",
             )
             Image.fromarray(img_as_ubyte(instance_label_colored)).save(export_file)
 
@@ -607,8 +600,8 @@ def export_image(
                 instance_label, sample["annotations"], id_increment
             )
             export_file = os.path.join(
-                dataset.image_dir,  # type:ignore
-                f"{file_name}_label_{dataset.labelset}_semantic.png",  # type:ignore
+                dataset.image_dir,
+                f"{file_name}_label_{dataset.labelset}_semantic.png",
             )
             Image.fromarray(img_as_ubyte(semantic_label)).save(export_file)
 
@@ -622,8 +615,8 @@ def export_image(
                 np.uint8(semantic_label), colormap=[c["color"] for c in categories]
             )
             export_file = os.path.join(
-                dataset.image_dir,  # type:ignore
-                f"{file_name}_label_{dataset.labelset}_semantic_colored.png",  # type:ignore
+                dataset.image_dir,
+                f"{file_name}_label_{dataset.labelset}_semantic_colored.png",
             )
             Image.fromarray(img_as_ubyte(semantic_label_colored)).save(export_file)
 

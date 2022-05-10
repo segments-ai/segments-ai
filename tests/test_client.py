@@ -285,7 +285,7 @@ class TestSample(Test):
                 )
                 self.assertIsInstance(sample, Sample)
             finally:
-                self.client.delete_sample(sample.uuid)  # type:ignore
+                self.client.delete_sample(sample.uuid)
 
     def test_update_sample_networkerror(self) -> None:
         with self.assertRaises(NetworkError):

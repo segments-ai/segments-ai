@@ -20,9 +20,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def release2dataset(
-    release: Release, download_images: bool = True
-) -> datasets.Dataset:  # type:ignore
+def release2dataset(release: Release, download_images: bool = True) -> datasets.Dataset:
     """Create a Huggingface dataset from a release.
 
     Args:
@@ -42,7 +40,7 @@ def release2dataset(
         )
         raise e
 
-    content = requests.get(release.attributes.url)  # type:ignore
+    content = requests.get(release.attributes.url)
     release_dict = json.loads(content.content)
 
     task_type = release_dict["dataset"]["task_type"]
@@ -163,8 +161,8 @@ def release2dataset(
             dataset_dict[key].append(data_row[key])
 
     # Create the HF Dataset and flatten it
-    dataset = datasets.Dataset.from_dict(dataset_dict, features)  # type:ignore
-    dataset = dataset.flatten()  # type:ignore
+    dataset = datasets.Dataset.from_dict(dataset_dict, features)
+    dataset = dataset.flatten()
 
     # Optionally download the images
     if (
