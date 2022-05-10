@@ -8,7 +8,7 @@ checks :
 	isort --check .
 	black --check .
 	# mypy src tests
-	python -m unittest
+	# python -m unittest
 
 .PHONY : format
 format :

@@ -4,8 +4,9 @@ import json
 import logging
 import os
 from multiprocessing.pool import ThreadPool
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 from urllib.parse import urlparse
+
 import numpy as np
 import numpy.typing as npt
 import requests
