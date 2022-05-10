@@ -53,11 +53,11 @@ setup(
     ],  # Keywords that define your package best
     install_requires=read_requirements("requirements.txt"),
     extras_require={
-        "dev": read_requirements("dev_requirements.txt")
+        "dev": read_requirements("requirements_dev.txt")
     },  # Install with: pip install segments-ai[dev]
     python_requires=">=3.6",
     classifiers=[
-        "Development Status :: 5 - Production/Stable",  # Chose either "3 - Alpha", "4 - Beta" or "5 - Production/Stable" as the current state of your package
+        "Development Status :: 3 - Alpha",  # Chose either "3 - Alpha", "4 - Beta" or "5 - Production/Stable" as the current state of your package
         "Intended Audience :: Developers",  # Define that your audience are developers
         "Topic :: Software Development :: Build Tools",
         "License :: OSI Approved :: MIT License",  # Again, pick a license

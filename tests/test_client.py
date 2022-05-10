@@ -5,9 +5,8 @@ import os
 import time
 import unittest
 
-from pydantic import ValidationError
 from segments.client import SegmentsClient
-from segments.exceptions import NetworkError
+from segments.exceptions import NetworkError, ValidationError
 from segments.typing import (
     Collaborator,
     Dataset,

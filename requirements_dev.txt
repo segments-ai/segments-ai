@@ -2,8 +2,8 @@
 flake8==3.9.2
 
 # Code formatting
-black
-isort
+black==22.1.0
+isort==5.10
 
 # Type checking
 mypy==0.910
