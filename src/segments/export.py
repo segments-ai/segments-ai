@@ -99,8 +99,8 @@ class IdGenerator:
 
     def get_color(self, cat_id: int) -> RGB:
         def random_color(base: RGB, max_dist: int = 30) -> RGB:
-            new_color = (  # new_color: npt.NDArray[3, npt.Int64]
-                base + np.random.randint(low=-max_dist, high=max_dist + 1, size=3)
+            new_color: npt.NDArray[Any] = base + np.random.randint(
+                low=-max_dist, high=max_dist + 1, size=3
             )
             rgb = tuple(np.maximum(0, np.minimum(255, new_color)))
             return rgb
@@ -128,7 +128,7 @@ class IdGenerator:
         return rgb2id(color), color
 
 
-def rgb2id(color: Union[npt.NDArray[3], RGB]) -> int:
+def rgb2id(color: Union[npt.NDArray[Any], RGB]) -> int:
     """Convert rgb to an id.
 
     Args:
@@ -143,7 +143,7 @@ def rgb2id(color: Union[npt.NDArray[3], RGB]) -> int:
     return int(color[0] + 256 * color[1] + 256 * 256 * color[2])
 
 
-def id2rgb(id_map: npt.NDArray) -> Union[npt.NDArray[3], RGB]:
+def id2rgb(id_map: npt.NDArray[Any]) -> Union[npt.NDArray[Any], RGB]:
     """Convert a color id to an rgb.
 
     Args:
@@ -154,9 +154,7 @@ def id2rgb(id_map: npt.NDArray) -> Union[npt.NDArray[3], RGB]:
     if isinstance(id_map, np.ndarray):
         id_map_copy = id_map.copy()
         rgb_shape = tuple(list(id_map.shape) + [3])
-        rgb_map = np.zeros(
-            rgb_shape, dtype=np.uint8
-        )  # rgb_map: npt.NDArray[3] = np.zeros(rgb_shape, dtype=np.uint8)
+        rgb_map: npt.NDArray[Any] = np.zeros(rgb_shape, dtype=np.uint8)
         for i in range(3):
             rgb_map[..., i] = id_map_copy % 256
             id_map_copy //= 256
@@ -173,7 +171,9 @@ def get_color(id: int) -> RGB:
     return COLORMAP[id][0:3]
 
 
-def colorize(img: npt.NDArray, colormap: Optional[ColorMap] = None) -> npt.NDArray:
+def colorize(
+    img: npt.NDArray[Any], colormap: Optional[ColorMap] = None
+) -> npt.NDArray[Any]:
 
     indices = np.unique(img)
     indices = indices[indices != 0]
@@ -191,7 +191,7 @@ def colorize(img: npt.NDArray, colormap: Optional[ColorMap] = None) -> npt.NDArr
     return colored_img
 
 
-def get_bbox(binary_mask: npt.NDArray) -> Union[Tuple[int, int, int, int], bool]:
+def get_bbox(binary_mask: npt.NDArray[Any]) -> Union[Tuple[int, int, int, int], bool]:
 
     regions = regionprops(np.uint8(binary_mask))
     if len(regions) == 1:

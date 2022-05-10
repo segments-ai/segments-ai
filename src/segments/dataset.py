@@ -4,9 +4,10 @@ import json
 import logging
 import os
 from multiprocessing.pool import ThreadPool
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, Tuple
 from urllib.parse import urlparse
-
+import numpy as np
+import numpy.typing as npt
 import requests
 from PIL import Image
 from segments.utils import (
@@ -213,7 +214,7 @@ class SegmentsDataset:
 
         logger.info(f"Initialized dataset with {num_samples} images.")
 
-    def _load_image_from_cache(self, sample):
+    def _load_image_from_cache(self, sample) -> Tuple[Image.Image, str]:
         sample_name = os.path.splitext(sample["name"])[0]
         image_url = sample["attributes"]["image"]["url"]
         image_url_parsed = urlparse(image_url)
@@ -239,7 +240,7 @@ class SegmentsDataset:
 
     def _load_segmentation_bitmap_from_cache(
         self, sample: Dict[str, Any], labelset: str
-    ):
+    ) -> Union[npt.NDArray[np.uint32], Image.Image]:
         sample_name = os.path.splitext(sample["name"])[0]
         label = sample["labels"][labelset]
         segmentation_bitmap_url = label["attributes"]["segmentation_bitmap"]["url"]
