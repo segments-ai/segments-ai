@@ -1,0 +1,14 @@
+# General
+numpy==1.21.6 # Change to >= 1.20 if we drop python 3.7 support (numpy 1.20+ includes type stubs).
+requests==2.27.1
+Pillow==9.1.0
+scikit-image==0.19.2
+tqdm==4.64.0
+pycocotools;platform_system!="Windows"
+pycocotools-windows;platform_system=="Windows"
+
+# Type hints
+typing_extensions==4.2.0
+pydantic==1.9.0
+types-Pillow==9.0.15
+types-requests==2.27.25 
