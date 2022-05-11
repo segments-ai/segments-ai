@@ -43,6 +43,8 @@ Category = Literal[
 RGB = List[float]  # TODO Tuple[float, float, float]
 RGBA = List[float]  # TODO Tuple[float, float, float, float]
 FormatVersion = Union[float, str]
+ObjectAttributes = Dict[str, Union[str, bool]]
+ImageAttributes = Dict[str, Union[str, bool]]
 
 
 class AuthHeader(TypedDict):
@@ -101,49 +103,6 @@ class File(BaseModel):
     url: str
     created_at: str
     presignedPostFields: PresignedPostFields
-
-
-#####################################
-# Object and image level attributes #
-#####################################
-class SelectTaskAttribute(BaseModel):
-    name: str
-    input_type: Literal["select"]
-    values: List[str]
-    default_value: Optional[str] = None
-
-
-class TextTaskAttribute(BaseModel):
-    name: str
-    input_type: Literal["text"]
-    default_value: Optional[str] = None
-
-
-class NumberTaskAttribute(BaseModel):
-    name: str
-    input_type: Literal["number"]
-    default_value: Optional[float] = None
-    min: Optional[float] = None
-    max: Optional[float] = None
-    step: Optional[float] = None
-
-
-class CheckboxTaskAttribute(BaseModel):
-    name: str
-    input_type: Literal["checkbox"]
-    default_value: Optional[bool] = None
-
-
-TaskAttribute = Union[
-    SelectTaskAttribute,
-    TextTaskAttribute,
-    NumberTaskAttribute,
-    CheckboxTaskAttribute,
-]
-# ObjectAttributes = List[TaskAttribute]
-# ImageAttributes = List[TaskAttribute]
-ObjectAttributes = Dict[str, str]
-ImageAttributes = Dict[str, str]
 
 
 #########
@@ -389,11 +348,47 @@ class Collaborator(BaseModel):
     role: Role
 
 
+class SelectTaskAttribute(BaseModel):
+    name: str
+    input_type: Literal["select"]
+    values: List[str]
+    default_value: Optional[str] = None
+
+
+class TextTaskAttribute(BaseModel):
+    name: str
+    input_type: Literal["text"]
+    default_value: Optional[str] = None
+
+
+class NumberTaskAttribute(BaseModel):
+    name: str
+    input_type: Literal["number"]
+    default_value: Optional[float] = None
+    min: Optional[float] = None
+    max: Optional[float] = None
+    step: Optional[float] = None
+
+
+class CheckboxTaskAttribute(BaseModel):
+    name: str
+    input_type: Literal["checkbox"]
+    default_value: Optional[bool] = None
+
+
+TaskAttribute = Union[
+    SelectTaskAttribute,
+    TextTaskAttribute,
+    NumberTaskAttribute,
+    CheckboxTaskAttribute,
+]
+
+
 class TaskAttributeCategory(BaseModel):
     name: str
     id: int
     color: Optional[Union[RGB, RGBA]] = None
-    attributes: Optional[ObjectAttributes] = None
+    attributes: Optional[List[TaskAttribute]] = None
     dimensions: Optional[XYZ] = None
 
 
@@ -439,8 +434,7 @@ class LabelStats(BaseModel):
 
 class Dataset(BaseModel):
     name: str
-    cloned_from: str
-    # cloned_from: Optional[int] = None
+    cloned_from: Optional[str] = None
     description: str
     data_type: DataType
     category: Category
