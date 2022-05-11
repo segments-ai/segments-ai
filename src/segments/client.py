@@ -252,7 +252,7 @@ class SegmentsClient:
         else:
             r = self._get("/user/datasets/", pydantic_model=List[Dataset])
 
-        return cast(List[Dataset], r)
+        return r
 
     def get_dataset(self, dataset_identifier: str) -> Dataset:
         """Get a dataset.
@@ -274,7 +274,7 @@ class SegmentsClient:
 
         r = self._get(f"/datasets/{dataset_identifier}/", pydantic_model=Dataset)
 
-        return cast(Dataset, r)
+        return r
 
     def add_dataset(
         self,
@@ -375,7 +375,7 @@ class SegmentsClient:
             }
             r = self._post("/user/datasets/", data=payload, pydantic_model=Dataset)
 
-            return cast(Dataset, r)
+            return r
 
     def update_dataset(
         self,
@@ -451,7 +451,7 @@ class SegmentsClient:
         )
         logger.info(f"Updated {dataset_identifier}")
 
-        return cast(Dataset, r)
+        return r
 
     def delete_dataset(self, dataset_identifier: str) -> None:
         """Delete a dataset.

@@ -1,23 +1,79 @@
 from __future__ import annotations
 
+import os
 import json
+import types
 import logging
 from typing import TYPE_CHECKING, Any, Dict
-
 import requests
+import tempfile
+from string import Template
+
 from PIL import Image
+
 from segments.utils import load_image_from_url, load_label_bitmap_from_url
 
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
 if TYPE_CHECKING:
     import datasets
     from segments.typing import Release
-
-
 #############
 # Variables #
 #############
 logger = logging.getLogger(__name__)
+try:
+    import datasets
+    from huggingface_hub import upload_file
+except ImportError:
+    logger.error(
+        "Please install HuggingFace datasets first: pip install --upgrade datasets"
+    )
+
+# Add some functionality to the push_to_hub function of datasets.Dataset
+push_to_hub_original = datasets.Dataset.push_to_hub
+
+
+def push_to_hub(self, repo_id, *args, **kwargs):
+    push_to_hub_original(self, repo_id, *args, **kwargs)
+
+    # Upload the label file (https://huggingface.co/datasets/huggingface/label-files)
+    if hasattr(self, "id2label"):
+        print("Uploading id2label.json")
+        tmpfile = os.path.join(tempfile.gettempdir(), "id2label.json")
+        with open(tmpfile, "w") as f:
+            json.dump(self.id2label, f)
+
+        upload_file(
+            path_or_fileobj=tmpfile,
+            path_in_repo="id2label.json",
+            repo_id=f"datasets/{repo_id}",
+        )
+
+    # Upload README.md
+    if hasattr(self, "readme"):
+        print("Uploading README.md")
+        tmpfile = os.path.join(tempfile.gettempdir(), "README.md")
+        with open(tmpfile, "w") as f:
+            f.write(self.readme)
+
+        upload_file(
+            path_or_fileobj=tmpfile,
+            path_in_repo="README.md",
+            repo_id=f"datasets/{repo_id}",
+        )
+
+
+datasets.Dataset.push_to_hub = push_to_hub
+
+
+def get_taxonomy_table(taxonomy):
+    markdown_table = ""
+    for category in taxonomy["categories"]:
+        id_ = category["id"]
+        name = category["name"]
+        description = category["description"] if "description" in category else "-"
+        markdown_table += f"| {id_} | {name} | {description} |\n"
+    return markdown_table
 
 
 def release2dataset(release: Release, download_images: bool = True) -> datasets.Dataset:
@@ -49,6 +105,7 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
         features = datasets.Features(
             {
                 "name": datasets.Value("string"),
+                "uuid": datasets.Value("string"),
                 "image": {"url": datasets.Value("string")},
                 "status": datasets.Value("string"),
                 "label": {
@@ -59,7 +116,7 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
                             "type": datasets.Value("string"),
                             "points": [[datasets.Value("float32")]],
                         }
-                    ]
+                    ],
                 },
             }
         )
@@ -68,6 +125,7 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
         features = datasets.Features(
             {
                 "name": datasets.Value("string"),
+                "uuid": datasets.Value("string"),
                 "image": {"url": datasets.Value("string")},
                 "status": datasets.Value("string"),
                 "label": {
@@ -86,6 +144,7 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
         features = datasets.Features(
             {
                 "name": datasets.Value("string"),
+                "uuid": datasets.Value("string"),
                 "text": datasets.Value("string"),
                 "status": datasets.Value("string"),
                 "label": {
@@ -117,6 +176,9 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
         # Name
         data_row["name"] = sample["name"]
 
+        # Uuid
+        data_row["uuid"] = sample["uuid"]
+
         # Status
         try:
             data_row["status"] = sample["labels"]["ground-truth"]["label_status"]
@@ -143,7 +205,19 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
 
         # Label
         try:
-            data_row["label"] = sample["labels"]["ground-truth"]["attributes"]
+            label = sample["labels"]["ground-truth"]["attributes"]
+
+            # Remove the image-level attributes
+            if "attributes" in label:
+                del label["attributes"]
+
+            # Remove the object-level attributes
+            for annotation in label["annotations"]:
+                if "attributes" in annotation:
+                    del annotation["attributes"]
+
+            data_row["label"] = label
+
         except (KeyError, TypeError):
             label: Dict[str, Any] = {"annotations": []}
             if task_type in ["segmentation-bitmap", "segmentation-bitmap-highres"]:
@@ -152,7 +226,7 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
 
         data_rows.append(data_row)
 
-    logger.info(data_rows)
+    # print(data_rows)
 
     # Now transform to column format
     dataset_dict: Dict[str, Any] = {key: [] for key in features.keys()}
@@ -161,7 +235,7 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
             dataset_dict[key].append(data_row[key])
 
     # Create the HF Dataset and flatten it
-    dataset = datasets.Dataset.from_dict(dataset_dict, features)
+    dataset = datasets.Dataset.from_dict(dataset_dict, features, split="train")
     dataset = dataset.flatten()
 
     # Optionally download the images
@@ -195,7 +269,7 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
             except Exception:
                 data_row["label.segmentation_bitmap"] = Image.new(
                     "RGB", (1, 1)
-                )  # None not possible?
+                )  # TODO: replace with None
             return data_row
 
         dataset = dataset.map(download_image, remove_columns=["image.url"])
@@ -204,5 +278,72 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
                 download_segmentation_bitmap,
                 remove_columns=["label.segmentation_bitmap.url"],
             )
+            # Reorder the features
+            features = datasets.Features(
+                {
+                    "name": dataset.features["name"],
+                    "uuid": dataset.features["uuid"],
+                    "status": dataset.features["status"],
+                    "image": datasets.Image(),
+                    "label.annotations": dataset.features["label.annotations"],
+                    "label.segmentation_bitmap": datasets.Image(),
+                }
+            )
+            dataset.info.features = features
+        else:
+            # Reorder the features
+            features = datasets.Features(
+                {
+                    "name": dataset.features["name"],
+                    "uuid": dataset.features["uuid"],
+                    "status": dataset.features["status"],
+                    "image": datasets.Image(),
+                    "label.annotations": dataset.features["label.annotations"],
+                }
+            )
+            dataset.info.features = features
+
+    # Create id2label
+    id2label = {}
+    for category in release_dict["dataset"]["task_attributes"]["categories"]:
+        id2label[category["id"]] = category["name"]
+    id2label[0] = "unlabeled"
+    dataset.id2label = id2label
+
+    # Create readme.md and update DatasetInfo
+    # https://stackoverflow.com/questions/6385686/is-there-a-native-templating-system-for-plain-text-files-in-python
+
+    task_type = release_dict["dataset"]["task_type"]
+    if task_type in ["segmentation-bitmap", "segmentation-bitmap-highres"]:
+        task_category = "image-segmentation"
+    elif task_type in ["vector", "bboxes"]:
+        task_category = "object-detection"
+    elif task_type in ["text-named-entities", "text-span-categorization"]:
+        task_category = "named-entity-recognition"
+    else:
+        task_category = "other"
+
+    info = {
+        "name": release_dict["dataset"]["name"],
+        "segments_url": f'https://segments.ai/{release_dict["dataset"]["owner"]}/{release_dict["dataset"]["name"]}',
+        "short_description": release_dict["dataset"]["description"],
+        "release": release_dict["name"],
+        "taxonomy_table": get_taxonomy_table(
+            release_dict["dataset"]["task_attributes"]
+        ),
+        "task_category": task_category,
+    }
+
+    ## Create readme.md
+    with open(
+        os.path.join(os.path.dirname(__file__), "data", "dataset_card_template.md"), "r"
+    ) as f:
+        template = Template(f.read())
+        readme = template.substitute(info)
+        dataset.readme = readme
+
+    ## Update DatasetInfo
+    dataset.info.description = info["short_description"]
+    dataset.info.homepage = info["segments_url"]
 
     return dataset

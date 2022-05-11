@@ -24,7 +24,6 @@ session = requests.Session()
 adapter = requests.adapters.HTTPAdapter(max_retries=3)
 session.mount("http://", adapter)
 session.mount("https://", adapter)
-
 logger = logging.getLogger(__name__)
 
 
