@@ -713,10 +713,8 @@ def export_yolo(
                 try:
                     frame_name = sample["attributes"]["frames"][j]["name"]
                 except KeyError:
-                    frame_name = "{:05d}".format(j + 1)
-                file_name = "{}/{}-{}.txt".format(
-                    dataset.image_dir, image_name, frame_name
-                )
+                    frame_name = f"{j + 1:05d}"
+                file_name = f"{dataset.image_dir}/{image_name}-{frame_name}.txt"
 
                 # Testing on x is the same as testing len(x)>0 (this also checks that x is not None)
                 # https://stackoverflow.com/questions/39983695/what-is-truthy-and-falsy-how-is-it-different-from-true-and-false
@@ -727,7 +725,7 @@ def export_yolo(
         for i in tqdm(range(len(dataset))):
             sample = dataset[i]
             image_name = os.path.splitext(os.path.basename(sample["name"]))[0]
-            file_name = "{}/{}.txt".format(dataset.image_dir, image_name)
+            file_name = f"{dataset.image_dir}/{image_name}.txt"
 
             # if "image_width" in kwargs and "image_height" in kwargs:
             #     image_width = kwargs["image_width"]
@@ -741,5 +739,5 @@ def export_yolo(
                 annotations = sample["annotations"]
                 write_yolo_file(file_name, annotations, image_width, image_height)
 
-    logger.info("Exported. Images and labels in {}".format(dataset.image_dir))
+    logger.info(f"Exported. Images and labels in {dataset.image_dir}")
     return dataset.image_dir

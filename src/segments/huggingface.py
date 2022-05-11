@@ -1,16 +1,15 @@
 from __future__ import annotations
 
-import os
 import json
-import types
 import logging
-from typing import TYPE_CHECKING, Any, Dict
-import requests
+import os
 import tempfile
+import types
 from string import Template
+from typing import TYPE_CHECKING, Any, Dict
 
+import requests
 from PIL import Image
-
 from segments.utils import load_image_from_url, load_label_bitmap_from_url
 
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
