@@ -16,7 +16,9 @@ jobs:
       RELEASES: ${{ secrets.RELEASES }}
       SAMPLE_ATTRIBUTE_TYPES: ${{ secrets.SAMPLE_ATTRIBUTE_TYPES }}
       LABEL_ATTRIBUTE_TYPES: ${{ secrets.LABEL_ATTRIBUTE_TYPES }}
+
     runs-on: ${{ matrix.os }}
+
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
