@@ -1,0 +1,8 @@
+# Documentation
+sphinx==4.5.0
+furo==2022.4.7
+myst_parser==0.17.2
+sphinx-autobuild==2021.3.14
+sphinx-copybutton==0.5.0
+sphinx_autodoc_typehints==1.18.1
+autodoc_pydantic==1.6.2

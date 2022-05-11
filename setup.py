@@ -29,7 +29,7 @@ def read_requirements(filename: str) -> List[str]:
 
 # version.py defines the VERSION and VERSION_SHORT variables.
 # We use exec here so we don't import cached_path whilst setting up.
-# VERSION = {}  # type: ignore
+# VERSION = {}
 # with open("src/segments/version.py", "r") as version_file:
 #     exec(version_file.read(), VERSION)
 
@@ -53,8 +53,9 @@ setup(
     ],  # Keywords that define your package best
     install_requires=read_requirements("requirements.txt"),
     extras_require={
-        "dev": read_requirements("requirements_dev.txt")
-    },  # Install with: pip install segments-ai[dev]
+        "dev": read_requirements("requirements_dev.txt"),
+        "docs": read_requirements("requirements_docs.txt"),
+    },  # Install with: pip install segments-ai[dev/docs]
     python_requires=">=3.7",
     classifiers=[
         "Development Status :: 3 - Alpha",  # Chose either "3 - Alpha", "4 - Beta" or "5 - Production/Stable" as the current state of your package
