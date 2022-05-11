@@ -16,7 +16,7 @@ class SegmentsError(Exception):
         self.cause = cause
 
     def __str__(self) -> str:
-        return self.message + str(self.args)
+        return self.message
 
 
 class AuthenticationError(SegmentsError):

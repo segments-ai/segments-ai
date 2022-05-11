@@ -315,44 +315,62 @@ class TestLabel(Test):
     #         self.assertIsInstance(label, Label)
 
     def test_add_update_get_delete_label(self) -> None:
-        task_attributes = [
-            {
-                "name": "color",
-                "input_type": "select",
-                "values": ["green", "yellow", "red"],
-                "default_value": "red",
+        # task_attributes = [
+        #     {
+        #         "name": "color",
+        #         "input_type": "select",
+        #         "values": ["green", "yellow", "red"],
+        #         "default_value": "red",
+        #     },
+        #     {
+        #         "name": "description",
+        #         "input_type": "text",
+        #         "default_value": "A nice car.",
+        #     },
+        #     {
+        #         "name": "number_of_wheels",
+        #         "input_type": "number",
+        #         "min": "1",
+        #         "max": "20",
+        #         "step": "1",
+        #         "default_value": 4,
+        #     },
+        #     {
+        #         "name": "is_electric",
+        #         "input_type": "checkbox",
+        #         "default_value": False,
+        #     },
+        # ]
+        image_or_object_attributes = (
+            {  # sample-level attributes
+                "scene_type": "crossroads",
+                "weather": "sunny",
             },
-            {
-                "name": "description",
-                "input_type": "text",
-                "default_value": "A nice car.",
-            },
-            {
-                "name": "number_of_wheels",
-                "input_type": "number",
-                "min": "1",
-                "max": "20",
-                "step": "1",
-                "default_value": 4,
-            },
-            {
-                "name": "is_electric",
-                "input_type": "checkbox",
-                "default_value": False,
-            },
-        ]
+        )
         label_attributes = {
             "image-segmentation": {
                 "format_version": "0.1",
                 "annotations": [
-                    {"id": 1, "category_id": 1, "attributes": task_attributes},
-                    {"id": 2, "category_id": 1, "attributes": task_attributes},
-                    {"id": 3, "category_id": 4, "attributes": task_attributes},
+                    {
+                        "id": 1,
+                        "category_id": 1,
+                        "attributes": image_or_object_attributes,
+                    },
+                    {
+                        "id": 2,
+                        "category_id": 1,
+                        "attributes": image_or_object_attributes,
+                    },
+                    {
+                        "id": 3,
+                        "category_id": 4,
+                        "attributes": image_or_object_attributes,
+                    },
                 ],
                 "segmentation_bitmap": {
                     "url": "https://segmentsai-staging.s3.eu-west-2.amazonaws.com/assets/davy/ddf55e99-1a6f-42d2-83e9-8657de3259a1.png"
                 },
-                "image_attributes": task_attributes,
+                "image_attributes": image_or_object_attributes,
             },
             "image-vector": {
                 "format_version": "0.1",
@@ -362,7 +380,7 @@ class TestLabel(Test):
                         "category_id": 1,
                         "type": "bbox",
                         "points": [[12.34, 56.78], [90.12, 34.56]],
-                        "attributes": task_attributes,
+                        "attributes": image_or_object_attributes,
                     },
                     {
                         "id": 2,
@@ -375,7 +393,7 @@ class TestLabel(Test):
                             [67.89, 98.76],
                             [54.32, 10.01],
                         ],
-                        "attributes": task_attributes,
+                        "attributes": image_or_object_attributes,
                     },
                     {
                         "id": 3,
@@ -388,17 +406,17 @@ class TestLabel(Test):
                             [67.89, 98.76],
                             [54.32, 10.01],
                         ],
-                        "attributes": task_attributes,
+                        "attributes": image_or_object_attributes,
                     },
                     {
                         "id": 4,
                         "category_id": 4,
                         "type": "point",
                         "points": [[12.34, 56.78]],
-                        "attributes": task_attributes,
+                        "attributes": image_or_object_attributes,
                     },
                 ],
-                "image_attributes": task_attributes,
+                "image_attributes": image_or_object_attributes,
             },
             "image-sequence-vector": {
                 "format_version": "0.2",
@@ -414,7 +432,7 @@ class TestLabel(Test):
                                 "is_keyframe": True,
                                 "type": "bbox",
                                 "points": [[12.34, 56.78], [90.12, 34.56]],
-                                "attributes": task_attributes,
+                                "attributes": image_or_object_attributes,
                             },
                             {
                                 "id": 2,
@@ -429,7 +447,7 @@ class TestLabel(Test):
                                     [67.89, 98.76],
                                     [54.32, 10.01],
                                 ],
-                                "attributes": task_attributes,
+                                "attributes": image_or_object_attributes,
                             },
                             {
                                 "id": 3,
@@ -444,7 +462,7 @@ class TestLabel(Test):
                                     [67.89, 98.76],
                                     [54.32, 10.01],
                                 ],
-                                "attributes": task_attributes,
+                                "attributes": image_or_object_attributes,
                             },
                             {
                                 "id": 4,
@@ -453,19 +471,31 @@ class TestLabel(Test):
                                 "is_keyframe": True,
                                 "type": "point",
                                 "points": [[12.34, 56.78]],
-                                "attributes": task_attributes,
+                                "attributes": image_or_object_attributes,
                             },
                         ],
-                        "image_attributes": task_attributes,
+                        "image_attributes": image_or_object_attributes,
                     }
                 ],
             },
             "pointcloud-segmentation": {
                 "format_version": "0.1",
                 "annotations": [
-                    {"id": 1, "category_id": 1, "attributes": task_attributes},
-                    {"id": 2, "category_id": 1, "attributes": task_attributes},
-                    {"id": 3, "category_id": 4, "attributes": task_attributes},
+                    {
+                        "id": 1,
+                        "category_id": 1,
+                        "attributes": image_or_object_attributes,
+                    },
+                    {
+                        "id": 2,
+                        "category_id": 1,
+                        "attributes": image_or_object_attributes,
+                    },
+                    {
+                        "id": 3,
+                        "category_id": 4,
+                        "attributes": image_or_object_attributes,
+                    },
                 ],
                 "point_annotations": [0, 0, 0, 3, 2, 2, 2, 1, 3],
             },
