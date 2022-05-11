@@ -182,11 +182,12 @@ class SegmentsClient:
         self.s3_session.mount("https://", adapter)
 
         try:
-            r = self._get("/api_status/?lib_version=0.58")
+            r = self._get("/api_status/?lib_version=0.58")  # TODO
             if r.status_code == 200:
                 logger.info("Initialized successfully.")
-        except requests.HTTPError as e:
-            if e.response.status_code == 426:
+        except NetworkError as e:
+            if e.cause.response.status_code == 426:
+                logger.info("The response HTTP status code is 426 Upgrade Required.")
                 pass
             else:
                 raise AuthenticationError(
