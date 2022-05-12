@@ -32,12 +32,12 @@ except ImportError:
 push_to_hub_original = datasets.Dataset.push_to_hub
 
 
-def push_to_hub(self, repo_id, *args, **kwargs):
+def push_to_hub(self, repo_id: int, *args: Any, **kwargs: Any) -> None:
     push_to_hub_original(self, repo_id, *args, **kwargs)
 
     # Upload the label file (https://huggingface.co/datasets/huggingface/label-files)
     if hasattr(self, "id2label"):
-        print("Uploading id2label.json")
+        logger.info("Uploading id2label.json")
         tmpfile = os.path.join(tempfile.gettempdir(), "id2label.json")
         with open(tmpfile, "w") as f:
             json.dump(self.id2label, f)
@@ -50,7 +50,7 @@ def push_to_hub(self, repo_id, *args, **kwargs):
 
     # Upload README.md
     if hasattr(self, "readme"):
-        print("Uploading README.md")
+        logger.info("Uploading README.md")
         tmpfile = os.path.join(tempfile.gettempdir(), "README.md")
         with open(tmpfile, "w") as f:
             f.write(self.readme)
@@ -65,7 +65,7 @@ def push_to_hub(self, repo_id, *args, **kwargs):
 datasets.Dataset.push_to_hub = push_to_hub
 
 
-def get_taxonomy_table(taxonomy):
+def get_taxonomy_table(taxonomy: Dict[str, Any]) -> str:
     markdown_table = ""
     for category in taxonomy["categories"]:
         id_ = category["id"]
@@ -84,16 +84,15 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
     Returns:
         A HuggingFace dataset.
     Raises:
-        ImportError: If HuggingFace datasets is not installed.
-        ValueError: If the type of dataset is not yet supported.
+        :exc:`ValueError`: If the type of dataset is not yet supported.
     """
-    try:
-        import datasets
-    except ImportError as e:
-        logger.error(
-            "Please install HuggingFace datasets first: pip install --upgrade datasets"
-        )
-        raise e
+    # try:
+    #     import datasets
+    # except ImportError as e:
+    #     logger.error(
+    #         "Please install HuggingFace datasets first: pip install --upgrade datasets"
+    #     )
+    #     raise e
 
     content = requests.get(release.attributes.url)
     release_dict = json.loads(content.content)
@@ -194,12 +193,12 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
         ]:
             try:
                 data_row["image"] = sample["attributes"]["image"]
-            except KeyError:
+            except (KeyError, TypeError):
                 data_row["image"] = {"url": None}
         elif task_type in ["text-named-entities", "text-span-categorization"]:
             try:
                 data_row["text"] = sample["attributes"]["text"]
-            except KeyError:
+            except (KeyError, TypeError):
                 data_row["text"] = None
 
         # Label
