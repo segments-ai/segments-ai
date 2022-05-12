@@ -39,8 +39,8 @@ def bitmap2file(
     Returns:
         A file object.
     Raises:
-        ValueError: If the ``dtype`` is not :class:`np.uint32` or :class:`np.uint8`.
-        ValueError: If the bitmap is not a segmentation bitmap.
+        :exc:`ValueError`: If the ``dtype`` is not :class:`np.uint32` or :class:`np.uint8`.
+        :exc:`ValueError`: If the bitmap is not a segmentation bitmap.
     """
 
     # Convert bitmap to np.uint32, if it is not already
@@ -168,7 +168,6 @@ def load_image_from_url(url: str, save_filename: Optional[str] = None) -> Image.
     Args:
         url: The image url.
         save_filename: The filename to save to.
-
     Returns:
         A PIL image.
     """
@@ -192,7 +191,6 @@ def load_label_bitmap_from_url(
     Args:
         url: The label bitmap url.
         save_filename: The filename to save to.
-
     Returns:
         A :class:`numpy.ndarray` with :class:`numpy.uint32` ``dtype``.
     """
@@ -220,10 +218,8 @@ def load_release(release: Release) -> Any:
 
     Args:
         release: A Segments release.
-
     Returns:
         A JSON with the release labels.
-
     """
     release_file = release.attributes.url
     content = requests.get(release_file)
@@ -235,7 +231,6 @@ def handle_exif_rotation(image: Image.Image) -> Image.Image:
 
     Args:
         image: A PIL image.
-
     Returns:
         A possibly rotated PIL image.
     """

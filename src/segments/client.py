@@ -151,7 +151,7 @@ class SegmentsClient:
         api_key: Your Segments.ai API key. If no API key given, reads ``SEGMENTS_API_KEY`` from the environment. Defaults to :obj:`None`.
         api_url: URL of the Segments.ai API. Defaults to ``https://api.segments.ai/``.
     Raises:
-        AuthenticationError: If an invalid API key is used or (when not passing the API key directly) if ``SEGMENTS_API_KEY`` is not found in your environment.
+        :exc:`~segments.exceptions.AuthenticationError`: If an invalid API key is used or (when not passing the API key directly) if ``SEGMENTS_API_KEY`` is not found in your environment.
     """
 
     def __init__(
