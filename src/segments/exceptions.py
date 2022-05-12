@@ -48,6 +48,6 @@ class APILimitError(SegmentsError):
 
 
 class ValidationError(SegmentsError):
-    """Raised when Pydantic validation of the response fails."""
+    """Raised when validation of the response fails."""
 
     pass

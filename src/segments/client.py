@@ -68,7 +68,7 @@ def exception_handler(
     """Catch exceptions and throw Segments exceptions.
 
     Args:
-        pydantic_model: The pydantic class to parse the JSON response into. Defaults to :obj:`None`.
+        model: The class to parse the JSON response into. Defaults to :obj:`None`.
     Returns:
         A wrapper function (of this exception handler decorator).
     Raises:
@@ -79,7 +79,7 @@ def exception_handler(
     """
 
     def wrapper_function(
-        *args: Any, pydantic_model: Optional[Type[T]] = None, **kwargs: Any
+        *args: Any, model: Optional[Type[T]] = None, **kwargs: Any
     ) -> Union[requests.Response, T]:
         try:
             r = f(*args, **kwargs)
@@ -91,9 +91,9 @@ def exception_handler(
                     message = r_json.get("message", "")
                     if message.startswith("You have exceeded"):
                         raise APILimitError(message)
-                if pydantic_model is not None:
-                    p = parse_obj_as(pydantic_model, r_json)
-                    return p
+                if model is not None:
+                    m = parse_obj_as(model, r_json)
+                    return m
             return r
         except requests.exceptions.Timeout as e:
             # Maybe set up for a retry, or continue in a retry loop
@@ -248,9 +248,9 @@ class SegmentsClient:
         """
 
         if user is not None:
-            r = self._get(f"/users/{user}/datasets/", pydantic_model=List[Dataset])
+            r = self._get(f"/users/{user}/datasets/", model=List[Dataset])
         else:
-            r = self._get("/user/datasets/", pydantic_model=List[Dataset])
+            r = self._get("/user/datasets/", model=List[Dataset])
 
         return r
 
@@ -272,7 +272,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        r = self._get(f"/datasets/{dataset_identifier}/", pydantic_model=Dataset)
+        r = self._get(f"/datasets/{dataset_identifier}/", model=Dataset)
 
         return r
 
@@ -373,7 +373,7 @@ class SegmentsClient:
                 "enable_ratings": enable_ratings,
                 "data_type": "IMAGE",
             }
-            r = self._post("/user/datasets/", data=payload, pydantic_model=Dataset)
+            r = self._post("/user/datasets/", data=payload, model=Dataset)
 
             return r
 
@@ -446,9 +446,7 @@ class SegmentsClient:
         if enable_ratings is not None:
             payload["enable_ratings"] = enable_ratings
 
-        r = self._patch(
-            f"/datasets/{dataset_identifier}/", data=payload, pydantic_model=Dataset
-        )
+        r = self._patch(f"/datasets/{dataset_identifier}/", data=payload, model=Dataset)
         logger.info(f"Updated {dataset_identifier}")
 
         return r
@@ -496,7 +494,7 @@ class SegmentsClient:
         r = self._post(
             f"/datasets/{dataset_identifier}/collaborators/",
             data=payload,
-            pydantic_model=Collaborator,
+            model=Collaborator,
         )
 
         return r
@@ -629,7 +627,7 @@ class SegmentsClient:
         if labelset is not None:
             query_string += f"?labelset={labelset}"
 
-        r = self._get(query_string, pydantic_model=Sample)
+        r = self._get(query_string, model=Sample)
 
         return r
 
@@ -708,7 +706,7 @@ class SegmentsClient:
             r = self._post(
                 f"/datasets/{dataset_identifier}/samples/",
                 data=payload,
-                pydantic_model=Sample,
+                model=Sample,
             )
             logger.info(f"Added {name}")
 
@@ -768,7 +766,7 @@ class SegmentsClient:
         if embedding is not None:
             payload["embedding"] = embedding
 
-        r = self._patch(f"/samples/{uuid}/", data=payload, pydantic_model=Sample)
+        r = self._patch(f"/samples/{uuid}/", data=payload, model=Sample)
         logger.info(f"Updated {uuid}")
 
         return r
@@ -811,7 +809,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        r = self._get(f"/labels/{sample_uuid}/{labelset}/", pydantic_model=Label)
+        r = self._get(f"/labels/{sample_uuid}/{labelset}/", model=Label)
 
         return r
 
@@ -880,7 +878,7 @@ class SegmentsClient:
                 payload["score"] = score
 
             r = self._put(
-                f"/labels/{sample_uuid}/{labelset}/", data=payload, pydantic_model=Label
+                f"/labels/{sample_uuid}/{labelset}/", data=payload, model=Label
             )
 
             return r
@@ -938,9 +936,7 @@ class SegmentsClient:
         if score is not None:
             payload["score"] = score
 
-        r = self._patch(
-            f"/labels/{sample_uuid}/{labelset}/", data=payload, pydantic_model=Label
-        )
+        r = self._patch(f"/labels/{sample_uuid}/{labelset}/", data=payload, model=Label)
 
         return r
 
@@ -985,7 +981,7 @@ class SegmentsClient:
         """
 
         r = self._get(
-            f"/datasets/{dataset_identifier}/labelsets/", pydantic_model=List[Labelset]
+            f"/datasets/{dataset_identifier}/labelsets/", model=List[Labelset]
         )
 
         return r
@@ -1011,7 +1007,7 @@ class SegmentsClient:
         """
 
         r = self._get(
-            f"/datasets/{dataset_identifier}/labelsets/{name}/", pydantic_model=Labelset
+            f"/datasets/{dataset_identifier}/labelsets/{name}/", model=Labelset
         )
 
         return r
@@ -1049,7 +1045,7 @@ class SegmentsClient:
         r = self._post(
             f"/datasets/{dataset_identifier}/labelsets/",
             data=payload,
-            pydantic_model=Labelset,
+            model=Labelset,
         )
 
         return r
@@ -1094,9 +1090,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        r = self._get(
-            f"/datasets/{dataset_identifier}/releases/", pydantic_model=List[Release]
-        )
+        r = self._get(f"/datasets/{dataset_identifier}/releases/", model=List[Release])
 
         return r
 
@@ -1120,9 +1114,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        r = self._get(
-            f"/datasets/{dataset_identifier}/releases/{name}/", pydantic_model=Release
-        )
+        r = self._get(f"/datasets/{dataset_identifier}/releases/{name}/", model=Release)
 
         return r
 
@@ -1157,7 +1149,7 @@ class SegmentsClient:
         r = self._post(
             f"/datasets/{dataset_identifier}/releases/",
             data=payload,
-            pydantic_model=Release,
+            model=Release,
         )
 
         return r
@@ -1230,14 +1222,14 @@ class SegmentsClient:
         self,
         endpoint: str,
         auth: bool = True,
-        pydantic_model: Optional[T] = None,
+        model: Optional[T] = None,
     ) -> requests.Response:
         """Send a GET request.
 
         Args:
             endpoint: The API endpoint.
             auth: If we want to authorize the request. Defaults to :obj:`True`.
-            pydantic_model: The pydantic class to parse the JSON response into. Defaults to :obj:`None`.
+            model: The class to parse the JSON response into. Defaults to :obj:`None`.
         Returns:
             The ``requests`` library response.
         Raises:
@@ -1261,7 +1253,7 @@ class SegmentsClient:
         endpoint: str,
         data: Optional[Dict[str, Any]] = None,
         auth: bool = True,
-        pydantic_model: Optional[T] = None,
+        model: Optional[T] = None,
     ) -> requests.Response:
         """Send a POST request.
 
@@ -1269,7 +1261,7 @@ class SegmentsClient:
             endpoint: The API endpoint.
             data: The JSON data. Defaults to :obj:`None`.
             auth: If we want to authorize the request with the API key. Defaults to :obj:`True`.
-            pydantic_model: The pydantic class to parse the JSON response into. Defaults to :obj:`None`.
+            model: The class to parse the JSON response into. Defaults to :obj:`None`.
         Returns:
             The ``requests`` library response.
         Raises:
@@ -1294,7 +1286,7 @@ class SegmentsClient:
         endpoint: str,
         data: Optional[Dict[str, Any]] = None,
         auth: bool = True,
-        pydantic_model: Optional[T] = None,
+        model: Optional[T] = None,
     ) -> requests.Response:
         """Send a PUT request.
 
@@ -1302,7 +1294,7 @@ class SegmentsClient:
             endpoint: The API endpoint.
             data: The JSON data. Defaults to :obj:`None`.
             auth: If we want to authorize the request with the API key. Defaults to :obj:`True`.
-            pydantic_model: The pydantic class to parse the JSON response into. Defaults to :obj:`None`.
+            model: The class to parse the JSON response into. Defaults to :obj:`None`.
         Returns:
             The ``requests`` library response.
         Raises:
@@ -1327,7 +1319,7 @@ class SegmentsClient:
         endpoint: str,
         data: Optional[Dict[str, Any]] = None,
         auth: bool = True,
-        pydantic_model: Optional[T] = None,
+        model: Optional[T] = None,
     ) -> requests.Response:
         """Send a PATCH request.
 
@@ -1335,7 +1327,7 @@ class SegmentsClient:
             endpoint: The API endpoint.
             data: The JSON data. Defaults to :obj:`None`.
             auth: If we want to authorize the request with the API key. Defaults to :obj:`True`.
-            pydantic_model: The pydantic class to parse the JSON response into. Defaults to :obj:`None`.
+            model: The class to parse the JSON response into. Defaults to :obj:`None`.
         Returns:
             The ``requests`` library response.
         Raises:
@@ -1360,7 +1352,7 @@ class SegmentsClient:
         endpoint: str,
         data: Optional[Dict[str, Any]] = None,
         auth: bool = True,
-        pydantic_model: Optional[T] = None,
+        model: Optional[T] = None,
     ) -> requests.Response:
         """Send a DELETE request.
 
@@ -1368,7 +1360,7 @@ class SegmentsClient:
             endpoint: The API endpoint.
             data: The JSON data. Defaults to :obj:`None`.
             auth: If we want to authorize the request with the API key. Defaults to :obj:`True`.
-            pydantic_model: The pydantic class to parse the JSON response into. Defaults to :obj:`None`.
+            model: The class to parse the JSON response into. Defaults to :obj:`None`.
         Returns:
             The ``requests`` library response.
         Raises:
