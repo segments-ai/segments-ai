@@ -712,7 +712,7 @@ def export_yolo(
                 # Construct the file name from image and frame name
                 try:
                     frame_name = sample["attributes"]["frames"][j]["name"]
-                except KeyError:
+                except (KeyError, TypeError):
                     frame_name = f"{j + 1:05d}"
                 file_name = f"{dataset.image_dir}/{image_name}-{frame_name}.txt"
 
