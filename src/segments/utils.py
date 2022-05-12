@@ -104,6 +104,7 @@ def export_dataset(
         "semantic-color",
     ] = "coco-panoptic",
     id_increment: int = 1,
+    **kwargs: Any,
 ) -> Optional[Union[Tuple[str, Optional[str]], Optional[str]]]:
     """Export a dataset to a different format.
 
@@ -147,7 +148,11 @@ def export_dataset(
             )
         from .export import export_yolo
 
-        return export_yolo(dataset, export_folder)
+        return export_yolo(
+            dataset,
+            image_width=kwargs.get("image_width", None),
+            image_height=kwargs.get("image_height", None),
+        )
     elif export_format in ["semantic-color", "instance-color", "semantic", "instance"]:
         if dataset.task_type not in [
             "segmentation-bitmap",
