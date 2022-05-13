@@ -9,7 +9,6 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union
 import numpy as np
 import numpy.typing as npt
 from PIL import Image
-from pycocotools import mask
 from pydantic import BaseModel
 from segments.utils import get_semantic_bitmap
 from skimage import img_as_ubyte
