@@ -158,15 +158,15 @@ class SegmentsClient:
         self, api_key: Optional[str] = None, api_url: str = "https://api.segments.ai/"
     ):
         if api_key is None:
-            self.api_key = os.getenv("SEGMENTS_API_KEY")
-            if self.api_key is None:
+            api_key = os.getenv("SEGMENTS_API_KEY")
+            if api_key is None:
                 raise AuthenticationError(
-                    message="Did you set SEGMENTS_API_KEY in your environment?"
+                    message="Please provide an api_key argument or set SEGMENTS_API_KEY in your environment."
                 )
             else:
                 logger.info("Found a Segments API key in your environment.")
-        else:
-            self.api_key = api_key
+
+        self.api_key = api_key
         self.api_url = api_url
 
         # https://realpython.com/python-requests/#performance
@@ -182,7 +182,7 @@ class SegmentsClient:
         self.s3_session.mount("https://", adapter)
 
         try:
-            r = self._get("/api_status/?lib_version=0.58")  # TODO
+            r = self._get("/api_status/?lib_version=1.0.0-rc.0")  # TODO
             if r.status_code == 200:
                 logger.info("Initialized successfully.")
         except NetworkError as e:
