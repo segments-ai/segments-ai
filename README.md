@@ -1,7 +1,7 @@
 # Segments Python SDK
 
 ![tests](https://github.com/segments-ai/python-sdk-improvements/actions/workflows/tests.yaml/badge.svg)
-![docs](https://segments-python-sdk.readthedocs.io/en/latest/?badge=latest)
+[![docs](https://readthedocs.org/projects/segments-python-sdk/badge/?version=latest)](https://segments-python-sdk.readthedocs.io/en/latest/?badge=latest)
 
 Segments.ai is the platform for computer vision experts to manage, label and improve datasets.
 

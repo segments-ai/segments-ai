@@ -115,7 +115,6 @@ def export_dataset(
         id_increment: Increment the category ids with this number. Defaults to ``1``. Ignored unless ``export_format`` is ``semantic`` or ``semantic-color``.
     Returns:
         TODO
-
     """
 
     logger.info("Exporting dataset. This may take a while...")

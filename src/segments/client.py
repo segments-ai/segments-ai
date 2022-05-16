@@ -211,7 +211,6 @@ class SegmentsClient:
 
         >>> with SegmentsClient() as client:
         >>>     client.get_datasets()
-
         """
         self.api_session.close()
         self.s3_session.close()
@@ -466,7 +465,6 @@ class SegmentsClient:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
-
         """
 
         self._delete(f"/datasets/{dataset_identifier}/")
