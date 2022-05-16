@@ -16,8 +16,6 @@ import os
 import sys
 from datetime import datetime
 
-from segments.version import SHORT_VERSION, VERSION
-
 sys.path.insert(0, os.path.abspath(os.path.join("..", "..", "src")))
 
 # -----------------------------------------------------------------------------
@@ -30,9 +28,7 @@ copyright = f"{datetime.today().year}, Segments.ai"
 author = "Arnout Hillen"
 
 # The full version, including alpha/beta/rc tags
-# release = "0.1"
-version = SHORT_VERSION
-release = VERSION
+release = "1.0.0-rc.0"
 
 # -----------------------------------------------------------------------------
 # General configuration
