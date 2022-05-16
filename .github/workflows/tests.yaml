@@ -6,7 +6,7 @@ on:
 
 jobs:
   test:
-    env:
+    secrets:
       PYTHON_PATH: ${{ secrets.PYTHON_PATH }}
       DATASET_OWNER: ${{ secrets.DATASET_OWNER }}
       SEGMENTS_API_KEY: ${{ secrets.SEGMENTS_API_KEY }}
