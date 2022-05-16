@@ -30,7 +30,7 @@ class SegmentsClient:
         self.s3_session.mount('http://', adapter)
         self.s3_session.mount('https://', adapter)
 
-        r = self.get('/api_status/?lib_version=0.69')
+        r = self.get('/api_status/?lib_version=0.70')
         if r.status_code == 200:
             print('Initialized successfully.')
         elif r.status_code == 426:
@@ -304,6 +304,24 @@ class SegmentsClient:
         r = self.post('/datasets/{}/samples/'.format(dataset_identifier), payload)
         print('Added ' + name)
         return r.json()
+
+
+    def add_samples(self, dataset_identifier, samples):
+        """Add samples to a dataset in bulk. When attempting to add samples which already exist, no error is thrown but the existing samples are returned without changes.
+
+        Args:
+            dataset_identifier (str): The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
+            samples (list): A list of dicts with required `name`, `attributes` fields and optional `metadata`, `priority`, `embedding` fields. See `add_sample` for details.
+
+        Returns:
+            list: a list of dicts representing the newly created samples.
+        """
+
+        payload = samples
+
+        r = self.post('/datasets/{}/samples_bulk/'.format(dataset_identifier), payload)
+        return r.json()
+
 
     def update_sample(self, uuid, name=None, attributes=None, metadata=None, priority=None, embedding=None):
         """Update a sample.
