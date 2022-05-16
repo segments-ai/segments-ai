@@ -25,7 +25,7 @@ jobs:
           pip install tox tox-gh-actions
       - name: Test with tox
         run: tox
-        env:
+        with:
           PYTHON_PATH: ${{ secrets.PYTHON_PATH }}
           DATASET_OWNER: ${{ secrets.DATASET_OWNER }}
           SEGMENTS_API_KEY: ${{ secrets.SEGMENTS_API_KEY }}
