@@ -154,7 +154,7 @@
 .. automethod:: segments.client.SegmentsClient.delete_release
 ```
 
-## Upload a file as an asset to Segments' S3 bucket
+## Upload an asset to Segments' S3 bucket
 
 ```{eval-rst}
 .. automethod:: segments.client.SegmentsClient.upload_asset
