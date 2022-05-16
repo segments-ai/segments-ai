@@ -103,7 +103,8 @@ class SegmentsDataset:
                 self.release = json.load(f)
         else:  # If it's a release object
             release_file_url = release_file.attributes.url
-            content = requests.get(release_file_url)
+            # TODO Fix in backend.
+            content = requests.get(release_file_url)  # type:ignore
             self.release = json.loads(content.content)
         self.release_file = release_file
 
@@ -215,7 +216,9 @@ class SegmentsDataset:
 
         logger.info(f"Initialized dataset with {num_samples} images.")
 
-    def _load_image_from_cache(self, sample) -> Tuple[Image.Image, str]:
+    def _load_image_from_cache(
+        self, sample: Dict[str, Any]
+    ) -> Tuple[Optional[Image.Image], str]:
         sample_name = os.path.splitext(sample["name"])[0]
         image_url = sample["attributes"]["image"]["url"]
         image_url_parsed = urlparse(image_url)
@@ -254,18 +257,16 @@ class SegmentsDataset:
                 f"{sample_name}_label_{labelset}{url_extension}",
             )
             if not os.path.exists(segmentation_bitmap_filename):
-                segmentation_bitmap = load_label_bitmap_from_url(
+                return load_label_bitmap_from_url(
                     segmentation_bitmap_url, segmentation_bitmap_filename
                 )
             else:
-                segmentation_bitmap = Image.open(segmentation_bitmap_filename)
+                return Image.open(segmentation_bitmap_filename)
         else:
-            segmentation_bitmap = load_label_bitmap_from_url(segmentation_bitmap_url)
-
-        return segmentation_bitmap
+            return load_label_bitmap_from_url(segmentation_bitmap_url)
 
     @property
-    def categories(self):
+    def categories(self) -> Any:
         return self.release["dataset"]["task_attributes"]["categories"]
         # categories = {}
         # for category in self.release['dataset']['labelsets'][self.labelset]['attributes']['categories']:
@@ -275,7 +276,7 @@ class SegmentsDataset:
     def __len__(self) -> int:
         return len(self.samples)
 
-    def __getitem__(self, index: int) -> Dict[str, Any]:
+    def __getitem__(self, index: int) -> Any:
         sample = self.samples[index]
 
         if (

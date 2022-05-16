@@ -186,7 +186,10 @@ class SegmentsClient:
             if r.status_code == 200:
                 logger.info("Initialized successfully.")
         except NetworkError as e:
-            if e.cause.response.status_code == 426:
+            if (
+                cast(requests.exceptions.RequestException, e.cause).response.status_code
+                == 426
+            ):
                 logger.info("The response HTTP status code is 426 Upgrade Required.")
                 pass
             else:
@@ -252,7 +255,7 @@ class SegmentsClient:
         else:
             r = self._get("/user/datasets/", model=List[Dataset])
 
-        return r
+        return cast(List[Dataset], r)
 
     def get_dataset(self, dataset_identifier: str) -> Dataset:
         """Get a dataset.
@@ -274,7 +277,7 @@ class SegmentsClient:
 
         r = self._get(f"/datasets/{dataset_identifier}/", model=Dataset)
 
-        return r
+        return cast(Dataset, r)
 
     def add_dataset(
         self,
@@ -375,7 +378,7 @@ class SegmentsClient:
             }
             r = self._post("/user/datasets/", data=payload, model=Dataset)
 
-            return r
+            return cast(Dataset, r)
 
     def update_dataset(
         self,
@@ -449,7 +452,7 @@ class SegmentsClient:
         r = self._patch(f"/datasets/{dataset_identifier}/", data=payload, model=Dataset)
         logger.info(f"Updated {dataset_identifier}")
 
-        return r
+        return cast(Dataset, r)
 
     def delete_dataset(self, dataset_identifier: str) -> None:
         """Delete a dataset.
@@ -497,7 +500,7 @@ class SegmentsClient:
             model=Collaborator,
         )
 
-        return r
+        return cast(Collaborator, r)
 
     def delete_dataset_collaborator(
         self, dataset_identifier: str, username: str
@@ -601,7 +604,7 @@ class SegmentsClient:
         except pydantic.ValidationError as e:
             raise ValidationError(message=str(e))
 
-        return results
+        return cast(List[Sample], results)
 
     def get_sample(self, uuid: str, labelset: Optional[str] = None) -> Sample:
         """Get a sample.
@@ -629,7 +632,7 @@ class SegmentsClient:
 
         r = self._get(query_string, model=Sample)
 
-        return r
+        return cast(Sample, r)
 
     def add_sample(
         self,
@@ -710,7 +713,7 @@ class SegmentsClient:
             )
             logger.info(f"Added {name}")
 
-            return r
+            return cast(Sample, r)
 
     def update_sample(
         self,
@@ -769,7 +772,7 @@ class SegmentsClient:
         r = self._patch(f"/samples/{uuid}/", data=payload, model=Sample)
         logger.info(f"Updated {uuid}")
 
-        return r
+        return cast(Sample, r)
 
     def delete_sample(self, uuid: str) -> None:
         """Delete a sample.
@@ -811,7 +814,7 @@ class SegmentsClient:
 
         r = self._get(f"/labels/{sample_uuid}/{labelset}/", model=Label)
 
-        return r
+        return cast(Label, r)
 
     def add_label(
         self,
@@ -881,7 +884,7 @@ class SegmentsClient:
                 f"/labels/{sample_uuid}/{labelset}/", data=payload, model=Label
             )
 
-            return r
+            return cast(Label, r)
 
     def update_label(
         self,
@@ -938,7 +941,7 @@ class SegmentsClient:
 
         r = self._patch(f"/labels/{sample_uuid}/{labelset}/", data=payload, model=Label)
 
-        return r
+        return cast(Label, r)
 
     def delete_label(self, sample_uuid: str, labelset: str = "ground-truth") -> None:
         """Delete a label.
@@ -984,7 +987,7 @@ class SegmentsClient:
             f"/datasets/{dataset_identifier}/labelsets/", model=List[Labelset]
         )
 
-        return r
+        return cast(List[Labelset], r)
 
     def get_labelset(self, dataset_identifier: str, name: str) -> Labelset:
         """Get a labelset.
@@ -1010,7 +1013,7 @@ class SegmentsClient:
             f"/datasets/{dataset_identifier}/labelsets/{name}/", model=Labelset
         )
 
-        return r
+        return cast(Labelset, r)
 
     def add_labelset(
         self, dataset_identifier: str, name: str, description: Optional[str] = None
@@ -1048,7 +1051,7 @@ class SegmentsClient:
             model=Labelset,
         )
 
-        return r
+        return cast(Labelset, r)
 
     def delete_labelset(self, dataset_identifier: str, name: str) -> None:
         """Delete a labelset.
@@ -1092,7 +1095,7 @@ class SegmentsClient:
 
         r = self._get(f"/datasets/{dataset_identifier}/releases/", model=List[Release])
 
-        return r
+        return cast(List[Release], r)
 
     def get_release(self, dataset_identifier: str, name: str) -> Release:
         """Get a release.
@@ -1116,7 +1119,7 @@ class SegmentsClient:
 
         r = self._get(f"/datasets/{dataset_identifier}/releases/{name}/", model=Release)
 
-        return r
+        return cast(Release, r)
 
     def add_release(
         self, dataset_identifier: str, name: str, description: Optional[str] = None
@@ -1152,7 +1155,7 @@ class SegmentsClient:
             model=Release,
         )
 
-        return r
+        return cast(Release, r)
 
     def delete_release(self, dataset_identifier: str, name: str) -> None:
         """Delete a release.

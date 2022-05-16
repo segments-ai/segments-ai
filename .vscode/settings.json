@@ -7,7 +7,8 @@
     "--ignore-missing-imports",
     "--follow-imports=silent",
     "--show-column-numbers",
-    "--strict"
+    "--strict",
+    "--warn-redundant-casts",
   ],
   "python.linting.enabled": true,
   "python.testing.unittestArgs": ["-v", "-s", "./tests", "-p", "test_*.py"],

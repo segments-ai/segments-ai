@@ -32,7 +32,9 @@ except ImportError:
 push_to_hub_original = datasets.Dataset.push_to_hub
 
 
-def push_to_hub(self, repo_id: int, *args: Any, **kwargs: Any) -> None:
+def push_to_hub(
+    self: datasets.Dataset, repo_id: int, *args: Any, **kwargs: Any
+) -> None:
     push_to_hub_original(self, repo_id, *args, **kwargs)
 
     # Upload the label file (https://huggingface.co/datasets/huggingface/label-files)
@@ -94,7 +96,8 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
     #     )
     #     raise e
 
-    content = requests.get(release.attributes.url)
+    # TODO Fix in the backend.
+    content = requests.get(release.attributes.url)  # type:ignore
     release_dict = json.loads(content.content)
 
     task_type = release_dict["dataset"]["task_type"]
@@ -217,10 +220,10 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
             data_row["label"] = label
 
         except (KeyError, TypeError):
-            label: Dict[str, Any] = {"annotations": []}
+            error_label: Dict[str, Any] = {"annotations": []}
             if task_type in ["segmentation-bitmap", "segmentation-bitmap-highres"]:
-                label["segmentation_bitmap"] = {"url": None}
-            data_row["label"] = label
+                error_label["segmentation_bitmap"] = {"url": None}
+            data_row["label"] = error_label
 
         data_rows.append(data_row)
 

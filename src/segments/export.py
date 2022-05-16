@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 import logging
 import os
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union, cast
 
 import numpy as np
 import numpy.typing as npt
@@ -100,7 +100,7 @@ class IdGenerator:
                 low=-max_dist, high=max_dist + 1, size=3
             )
             rgb = tuple(np.maximum(0, np.minimum(255, new_color)))
-            return rgb
+            return cast(RGB, rgb)
 
         category = self.categories[cat_id]
         if category.isthing == 0:
@@ -125,7 +125,7 @@ class IdGenerator:
         return rgb2id(color), color
 
 
-def rgb2id(color: Union[npt.NDArray[Any], RGB]) -> int:
+def rgb2id(color: Union[npt.NDArray[Any], RGB]) -> Union[npt.NDArray[Any], int]:
     """Convert rgb to an id.
 
     Args:
@@ -136,7 +136,8 @@ def rgb2id(color: Union[npt.NDArray[Any], RGB]) -> int:
     if isinstance(color, np.ndarray) and len(color.shape) == 3:
         if color.dtype == np.uint8:
             color = color.astype(np.int32)
-        return color[:, :, 0] + 256 * color[:, :, 1] + 256 * 256 * color[:, :, 2]
+        color_id = color[:, :, 0] + 256 * color[:, :, 1] + 256 * 256 * color[:, :, 2]
+        return cast(npt.NDArray[Any], color_id)
     return int(color[0] + 256 * color[1] + 256 * 256 * color[2])
 
 
@@ -193,7 +194,7 @@ def get_bbox(binary_mask: npt.NDArray[Any]) -> Union[Tuple[int, int, int, int], 
     regions = regionprops(np.uint8(binary_mask))
     if len(regions) == 1:
         bbox = regions[0].bbox
-        return bbox
+        return cast(Tuple[int, int, int, int], bbox)
     else:
         return False
 
