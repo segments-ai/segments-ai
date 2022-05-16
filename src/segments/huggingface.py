@@ -4,7 +4,6 @@ import json
 import logging
 import os
 import tempfile
-import types
 from string import Template
 from typing import TYPE_CHECKING, Any, Dict
 
@@ -14,8 +13,9 @@ from segments.utils import load_image_from_url, load_label_bitmap_from_url
 
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
 if TYPE_CHECKING:
-    import datasets
     from segments.typing import Release
+
+
 #############
 # Variables #
 #############
@@ -335,7 +335,7 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
         "task_category": task_category,
     }
 
-    ## Create readme.md
+    # Create readme.md
     with open(
         os.path.join(os.path.dirname(__file__), "data", "dataset_card_template.md"), "r"
     ) as f:
@@ -343,7 +343,7 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
         readme = template.substitute(info)
         dataset.readme = readme
 
-    ## Update DatasetInfo
+    # Update DatasetInfo
     dataset.info.description = info["short_description"]
     dataset.info.homepage = info["segments_url"]
 
