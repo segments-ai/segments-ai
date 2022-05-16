@@ -647,7 +647,7 @@ class SegmentsClient:
 
         Note:
             - The content of the ``attributes`` field depends on the `sample type <https://docs.segments.ai/reference/sample-and-label-types/sample-types>`__.
-            - If the image is on your local computer, you should first upload it to a cloud storage service like Amazon S3, Google Cloud Storage, Imgur, or `our asset storage service <https://docs.segments.ai/reference/python-sdk#upload-a-file-as-an-asset>`__.
+            - If the image is on your local computer, you should first upload it to a cloud storage service like Amazon S3, Google Cloud Storage, Imgur, or to our asset storage service using :meth:`.upload_asset`.
             - If you create a sample with a URL from a public S3 bucket and you see an error on the platform, make sure to `properly configure your bucket's CORS settings <https://docs.aws.amazon.com/AmazonS3/latest/dev/cors.html>`__.
 
         >>> dataset_identifier = 'jane/flowers'
