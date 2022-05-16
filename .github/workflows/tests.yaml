@@ -25,7 +25,7 @@ jobs:
           pip install tox tox-gh-actions
       - name: Test with tox
         run: tox
-        with:
+        env:
           PYTHON_PATH: ${{ secrets.PYTHON_PATH }}
           DATASET_OWNER: ${{ secrets.DATASET_OWNER }}
           SEGMENTS_API_KEY: ${{ secrets.SEGMENTS_API_KEY }}
@@ -35,3 +35,4 @@ jobs:
           RELEASES: ${{ secrets.RELEASES }}
           SAMPLE_ATTRIBUTE_TYPES: ${{ secrets.SAMPLE_ATTRIBUTE_TYPES }}
           LABEL_ATTRIBUTE_TYPES: ${{ secrets.LABEL_ATTRIBUTE_TYPES }}
+        run: env
