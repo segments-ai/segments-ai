@@ -5,7 +5,6 @@ on:
   - pull_request
 
 env:
-  PYTHON_PATH: ${{ secrets.PYTHON_PATH }}
   DATASET_OWNER: ${{ secrets.DATASET_OWNER }}
   SEGMENTS_API_KEY: ${{ secrets.SEGMENTS_API_KEY }}
   SAMPLE_UUIDS: ${{ secrets.SAMPLE_UUIDS }}
