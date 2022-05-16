@@ -6,17 +6,6 @@ on:
 
 jobs:
   test:
-    secrets:
-      PYTHON_PATH: ${{ secrets.PYTHON_PATH }}
-      DATASET_OWNER: ${{ secrets.DATASET_OWNER }}
-      SEGMENTS_API_KEY: ${{ secrets.SEGMENTS_API_KEY }}
-      SAMPLE_UUIDS: ${{ secrets.SAMPLE_UUIDS }}
-      DATASETS: ${{ secrets.DATASETS }}
-      LABELSETS: ${{ secrets.LABELSETS }}
-      RELEASES: ${{ secrets.RELEASES }}
-      SAMPLE_ATTRIBUTE_TYPES: ${{ secrets.SAMPLE_ATTRIBUTE_TYPES }}
-      LABEL_ATTRIBUTE_TYPES: ${{ secrets.LABEL_ATTRIBUTE_TYPES }}
-
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -36,3 +25,13 @@ jobs:
           pip install tox tox-gh-actions
       - name: Test with tox
         run: tox
+        env:
+          PYTHON_PATH: ${{ secrets.PYTHON_PATH }}
+          DATASET_OWNER: ${{ secrets.DATASET_OWNER }}
+          SEGMENTS_API_KEY: ${{ secrets.SEGMENTS_API_KEY }}
+          SAMPLE_UUIDS: ${{ secrets.SAMPLE_UUIDS }}
+          DATASETS: ${{ secrets.DATASETS }}
+          LABELSETS: ${{ secrets.LABELSETS }}
+          RELEASES: ${{ secrets.RELEASES }}
+          SAMPLE_ATTRIBUTE_TYPES: ${{ secrets.SAMPLE_ATTRIBUTE_TYPES }}
+          LABEL_ATTRIBUTE_TYPES: ${{ secrets.LABEL_ATTRIBUTE_TYPES }}
