@@ -4,6 +4,7 @@ import json
 import os
 import time
 import unittest
+from typing import Any, Dict
 
 from segments.client import SegmentsClient
 from segments.exceptions import NetworkError, ValidationError
@@ -16,6 +17,7 @@ from segments.typing import (
     Release,
     Sample,
 )
+from typing_extensions import Final
 
 
 ##############
@@ -76,7 +78,7 @@ class TestDataset(Test):
             self.client.get_dataset(wrong_dataset_identifier)
 
     def test_add_update_delete_dataset(self) -> None:
-        arguments = {
+        arguments: Dict[str, Any] = {
             "name": "add_dataset",
             "description": "Test add_update_delete_dataset.",
             "task_type": "vector",
@@ -151,7 +153,7 @@ class TestDataset(Test):
     def test_add_delete_dataset_collaborator(self) -> None:
         dataset_identifier = self.owner + "/" + self.datasets[0]
         username = "admin-arnout"
-        role = "admin"
+        role: Final = "admin"
         try:
             collaborator = self.client.add_dataset_collaborator(
                 dataset_identifier, username, role
@@ -192,8 +194,8 @@ class TestSample(Test):
         name = None
         label_status = None
         metadata = None
-        sort = "created"
-        direction = "desc"
+        sort: Final = "created"
+        direction: Final = "desc"
         samples = self.client.get_samples(
             dataset_identifier, name, label_status, metadata, sort, direction
         )
@@ -221,7 +223,7 @@ class TestSample(Test):
         priority = 0
         # embedding = np.zeros(100).tolist()
         name = "Test sample"
-        attributes_dict = {
+        attributes_dict: Dict[str, Dict[str, Any]] = {
             "image": {"image": {"url": "url"}},
             "image-sequence": {
                 "frames": [{"image": {"url": "url"}}, {"image": {"url": ""}}]
@@ -347,7 +349,7 @@ class TestLabel(Test):
                 "weather": "sunny",
             },
         )
-        label_attributes = {
+        label_attributes: Dict[str, Dict[str, Any]] = {
             "image-segmentation": {
                 "format_version": "0.1",
                 "annotations": [
@@ -585,7 +587,7 @@ class TestLabel(Test):
             },
         }
         labelset = "ground-truth"
-        label_status = "PRELABELED"
+        label_status: Final = "PRELABELED"
         score = 1
         for sample_uuid, label_attribute_type in zip(
             self.sample_uuids, self.label_attribute_types
@@ -613,13 +615,13 @@ class TestLabel(Test):
     def test_add_label_validationerror(self) -> None:
         with self.assertRaises(ValidationError):
             wrong_sample_uuid = "12345"
-            wrong_attributes = {}
+            wrong_attributes: Dict[str, Any] = {}
             self.client.add_label(wrong_sample_uuid, wrong_attributes)
 
     def test_update_label_networkerror(self) -> None:
         with self.assertRaises(NetworkError):
             wrong_sample_uuid = "12345"
-            wrong_attributes = {}
+            wrong_attributes: Dict[str, Any] = {}
             self.client.update_label(wrong_sample_uuid, wrong_attributes)
 
 

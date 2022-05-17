@@ -18,6 +18,7 @@ from tqdm import tqdm
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
 if TYPE_CHECKING:
     from segments.dataset import SegmentsDataset
+    from segments.typing import ExportCategory
 
 
 #############
@@ -67,13 +68,6 @@ COLORMAP: ColorMap = [
 ]
 
 
-class Category(BaseModel):
-    id: int
-    name: str
-    color: RGB
-    isthing: bool
-
-
 # https://github.com/cocodataset/panopticapi/blob/master/panopticapi/utils.py
 class IdGenerator:
     """
@@ -86,7 +80,7 @@ class IdGenerator:
     ``isthing`` and ``color``
     """
 
-    def __init__(self, categories: Dict[int, Category]):
+    def __init__(self, categories: Dict[int, ExportCategory]):
         self.taken_colors: Set[RGB] = set()
         self.taken_colors.add((0, 0, 0))
         self.categories = categories
@@ -389,7 +383,7 @@ def export_coco_panoptic(
     }
 
     # CATEGORIES
-    categories = []
+    categories: List[ExportCategory] = []
     for i, category in enumerate(dataset.categories):
         color = category["color"][:3] if "color" in category else get_color(i)
         isthing = int(category["has_instances"]) if "has_instances" in category else 0
@@ -404,7 +398,9 @@ def export_coco_panoptic(
         )
     # print(categories)
 
-    categories_dict = {category.id: category for category in categories}
+    categories_dict: Dict[int, ExportCategory] = {
+        category.id: category for category in categories
+    }
     id_generator = IdGenerator(categories_dict)
 
     # IMAGES AND ANNOTATIONS
@@ -737,7 +733,12 @@ def export_yolo(
 
             if "annotations" in sample and sample["annotations"]:
                 annotations = sample["annotations"]
-                write_yolo_file(file_name, annotations, image_width, image_height)
+                write_yolo_file(
+                    file_name,
+                    annotations,
+                    cast(float, image_width),
+                    cast(float, image_height),
+                )
 
     logger.info(f"Exported. Images and labels in {dataset.image_dir}")
     return dataset.image_dir

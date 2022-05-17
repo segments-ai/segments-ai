@@ -4,7 +4,7 @@ import json
 import logging
 import os
 from multiprocessing.pool import ThreadPool
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
 from urllib.parse import urlparse
 
 import numpy as np
@@ -20,7 +20,7 @@ from tqdm import tqdm
 
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
 if TYPE_CHECKING:
-    from segments.typing import LabelStatus, Release
+    from segments.typing import LabelStatus, Release, ExportCategory
 
 
 #############
@@ -103,8 +103,7 @@ class SegmentsDataset:
                 self.release = json.load(f)
         else:  # If it's a release object
             release_file_url = release_file.attributes.url
-            # TODO Fix in backend.
-            content = requests.get(release_file_url)  # type:ignore
+            content = requests.get(cast(str, release_file_url))  # TODO Fix in backend.
             self.release = json.loads(content.content)
         self.release_file = release_file
 
@@ -266,8 +265,10 @@ class SegmentsDataset:
             return load_label_bitmap_from_url(segmentation_bitmap_url)
 
     @property
-    def categories(self) -> Any:
-        return self.release["dataset"]["task_attributes"]["categories"]
+    def categories(self) -> ExportCategory:
+        return ExportCategory.parse_obj(
+            self.release["dataset"]["task_attributes"]["categories"]
+        )
         # categories = {}
         # for category in self.release['dataset']['labelsets'][self.labelset]['attributes']['categories']:
         #     categories[category['id']] = category['name']
@@ -315,16 +316,21 @@ class SegmentsDataset:
                 )
                 attributes = label["attributes"]
                 annotations = attributes["annotations"]
+                item.update(
+                    {
+                        "segmentation_bitmap": segmentation_bitmap,
+                        "annotations": annotations,
+                        "attributes": attributes,
+                    }
+                )
             except Exception:
-                segmentation_bitmap = attributes = annotations = None
-
-            item.update(
-                {
-                    "segmentation_bitmap": segmentation_bitmap,
-                    "annotations": annotations,
-                    "attributes": attributes,
-                }
-            )
+                item.update(
+                    {
+                        "segmentation_bitmap": None,
+                        "annotations": None,
+                        "attributes": None,
+                    }
+                )
 
         # Vector labels
         elif (
@@ -336,13 +342,12 @@ class SegmentsDataset:
                 label = sample["labels"][self.labelset]
                 attributes = label["attributes"]
                 annotations = attributes["annotations"]
+                item.update({"annotations": annotations, "attributes": attributes})
             except (KeyError, TypeError):
-                attributes = annotations = None
-
-            item.update({"annotations": annotations, "attributes": attributes})
+                item.update({"annotations": None, "attributes": None})
 
         else:
-            assert False
+            raise ValueError("This task type is not yet supported.")
 
         #         # transform
         #         if self.transform is not None:

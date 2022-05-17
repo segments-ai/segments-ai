@@ -5,7 +5,7 @@ import logging
 import os
 import tempfile
 from string import Template
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any, Dict, cast
 
 import requests
 from PIL import Image
@@ -96,8 +96,9 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
     #     )
     #     raise e
 
-    # TODO Fix in the backend.
-    content = requests.get(release.attributes.url)  # type:ignore
+    content = requests.get(
+        cast(str, release.attributes.url)  # TODO Fix in the backend.
+    )
     release_dict = json.loads(content.content)
 
     task_type = release_dict["dataset"]["task_type"]

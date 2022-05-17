@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import logging
 from io import BytesIO
-from typing import TYPE_CHECKING, Any, Dict, Mapping, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Mapping, Optional, Tuple, Union, cast
 
 import numpy as np
 import numpy.typing as npt
@@ -65,15 +65,15 @@ def bitmap2file(
 
 
 def get_semantic_bitmap(
-    instance_bitmap: npt.NDArray[np.uint32],
-    annotations: Dict[str, Any],
+    instance_bitmap: Optional[npt.NDArray[np.uint32]] = None,
+    annotations: Optional[Dict[str, Any]] = None,
     id_increment: int = 1,
 ) -> Optional[npt.NDArray[np.uint32]]:
     """Convert an instance bitmap and annotations dict into a segmentation bitmap.
 
     Args:
-        instance_bitmap: A :class:`numpy.ndarray` with :class:`numpy.uint32` ``dtype`` where each unique value represents an instance id.
-        annotations: An annotations dictionary.
+        instance_bitmap: A :class:`numpy.ndarray` with :class:`numpy.uint32` ``dtype`` where each unique value represents an instance id. Defaults to :obj:`None`.
+        annotations: An annotations dictionary. Defaults to :obj:`None`.
         id_increment: Increment the category ids with this number. Defaults to ``1``.
     Returns:
         A :class:`numpy.ndarray` with :class:`numpy.uint32` ``dtype`` where each unique value represents a category id.
@@ -203,18 +203,18 @@ def load_label_bitmap_from_url(
         bitmap: Image.Image,
     ) -> npt.NDArray[np.uint32]:
 
-        bitmap = np.array(bitmap)
-        bitmap[:, :, 3] = 0
-        bitmap = bitmap.view(np.uint32).squeeze(2)
-        return bitmap
+        bitmap_array = np.array(bitmap)
+        bitmap_array[:, :, 3] = 0
+        bitmap_array = bitmap_array.view(np.uint32).squeeze(2)
+        return bitmap_array
 
     bitmap = Image.open(BytesIO(session.get(url).content))
-    bitmap = extract_bitmap(bitmap)
+    bitmap_array = extract_bitmap(bitmap)
 
     if save_filename is not None:
-        Image.fromarray(bitmap).save(save_filename)
+        Image.fromarray(bitmap_array).save(save_filename)
 
-    return bitmap
+    return bitmap_array
 
 
 def load_release(release: Release) -> Any:
@@ -225,7 +225,7 @@ def load_release(release: Release) -> Any:
     Returns:
         A JSON with the release labels.
     """
-    release_file = release.attributes.url
+    release_file = cast(str, release.attributes.url)  # TODO Fix in the backend.
     content = requests.get(release_file)
     return json.loads(content.content)
 

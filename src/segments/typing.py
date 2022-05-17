@@ -57,7 +57,7 @@ class AuthHeader(TypedDict):
 class URL(BaseModel):
     url: Optional[
         str
-    ] = None  # TODO remove optional (e.g., does not return an URL when adding a release).
+    ] = None  # TODO Remove optional (e.g., the backend does not return an URL when adding a release).
 
 
 class Release(BaseModel):
@@ -458,3 +458,13 @@ class Dataset(BaseModel):
     noncollaborator_can_review: Optional[bool] = None
     tasks: Optional[List[Dict[str, Any]]] = None
     embeddings_enabled: Optional[bool] = None
+
+
+####################
+# Segments dataset #
+####################
+class ExportCategory(BaseModel):
+    id: int
+    name: str
+    color: RGB
+    isthing: bool
