@@ -20,7 +20,7 @@ from tqdm import tqdm
 
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
 if TYPE_CHECKING:
-    from segments.typing import LabelStatus, Release, ExportCategory
+    from segments.typing import ExportCategory, LabelStatus, Release
 
 
 #############
