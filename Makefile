@@ -12,7 +12,7 @@ checks :
 
 .PHONY : format
 format :
-	isort src tests setup.py
-	black src tests setup.py
-	flynt src tests setup.py
-	flake8 src tests setup.py
+	isort src tests setup.py docs/source/conf.py
+	black src tests setup.py docs/source/conf.py
+	flynt src tests setup.py docs/source/conf.py
+	flake8 src tests setup.py docs/source/conf.py
