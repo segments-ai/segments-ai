@@ -4,7 +4,7 @@ import json
 import os
 import time
 import unittest
-from typing import Any, Dict
+from typing import Any, Dict, cast
 
 from segments.client import SegmentsClient
 from segments.exceptions import NetworkError, ValidationError
@@ -27,25 +27,27 @@ class Test(unittest.TestCase):
     def setUp(self) -> None:
         API_KEY = os.getenv("SEGMENTS_API_KEY")
         API_URL = os.getenv("SEGMENTS_API_URL")
-        self.owner = os.getenv("DATASET_OWNER", "")
+        self.owner = cast(str, os.getenv("DATASET_OWNER"))
         self.client = (
             SegmentsClient(api_key=API_KEY, api_url=API_URL)
             if API_URL is not None
             else SegmentsClient(api_key=API_KEY)
         )
-        self.datasets = json.loads(os.getenv("DATASETS", ""))
+        self.datasets = json.loads(cast(str, os.getenv("DATASETS")))
         # First sample uuid.
-        self.sample_uuids = json.loads(os.getenv("SAMPLE_UUIDS", ""))
+        self.sample_uuids = json.loads(cast(str, os.getenv("SAMPLE_UUIDS")))
         # First sample of first dataset.
-        self.labelsets = json.loads(os.getenv("LABELSETS", ""))
+        self.labelsets = json.loads(cast(str, os.getenv("LABELSETS")))
         # Releases of first dataset.
-        self.releases = json.loads(os.getenv("RELEASES", ""))
+        self.releases = json.loads(cast(str, os.getenv("RELEASES")))
         # Sample attribute type of the datasets.
         self.sample_attribute_types = json.loads(
-            os.getenv("SAMPLE_ATTRIBUTE_TYPES", "")
+            cast(str, os.getenv("SAMPLE_ATTRIBUTE_TYPES"))
         )
         # Label attribute type of the datasets.
-        self.label_attribute_types = json.loads(os.getenv("LABEL_ATTRIBUTE_TYPES", ""))
+        self.label_attribute_types = json.loads(
+            cast(str, os.getenv("LABEL_ATTRIBUTE_TYPES"))
+        )
         self.TIME_INTERVAL = 0.2  # Wait for API call to complete.
 
     def tearDown(self) -> None:

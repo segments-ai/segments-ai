@@ -32,6 +32,9 @@ except ImportError:
 push_to_hub_original = datasets.Dataset.push_to_hub
 
 
+#############
+# Functions #
+#############
 def push_to_hub(
     self: datasets.Dataset, repo_id: int, *args: Any, **kwargs: Any
 ) -> None:

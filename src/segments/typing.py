@@ -1,6 +1,6 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Extra
 from typing_extensions import Literal, TypedDict
 
 #######################################
@@ -40,8 +40,8 @@ InputType = Literal["select", "text", "number", "checkbox"]
 Category = Literal[
     "street_scenery", "garden", "agriculture", "satellite", "people", "medical", "other"
 ]
-RGB = List[float]  # TODO Tuple[float, float, float]
-RGBA = List[float]  # TODO Tuple[float, float, float, float]
+RGB = Tuple[int, int, int]
+RGBA = Tuple[int, int, int, int]
 FormatVersion = Union[float, str]
 ObjectAttributes = Dict[str, Union[str, bool]]
 ImageAttributes = Dict[str, Union[str, bool]]
@@ -463,8 +463,12 @@ class Dataset(BaseModel):
 ####################
 # Segments dataset #
 ####################
-class ExportCategory(BaseModel):
+class SegmentsDatasetCategory(BaseModel):
     id: int
     name: str
-    color: RGB
-    isthing: bool
+    color: Optional[RGB] = None
+    attributes: Optional[List[Any]] = None
+
+    class Config:
+        allow_population_by_field_name = True
+        extra = Extra.allow

@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union, 
 import numpy as np
 import numpy.typing as npt
 from PIL import Image
+from segments.typing import SegmentsDatasetCategory
 from segments.utils import get_semantic_bitmap
 from skimage import img_as_ubyte
 from skimage.measure import regionprops
@@ -17,7 +18,6 @@ from tqdm import tqdm
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
 if TYPE_CHECKING:
     from segments.dataset import SegmentsDataset
-    from segments.typing import ExportCategory
 
 
 #############
@@ -79,7 +79,7 @@ class IdGenerator:
     ``isthing`` and ``color``
     """
 
-    def __init__(self, categories: Dict[int, ExportCategory]):
+    def __init__(self, categories: Dict[int, SegmentsDatasetCategory]):
         self.taken_colors: Set[RGB] = set()
         self.taken_colors.add((0, 0, 0))
         self.categories = categories
@@ -348,7 +348,7 @@ def export_coco_instance(
     json_data = {
         "info": info,
         # 'licenses': licenses,
-        "categories": categories,
+        "categories": [category.dict() for category in categories],
         "images": images,
         "annotations": annotations
         #     'segment_info': [] # Only in Panoptic annotations
@@ -382,22 +382,24 @@ def export_coco_panoptic(
     }
 
     # CATEGORIES
-    categories: List[ExportCategory] = []
+    categories: List[SegmentsDatasetCategory] = []
     for i, category in enumerate(dataset.categories):
-        color = category["color"][:3] if "color" in category else get_color(i)
-        isthing = int(category["has_instances"]) if "has_instances" in category else 0
+        color = category.color[:3] if category.color else get_color(i)
+        isthing = (
+            int(category.has_instances) if hasattr(category, "has_instances") else 0
+        )
 
         categories.append(
-            {
-                "id": category["id"],
-                "name": category["name"],
-                "color": color,
-                "isthing": isthing,
-            }
+            SegmentsDatasetCategory(
+                id=category.id,
+                name=category.name,
+                color=color,
+                isthing=isthing,
+            )
         )
     # print(categories)
 
-    categories_dict: Dict[int, ExportCategory] = {
+    categories_dict: Dict[int, SegmentsDatasetCategory] = {
         category.id: category for category in categories
     }
     id_generator = IdGenerator(categories_dict)
@@ -521,7 +523,7 @@ def export_coco_panoptic(
     # PUT EVERYTHING TOGETHER
     json_data = {
         "info": info,
-        "categories": categories,
+        "categories": [category.dict() for category in categories],
         "images": images,
         "annotations": annotations,
     }

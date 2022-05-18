@@ -12,10 +12,10 @@
   ],
   "python.linting.enabled": true,
   "python.testing.unittestArgs": ["-v", "-s", "./tests", "-p", "test_*.py"],
-  "python.testing.pytestArgs": ["tests"],
+  "python.testing.pytestArgs": [".", "--exitfirst", "--verbose", "-rsA", "--no-cov"],
   "python.testing.unittestEnabled": false,
   "python.testing.nosetestsEnabled": false,
   "python.testing.pytestEnabled": true,
   "python.analysis.typeCheckingMode": "basic",
-  "python.envFile": "${workspaceFolder}/.env"
+  "python.envFile": "${workspaceFolder}/.env",
 }

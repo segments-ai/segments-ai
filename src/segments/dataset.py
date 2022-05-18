@@ -4,24 +4,21 @@ import json
 import logging
 import os
 from multiprocessing.pool import ThreadPool
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 from urllib.parse import urlparse
 
 import numpy as np
 import numpy.typing as npt
 import requests
 from PIL import Image
+from pydantic import parse_obj_as
+from segments.typing import SegmentsDatasetCategory, LabelStatus, Release
 from segments.utils import (
     handle_exif_rotation,
     load_image_from_url,
     load_label_bitmap_from_url,
 )
 from tqdm import tqdm
-
-# https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
-if TYPE_CHECKING:
-    from segments.typing import ExportCategory, LabelStatus, Release
-
 
 #############
 # Variables #
@@ -35,10 +32,12 @@ class SegmentsDataset:
     >>> # pip install --upgrade segments-ai
     >>> from segments import SegmentsClient, SegmentsDataset
     >>> from segments.utils import export_dataset
+    >>>
     >>> # Initialize a SegmentsDataset from the release file
     >>> client = SegmentsClient('YOUR_API_KEY')
     >>> release = client.get_release('jane/flowers', 'v1.0') # Alternatively: release = 'flowers-v1.0.json'
     >>> dataset = SegmentsDataset(release, labelset='ground-truth', filter_by=['LABELED', 'REVIEWED'])
+    >>>
     >>> # Export to COCO panoptic format
     >>> export_format = 'coco-panoptic'
     >>> export_dataset(dataset, export_format)
@@ -48,25 +47,29 @@ class SegmentsDataset:
     >>> import matplotlib.pyplot as plt
     >>> from segments.utils import get_semantic_bitmap
     >>> for sample in dataset:
+    >>>
     >>>     # Print the sample name and list of labeled objects
     >>>     print(sample['name'])
     >>>     logger.info(sample['annotations'])
+    >>>
     >>>     # Show the image
     >>>     plt.imshow(sample['image'])
     >>>     plt.show()
+    >>>
     >>>     # Show the instance segmentation label
     >>>     plt.imshow(sample['segmentation_bitmap'])
     >>>     plt.show()
+    >>>
     >>>     # Show the semantic segmentation label
     >>>     semantic_bitmap = get_semantic_bitmap(sample['segmentation_bitmap'], sample['annotations'])
     >>>     plt.imshow(semantic_bitmap)
     >>>     plt.show()
 
     Args:
-        release_file: Path to a release file, or a release class resulting from ``client.get_release()``.
+        release_file: Path to a release file, or a release class resulting from :meth:`.get_release`.
         labelset: The labelset that should be loaded. Defaults to ``ground-truth``.
         filter_by: A list of label statuses to filter by. Defaults to :obj:`None`.
-        filter_by_metadata: a dict of metadata key:value pairs to filter by. Filters are ANDed together. Defaults to :obj:`None`.
+        filter_by_metadata: A dict of metadata key:value pairs to filter by. Filters are ANDed together. Defaults to :obj:`None`.
         segments_dir: The directory where the data will be downloaded to for caching. Set to :obj:`None` to disable caching. Defaults to ``segments``.
         preload: Whether the data should be pre-downloaded when the dataset is initialized. Ignored if ``segments_dir`` is :obj:`None`. Defaults to :obj:`True`.
     Raises:
@@ -86,9 +89,7 @@ class SegmentsDataset:
     ):
         self.labelset = labelset
         self.filter_by = (
-            [filter_by]
-            if filter_by is not None and not isinstance(filter_by, list)
-            else filter_by
+            [filter_by] if filter_by and not isinstance(filter_by, list) else filter_by
         )
         # if self.filter_by is not None:
         #     self.filter_by = [s.lower() for s in self.filter_by]
@@ -96,6 +97,7 @@ class SegmentsDataset:
         self.segments_dir = segments_dir
         self.caching_enabled = segments_dir is not None
         self.preload = preload
+        self._index = 0
 
         # if urlparse(release_file).scheme in ('http', 'https'): # If it's a url
         if isinstance(release_file, str):  # If it's a file path
@@ -265,9 +267,10 @@ class SegmentsDataset:
             return load_label_bitmap_from_url(segmentation_bitmap_url)
 
     @property
-    def categories(self) -> ExportCategory:
-        return ExportCategory.parse_obj(
-            self.release["dataset"]["task_attributes"]["categories"]
+    def categories(self) -> List[SegmentsDatasetCategory]:
+        return parse_obj_as(
+            List[SegmentsDatasetCategory],
+            self.release["dataset"]["task_attributes"]["categories"],
         )
         # categories = {}
         # for category in self.release['dataset']['labelsets'][self.labelset]['attributes']['categories']:
@@ -277,8 +280,8 @@ class SegmentsDataset:
     def __len__(self) -> int:
         return len(self.samples)
 
-    def __getitem__(self, index: int) -> Any:
-        sample = self.samples[index]
+    def __getitem__(self, index: int) -> Dict[str, Any]:
+        sample: Dict[str, Any] = self.samples[index]
 
         if (
             self.task_type == "pointcloud-segmentation"
@@ -289,11 +292,10 @@ class SegmentsDataset:
         # Load the image
         try:
             image, image_filename = self._load_image_from_cache(sample)
-        except Exception as e:
+        except TypeError:
             logger.error(
                 f"Something went wrong loading sample {sample['name']}: {sample}"
             )
-            raise e
 
         item = {
             "uuid": sample["uuid"],
@@ -323,7 +325,7 @@ class SegmentsDataset:
                         "attributes": attributes,
                     }
                 )
-            except Exception:
+            except TypeError:
                 item.update(
                     {
                         "segmentation_bitmap": None,
@@ -354,3 +356,14 @@ class SegmentsDataset:
         #             item = self.transform(item)
 
         return item
+
+    def __iter__(self) -> SegmentsDataset:
+        return self
+
+    def __next__(self) -> Dict[str, Any]:
+        if self._index < len(self):
+            result = self[self._index]
+            self._index += 1
+            return result
+        else:
+            raise StopIteration
