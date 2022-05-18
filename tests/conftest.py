@@ -83,3 +83,8 @@ def label_attribute_types() -> List[str]:
 def TIME_INTERVAL() -> float:
     """Wait for API call to complete."""
     return 0.2
+
+
+@pytest.fixture
+def TMP_DIR() -> str:
+    return "./tmp"
