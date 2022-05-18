@@ -141,9 +141,9 @@ def export_dataset(
 
         return export_coco_instance(dataset, export_folder)
     elif export_format == "yolo":
-        if dataset.task_type not in ["vector", "bboxes"]:
+        if dataset.task_type not in ["vector", "bboxes", "image-vector-sequence"]:
             raise ValueError(
-                "Only datasets of type 'vector' and 'bboxes' can be exported to this format."
+                "Only datasets of type 'vector', 'bboxes' and 'image-vector-sequence' can be exported to this format."
             )
         from .export import export_yolo
 

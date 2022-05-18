@@ -39,6 +39,7 @@ setup(
     name="segments-ai",  # How you named your package folder (MyLib)
     package_dir={"": "src"},
     packages=["segments"],  # Chose the same as "name"
+    package_data={"segments": ["data/*"]},
     version=VERSION,  # Start with a small number and increase it with every change you make
     license="MIT",  # Chose a license from here: https://help.github.com/articles/licensing-a-repository
     description="",  # Give a short description about your library

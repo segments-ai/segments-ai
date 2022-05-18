@@ -707,7 +707,7 @@ def export_yolo(
                     frame_name = f"{j + 1:05d}"
                 file_name = f"{dataset.image_dir}/{image_name}-{frame_name}.txt"
 
-                # Testing on x is the same as testing len(x)>0 (this also checks that x is not None)
+                # Testing on x is the same as testing len(x)>0 (this also checks that x is not None - see truthy and falsy values in Python)
                 # https://stackoverflow.com/questions/39983695/what-is-truthy-and-falsy-how-is-it-different-from-true-and-false
                 if "annotations" in frame and frame["annotations"]:
                     annotations = frame["annotations"]

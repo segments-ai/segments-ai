@@ -87,6 +87,7 @@ class SegmentsDataset:
         segments_dir: str = "segments",
         preload: bool = True,
     ):
+
         self.labelset = labelset
         self.filter_by = (
             [filter_by] if filter_by and not isinstance(filter_by, list) else filter_by
@@ -132,18 +133,15 @@ class SegmentsDataset:
         if self.task_type not in [
             "segmentation-bitmap",
             "segmentation-bitmap-highres",
-            "image-vector-sequence",
-            "bboxes",
             "vector",
-            "pointcloud-cuboid",
-            "pointcloud-cuboid-sequence",
+            "bboxes",
+            "keypoints",
+            "image-vector-sequence",
+            "pointcloud-detection",
             "pointcloud-segmentation",
-            "pointcloud-segmentation-sequence",
-            "text-named-entities",
-            "text-span-categorization",
         ]:
             raise ValueError(
-                "You can only create a dataset for tasks of type 'segmentation-bitmap', 'segmentation-bitmap-highres', 'image-vector-sequence', 'bboxes', 'vector', 'pointcloud-cuboid', 'pointcloud-cuboid-sequence', 'pointcloud-segmentation', 'pointcloud-segmentation-sequence', 'text-named-entities', or 'text-span-categorization', for now."
+                "You can only create a dataset for tasks of type 'segmentation-bitmap', 'segmentation-bitmap-highres', 'vector', 'bboxes', 'keypoints', 'image-vector-sequence', 'pointcloud-detection', 'pointcloud-segmentation' for now."
             )
 
         self.load_dataset()
@@ -178,9 +176,8 @@ class SegmentsDataset:
         if self.filter_by_metadata:
             filtered_samples = []
             for sample in samples:
-                if (
-                    self.filter_by_metadata.items() <= sample["metadata"].items()
-                ):  # https://stackoverflow.com/a/41579450/1542912
+                # https://stackoverflow.com/a/41579450/1542912
+                if self.filter_by_metadata.items() <= sample["metadata"].items():
                     filtered_samples.append(sample)
             samples = filtered_samples
 
@@ -221,6 +218,7 @@ class SegmentsDataset:
     def _load_image_from_cache(
         self, sample: Dict[str, Any]
     ) -> Tuple[Optional[Image.Image], str]:
+
         sample_name = os.path.splitext(sample["name"])[0]
         image_url = sample["attributes"]["image"]["url"]
         image_url_parsed = urlparse(image_url)
@@ -247,6 +245,7 @@ class SegmentsDataset:
     def _load_segmentation_bitmap_from_cache(
         self, sample: Dict[str, Any], labelset: str
     ) -> Union[npt.NDArray[np.uint32], Image.Image]:
+
         sample_name = os.path.splitext(sample["name"])[0]
         label = sample["labels"][labelset]
         segmentation_bitmap_url = label["attributes"]["segmentation_bitmap"]["url"]
@@ -284,10 +283,11 @@ class SegmentsDataset:
     def __getitem__(self, index: int) -> Dict[str, Any]:
         sample: Dict[str, Any] = self.samples[index]
 
-        if (
-            self.task_type == "pointcloud-segmentation"
-            or self.task_type == "pointcloud-detection"
-        ):
+        if self.task_type in [
+            "pointcloud-segmentation",
+            "pointcloud-detection",
+            "image-vector-sequence",
+        ]:
             return sample
 
         # Load the image

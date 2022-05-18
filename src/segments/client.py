@@ -676,7 +676,7 @@ class SegmentsClient:
             A newly created sample.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the sample attributes fails.
-            :exc:`~segments.exceptions.ValidationError`: If validation of the samples fails.
+            :exc:`~segments.exceptions.ValidationError`: If validation of the sample fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
@@ -712,6 +712,50 @@ class SegmentsClient:
             logger.info(f"Added {name}")
 
             return cast(Sample, r)
+
+    def add_samples(
+        self, dataset_identifier: str, samples: List[Dict[str, Any]]
+    ) -> List[Sample]:
+        """Add samples to a dataset in bulk. When attempting to add samples which already exist, no error is thrown but the existing samples are returned without changes.
+
+        Args:
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
+            samples: A list of dicts with required ``name``, ``attributes`` fields and optional ``metadata``, ``priority``, ``embedding`` fields. See :meth:`.add_sample` for details.
+        Returns:
+            A list of the newly created samples.
+        Raises:
+            :exc:`KeyError`: If 'name' or 'attributes' is not in a sample dict.
+            :exc:`~segments.exceptions.ValidationError`: If validation of the attributes of a sample fails.
+            :exc:`~segments.exceptions.ValidationError`: If validation of a sample fails.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+        """
+
+        # Check the input
+        for sample in samples:
+            if "name" not in sample or "attributes" not in sample:
+                raise KeyError(
+                    f"Please add a name and attributes to your sample: {sample}"
+                )
+
+            try:
+                parse_obj_as(SampleAttributes, sample["attributes"])
+            except pydantic.ValidationError as e:
+                logger.error(
+                    "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
+                )
+                raise ValidationError(message=str(e))
+
+        payload = samples
+
+        r = self._post(
+            f"/datasets/{dataset_identifier}/samples_bulk/",
+            data=payload,
+            model=List[Sample],
+        )
+
+        return cast(List[Sample], r)
 
     def update_sample(
         self,
