@@ -30,7 +30,7 @@ class Test(unittest.TestCase):
         self.owner = cast(str, os.getenv("DATASET_OWNER"))
         self.client = (
             SegmentsClient(api_key=API_KEY, api_url=API_URL)
-            if API_URL is not None
+            if API_URL
             else SegmentsClient(api_key=API_KEY)
         )
         self.datasets = json.loads(cast(str, os.getenv("DATASETS")))

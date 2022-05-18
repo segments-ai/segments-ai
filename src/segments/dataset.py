@@ -91,7 +91,7 @@ class SegmentsDataset:
         self.filter_by = (
             [filter_by] if filter_by and not isinstance(filter_by, list) else filter_by
         )
-        # if self.filter_by is not None:
+        # if self.filter_by:
         #     self.filter_by = [s.lower() for s in self.filter_by]
         self.filter_by_metadata = filter_by_metadata
         self.segments_dir = segments_dir
@@ -160,21 +160,21 @@ class SegmentsDataset:
 
         # Load and filter the samples
         samples = self.release["dataset"]["samples"]
-        if self.filter_by is not None:
+        if self.filter_by:
             filtered_samples = []
             for sample in samples:
-                if sample["labels"][self.labelset] is not None:
+                if sample["labels"][self.labelset]:
                     label_status = sample["labels"][self.labelset][
                         "label_status"
                     ].lower()
                 else:
                     label_status = "unlabeled"
 
-                if self.filter_by is not None and label_status in self.filter_by:
+                if self.filter_by and label_status in self.filter_by:
                     filtered_samples.append(sample)
             samples = filtered_samples
 
-        if self.filter_by_metadata is not None:
+        if self.filter_by_metadata:
             filtered_samples = []
             for sample in samples:
                 if (
@@ -352,7 +352,7 @@ class SegmentsDataset:
             raise ValueError("This task type is not yet supported.")
 
         #         # transform
-        #         if self.transform is not None:
+        #         if self.transform:
         #             item = self.transform(item)
 
         return item

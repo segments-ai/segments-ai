@@ -25,7 +25,7 @@ def owner() -> str:
 def client(API_KEY: str, API_URL: Optional[str]) -> Iterable[SegmentsClient]:
     client = (
         SegmentsClient(api_key=API_KEY, api_url=API_URL)
-        if API_URL is not None
+        if API_URL
         else SegmentsClient(api_key=API_KEY)
     )
     yield client

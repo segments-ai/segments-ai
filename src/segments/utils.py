@@ -178,7 +178,7 @@ def load_image_from_url(url: str, save_filename: Optional[str] = None) -> Image.
     image = Image.open(BytesIO(session.get(url).content))
     # urllib.request.urlretrieve(url, save_filename)
 
-    if save_filename is not None:
+    if save_filename:
         if "exif" in image.info:
             image.save(save_filename, exif=image.info["exif"])
         else:
@@ -211,7 +211,7 @@ def load_label_bitmap_from_url(
     bitmap = Image.open(BytesIO(session.get(url).content))
     bitmap_array = extract_bitmap(bitmap)
 
-    if save_filename is not None:
+    if save_filename:
         Image.fromarray(bitmap_array).save(save_filename)
 
     return bitmap_array

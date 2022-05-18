@@ -91,7 +91,7 @@ def exception_handler(
                     message = r_json.get("message", "")
                     if message.startswith("You have exceeded"):
                         raise APILimitError(message)
-                if model is not None:
+                if model:
                     m = parse_obj_as(model, r_json)
                     return m
             return r
@@ -249,7 +249,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        if user is not None:
+        if user:
             r = self._get(f"/users/{user}/datasets/", model=List[Dataset])
         else:
             r = self._get("/user/datasets/", model=List[Dataset])
@@ -421,31 +421,31 @@ class SegmentsClient:
 
         payload: Dict[str, Any] = {}
 
-        if description is not None:
+        if description:
             payload["description"] = description
 
-        if task_type is not None:
+        if task_type:
             payload["task_type"] = task_type
 
-        if task_attributes is not None:
+        if task_attributes:
             payload["task_attributes"] = task_attributes
 
-        if category is not None:
+        if category:
             payload["category"] = category
 
-        if public is not None:
+        if public:
             payload["public"] = public
 
-        if readme is not None:
+        if readme:
             payload["readme"] = readme
 
-        if enable_skip_labeling is not None:
+        if enable_skip_labeling:
             payload["enable_skip_labeling"] = enable_skip_labeling
 
-        if enable_skip_reviewing is not None:
+        if enable_skip_reviewing:
             payload["enable_skip_reviewing"] = enable_skip_reviewing
 
-        if enable_ratings is not None:
+        if enable_ratings:
             payload["enable_ratings"] = enable_ratings
 
         r = self._patch(f"/datasets/{dataset_identifier}/", data=payload, model=Dataset)
@@ -564,17 +564,17 @@ class SegmentsClient:
         query_string = f"?per_page={per_page}&page={page}"
 
         # filter by name
-        if name is not None:
+        if name:
             query_string += f"&name__contains={name}"
 
         # filter by metadata
-        if metadata is not None:
+        if metadata:
             if isinstance(metadata, str):
                 metadata = [metadata]
             query_string += f"&filters={','.join(metadata)}"
 
         # filter by label status
-        if label_status is not None:
+        if label_status:
             if isinstance(label_status, str):
                 label_status = [label_status]
             assert isinstance(label_status, list)
@@ -625,7 +625,7 @@ class SegmentsClient:
 
         query_string = f"/samples/{uuid}/"
 
-        if labelset is not None:
+        if labelset:
             query_string += f"?labelset={labelset}"
 
         r = self._get(query_string, model=Sample)
@@ -695,13 +695,13 @@ class SegmentsClient:
                 "attributes": attributes,
             }
 
-            if metadata is not None:
+            if metadata:
                 payload["metadata"] = metadata
 
-            if priority is not None:
+            if priority:
                 payload["priority"] = priority
 
-            if embedding is not None:
+            if embedding:
                 payload["embedding"] = embedding
 
             r = self._post(
@@ -752,19 +752,19 @@ class SegmentsClient:
 
         payload: Dict[str, Any] = {}
 
-        if name is not None:
+        if name:
             payload["name"] = name
 
-        if attributes is not None:
+        if attributes:
             payload["attributes"] = attributes
 
-        if metadata is not None:
+        if metadata:
             payload["metadata"] = metadata
 
-        if priority is not None:
+        if priority:
             payload["priority"] = priority
 
-        if embedding is not None:
+        if embedding:
             payload["embedding"] = embedding
 
         r = self._patch(f"/samples/{uuid}/", data=payload, model=Sample)
@@ -875,7 +875,7 @@ class SegmentsClient:
                 "attributes": attributes,
             }
 
-            if score is not None:
+            if score:
                 payload["score"] = score
 
             r = self._put(
@@ -928,13 +928,13 @@ class SegmentsClient:
 
         payload: Dict[str, Any] = {}
 
-        if attributes is not None:
+        if attributes:
             payload["attributes"] = attributes
 
-        if label_status is not None:
+        if label_status:
             payload["label_status"] = label_status
 
-        if score is not None:
+        if score:
             payload["score"] = score
 
         r = self._patch(f"/labels/{sample_uuid}/{labelset}/", data=payload, model=Label)

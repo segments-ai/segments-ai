@@ -173,7 +173,7 @@ def colorize(
 
     for id in indices:
         mask = img == id
-        if colormap is not None:
+        if colormap:
             color = colormap[id - 1]
         else:
             color = get_color(id - 1)
@@ -254,12 +254,8 @@ def export_coco_instance(
                 "id": image_id,
                 # 'license': 1,
                 "file_name": sample["file_name"],
-                "height": sample["image"].size[1]
-                if sample["image"] is not None
-                else None,
-                "width": sample["image"].size[0]
-                if sample["image"] is not None
-                else None,
+                "height": sample["image"].size[1] if sample["image"] else None,
+                "width": sample["image"].size[0] if sample["image"] else None,
                 #         'date_captured': "2013-11-14 17:02:52",
                 #         'coco_url': "http://images.cocodataset.org/val2017/000000397133.jpg",
                 #         'flickr_url': "http://farm7.staticflickr.com/6116/6255196340_da26cf2c9e_z.jpg",
@@ -419,12 +415,8 @@ def export_coco_panoptic(
             {
                 "id": image_id,
                 "file_name": sample["file_name"],
-                "height": sample["image"].size[1]
-                if sample["image"] is not None
-                else None,
-                "width": sample["image"].size[0]
-                if sample["image"] is not None
-                else None,
+                "height": sample["image"].size[1] if sample["image"] else None,
+                "width": sample["image"].size[0] if sample["image"] else None,
             }
         )
 
