@@ -12,7 +12,7 @@ import numpy.typing as npt
 import requests
 from PIL import Image
 from pydantic import parse_obj_as
-from segments.typing import SegmentsDatasetCategory, LabelStatus, Release
+from segments.typing import LabelStatus, Release, SegmentsDatasetCategory
 from segments.utils import (
     handle_exif_rotation,
     load_image_from_url,
@@ -97,6 +97,7 @@ class SegmentsDataset:
         self.segments_dir = segments_dir
         self.caching_enabled = segments_dir is not None
         self.preload = preload
+        # To iterate over the SegmentsDataset samples
         self._index = 0
 
         # if urlparse(release_file).scheme in ('http', 'https'): # If it's a url
