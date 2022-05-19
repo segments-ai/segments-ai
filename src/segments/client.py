@@ -182,7 +182,7 @@ class SegmentsClient:
         self.s3_session.mount("https://", adapter)
 
         try:
-            r = self._get("/api_status/?lib_version=1.0.0-rc.0")
+            r = self._get("/api_status/?lib_version=1.0.0-rc.1")
             if r.status_code == 200:
                 logger.info("Initialized successfully.")
         except NetworkError as e:
