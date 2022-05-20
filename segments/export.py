@@ -1,5 +1,6 @@
 # https://www.immersivelimit.com/tutorials/create-coco-annotations-from-scratch/#coco-dataset-format
 
+from fileinput import filename
 import os
 import json
 import random
@@ -508,7 +509,12 @@ def export_yolo(dataset, export_folder, **kwargs):
                     frame_name = sample['attributes']['frames'][j]['name']
                 except:
                     frame_name = '{:05d}'.format(j+1)
-                file_name = '{}/{}-{}.txt'.format(dataset.image_dir, image_name, frame_name)
+
+                # In order to keep the format export_folder/segments/dataset_name, the folder needs to be created
+                if i == 0:
+                    os.makedirs(os.path.join(export_folder, dataset.image_dir), exist_ok=True)
+
+                file_name = os.path.join(export_folder, dataset.image_idr, f"{image_name}-{frame_name}")
 
                 if 'annotations' in frame and frame['annotations'] is not None and len(frame['annotations']) > 0:
                     annotations = frame['annotations']
@@ -517,7 +523,12 @@ def export_yolo(dataset, export_folder, **kwargs):
         for i in tqdm(range(len(dataset))):        
             sample = dataset[i]
             image_name = os.path.splitext(os.path.basename(sample['name']))[0]
-            file_name = '{}/{}.txt'.format(dataset.image_dir, image_name)
+
+            # In order to keep the format export_folder/segments/dataset_name, the folder needs to be created
+            if i == 0:
+                os.makedirs(os.path.join(export_folder, dataset.image_dir), exist_ok=True)
+
+            file_name = os.path.join(export_folder, '{}/{}.txt'.format(dataset.image_dir, image_name))
 
             if 'image_width' in kwargs and 'image_height' in kwargs:
                 image_width = kwargs['image_width']
@@ -530,5 +541,5 @@ def export_yolo(dataset, export_folder, **kwargs):
                 annotations = sample['annotations']
                 write_yolo_file(file_name, annotations, image_width, image_height)
 
-    print('Exported. Images and labels in {}'.format(dataset.image_dir))
-    return dataset.image_dir
+    print('Exported. Images and labels in {}'.format(os.path.join(export_folder, dataset.image_dir)))
+    return os.path.join(export_folder, dataset.image_dir)
