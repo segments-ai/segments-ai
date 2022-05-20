@@ -64,6 +64,12 @@
 .. automethod:: segments.client.SegmentsClient.add_sample
 ```
 
+### Create samples in bulk
+
+```{eval-rst}
+.. automethod:: segments.client.SegmentsClient.add_samples
+```
+
 ### Update a sample
 
 ```{eval-rst}
