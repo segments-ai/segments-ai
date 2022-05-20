@@ -1,6 +1,5 @@
 # https://www.immersivelimit.com/tutorials/create-coco-annotations-from-scratch/#coco-dataset-format
 
-from fileinput import filename
 import os
 import json
 import random
