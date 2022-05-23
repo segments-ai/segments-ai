@@ -66,11 +66,11 @@ autodoc_typehints_description_target = "documented"
 
 # Intersphinx
 intersphinx_mapping = {
-    "python": ("https://docs.python.org/", None),
+    #     "python": ("https://docs.python.org/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
-    "PIL": ("https://pillow.readthedocs.io/en/stable/", None),
-    "pydantic": ("https://prompt-build--pydantic-docs.netlify.app/", None),
-    "requests": ("https://docs.python-requests.org/en/stable/", None),
+    "PIL": ("https://pillow.readthedocs.io/en/stable/", None)
+    #     "pydantic": ("https://prompt-build--pydantic-docs.netlify.app/", None),
+    #     "requests": ("https://docs.python-requests.org/en/stable/", None),
 }
 
 # Myst

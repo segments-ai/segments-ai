@@ -76,7 +76,7 @@ def get_semantic_bitmap(
         annotations: An annotations dictionary. Defaults to :obj:`None`.
         id_increment: Increment the category ids with this number. Defaults to ``1``.
     Returns:
-        A :class:`numpy.ndarray` with :class:`numpy.uint32` ``dtype`` where each unique value represents a category id.
+        An array here each unique value represents a category id.
     """
 
     if instance_bitmap is None or annotations is None:
@@ -172,8 +172,6 @@ def load_image_from_url(url: str, save_filename: Optional[str] = None) -> Image.
     Args:
         url: The image url.
         save_filename: The filename to save to.
-    Returns:
-        A PIL image.
     """
     image = Image.open(BytesIO(session.get(url).content))
     # urllib.request.urlretrieve(url, save_filename)
@@ -195,8 +193,6 @@ def load_label_bitmap_from_url(
     Args:
         url: The label bitmap url.
         save_filename: The filename to save to.
-    Returns:
-        A :class:`numpy.ndarray` with :class:`numpy.uint32` ``dtype``.
     """
 
     def extract_bitmap(
@@ -236,7 +232,7 @@ def handle_exif_rotation(image: Image.Image) -> Image.Image:
     Args:
         image: A PIL image.
     Returns:
-        A possibly rotated PIL image.
+        A rotated PIL image.
     """
 
     def get_key_by_value(dictionary: Mapping[int, str], value: str) -> int:
