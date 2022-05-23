@@ -87,6 +87,9 @@ copybutton_prompt_is_regexp = True
 # Autodoc pydantic
 autodoc_pydantic_model_show_json = False
 autodoc_pydantic_model_show_config = False
+autodoc_pydantic_model_signature_prefix = "class"
+autodoc_pydantic_field_show_default = False
+autodoc_pydantic_field_show_required = False
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -100,21 +103,21 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # Options for HTML output
 # -----------------------------------------------------------------------------
 
-# The theme to use for HTML and HTML Help pages.  See the documentation for
+# The theme to use for HTML and HTML Help pages. See the documentation for
 # a list of builtin themes.
 
 html_theme = "furo"
 html_theme_options = {
-    # - Shpinx book theme options:
-    # "repository_url": "https://github.com/segments-ai/segments-ai",
-    # "use_repository_button": True,
-    # - Furo options (https://pradyunsg.me/furo/customisation/):
+    # Furo options (https://pradyunsg.me/furo/customisation/):
     # Furo will automatically add a small edit button to each document, when the documentation is generated on Read the Docs using a GitHub repository as the source.
     # "announcement": "<em>Important</em> announcement!",
     "sidebar_hide_name": True,
+    "navigation_with_keys": True,
+    "light_css_variables": {
+        "font-stack": "gitbook-content-font, -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif"
+    },
 }
-pygments_style = "sphinx"
-pygments_dark_style = "monokai"  # Furo
+pygments_style = "default"
 html_logo = "_static/logo_blue_background.png"
 html_title = "Python SDK"
 html_favicon = "_static/favicon.ico"
@@ -124,3 +127,6 @@ html_favicon = "_static/favicon.ico"
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
+html_css_files = [
+    "css/custom.css",
+]

@@ -1,0 +1,23 @@
+@import "../furo.css";
+
+body {
+  --base-margin-size: 16px;
+  /* For main text and headings (was black) */
+  --color-foreground-primary: rgba(59, 69, 78, 1);
+}
+
+h1 {
+  margin-top: calc(var(--base-margin-size) * 2);
+  margin-bottom: calc(var(--base-margin-size) * 4);
+}
+
+h2 {
+  margin-top: calc(var(--base-margin-size) * 5);
+  margin-bottom: calc(var(--base-margin-size) * 1.5);
+  /* border-top: 1px solid grey; */
+}
+
+h3 {
+  margin-top: calc(var(--base-margin-size) * 5);
+  margin-bottom: calc(var(--base-margin-size) * 1.5);
+}

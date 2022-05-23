@@ -27,43 +27,48 @@ logger = logging.getLogger(__name__)
 
 
 class SegmentsDataset:
-    """SegmentsDataset class.
+    """A class that represents a Segments dataset.
 
-    >>> # pip install --upgrade segments-ai
-    >>> from segments import SegmentsClient, SegmentsDataset
-    >>> from segments.utils import export_dataset
-    >>>
-    >>> # Initialize a SegmentsDataset from the release file
-    >>> client = SegmentsClient('YOUR_API_KEY')
-    >>> release = client.get_release('jane/flowers', 'v1.0') # Alternatively: release = 'flowers-v1.0.json'
-    >>> dataset = SegmentsDataset(release, labelset='ground-truth', filter_by=['LABELED', 'REVIEWED'])
-    >>>
-    >>> # Export to COCO panoptic format
-    >>> export_format = 'coco-panoptic'
-    >>> export_dataset(dataset, export_format)
+    .. code-block:: python
+
+        # pip install --upgrade segments-ai
+        from segments import SegmentsClient, SegmentsDataset
+        from segments.utils import export_dataset
+
+        # Initialize a SegmentsDataset from the release file
+        client = SegmentsClient('YOUR_API_KEY')
+        release = client.get_release('jane/flowers', 'v1.0') # Alternatively: release = 'flowers-v1.0.json'
+        dataset = SegmentsDataset(release, labelset='ground-truth', filter_by=['LABELED', 'REVIEWED'])
+
+        # Export to COCO panoptic format
+        export_format = 'coco-panoptic'
+        export_dataset(dataset, export_format)
 
     Alternatively, you can use the initialized :class:`SegmentsDataset` to loop through the samples and labels, and visualize or process them in any way you please:
 
-    >>> import matplotlib.pyplot as plt
-    >>> from segments.utils import get_semantic_bitmap
-    >>> for sample in dataset:
-    >>>
-    >>>     # Print the sample name and list of labeled objects
-    >>>     print(sample['name'])
-    >>>     logger.info(sample['annotations'])
-    >>>
-    >>>     # Show the image
-    >>>     plt.imshow(sample['image'])
-    >>>     plt.show()
-    >>>
-    >>>     # Show the instance segmentation label
-    >>>     plt.imshow(sample['segmentation_bitmap'])
-    >>>     plt.show()
-    >>>
-    >>>     # Show the semantic segmentation label
-    >>>     semantic_bitmap = get_semantic_bitmap(sample['segmentation_bitmap'], sample['annotations'])
-    >>>     plt.imshow(semantic_bitmap)
-    >>>     plt.show()
+    .. code-block:: python
+
+        import matplotlib.pyplot as plt
+        from segments.utils import get_semantic_bitmap
+
+        for sample in dataset:
+
+            # Print the sample name and list of labeled objects
+            print(sample['name'])
+            logger.info(sample['annotations'])
+
+            # Show the image
+            plt.imshow(sample['image'])
+            plt.show()
+
+            # Show the instance segmentation label
+            plt.imshow(sample['segmentation_bitmap'])
+            plt.show()
+
+            # Show the semantic segmentation label
+            semantic_bitmap = get_semantic_bitmap(sample['segmentation_bitmap'], sample['annotations'])
+            plt.imshow(semantic_bitmap)
+            plt.show()
 
     Args:
         release_file: Path to a release file, or a release class resulting from :meth:`.get_release`.

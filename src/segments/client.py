@@ -125,27 +125,34 @@ class SegmentsClient:
 
     First install the SDK.
 
-    >>> $ pip install --upgrade segments-ai
+    .. code-block:: bash
+
+        pip install --upgrade segments-ai
 
     Import the ``segments`` package in your python file and set up a client with an API key. An API key can be created on your `user account page <https://segments.ai/account>`__.
 
-    >>> from segments import SegmentsClient
-    >>> api_key = 'YOUR_API_KEY'
-    >>> client = SegmentsClient(api_key)
-    'Initialized successfully.'
+    .. code-block:: python
+
+        from segments import SegmentsClient
+        api_key = 'YOUR_API_KEY'
+        client = SegmentsClient(api_key)
+        'Initialized successfully.'
 
     Or store your Segments API key in your environment (``SEGMENTS_API_KEY = 'YOUR_API_KEY'``):
 
-    >>> from segments import SegmentsClient
-    >>> client = SegmentsClient()
-    'Found a Segments API key in your environment.'
-    'Initialized successfully.'
+    .. code-block:: python
+
+        from segments import SegmentsClient
+        client = SegmentsClient()
+        'Found a Segments API key in your environment.'
+        'Initialized successfully.'
 
     You can also use the client as a context manager:
 
-    >>> with SegmentsClient() as client:
-    >>>     client.get_datasets()
+    .. code-block:: python
 
+        with SegmentsClient() as client:
+            client.get_datasets()
 
     Args:
         api_key: Your Segments.ai API key. If no API key given, reads ``SEGMENTS_API_KEY`` from the environment. Defaults to :obj:`None`.
@@ -203,14 +210,18 @@ class SegmentsClient:
 
         You can manually close the Segments client's connections:
 
-        >>> client = SegmentsClient()
-        >>> client.get_datasets()
-        >>> client.close()
+        .. code-block:: python
+
+            client = SegmentsClient()
+            client.get_datasets()
+            client.close()
 
         Or use the client as a context manager:
 
-        >>> with SegmentsClient() as client:
-        >>>     client.get_datasets()
+        .. code-block:: python
+
+            with SegmentsClient() as client:
+                client.get_datasets()
         """
         self.api_session.close()
         self.s3_session.close()
@@ -234,9 +245,11 @@ class SegmentsClient:
     def get_datasets(self, user: Optional[str] = None) -> List[Dataset]:
         """Get a list of datasets.
 
-        >>> datasets = client.get_datasets()
-        >>> for dataset in datasets:
-        >>>     print(dataset.name, dataset.description)
+        .. code-block:: python
+
+            datasets = client.get_datasets()
+            for dataset in datasets:
+                print(dataset.name, dataset.description)
 
         Args:
             user: The user for which to get the datasets. Leave empty to get datasets of current user. Defaults to :obj:`None`.
@@ -259,9 +272,11 @@ class SegmentsClient:
     def get_dataset(self, dataset_identifier: str) -> Dataset:
         """Get a dataset.
 
-        >>> dataset_identifier = 'jane/flowers'
-        >>> dataset = client.get_dataset(dataset_identifier)
-        >>> print(dataset)
+        .. code-block:: python
+
+            dataset_identifier = 'jane/flowers'
+            dataset = client.get_dataset(dataset_identifier)
+            print(dataset)
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
@@ -293,11 +308,13 @@ class SegmentsClient:
     ) -> Dataset:
         """Add a dataset.
 
-        >>> dataset_name = 'flowers'
-        >>> description = 'A dataset containing flowers of all kinds.'
-        >>> task_type = 'segmentation-bitmap'
-        >>> dataset = client.add_dataset(dataset_name, description, task_type)
-        >>> print(dataset)
+        .. code-block:: python
+
+            dataset_name = 'flowers'
+            description = 'A dataset containing flowers of all kinds.'
+            task_type = 'segmentation-bitmap'
+            dataset = client.add_dataset(dataset_name, description, task_type)
+            print(dataset)
 
         +-------------------------------------------+---------------------------------------+
         | Task type                                 | Value                                 |
@@ -394,10 +411,12 @@ class SegmentsClient:
     ) -> Dataset:
         """Update a dataset.
 
-        >>> dataset_identifier = 'jane/flowers'
-        >>> description = 'A dataset containing flowers of all kinds.'
-        >>> dataset = client.update_dataset(dataset_identifier, description)
-        >>> print(dataset)
+        .. code-block:: python
+
+            dataset_identifier = 'jane/flowers'
+            description = 'A dataset containing flowers of all kinds.'
+            dataset = client.update_dataset(dataset_identifier, description)
+            print(dataset)
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
@@ -456,8 +475,10 @@ class SegmentsClient:
     def delete_dataset(self, dataset_identifier: str) -> None:
         """Delete a dataset.
 
-        >>> dataset_identifier = 'jane/flowers'
-        >>> client.delete_dataset(dataset_identifier)
+        .. code-block:: python
+
+            dataset_identifier = 'jane/flowers'
+            client.delete_dataset(dataset_identifier)
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
@@ -474,10 +495,12 @@ class SegmentsClient:
     ) -> Collaborator:
         """Add a collaborator to a dataset.
 
-        >>> dataset_identifier = 'jane/flowers'
-        >>> username = 'john'
-        >>> role = 'reviewer'
-        >>> client.add_dataset_collaborator(dataset_identifier, username, role)
+        .. code-block:: python
+
+            dataset_identifier = 'jane/flowers'
+            username = 'john'
+            role = 'reviewer'
+            client.add_dataset_collaborator(dataset_identifier, username, role)
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
@@ -505,9 +528,11 @@ class SegmentsClient:
     ) -> None:
         """Delete a dataset collaborator.
 
-        >>> dataset_identifier = 'jane/flowers'
-        >>> username = 'john'
-        >>> client.delete_dataset_collaborator(dataset_identifier, username)
+        .. code-block:: python
+
+            dataset_identifier = 'jane/flowers'
+            username = 'john'
+            client.delete_dataset_collaborator(dataset_identifier, username)
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
@@ -537,10 +562,12 @@ class SegmentsClient:
     ) -> List[Sample]:
         """Get the samples in a dataset.
 
-            >>> dataset_identifier = 'jane/flowers'
-            >>> samples = client.get_samples(dataset_identifier)
-            >>> for sample in samples:
-            >>>     print(sample.name, sample.uuid)
+        .. code-block:: python
+
+            dataset_identifier = 'jane/flowers'
+            samples = client.get_samples(dataset_identifier)
+            for sample in samples:
+                print(sample.name, sample.uuid)
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
@@ -607,9 +634,11 @@ class SegmentsClient:
     def get_sample(self, uuid: str, labelset: Optional[str] = None) -> Sample:
         """Get a sample.
 
-        >>> uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
-        >>> sample = client.get_sample(uuid)
-        >>> print(sample)
+        .. code-block:: python
+
+            uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
+            sample = client.get_sample(uuid)
+            print(sample)
 
         Args:
             uuid: The sample uuid.
@@ -648,22 +677,24 @@ class SegmentsClient:
             - If the image is on your local computer, you should first upload it to a cloud storage service like Amazon S3, Google Cloud Storage, Imgur, or to our asset storage service using :meth:`.upload_asset`.
             - If you create a sample with a URL from a public S3 bucket and you see an error on the platform, make sure to `properly configure your bucket's CORS settings <https://docs.aws.amazon.com/AmazonS3/latest/dev/cors.html>`__.
 
-        >>> dataset_identifier = 'jane/flowers'
-        >>> name = 'violet.jpg'
-        >>> attributes = {
-        ...     'image': {
-        ...         'url': 'https://example.com/violet.jpg'
-        ...     }
-        ... }
-        >>> # Metadata and priority are optional fields.
-        >>> metadata = {
-        ...     'city': 'London',
-        ...     'weather': 'cloudy',
-        ...     'robot_id': 3
-        ... }
-        >>> priority = 10 # Samples with higher priority value will be labeled first. Default is 0.
-        >>> sample = client.add_sample(dataset_identifier, name, attributes, metadata, priority)
-        >>> print(sample)
+        .. code-block:: python
+
+            dataset_identifier = 'jane/flowers'
+            name = 'violet.jpg'
+            attributes = {
+                'image': {
+                    'url': 'https://example.com/violet.jpg'
+                }
+            }
+            # Metadata and priority are optional fields.
+            metadata = {
+                'city': 'London',
+                'weather': 'cloudy',
+                'robot_id': 3
+            }
+            priority = 10 # Samples with higher priority value will be labeled first. Default is 0.
+            sample = client.add_sample(dataset_identifier, name, attributes, metadata, priority)
+            print(sample)
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
@@ -768,15 +799,17 @@ class SegmentsClient:
     ) -> Sample:
         """Update a sample.
 
-        >>> uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
-        >>> metadata = {
-        ...     'city': 'London',
-        ...     'weather': 'cloudy',
-        ...     'robot_id': 3
-        ... }
-        >>> priority = 10 # Samples with higher priority value will be labeled first. Default is 0.
-        >>> sample = client.update_sample(uuid, metadata=metadata, priority=priority)
-        >>> print(sample)
+        .. code-block:: python
+
+            uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
+            metadata = {
+                'city': 'London',
+                'weather': 'cloudy',
+                'robot_id': 3
+            }
+            priority = 10 # Samples with higher priority value will be labeled first. Default is 0.
+            sample = client.update_sample(uuid, metadata=metadata, priority=priority)
+            print(sample)
 
         Args:
             uuid: The sample uuid.
@@ -819,8 +852,10 @@ class SegmentsClient:
     def delete_sample(self, uuid: str) -> None:
         """Delete a sample.
 
-        >>> uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
-        >>> client.delete_sample(uuid)
+        .. code-block:: python
+
+            uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
+            client.delete_sample(uuid)
 
         Args:
             uuid: The sample uuid.
@@ -838,9 +873,11 @@ class SegmentsClient:
     def get_label(self, sample_uuid: str, labelset: str = "ground-truth") -> Label:
         """Get a label.
 
-        >>> sample_uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
-        >>> label = client.get_label(sample_uuid)
-        >>> print(label)
+        .. code-block:: python
+
+            sample_uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
+            label = client.get_label(sample_uuid)
+            print(label)
 
         Args:
             sample_uuid: The sample uuid.
@@ -873,22 +910,24 @@ class SegmentsClient:
         Note:
             The content of the ``attributes`` field depends on the `label type <https://docs.segments.ai/reference/sample-and-label-types/label-types>`__.
 
-        >>> sample_uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
-        >>> attributes = {
-        ...     'format_version': '0.1',
-        ...     'annotations': [
-        ...         {
-        ...             'id': 1,
-        ...             'category_id': 1,
-        ...             'type': 'bbox',
-        ...             'points': [
-        ...                 [12.34, 56.78],
-        ...                 [90.12, 34.56]
-        ...             ]
-        ...         },
-        ...     ]
-        ... }
-        >>> client.add_label(sample_uuid, attributes)
+        .. code-block:: python
+
+            sample_uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
+            attributes = {
+                'format_version': '0.1',
+                'annotations': [
+                    {
+                        'id': 1,
+                        'category_id': 1,
+                        'type': 'bbox',
+                        'points': [
+                            [12.34, 56.78],
+                            [90.12, 34.56]
+                        ]
+                    },
+                ]
+            }
+            client.add_label(sample_uuid, attributes)
 
         Args:
             sample_uuid: The sample uuid.
@@ -938,22 +977,24 @@ class SegmentsClient:
     ) -> Label:
         """Update a label.
 
-        >>> sample_uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
-        >>> attributes = {
-        ...     'format_version': '0.1',
-        ...     'annotations': [
-        ...         {
-        ...             'id': 1,
-        ...             'category_id': 1,
-        ...             'type': 'bbox',
-        ...             'points': [
-        ...                 [12.34, 56.78],
-        ...                 [90.12, 34.56]
-        ...             ]
-        ...         },
-        ...     ]
-        ... }
-        >>> client.update_label(sample_uuid, attributes)
+        .. code-block:: python
+
+            sample_uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
+            attributes = {
+                'format_version': '0.1',
+                'annotations': [
+                    {
+                        'id': 1,
+                        'category_id': 1,
+                        'type': 'bbox',
+                        'points': [
+                            [12.34, 56.78],
+                            [90.12, 34.56]
+                        ]
+                    },
+                ]
+            }
+            client.update_label(sample_uuid, attributes)
 
         Args:
             sample_uuid: The sample uuid.
@@ -988,9 +1029,11 @@ class SegmentsClient:
     def delete_label(self, sample_uuid: str, labelset: str = "ground-truth") -> None:
         """Delete a label.
 
-        >>> sample_uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
-        >>> labelset = 'ground-truth'
-        >>> client.delete_label(sample_uuid, labelset)
+        .. code-block:: python
+
+            sample_uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
+            labelset = 'ground-truth'
+            client.delete_label(sample_uuid, labelset)
 
         Args:
             sample_uuid: The sample uuid.
@@ -1009,10 +1052,12 @@ class SegmentsClient:
     def get_labelsets(self, dataset_identifier: str) -> List[Labelset]:
         """Get the labelsets in a dataset.
 
-        >>> dataset_identifier = 'jane/flowers'
-        >>> labelsets = client.get_labelsets(dataset_identifier)
-        >>> for labelset in labelsets:
-        >>>     print(labelset.name, labelset.description)
+        .. code-block:: python
+
+            dataset_identifier = 'jane/flowers'
+            labelsets = client.get_labelsets(dataset_identifier)
+            for labelset in labelsets:
+                print(labelset.name, labelset.description)
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
@@ -1034,10 +1079,12 @@ class SegmentsClient:
     def get_labelset(self, dataset_identifier: str, name: str) -> Labelset:
         """Get a labelset.
 
-        >>> dataset_identifier = 'jane/flowers'
-        >>> name = 'model-predictions'
-        >>> labelset = client.get_labelset(dataset_identifier, name)
-        >>> print(labelset)
+        .. code-block:: python
+
+            dataset_identifier = 'jane/flowers'
+            name = 'model-predictions'
+            labelset = client.get_labelset(dataset_identifier, name)
+            print(labelset)
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
@@ -1062,9 +1109,11 @@ class SegmentsClient:
     ) -> Labelset:
         """Add a labelset to a dataset.
 
-        >>> dataset_identifier = 'jane/flowers'
-        >>> name = 'model-predictions-resnet50'
-        >>> client.add_labelset(dataset_identifier, name)
+        .. code-block:: python
+
+            dataset_identifier = 'jane/flowers'
+            name = 'model-predictions-resnet50'
+            client.add_labelset(dataset_identifier, name)
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
@@ -1098,9 +1147,11 @@ class SegmentsClient:
     def delete_labelset(self, dataset_identifier: str, name: str) -> None:
         """Delete a labelset.
 
-        >>> dataset_identifier = 'jane/flowers'
-        >>> name = 'model-predictions'
-        >>> client.delete_labelset(dataset_identifier, name)
+        .. code-block:: python
+
+            dataset_identifier = 'jane/flowers'
+            name = 'model-predictions'
+            client.delete_labelset(dataset_identifier, name)
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
@@ -1119,10 +1170,12 @@ class SegmentsClient:
     def get_releases(self, dataset_identifier: str) -> List[Release]:
         """Get the releases in a dataset.
 
-        >>> dataset_identifier = 'jane/flowers'
-        >>> releases = client.get_releases(dataset_identifier)
-        >>> for release in releases:
-        >>>     print(release.name, release.description, release.attributes.url)
+        .. code-block:: python
+
+            dataset_identifier = 'jane/flowers'
+            releases = client.get_releases(dataset_identifier)
+            for release in releases:
+                print(release.name, release.description, release.attributes.url)
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
@@ -1142,10 +1195,12 @@ class SegmentsClient:
     def get_release(self, dataset_identifier: str, name: str) -> Release:
         """Get a release.
 
-        >>> dataset_identifier = 'jane/flowers'
-        >>> name = 'v0.1'
-        >>> release = client.get_release(dataset_identifier, name)
-        >>> print(release)
+        .. code-block:: python
+
+            dataset_identifier = 'jane/flowers'
+            name = 'v0.1'
+            release = client.get_release(dataset_identifier, name)
+            print(release)
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
@@ -1168,11 +1223,13 @@ class SegmentsClient:
     ) -> Release:
         """Add a release to a dataset.
 
-        >>> dataset_identifier = 'jane/flowers'
-        >>> name = 'v0.1'
-        >>> description = 'My first release.'
-        >>> release = client.add_release(dataset_identifier, name, description)
-        >>> print(release)
+        .. code-block:: python
+
+            dataset_identifier = 'jane/flowers'
+            name = 'v0.1'
+            description = 'My first release.'
+            release = client.add_release(dataset_identifier, name, description)
+            print(release)
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
@@ -1202,9 +1259,11 @@ class SegmentsClient:
     def delete_release(self, dataset_identifier: str, name: str) -> None:
         """Delete a release.
 
-        >>> dataset_identifier = 'jane/flowers'
-        >>> name = 'v0.1'
-        >>> client.delete_release(dataset_identifier, name)
+        .. code-block:: python
+
+            dataset_identifier = 'jane/flowers'
+            name = 'v0.1'
+            client.delete_release(dataset_identifier, name)
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
@@ -1225,12 +1284,14 @@ class SegmentsClient:
     ) -> File:
         """Upload an asset.
 
-        >>> filename = '/home/jane/flowers/violet.jpg'
-        >>> with open(filename, 'rb') as f:
-        >>>     filename = 'violet.jpg'
-        >>>     asset = client.upload_asset(f, filename)
-        >>> image_url = asset.url
-        >>> print(image_url)
+        .. code-block:: python
+
+            filename = '/home/jane/flowers/violet.jpg'
+            with open(filename, 'rb') as f:
+                filename = 'violet.jpg'
+                asset = client.upload_asset(f, filename)
+            image_url = asset.url
+            print(image_url)
 
         Args:
             file: A file object.

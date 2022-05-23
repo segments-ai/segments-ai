@@ -161,7 +161,7 @@
 .. autopydantic_model:: segments.typing.File
 ```
 
-## Helper models
+## Helper classes
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.URL
