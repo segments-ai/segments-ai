@@ -162,9 +162,10 @@ def export_coco_instance(dataset, export_folder, **kwargs):
             'width': sample['image'].size[0] if sample['image'] is not None else None,       
         })
 
-        # https://scikit-image.org/docs/dev/api/skimage.measure.html#skimage.measure.regionprops
-        regions = regionprops(np.array(sample['segmentation_bitmap'], np.uint32))
-        regions = {region.label: region for region in regions}
+        if task_type == 'segmentation-bitmap' or task_type == 'segmentation-bitmap-highres':
+            # https://scikit-image.org/docs/dev/api/skimage.measure.html#skimage.measure.regionprops
+            regions = regionprops(np.array(sample['segmentation_bitmap'], np.uint32))
+            regions = {region.label: region for region in regions}
         
         for instance in sample['annotations']:
             category_id = instance['category_id']
