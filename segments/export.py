@@ -127,22 +127,13 @@ def export_coco_instance(dataset, export_folder, **kwargs):
         return
 
     # Create export folder
-    # export_folder = os.path.join(export_folder, dataset.dataset_identifier, dataset.release['name'])
     os.makedirs(export_folder, exist_ok=True)
 
     info = {
         'description': dataset.release['dataset']['name'],
-        # 'url': 'https://segments.ai/test/test',
         'version':  dataset.release['name'],
-        # 'year': 2020,
-        # 'contributor': 'Segments.ai',
+        # 'year': 2022,
     }
-
-    # licenses = [{
-    #     'url': 'http://creativecommons.org/licenses/by-nc-sa/2.0/',
-    #     'id': 1,
-    #     'name': 'Attribution-NonCommercial-ShareAlike License'
-    # }]
 
     categories = dataset.categories
     task_type = dataset.task_type
@@ -166,13 +157,9 @@ def export_coco_instance(dataset, export_folder, **kwargs):
         image_id = i+1
         images.append({        
             'id': image_id,
-            # 'license': 1,
             'file_name': sample['file_name'],
             'height': sample['image'].size[1] if sample['image'] is not None else None,
-            'width': sample['image'].size[0] if sample['image'] is not None else None,
-    #         'date_captured': "2013-11-14 17:02:52",
-    #         'coco_url': "http://images.cocodataset.org/val2017/000000397133.jpg",
-    #         'flickr_url': "http://farm7.staticflickr.com/6116/6255196340_da26cf2c9e_z.jpg",        
+            'width': sample['image'].size[0] if sample['image'] is not None else None,       
         })
 
         # https://scikit-image.org/docs/dev/api/skimage.measure.html#skimage.measure.regionprops
@@ -188,7 +175,7 @@ def export_coco_instance(dataset, export_folder, **kwargs):
                 'category_id': category_id,
             }
 
-            # Segmentation bitmap
+            # Segmentation bitmap labels
             if task_type == 'segmentation-bitmap' or task_type == 'segmentation-bitmap-highres':
                 if instance['id'] not in regions:
                     # Only happens when the instance has 0 labeled pixels, which should not happen.
@@ -220,28 +207,49 @@ def export_coco_instance(dataset, export_folder, **kwargs):
                     'area': area,
                     'iscrowd': 0,
                 })
+            
+            # Vector labels
+            elif "type" in instance:
+                # bbox
+                if instance["type"] == 'bbox':
+                    points = instance['points']
+                    x0 = points[0][0]
+                    y0 = points[0][1]
+                    x1 = points[1][0]
+                    y1 = points[1][1]
 
-            # Bounding boxes
-            elif task_type == 'bboxes':
-                points = instance['points']
-                x0 = points[0][0]
-                y0 = points[0][1]
-                x1 = points[1][0]
-                y1 = points[1][1]
+                    annotation.update({
+                        'bbox': [x0, y0, x1-x0, y1-y0],
+                    })
 
-                annotation.update({
-                    'bbox': [x0, y0, x1-x0, y1-y0],
-                })
+                # keypoints
+                elif instance["type"] == 'point':
+                    points = instance['points']
+                    x0 = points[0][0]
+                    y0 = points[0][1]
 
-            else:
-                assert False
+                    annotation.update({
+                        'keypoints': [x0, y0, 1], # https://cocodataset.org/#format-results
+                    })
+
+                # polygon
+                elif instance["type"] == 'polygon':
+                    annotation.update({
+                        'points': instance['points'],
+                    })
+
+                # polyline
+                elif instance["type"] == 'polyline':
+                    print('WARNING: polyline annotations are not exported.')
+
+                else:
+                    assert False
 
             annotations.append(annotation)
             annotation_id += 1
             
     json_data = {
         'info': info,
-        # 'licenses': licenses,
         'categories': categories,
         'images': images,
         'annotations': annotations    
@@ -259,14 +267,13 @@ def export_coco_instance(dataset, export_folder, **kwargs):
 
 def export_coco_panoptic(dataset, export_folder, **kwargs):
     # Create export folder
-    # export_folder = os.path.join(export_folder, dataset.dataset_identifier, dataset.release['name'])
     os.makedirs(export_folder, exist_ok=True)
     
     # INFO
     info = {
         'description': dataset.release['dataset']['name'],
         'version':  dataset.release['name'],
-        # 'year': '2021'
+        # 'year': '2022'
     }
     
     # CATEGORIES    
@@ -400,7 +407,6 @@ def export_coco_panoptic(dataset, export_folder, **kwargs):
 
 def export_image(dataset, export_folder, export_format, id_increment, **kwargs):
     # Create export folder
-    # export_folder = os.path.join(export_folder, dataset.dataset_identifier, dataset.release['name'])
     os.makedirs(export_folder, exist_ok=True)
     
     # CATEGORIES    

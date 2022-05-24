@@ -82,8 +82,8 @@ def export_dataset(dataset, export_folder='.', export_format='coco-panoptic', id
         from .export import export_coco_panoptic
         return export_coco_panoptic(dataset, export_folder, **kwargs)
     elif export_format == 'coco-instance':
-        if not dataset.task_type in ['segmentation-bitmap', 'segmentation-bitmap-highres']:
-            raise ValueError('Only datasets of type "segmentation-bitmap" and "segmentation-bitmap-highres" can be exported to this format.')
+        if not dataset.task_type in ['segmentation-bitmap', 'segmentation-bitmap-highres', 'vector', 'bboxes', 'keypoints']:
+            raise ValueError('Only datasets of type "segmentation-bitmap", "segmentation-bitmap-highres", "vector", "bboxes" and "keypoints" can be exported to this format.')
         from .export import export_coco_instance
         return export_coco_instance(dataset, export_folder, **kwargs)
     elif export_format == 'yolo':
