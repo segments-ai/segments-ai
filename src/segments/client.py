@@ -97,17 +97,17 @@ def exception_handler(
             return r
         except requests.exceptions.Timeout as e:
             # Maybe set up for a retry, or continue in a retry loop
-            raise TimeoutError(message=str(e))
+            raise TimeoutError(message=str(e), cause=e)
         except requests.exceptions.HTTPError as e:
-            raise NetworkError(message=str(e))
+            raise NetworkError(message=str(e), cause=e)
         except requests.exceptions.TooManyRedirects as e:
             # Tell the user their URL was bad and try a different one
             raise NetworkError(message="Bad url, please try a different one.", cause=e)
         except requests.exceptions.RequestException as e:
             logger.error(f"Unknown error: {e}")
-            raise NetworkError(message=str(e))
+            raise NetworkError(message=str(e), cause=e)
         except pydantic.ValidationError as e:
-            raise ValidationError(message=str(e))
+            raise ValidationError(message=str(e), cause=e)
 
     return wrapper_function
 
@@ -198,14 +198,13 @@ class SegmentsClient:
                 == 426
             ):
                 logger.info("The response HTTP status code is 426 Upgrade Required.")
-                pass
             else:
                 raise AuthenticationError(
                     message="Something went wrong. Did you use the right API key?"
                 )
 
     # https://stackoverflow.com/questions/48160728/resourcewarning-unclosed-socket-in-python-3-unit-test
-    def _close(self) -> None:
+    def close(self) -> None:
         """Close :class:`SegmentsClient` connections.
 
         You can manually close the Segments client's connections:
@@ -237,7 +236,7 @@ class SegmentsClient:
         exc_value: Optional[BaseException],
         traceback: Optional[TracebackType],
     ) -> None:
-        self._close()
+        self.close()
 
     ############
     # Datasets #
