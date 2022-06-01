@@ -16,6 +16,7 @@ from segments.typing import (
     Labelset,
     Release,
     Sample,
+    TaskType,
 )
 from typing_extensions import Final
 
@@ -151,6 +152,42 @@ class TestDataset(Test):
         with self.assertRaises(NetworkError):
             wrong_dataset_identifier = "abcde"
             self.client.delete_dataset(wrong_dataset_identifier)
+
+    def test_clone_dataset_networkerror(self) -> None:
+        with self.assertRaises(NetworkError):
+            wrong_dataset_identifier = "abcde"
+            self.client.clone_dataset(wrong_dataset_identifier)
+
+    def test_clone_dataset_defaults(self) -> None:
+        dataset_identifier = f"{self.owner}/example-images-segmentation"
+        clone = self.client.clone_dataset(dataset_identifier)
+
+        # Delete dataset
+        self.client.delete_dataset(f"{clone.owner}/{clone.name}")
+
+        self.assertIsInstance(clone, Dataset)
+        self.assertEquals(clone.name, "example-images-segmentation-clone")
+        self.assertEquals(clone.task_type, "segmentation-bitmap")
+        self.assertEquals(clone.public, False)
+
+    def test_clone_dataset_custom(self) -> None:
+        dataset_identifier = f"{self.owner}/example-images-segmentation"
+
+        new_name = "example-images-vector-clone"
+        new_task_type: TaskType = "vector"
+
+        clone = self.client.clone_dataset(
+            dataset_identifier,
+            new_name=new_name,
+            new_task_type=new_task_type,
+        )
+
+        # Delete dataset
+        self.client.delete_dataset(f"{clone.owner}/{clone.name}")
+
+        self.assertIsInstance(clone, Dataset)
+        self.assertEquals(clone.name, new_name)
+        self.assertEquals(clone.task_type, new_task_type)
 
     def test_add_delete_dataset_collaborator(self) -> None:
         dataset_identifier = self.owner + "/" + self.datasets[0]

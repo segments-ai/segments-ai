@@ -136,7 +136,6 @@ class SegmentsClient:
         from segments import SegmentsClient
         api_key = 'YOUR_API_KEY'
         client = SegmentsClient(api_key)
-        'Initialized successfully.'
 
     Or store your Segments API key in your environment (``SEGMENTS_API_KEY = 'YOUR_API_KEY'``):
 
@@ -144,15 +143,6 @@ class SegmentsClient:
 
         from segments import SegmentsClient
         client = SegmentsClient()
-        'Found a Segments API key in your environment.'
-        'Initialized successfully.'
-
-    You can also use the client as a context manager:
-
-    .. code-block:: python
-
-        with SegmentsClient() as client:
-            client.get_datasets()
 
     Args:
         api_key: Your Segments.ai API key. If no API key given, reads ``SEGMENTS_API_KEY`` from the environment. Defaults to :obj:`None`.
@@ -336,12 +326,12 @@ class SegmentsClient:
 
         Args:
             name: The dataset name. Example: ``flowers``.
-            description: The dataset description. Defaults to :obj:`None`.
+            description: The dataset description. Defaults to ``''``.
             task_type: The dataset's task type. Defaults to ``segmentation-bitmap``.
-            task_attributes: The dataset's task attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/categories-and-task-attributes#object-attribute-format>`__. Defaults to :obj:`None`.
+            task_attributes: The dataset's task attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/categories-and-task-attributes#object-attribute-format>`__. Defaults to ``{'format_version': '0.1', 'categories': [{'id': 0, 'name': 'object'}]}``.
             category: The dataset category. Defaults to ``other``.
             public: The dataset visibility. Defaults to :obj:`False`.
-            readme: The dataset readme. Defaults to :obj:`None`.
+            readme: The dataset readme. Defaults to ``''``.
             enable_skip_labeling: Enable the skip button in the labeling workflow. Defaults to :obj:`True`.
             enable_skip_reviewing: Enable the skip button in the reviewing workflow. Defaults to :obj:`False`.
             enable_ratings: Enable star-ratings for labeled images. Defaults to :obj:`False`.
@@ -481,6 +471,59 @@ class SegmentsClient:
         """
 
         self._delete(f"/datasets/{dataset_identifier}/")
+
+    def clone_dataset(
+        self,
+        dataset_identifier: str,
+        new_name: Optional[str] = None,
+        new_task_type: Optional[TaskType] = None,
+        new_public: Optional[bool] = None,
+    ) -> Dataset:
+        """Clone a dataset.
+
+        .. code-block:: python
+
+            dataset_identifier = 'jane/flowers'
+            new_name = 'flowers-vector'
+            new_task_type = 'vector'
+            new_public = False
+            client.clone_dataset(
+                dataset_identifier,
+                new_name=new_name,
+                new_task_type=new_task_type,
+                new_public=new_public,
+            )
+
+        Args:
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+            new_name: The dataset name for the clone. Defaults to ``f'{old_dataset_name}-clone'``.
+            new_task_type: The task type for the clone. Defaults to the task type of the original dataset.
+            new_public: The visibility for the clone. Defaults to the visibility of the original dataset.
+        Raises:
+            :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+        """
+
+        old_name = dataset_identifier.split("/")[-1]
+
+        if new_name is None:
+            new_name = f"{old_name}-clone"
+
+        payload: Dict[str, Any] = {"name": new_name}
+
+        if new_task_type:
+            payload["task_type"] = new_task_type
+
+        if new_public:
+            payload["public"] = new_public
+
+        r = self._post(
+            f"/datasets/{dataset_identifier}/clone/", data=payload, model=Dataset
+        )
+
+        return cast(Dataset, r)
 
     def add_dataset_collaborator(
         self, dataset_identifier: str, username: str, role: Role = "labeler"
@@ -1088,7 +1131,7 @@ class SegmentsClient:
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
             name: The name of the labelset.
-            description: The labelset description. Defaults to :obj:`None`.
+            description: The labelset description. Defaults to ``''``.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the labelset fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -1198,7 +1241,7 @@ class SegmentsClient:
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
             name: The name of the release.
-            description: The release description. Defaults to :obj:`None`.
+            description: The release description. Defaults to ``''``.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the release fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
