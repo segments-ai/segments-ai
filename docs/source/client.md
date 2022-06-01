@@ -32,6 +32,12 @@
 .. automethod:: segments.client.SegmentsClient.delete_dataset
 ```
 
+### Clone a dataset
+
+```{eval-rst}
+.. automethod:: segments.client.SegmentsClient.clone_dataset
+```
+
 ### Add a collaborator to a dataset
 
 ```{eval-rst}
