@@ -482,6 +482,59 @@ class SegmentsClient:
 
         self._delete(f"/datasets/{dataset_identifier}/")
 
+    def clone_dataset(
+        self,
+        dataset_identifier: str,
+        new_name: Optional[str] = None,
+        new_task_type: Optional[TaskType] = None,
+        new_public: Optional[bool] = None,
+    ) -> Dataset:
+        """Clone a dataset.
+
+        .. code-block:: python
+
+            dataset_identifier = 'jane/flowers'
+            new_name = 'flowers-vector'
+            new_task_type = 'vector'
+            new_public = False
+            client.clone_dataset(
+                dataset_identifier,
+                new_name=new_name,
+                new_task_type=new_task_type,
+                new_public=new_public,
+            )
+
+        Args:
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+            new_name: The dataset name for the clone. Defaults to ``f'{old_dataset_name}-clone'``.
+            new_task_type: The task type for the clone. Defaults to the task type of the original dataset.
+            new_public: The visibility for the clone. Defaults to the visibility of the original dataset.
+        Raises:
+            :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+        """
+
+        old_name = dataset_identifier.split("/")[-1]
+
+        if new_name is None:
+            new_name = f"{old_name}-clone"
+
+        payload: Dict[str, Any] = {"name": new_name}
+
+        if new_task_type:
+            payload["task_type"] = new_task_type
+
+        if new_public:
+            payload["public"] = new_public
+
+        r = self._post(
+            f"/datasets/{dataset_identifier}/clone/", data=payload, model=Dataset
+        )
+
+        return cast(Dataset, r)
+
     def add_dataset_collaborator(
         self, dataset_identifier: str, username: str, role: Role = "labeler"
     ) -> Collaborator:
