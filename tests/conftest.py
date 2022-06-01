@@ -29,7 +29,7 @@ def client(API_KEY: str, API_URL: Optional[str]) -> Iterable[SegmentsClient]:
         else SegmentsClient(api_key=API_KEY)
     )
     yield client
-    client._close()
+    client.close()
 
 
 @pytest.fixture

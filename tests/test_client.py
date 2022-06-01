@@ -52,7 +52,7 @@ class Test(unittest.TestCase):
         self.TIME_INTERVAL = 0.2  # Wait for API call to complete.
 
     def tearDown(self) -> None:
-        self.client._close()
+        self.client.close()
 
 
 ###########
