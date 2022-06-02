@@ -70,7 +70,7 @@ class SegmentsClient:
         r = self.get('/datasets/{}/'.format(dataset_identifier))
         return r.json()
 
-    def add_dataset(self, name, description='', task_type='segmentation-bitmap', task_attributes=None, category='other', public=False, readme='', enable_skip_labeling=True, enable_skip_reviewing=False, enable_ratings=False):
+    def add_dataset(self, name, description='', task_type='segmentation-bitmap', task_attributes=None, category='other', public=False, readme='', enable_skip_labeling=True, enable_skip_reviewing=False, enable_ratings=False, organization=None):
         """Add a dataset.
 
         Args:
@@ -83,7 +83,8 @@ class SegmentsClient:
             readme (str, optional): The dataset readme. Defaults to ''.
             enable_skip_labeling (bool, optional): Enable the skip button in the labeling workflow. Defaults to True.
             enable_skip_reviewing (bool, optional): Enable the skip button in the reviewing workflow. Defaults to False.
-            enable_ratings: Enable star-ratings for labeled images. Defaults to False.
+            enable_ratings (bool, optional): Enable star-ratings for labeled images. Defaults to False.
+            organization (str, optional): The username of the organization for which this dataset should be created. None will create a dataset for the current user. Defaults to None.
 
         Returns:
             dict: a dictionary representing the newly created dataset.
@@ -113,7 +114,12 @@ class SegmentsClient:
             'enable_ratings': enable_ratings,
             'data_type': 'IMAGE'
         }
-        r = self.post('/user/datasets/', payload)
+
+        endpoint = '/user/datasets/'
+        if organization is not None:
+            endpoint = '/organizations/{}/datasets/'.format(organization)
+
+        r = self.post(endpoint, payload)
         return r.json()
 
     def update_dataset(self, dataset_identifier, description=None, task_type=None, task_attributes=None, category=None, public=None, readme=None, enable_skip_labeling=None, enable_skip_reviewing=None, enable_ratings=None):
