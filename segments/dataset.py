@@ -1,20 +1,14 @@
 import os
 import json
 import requests
-from io import BytesIO
 from urllib.parse import urlparse
 from multiprocessing.pool import ThreadPool
 
-import boto3
 from tqdm import tqdm
 
 from .utils import load_image_from_url, load_label_bitmap_from_url, handle_exif_rotation
 
 from PIL import Image
-
-# This will capture the default profile, it should be up to the user to set the
-# correct enviroment variables to target the right profile
-s3_session = boto3.client('s3')
 
 class SegmentsDataset():
     """SegmentsDataset class.
@@ -26,11 +20,12 @@ class SegmentsDataset():
         filter_by_metadata (dict, optional): a dict of metadata key:value pairs to filter by. Filters are ANDed together. Defaults to None.
         segments_dir (str, optional): The directory where the data will be downloaded to for caching. Set to None to disable caching. Defaults to 'segments'.
         preload (bool, optional): Whether the data should be pre-downloaded when the dataset is initialized. Ignored if segments_dir is None. Defaults to True. 
+        s3_client (obj, optional): A boto3 S3 client, e.g. `s3_client = boto3.client("s3")`. Needs to be provided if your images are in a private S3 bucket. Defaults to None.
 
     """
 
     # https://stackoverflow.com/questions/682504/what-is-a-clean-pythonic-way-to-have-multiple-constructors-in-python
-    def __init__(self, release_file, labelset='ground-truth', filter_by=None, filter_by_metadata=None, segments_dir='segments', preload=True):
+    def __init__(self, release_file, labelset='ground-truth', filter_by=None, filter_by_metadata=None, segments_dir='segments', preload=True, s3_client=None):
         self.labelset = labelset
         self.filter_by = [filter_by] if isinstance(filter_by, str) else filter_by
         if self.filter_by is not None:
@@ -39,6 +34,7 @@ class SegmentsDataset():
         self.segments_dir = segments_dir
         self.caching_enabled = segments_dir is not None
         self.preload = preload
+        self.s3_client = s3_client
         
         # if urlparse(release_file).scheme in ('http', 'https'): # If it's a url
         if isinstance(release_file, str): # If it's a file path
@@ -126,23 +122,17 @@ class SegmentsDataset():
         # image_filename_rel = '{}{}'.format(sample['uuid'], url_extension)
         image_filename_rel = '{}{}'.format(sample_name, url_extension)
 
-        # This could be a brittle check for s3 urls in the form
-        # "https://<BUCKET_NAME>.s3.<REGION>.amazonaws.com/<KEY>"
-        if image_url_parsed.scheme == 's3' or '.amazonaws.com/' in image_url:
-            bucket = image_url.split(".")[0].replace("https://", "")
-            object_key = image_url.split("amazonaws.com/")[-1]
-
-            file_byte_string = s3_session.get_object(Bucket=bucket, Key=object_key)['Body'].read()
-            image = Image.open(BytesIO(file_byte_string))
+        if image_url_parsed.scheme == 's3':
+            image = None
         else:
             if self.caching_enabled:
                 image_filename = os.path.join(self.image_dir, image_filename_rel)
                 if not os.path.exists(image_filename):
-                    image = load_image_from_url(image_url, image_filename)
+                    image = load_image_from_url(image_url, image_filename, self.s3_client)
                 else:
                     image = Image.open(image_filename)
             else:
-                image = load_image_from_url(image_url)            
+                image = load_image_from_url(image_url, self.s3_client)            
 
             image = handle_exif_rotation(image)
 

@@ -1,7 +1,8 @@
 import os
+import re
 from io import BytesIO
 import requests
-import urllib.request
+from urllib.parse import urlparse
 import json
 
 import numpy as np
@@ -100,7 +101,7 @@ def export_dataset(dataset, export_folder='.', export_format='coco-panoptic', id
         print('Supported export formats: coco-panoptic, coco-instance, yolo')
         return
 
-def load_image_from_url(url, save_filename=None):
+def load_image_from_url(url, save_filename=None, s3_client=None):
     """Load an image from url.
 
     Args:
@@ -110,8 +111,18 @@ def load_image_from_url(url, save_filename=None):
     Returns:
         PIL.Image: a PIL image.
     """
-    image = Image.open(BytesIO(session.get(url).content))
-    # urllib.request.urlretrieve(url, save_filename)
+    if s3_client is not None:
+        url_parsed = urlparse(url)
+        regex = re.search(r"(.+).(s3|s3-accelerate).(.+).amazonaws.com", url_parsed.netloc)
+        bucket = regex.group(1)
+        region_name = regex.group(2)
+        key = url_parsed.path.lstrip('/')
+
+        file_byte_string = s3_client.get_object(Bucket=bucket, Key=key)['Body'].read()
+        image = Image.open(BytesIO(file_byte_string))
+    else:
+        image = Image.open(BytesIO(session.get(url).content))
+        # urllib.request.urlretrieve(url, save_filename)        
 
     if save_filename is not None:
         if 'exif' in image.info:
