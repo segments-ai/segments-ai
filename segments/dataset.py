@@ -1,13 +1,20 @@
 import os
 import json
 import requests
+from io import BytesIO
 from urllib.parse import urlparse
 from multiprocessing.pool import ThreadPool
+
+import boto3
 from tqdm import tqdm
 
 from .utils import load_image_from_url, load_label_bitmap_from_url, handle_exif_rotation
 
 from PIL import Image
+
+# This will capture the default profile, it should be up to the user to set the
+# correct enviroment variables to target the right profile
+s3_session = boto3.client('s3')
 
 class SegmentsDataset():
     """SegmentsDataset class.
@@ -111,7 +118,6 @@ class SegmentsDataset():
 
         print('Initialized dataset with {} images.'.format(num_samples))
 
-        
     def _load_image_from_cache(self, sample):
         sample_name = os.path.splitext(sample['name'])[0]
         image_url = sample['attributes']['image']['url']
@@ -120,8 +126,14 @@ class SegmentsDataset():
         # image_filename_rel = '{}{}'.format(sample['uuid'], url_extension)
         image_filename_rel = '{}{}'.format(sample_name, url_extension)
 
-        if image_url_parsed.scheme == 's3':
-            image = None
+        # This could be a brittle check for s3 urls in the form
+        # "https://<BUCKET_NAME>.s3.<REGION>.amazonaws.com/<KEY>"
+        if image_url_parsed.scheme == 's3' or '.amazonaws.com/' in image_url:
+            bucket = image_url.split(".")[0].replace("https://", "")
+            object_key = image_url.split("amazonaws.com/")[-1]
+
+            file_byte_string = s3_session.get_object(Bucket=bucket, Key=object_key)['Body'].read()
+            image = Image.open(BytesIO(file_byte_string))
         else:
             if self.caching_enabled:
                 image_filename = os.path.join(self.image_dir, image_filename_rel)
