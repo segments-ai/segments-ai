@@ -489,6 +489,9 @@ def write_yolo_file(file_name, annotations, image_width, image_height):
                 f.write('{} {:.6f} {:.6f} {:.6f} {:.6f}\n'.format(category_id, x_center, y_center, width, height))
 
 def export_yolo(dataset, export_folder, **kwargs):
+    # Create export folder
+    os.makedirs(os.path.join(export_folder, dataset.image_dir), exist_ok=True)
+
     if dataset.task_type not in ['vector', 'bboxes', 'image-vector-sequence']:
         print('You can only export bounding box datasets to YOLO format.')
         return
@@ -515,12 +518,7 @@ def export_yolo(dataset, export_folder, **kwargs):
                     frame_name = sample['attributes']['frames'][j]['name']
                 except:
                     frame_name = '{:05d}'.format(j+1)
-
-                # In order to keep the format export_folder/segments/dataset_name, the folder needs to be created
-                if i == 0:
-                    os.makedirs(os.path.join(export_folder, dataset.image_dir), exist_ok=True)
-
-                file_name = os.path.join(export_folder, dataset.image_idr, f"{image_name}-{frame_name}")
+                file_name = os.path.join(export_folder, dataset.image_dir, '{}-{}.txt'.format(image_name, frame_name))
 
                 if 'annotations' in frame and frame['annotations'] is not None and len(frame['annotations']) > 0:
                     annotations = frame['annotations']
@@ -529,12 +527,7 @@ def export_yolo(dataset, export_folder, **kwargs):
         for i in tqdm(range(len(dataset))):        
             sample = dataset[i]
             image_name = os.path.splitext(os.path.basename(sample['name']))[0]
-
-            # In order to keep the format export_folder/segments/dataset_name, the folder needs to be created
-            if i == 0:
-                os.makedirs(os.path.join(export_folder, dataset.image_dir), exist_ok=True)
-
-            file_name = os.path.join(export_folder, '{}/{}.txt'.format(dataset.image_dir, image_name))
+            file_name = os.path.join(export_folder, dataset.image_dir, '{}.txt'.format(image_name))
 
             if 'image_width' in kwargs and 'image_height' in kwargs:
                 image_width = kwargs['image_width']
