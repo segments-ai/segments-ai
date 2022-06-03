@@ -903,7 +903,7 @@ class SegmentsClient:
 
         Args:
             sample_uuid: The sample uuid.
-            labelset: The labelset this label belongs to. Defaults to ``ground-truth```.
+            labelset: The labelset this label belongs to. Defaults to ``ground-truth``.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the label fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -918,8 +918,8 @@ class SegmentsClient:
     def add_label(
         self,
         sample_uuid: str,
+        labelset: str,
         attributes: Dict[str, Any],
-        labelset: str = "ground-truth",
         label_status: LabelStatus = "PRELABELED",
         score: Optional[float] = None,
     ) -> Label:
@@ -951,8 +951,8 @@ class SegmentsClient:
 
         Args:
             sample_uuid: The sample uuid.
+            labelset: The labelset this label belongs to.
             attributes: The label attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/sample-and-label-types/label-types>`__.
-            labelset: The labelset this label belongs to. Defaults to ``ground-truth``.
             label_status: The label status. Defaults to ``PRELABELED``.
             score: The label score. Defaults to :obj:`None`.
         Raises:
@@ -988,8 +988,8 @@ class SegmentsClient:
     def update_label(
         self,
         sample_uuid: str,
+        labelset: str,
         attributes: Dict[str, Any],
-        labelset: str = "ground-truth",
         label_status: LabelStatus = "PRELABELED",
         score: Optional[float] = None,
     ) -> Label:
@@ -1016,8 +1016,8 @@ class SegmentsClient:
 
         Args:
             sample_uuid: The sample uuid.
+            labelset: The labelset this label belongs to.
             attributes: The label attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/sample-and-label-types/label-types>`__.
-            labelset: The labelset this label belongs to. Defaults to ``ground-truth``.
             label_status: The label status. Defaults to ``PRELABELED``.
             score: The label score. Defaults to :obj:`None`.
         Raises:
@@ -1042,7 +1042,7 @@ class SegmentsClient:
 
         return cast(Label, r)
 
-    def delete_label(self, sample_uuid: str, labelset: str = "ground-truth") -> None:
+    def delete_label(self, sample_uuid: str, labelset: str) -> None:
         """Delete a label.
 
         .. code-block:: python
@@ -1053,7 +1053,7 @@ class SegmentsClient:
 
         Args:
             sample_uuid: The sample uuid.
-            labelset: The labelset this label belongs to. Defaults to ``ground-truth``.
+            labelset: The labelset this label belongs to.
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
