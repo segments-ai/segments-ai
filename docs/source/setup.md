@@ -17,7 +17,6 @@ from segments import SegmentsClient
 
 api_key = "YOUR_API_KEY"
 client = SegmentsClient(api_key)
-'Initialized successfully.'
 ```
 
 Or store your Segments API key in your environment (`SEGMENTS_API_KEY = YOUR_API_KEY`):
@@ -26,8 +25,6 @@ Or store your Segments API key in your environment (`SEGMENTS_API_KEY = YOUR_API
 from segments import SegmentsClient
 
 client = SegmentsClient()
-'Found a Segments API key in your environment.'
-'Initialized successfully.'
 ```
 
 You can also use the client as a context manager:
