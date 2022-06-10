@@ -635,12 +635,12 @@ class TestLabel(Test):
             try:
                 # Add
                 label = self.client.add_label(
-                    sample_uuid, attributes, labelset, label_status, score
+                    sample_uuid, labelset, attributes, label_status, score
                 )
                 self.assertIsInstance(label, Label)
                 # Update
                 label = self.client.update_label(
-                    sample_uuid, attributes, labelset, label_status, score
+                    sample_uuid, labelset, attributes, label_status, score
                 )
                 self.assertIsInstance(label, Label)
                 # Get
@@ -654,14 +654,16 @@ class TestLabel(Test):
     def test_add_label_validationerror(self) -> None:
         with self.assertRaises(ValidationError):
             wrong_sample_uuid = "12345"
+            labelset = "ground-truth"
             wrong_attributes: Dict[str, Any] = {}
-            self.client.add_label(wrong_sample_uuid, wrong_attributes)
+            self.client.add_label(wrong_sample_uuid, labelset, wrong_attributes)
 
     def test_update_label_networkerror(self) -> None:
         with self.assertRaises(NetworkError):
             wrong_sample_uuid = "12345"
+            labelset = "ground-truth"
             wrong_attributes: Dict[str, Any] = {}
-            self.client.update_label(wrong_sample_uuid, wrong_attributes)
+            self.client.update_label(wrong_sample_uuid, labelset, wrong_attributes)
 
 
 ############
