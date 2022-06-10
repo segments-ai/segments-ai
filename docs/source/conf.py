@@ -25,10 +25,10 @@ sys.path.insert(0, os.path.abspath(os.path.join("..", "..", "src")))
 
 project = "Segments.ai Python SDK"
 copyright = f"{datetime.today().year}, Segments.ai"
-author = "Arnout Hillen"
+author = "Bert De Brabandere & Arnout Hillen"
 
 # The full version, including alpha/beta/rc tags
-release = "1.0.0-rc.1"
+release = "1.0.0-rc.2"
 
 # -----------------------------------------------------------------------------
 # General configuration
