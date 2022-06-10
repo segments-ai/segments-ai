@@ -290,6 +290,7 @@ class SegmentsClient:
         enable_skip_labeling: bool = True,
         enable_skip_reviewing: bool = False,
         enable_ratings: bool = False,
+        organization: Optional[str] = None,
     ) -> Dataset:
         """Add a dataset.
 
@@ -334,6 +335,7 @@ class SegmentsClient:
             enable_skip_labeling: Enable the skip button in the labeling workflow. Defaults to :obj:`True`.
             enable_skip_reviewing: Enable the skip button in the reviewing workflow. Defaults to :obj:`False`.
             enable_ratings: Enable star-ratings for labeled images. Defaults to :obj:`False`.
+            organization: The username of the organization for which this dataset should be created. None will create a dataset for the current user. Defaults to :obj:`None`.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the task attributes fails.
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
@@ -375,7 +377,12 @@ class SegmentsClient:
                 "enable_ratings": enable_ratings,
                 "data_type": "IMAGE",
             }
-            r = self._post("/user/datasets/", data=payload, model=Dataset)
+
+            endpoint = "/user/datasets/"
+            if organization is not None:
+                endpoint = f"/organizations/{organization}/datasets/"
+
+            r = self._post(endpoint, data=payload, model=Dataset)
 
             return cast(Dataset, r)
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import json
 import logging
 from io import BytesIO
@@ -8,6 +9,7 @@ from typing import TYPE_CHECKING, Any, Dict, Mapping, Optional, Tuple, Union, ca
 import numpy as np
 import numpy.typing as npt
 import requests
+from urllib.parse import urlparse
 from PIL import ExifTags, Image
 from typing_extensions import Literal
 
@@ -141,14 +143,21 @@ def export_dataset(
 
         return export_coco_instance(dataset, export_folder)
     elif export_format == "yolo":
-        if dataset.task_type not in ["vector", "bboxes", "image-vector-sequence"]:
+        if dataset.task_type not in [
+            "segmentation-bitmap",
+            "segmentation-bitmap-highres",
+            "vector",
+            "bboxes",
+            "keypoints",
+        ]:
             raise ValueError(
-                "Only datasets of type 'vector', 'bboxes' and 'image-vector-sequence' can be exported to this format."
+                'Only datasets of type "segmentation-bitmap", "segmentation-bitmap-highres", "vector", "bboxes" and "keypoints" can be exported to this format.'
             )
         from .export import export_yolo
 
         return export_yolo(
             dataset,
+            export_folder,
             image_width=kwargs.get("image_width", None),
             image_height=kwargs.get("image_height", None),
         )
@@ -166,17 +175,32 @@ def export_dataset(
     return None
 
 
-def load_image_from_url(url: str, save_filename: Optional[str] = None) -> Image.Image:
+def load_image_from_url(
+    url: str, save_filename: Optional[str] = None, s3_client: Optional[Any] = None
+) -> Image.Image:
     """Load an image from url.
 
     Args:
         url: The image url.
         save_filename: The filename to save to.
+        s3_client: A boto3 S3 client, e.g. ``s3_client = boto3.client("s3")``. Needs to be provided if your images are in a private S3 bucket. Defaults to :obj:`None`.
     """
-    image = Image.open(BytesIO(session.get(url).content))
-    # urllib.request.urlretrieve(url, save_filename)
+    if s3_client is not None:
+        url_parsed = urlparse(url)
+        regex = re.search(
+            r"(.+).(s3|s3-accelerate).(.+).amazonaws.com", url_parsed.netloc
+        )
+        bucket = regex.group(1)
+        region_name = regex.group(2)
+        key = url_parsed.path.lstrip("/")
 
-    if save_filename:
+        file_byte_string = s3_client.get_object(Bucket=bucket, Key=key)["Body"].read()
+        image = Image.open(BytesIO(file_byte_string))
+    else:
+        image = Image.open(BytesIO(session.get(url).content))
+        # urllib.request.urlretrieve(url, save_filename)
+
+    if save_filename is not None:
         if "exif" in image.info:
             image.save(save_filename, exif=image.info["exif"])
         else:

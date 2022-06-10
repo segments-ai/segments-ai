@@ -212,22 +212,13 @@ def export_coco_instance(
         raise e
 
     # Create export folder
-    # export_folder = os.path.join(export_folder, dataset.dataset_identifier, dataset.release['name'])
     os.makedirs(export_folder, exist_ok=True)
 
     info = {
         "description": dataset.release["dataset"]["name"],
-        # 'url': 'https://segments.ai/test/test',
         "version": dataset.release["name"],
-        # 'year': 2020,
-        # 'contributor': 'Segments.ai',
+        # 'year': 2022,
     }
-
-    # licenses = [{
-    #     'url': 'http://creativecommons.org/licenses/by-nc-sa/2.0/',
-    #     'id': 1,
-    #     'name': 'Attribution-NonCommercial-ShareAlike License'
-    # }]
 
     categories = dataset.categories
     task_type = dataset.task_type
@@ -252,19 +243,19 @@ def export_coco_instance(
         images.append(
             {
                 "id": image_id,
-                # 'license': 1,
                 "file_name": sample["file_name"],
                 "height": sample["image"].size[1] if sample["image"] else None,
                 "width": sample["image"].size[0] if sample["image"] else None,
-                #         'date_captured': "2013-11-14 17:02:52",
-                #         'coco_url': "http://images.cocodataset.org/val2017/000000397133.jpg",
-                #         'flickr_url': "http://farm7.staticflickr.com/6116/6255196340_da26cf2c9e_z.jpg",
             }
         )
 
-        # https://scikit-image.org/docs/dev/api/skimage.measure.html#skimage.measure.regionprops
-        regions = regionprops(np.array(sample["segmentation_bitmap"], np.uint32))
-        regions = {region.label: region for region in regions}
+        if (
+            task_type == "segmentation-bitmap"
+            or task_type == "segmentation-bitmap-highres"
+        ):
+            # https://scikit-image.org/docs/dev/api/skimage.measure.html#skimage.measure.regionprops
+            regions = regionprops(np.array(sample["segmentation_bitmap"], np.uint32))
+            regions = {region.label: region for region in regions}
 
         for instance in sample["annotations"]:
             category_id = instance["category_id"]
@@ -275,7 +266,7 @@ def export_coco_instance(
                 "category_id": category_id,
             }
 
-            # Segmentation bitmap
+            # Segmentation bitmap labels
             if (
                 task_type == "segmentation-bitmap"
                 or task_type == "segmentation-bitmap-highres"
@@ -321,33 +312,62 @@ def export_coco_instance(
                     }
                 )
 
-            # Bounding boxes
-            elif task_type == "bboxes":
-                points = instance["points"]
-                x0 = points[0][0]
-                y0 = points[0][1]
-                x1 = points[1][0]
-                y1 = points[1][1]
+            # Vector labels
+            elif "type" in instance:
+                # bbox
+                if instance["type"] == "bbox":
+                    points = instance["points"]
+                    x0 = points[0][0]
+                    y0 = points[0][1]
+                    x1 = points[1][0]
+                    y1 = points[1][1]
 
-                annotation.update(
-                    {
-                        "bbox": [x0, y0, x1 - x0, y1 - y0],
-                    }
-                )
+                    annotation.update(
+                        {
+                            "bbox": [x0, y0, x1 - x0, y1 - y0],
+                        }
+                    )
 
-            else:
-                assert False
+                # keypoints
+                elif instance["type"] == "point":
+                    points = instance["points"]
+                    x0 = points[0][0]
+                    y0 = points[0][1]
+
+                    annotation.update(
+                        {
+                            "keypoints": [
+                                x0,
+                                y0,
+                                1,
+                            ],  # https://cocodataset.org/#format-results
+                        }
+                    )
+
+                # polygon
+                elif instance["type"] == "polygon":
+                    annotation.update(
+                        {
+                            "points": instance["points"],
+                        }
+                    )
+
+                # polyline
+                elif instance["type"] == "polyline":
+                    print("WARNING: polyline annotations are not exported.")
+
+                else:
+                    assert False
 
             annotations.append(annotation)
             annotation_id += 1
 
     json_data = {
         "info": info,
-        # 'licenses': licenses,
         "categories": [category.dict() for category in categories],
         "images": images,
         "annotations": annotations
-        #     'segment_info': [] # Only in Panoptic annotations
+        # "segment_info": [] # Only in Panoptic annotations
     }
 
     file_name = os.path.join(
@@ -367,14 +387,13 @@ def export_coco_panoptic(
     dataset: SegmentsDataset, export_folder: str, **kwargs: Any
 ) -> Tuple[str, Optional[str]]:
     # Create export folder
-    # export_folder = os.path.join(export_folder, dataset.dataset_identifier, dataset.release['name'])
     os.makedirs(export_folder, exist_ok=True)
 
     # INFO
     info = {
         "description": dataset.release["dataset"]["name"],
         "version": dataset.release["name"],
-        # 'year': '2021'
+        # 'year': '2022'
     }
 
     # CATEGORIES
@@ -542,7 +561,6 @@ def export_image(
     **kwargs: Any,
 ) -> Optional[str]:
     # Create export folder
-    # export_folder = os.path.join(export_folder, dataset.dataset_identifier, dataset.release['name'])
     os.makedirs(export_folder, exist_ok=True)
 
     # CATEGORIES
@@ -655,6 +673,7 @@ def write_yolo_file(
 
 def export_yolo(
     dataset: SegmentsDataset,
+    export_folder: str,
     image_width: Optional[float] = None,
     image_height: Optional[float] = None,
 ) -> Optional[str]:
@@ -670,6 +689,9 @@ def export_yolo(
         :exc:`ValueError`: If the dataset is not a bounding box dataset.
         :exc:`ValueError`: If the dataset is an ``image-vector-sequence``and the image width or image height is :obj:`None`.
     """
+    # Create export folder
+    os.makedirs(os.path.join(export_folder, dataset.image_dir), exist_ok=True)
+
     if dataset.task_type not in ["vector", "bboxes", "image-vector-sequence"]:
         raise ValueError("You can only export bounding box datasets to YOLO format.")
 
@@ -705,7 +727,9 @@ def export_yolo(
                     frame_name = sample["attributes"]["frames"][j]["name"]
                 except (KeyError, TypeError):
                     frame_name = f"{j + 1:05d}"
-                file_name = f"{dataset.image_dir}/{image_name}-{frame_name}.txt"
+                file_name = os.path.join(
+                    export_folder, dataset.image_dir, f"{image_name}-{frame_name}.txt"
+                )
 
                 # Testing on x is the same as testing len(x)>0 (this also checks that x is not None - see truthy and falsy values in Python)
                 # https://stackoverflow.com/questions/39983695/what-is-truthy-and-falsy-how-is-it-different-from-true-and-false
@@ -716,12 +740,10 @@ def export_yolo(
         for i in tqdm(range(len(dataset))):
             sample = dataset[i]
             image_name = os.path.splitext(os.path.basename(sample["name"]))[0]
-            file_name = f"{dataset.image_dir}/{image_name}.txt"
+            file_name = os.path.join(
+                export_folder, dataset.image_dir, f"{image_name}.txt"
+            )
 
-            # if "image_width" in kwargs and "image_height" in kwargs:
-            #     image_width = kwargs["image_width"]
-            #     image_height = kwargs["image_height"]
-            # else:
             if image_width is None or image_height is None:
                 image_width = sample["image"].width
                 image_height = sample["image"].height
