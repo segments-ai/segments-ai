@@ -160,15 +160,17 @@ class TestDataset(Test):
 
     def test_clone_dataset_defaults(self) -> None:
         dataset_identifier = f"{self.owner}/example-images-segmentation"
-        clone = self.client.clone_dataset(dataset_identifier)
+        try:
+            clone = self.client.clone_dataset(dataset_identifier)
 
-        # Delete dataset
-        self.client.delete_dataset(f"{clone.owner}/{clone.name}")
+            self.assertIsInstance(clone, Dataset)
+            self.assertEqual(clone.name, "example-images-segmentation-clone")
+            self.assertEqual(clone.task_type, "segmentation-bitmap")
+            self.assertEqual(clone.public, False)
 
-        self.assertIsInstance(clone, Dataset)
-        self.assertEquals(clone.name, "example-images-segmentation-clone")
-        self.assertEquals(clone.task_type, "segmentation-bitmap")
-        self.assertEquals(clone.public, False)
+        finally:
+            # Delete dataset
+            self.client.delete_dataset(f"{clone.owner.username}/{clone.name}")
 
     def test_clone_dataset_custom(self) -> None:
         dataset_identifier = f"{self.owner}/example-images-vector"
@@ -176,18 +178,20 @@ class TestDataset(Test):
         new_name = "example-images-vector-clone"
         new_task_type: TaskType = "vector"
 
-        clone = self.client.clone_dataset(
-            dataset_identifier,
-            new_name=new_name,
-            new_task_type=new_task_type,
-        )
+        try:
+            clone = self.client.clone_dataset(
+                dataset_identifier,
+                new_name=new_name,
+                new_task_type=new_task_type,
+            )
 
-        # Delete dataset
-        self.client.delete_dataset(f"{clone.owner.username}/{clone.name}")
+            self.assertIsInstance(clone, Dataset)
+            self.assertEqual(clone.name, new_name)
+            self.assertEqual(clone.task_type, new_task_type)
 
-        self.assertIsInstance(clone, Dataset)
-        self.assertEquals(clone.name, new_name)
-        self.assertEquals(clone.task_type, new_task_type)
+        finally:
+            # Delete dataset
+            self.client.delete_dataset(f"{clone.owner.username}/{clone.name}")
 
     def test_add_delete_dataset_collaborator(self) -> None:
         dataset_identifier = self.owner + "/" + self.datasets[0]
