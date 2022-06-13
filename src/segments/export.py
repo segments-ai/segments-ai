@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 #############
 RGB = Tuple[int, int, int]
 RGBA = Tuple[int, int, int, int]
-ColorMap = List[RGBA]
+ColorMap = Union[List[RGBA], List[RGB]]
 logger = logging.getLogger(__name__)
 COLORMAP: ColorMap = [
     (0, 113, 188, 255),
@@ -572,12 +572,14 @@ def export_image(
         )
 
         categories.append(
-            {
-                "id": category.id,
-                "name": category.name,
-                "color": color,
-                "isthing": isthing,
-            }
+            SegmentsDatasetCategory.parse_obj(
+                {
+                    "id": category.id,
+                    "name": category.name,
+                    "color": color,
+                    "isthing": isthing,
+                }
+            )
         )
 
     for i in tqdm(range(len(dataset))):
@@ -631,7 +633,7 @@ def export_image(
                 instance_label, sample["annotations"], id_increment
             )
             semantic_label_colored = colorize(
-                np.uint8(semantic_label), colormap=[c["color"] for c in categories]
+                np.uint8(semantic_label), colormap=[c.color for c in categories]
             )
             export_file = os.path.join(
                 dataset.image_dir,

@@ -465,7 +465,7 @@ class Dataset(BaseModel):
 class SegmentsDatasetCategory(BaseModel):
     id: int
     name: str
-    color: Optional[RGB] = None
+    color: Optional[Union[RGB, RGBA]] = None
     attributes: Optional[List[Any]] = None
 
     class Config:
