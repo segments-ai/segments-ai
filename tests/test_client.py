@@ -171,7 +171,7 @@ class TestDataset(Test):
         self.assertEquals(clone.public, False)
 
     def test_clone_dataset_custom(self) -> None:
-        dataset_identifier = f"{self.owner}/example-images-segmentation"
+        dataset_identifier = f"{self.owner}/example-images-vector"
 
         new_name = "example-images-vector-clone"
         new_task_type: TaskType = "vector"
@@ -183,7 +183,7 @@ class TestDataset(Test):
         )
 
         # Delete dataset
-        self.client.delete_dataset(f"{clone.owner}/{clone.name}")
+        self.client.delete_dataset(f"{clone.owner.username}/{clone.name}")
 
         self.assertIsInstance(clone, Dataset)
         self.assertEquals(clone.name, new_name)

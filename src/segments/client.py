@@ -512,9 +512,8 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        old_name = dataset_identifier.split("/")[-1]
-
         if new_name is None:
+            old_name = dataset_identifier.split("/")[-1]
             new_name = f"{old_name}-clone"
 
         payload: Dict[str, Any] = {"name": new_name}
