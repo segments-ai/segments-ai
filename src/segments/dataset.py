@@ -146,11 +146,11 @@ class SegmentsDataset:
             "bboxes",
             "keypoints",
             "image-vector-sequence",
-            "pointcloud-detection",
+            "pointcloud-cuboid",
             "pointcloud-segmentation",
         ]:
             raise ValueError(
-                "You can only create a dataset for tasks of type 'segmentation-bitmap', 'segmentation-bitmap-highres', 'vector', 'bboxes', 'keypoints', 'image-vector-sequence', 'pointcloud-detection', 'pointcloud-segmentation' for now."
+                "You can only create a dataset for tasks of type 'segmentation-bitmap', 'segmentation-bitmap-highres', 'vector', 'bboxes', 'keypoints', 'image-vector-sequence', 'pointcloud-cuboid', 'pointcloud-segmentation' for now."
             )
 
         self.load_dataset()
@@ -209,8 +209,7 @@ class SegmentsDataset:
         if (
             self.caching_enabled
             and self.preload
-            and self.task_type
-            not in ["pointcloud-segmentation", "pointcloud-detection"]
+            and self.task_type not in ["pointcloud-segmentation", "pointcloud-cuboid"]
         ):
             logger.info("Preloading all samples. This may take a while...")
             with ThreadPool(16) as pool:
@@ -296,7 +295,7 @@ class SegmentsDataset:
 
         if self.task_type in [
             "pointcloud-segmentation",
-            "pointcloud-detection",
+            "pointcloud-cuboid",
             "image-vector-sequence",
         ]:
             return sample

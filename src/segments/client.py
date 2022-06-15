@@ -283,7 +283,7 @@ class SegmentsClient:
         name: str,
         description: Optional[str] = None,
         task_type: TaskType = "segmentation-bitmap",
-        task_attributes: Optional[Dict[str, Any]] = None,
+        task_attributes: Optional[Union[Dict[str, Any], TaskAttributes]] = None,
         category: Category = "other",
         public: bool = False,
         readme: Optional[str] = None,
@@ -356,42 +356,47 @@ class SegmentsClient:
                 "categories": [{"id": 0, "name": "object"}],
             }
 
-        try:
-            TaskAttributes.parse_obj(task_attributes)
-        except pydantic.ValidationError as e:
-            logger.error(
-                "Did you use the right task attributes? Please refer to the online documentation: https://docs.segments.ai/reference/categories-and-task-attributes#object-attribute-format.",
-            )
-            raise ValidationError(message=str(e))
-        else:
-            payload: Dict[str, Any] = {
-                "name": name,
-                "description": description,
-                "task_type": task_type,
-                "task_attributes": task_attributes,
-                "category": category,
-                "public": public,
-                "readme": readme,
-                "enable_skip_labeling": enable_skip_labeling,
-                "enable_skip_reviewing": enable_skip_reviewing,
-                "enable_ratings": enable_ratings,
-                "data_type": "IMAGE",
-            }
+        if type(task_attributes) is dict:
+            try:
+                TaskAttributes.parse_obj(task_attributes)
+            except pydantic.ValidationError as e:
+                logger.error(
+                    "Did you use the right task attributes? Please refer to the online documentation: https://docs.segments.ai/reference/categories-and-task-attributes#object-attribute-format.",
+                )
+                raise ValidationError(message=str(e), cause=e)
+        elif type(task_attributes) is TaskAttributes:
+            task_attributes = task_attributes.dict()
 
-            endpoint = "/user/datasets/"
-            if organization is not None:
-                endpoint = f"/organizations/{organization}/datasets/"
+        payload: Dict[str, Any] = {
+            "name": name,
+            "description": description,
+            "task_type": task_type,
+            "task_attributes": task_attributes,
+            "category": category,
+            "public": public,
+            "readme": readme,
+            "enable_skip_labeling": enable_skip_labeling,
+            "enable_skip_reviewing": enable_skip_reviewing,
+            "enable_ratings": enable_ratings,
+            "data_type": "IMAGE",
+        }
 
-            r = self._post(endpoint, data=payload, model=Dataset)
+        endpoint = (
+            f"/organizations/{organization}/datasets/"
+            if organization is not None
+            else "/user/datasets/"
+        )
 
-            return cast(Dataset, r)
+        r = self._post(endpoint, data=payload, model=Dataset)
+
+        return cast(Dataset, r)
 
     def update_dataset(
         self,
         dataset_identifier: str,
         description: Optional[str] = None,
         task_type: Optional[TaskType] = None,
-        task_attributes: Optional[Dict[str, Any]] = None,
+        task_attributes: Optional[Union[Dict[str, Any], TaskAttributes]] = None,
         category: Optional[Category] = None,
         public: Optional[bool] = None,
         readme: Optional[str] = None,
@@ -435,7 +440,11 @@ class SegmentsClient:
             payload["task_type"] = task_type
 
         if task_attributes:
-            payload["task_attributes"] = task_attributes
+            payload["task_attributes"] = (
+                task_attributes.dict()
+                if type(task_attributes) is TaskAttributes
+                else task_attributes
+            )
 
         if category:
             payload["category"] = category
@@ -663,7 +672,7 @@ class SegmentsClient:
         try:
             results = parse_obj_as(List[Sample], results)
         except pydantic.ValidationError as e:
-            raise ValidationError(message=str(e))
+            raise ValidationError(message=str(e), cause=e)
 
         return cast(List[Sample], results)
 
@@ -699,7 +708,7 @@ class SegmentsClient:
         self,
         dataset_identifier: str,
         name: str,
-        attributes: Dict[str, Any],
+        attributes: Union[Dict[str, Any], SampleAttributes],
         metadata: Optional[Dict[str, Any]] = None,
         priority: float = 0,
         embedding: Optional[Union[npt.NDArray[Any], List[float]]] = None,
@@ -745,39 +754,42 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        try:
-            parse_obj_as(SampleAttributes, attributes)
-        except pydantic.ValidationError as e:
-            logger.error(
-                "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
-            )
-            raise ValidationError(message=str(e))
-        else:
-            payload: Dict[str, Any] = {
-                "name": name,
-                "attributes": attributes,
-            }
+        if type(attributes) is dict:
+            try:
+                parse_obj_as(SampleAttributes, attributes)
+            except pydantic.ValidationError as e:
+                logger.error(
+                    "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
+                )
+                raise ValidationError(message=str(e), cause=e)
+        elif type(attributes) is SampleAttributes:
+            attributes = attributes.dict()
 
-            if metadata:
-                payload["metadata"] = metadata
+        payload: Dict[str, Any] = {
+            "name": name,
+            "attributes": attributes,
+        }
 
-            if priority:
-                payload["priority"] = priority
+        if metadata:
+            payload["metadata"] = metadata
 
-            if embedding:
-                payload["embedding"] = embedding
+        if priority:
+            payload["priority"] = priority
 
-            r = self._post(
-                f"/datasets/{dataset_identifier}/samples/",
-                data=payload,
-                model=Sample,
-            )
-            logger.info(f"Added {name}")
+        if embedding:
+            payload["embedding"] = embedding
 
-            return cast(Sample, r)
+        r = self._post(
+            f"/datasets/{dataset_identifier}/samples/",
+            data=payload,
+            model=Sample,
+        )
+        logger.info(f"Added {name}")
+
+        return cast(Sample, r)
 
     def add_samples(
-        self, dataset_identifier: str, samples: List[Dict[str, Any]]
+        self, dataset_identifier: str, samples: List[Union[Dict[str, Any], Sample]]
     ) -> List[Sample]:
         """Add samples to a dataset in bulk. When attempting to add samples which already exist, no error is thrown but the existing samples are returned without changes.
 
@@ -795,18 +807,21 @@ class SegmentsClient:
 
         # Check the input
         for sample in samples:
-            if "name" not in sample or "attributes" not in sample:
-                raise KeyError(
-                    f"Please add a name and attributes to your sample: {sample}"
-                )
+            if type(sample) is dict:
+                if "name" not in sample or "attributes" not in sample:
+                    raise KeyError(
+                        f"Please add a name and attributes to your sample: {sample}"
+                    )
 
-            try:
-                parse_obj_as(SampleAttributes, sample["attributes"])
-            except pydantic.ValidationError as e:
-                logger.error(
-                    "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
-                )
-                raise ValidationError(message=str(e))
+                try:
+                    parse_obj_as(SampleAttributes, sample["attributes"])
+                except pydantic.ValidationError as e:
+                    logger.error(
+                        "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
+                    )
+                    raise ValidationError(message=str(e), cause=e)
+            elif type(sample) is Sample:
+                sample = sample.dict()
 
         payload = samples
 
@@ -822,7 +837,7 @@ class SegmentsClient:
         self,
         uuid: str,
         name: Optional[str] = None,
-        attributes: Optional[Dict[str, Any]] = None,
+        attributes: Optional[Union[Dict[str, Any], SampleAttributes]] = None,
         metadata: Optional[Dict[str, Any]] = None,
         priority: float = 0,
         embedding: Optional[Union[npt.NDArray[Any], List[float]]] = None,
@@ -861,7 +876,11 @@ class SegmentsClient:
             payload["name"] = name
 
         if attributes:
-            payload["attributes"] = attributes
+            payload["attributes"] = (
+                attributes.dict()
+                if type(attributes) is SampleAttributes
+                else attributes
+            )
 
         if metadata:
             payload["metadata"] = metadata
@@ -925,7 +944,7 @@ class SegmentsClient:
         self,
         sample_uuid: str,
         labelset: str,
-        attributes: Dict[str, Any],
+        attributes: Union[Dict[str, Any], LabelAttributes],
         label_status: LabelStatus = "PRELABELED",
         score: Optional[float] = None,
     ) -> Label:
@@ -969,33 +988,34 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        try:
-            parse_obj_as(LabelAttributes, attributes)
-        except pydantic.ValidationError as e:
-            logger.error(
-                "Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.",
-            )
-            raise ValidationError(message=str(e))
-        else:
-            payload: Dict[str, Any] = {
-                "label_status": label_status,
-                "attributes": attributes,
-            }
+        if type(attributes) is dict:
+            try:
+                parse_obj_as(LabelAttributes, attributes)
+            except pydantic.ValidationError as e:
+                logger.error(
+                    "Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.",
+                )
+                raise ValidationError(message=str(e), cause=e)
+        elif type(attributes) is LabelAttributes:
+            attributes = attributes.dict()
 
-            if score:
-                payload["score"] = score
+        payload: Dict[str, Any] = {
+            "label_status": label_status,
+            "attributes": attributes,
+        }
 
-            r = self._put(
-                f"/labels/{sample_uuid}/{labelset}/", data=payload, model=Label
-            )
+        if score:
+            payload["score"] = score
 
-            return cast(Label, r)
+        r = self._put(f"/labels/{sample_uuid}/{labelset}/", data=payload, model=Label)
+
+        return cast(Label, r)
 
     def update_label(
         self,
         sample_uuid: str,
         labelset: str,
-        attributes: Dict[str, Any],
+        attributes: Union[Dict[str, Any], LabelAttributes],
         label_status: LabelStatus = "PRELABELED",
         score: Optional[float] = None,
     ) -> Label:
@@ -1036,7 +1056,9 @@ class SegmentsClient:
         payload: Dict[str, Any] = {}
 
         if attributes:
-            payload["attributes"] = attributes
+            payload["attributes"] = (
+                attributes.dict() if type(attributes) is LabelAttributes else attributes
+            )
 
         if label_status:
             payload["label_status"] = label_status
@@ -1324,7 +1346,7 @@ class SegmentsClient:
         try:
             f = File.parse_obj(r.json())
         except pydantic.ValidationError as e:
-            raise ValidationError(message=str(e))
+            raise ValidationError(message=str(e), cause=e)
 
         return f
 
