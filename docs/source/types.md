@@ -6,6 +6,14 @@
 .. autopydantic_model:: segments.typing.Dataset
 ```
 
+```{eval-rst}
+.. autopydantic_model:: segments.typing.Collaborator
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.User
+```
+
 ## Samples
 
 ```{eval-rst}
@@ -197,7 +205,6 @@
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.EgoPose
-
 ```
 
 ```{eval-rst}
