@@ -99,7 +99,7 @@ def exception_handler(
             # Maybe set up for a retry, or continue in a retry loop
             raise TimeoutError(message=str(e), cause=e)
         except requests.exceptions.HTTPError as e:
-            raise NetworkError(message=str(e), cause=e)
+            raise NetworkError(message=e.response.text, cause=e)
         except requests.exceptions.TooManyRedirects as e:
             # Tell the user their URL was bad and try a different one
             raise NetworkError(message="Bad url, please try a different one.", cause=e)

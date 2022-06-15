@@ -252,8 +252,8 @@ class TestSample(Test):
 
     def test_get_sample(self) -> None:
         labelset = "ground-truth"
-        for i in range(len(self.sample_uuids)):
-            sample = self.client.get_sample(self.sample_uuids[i], labelset)
+        for sample_uuid in self.sample_uuids:
+            sample = self.client.get_sample(sample_uuid, labelset)
             self.assertIsInstance(sample, Sample)
 
     def test_get_sample_networkerror(self) -> None:
@@ -385,13 +385,11 @@ class TestLabel(Test):
         #         "input_type": "checkbox",
         #         "default_value": False,
         #     },
-        # ]
-        image_or_object_attributes = (
-            {  # sample-level attributes
-                "scene_type": "crossroads",
-                "weather": "sunny",
-            },
-        )
+        #
+        image_or_object_attributes = {  # sample-level attributes
+            "scene_type": "crossroads",
+            "weather": "sunny",
+        }
         label_attributes: Dict[str, Dict[str, Any]] = {
             "image-segmentation": {
                 "format_version": "0.1",
@@ -693,8 +691,8 @@ class TestLabelset(Test):
 
     def test_get_labelset(self) -> None:
         dataset_identifier = self.owner + "/" + self.datasets[0]
-        for i in range(len(self.labelsets)):
-            labelset = self.client.get_labelset(dataset_identifier, self.labelsets[i])
+        for labelset in self.labelsets:
+            labelset = self.client.get_labelset(dataset_identifier, labelset)
             self.assertIsInstance(labelset, Labelset)
 
     def test_get_labelset_networkerror(self) -> None:
@@ -763,8 +761,8 @@ class TestRelease(Test):
 
     def test_get_release(self) -> None:
         dataset_identifier = self.owner + "/" + self.datasets[0]
-        for i in range(len(self.releases)):
-            release = self.client.get_release(dataset_identifier, self.releases[i])
+        for release in self.releases:
+            release = self.client.get_release(dataset_identifier, release)
             self.assertIsInstance(release, Release)
 
     def test_get_release_networkerror(self) -> None:
