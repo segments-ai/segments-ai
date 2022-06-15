@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-import re
 import json
 import logging
+import re
 from io import BytesIO
 from typing import TYPE_CHECKING, Any, Dict, Mapping, Optional, Tuple, Union, cast
+from urllib.parse import urlparse
 
 import numpy as np
 import numpy.typing as npt
 import requests
-from urllib.parse import urlparse
 from PIL import ExifTags, Image
 from typing_extensions import Literal
 
@@ -190,12 +190,15 @@ def load_image_from_url(
         regex = re.search(
             r"(.+).(s3|s3-accelerate).(.+).amazonaws.com", url_parsed.netloc
         )
-        bucket = regex.group(1)
-        region_name = regex.group(2)
-        key = url_parsed.path.lstrip("/")
+        if regex:
+            bucket = regex.group(1)
+            # region_name = regex.group(2)
+            key = url_parsed.path.lstrip("/")
 
-        file_byte_string = s3_client.get_object(Bucket=bucket, Key=key)["Body"].read()
-        image = Image.open(BytesIO(file_byte_string))
+            file_byte_string = s3_client.get_object(Bucket=bucket, Key=key)[
+                "Body"
+            ].read()
+            image = Image.open(BytesIO(file_byte_string))
     else:
         image = Image.open(BytesIO(session.get(url).content))
         # urllib.request.urlretrieve(url, save_filename)
