@@ -668,6 +668,40 @@ class TestLabel(Test):
             self.client.update_label(wrong_sample_uuid, labelset, wrong_attributes)
 
 
+#########
+# Issue #
+#########
+class TestIssue(Test):
+    def setUp(self) -> None:
+        super().setUp()
+
+    def tearDown(self) -> None:
+        super().tearDown()
+
+    def test_add_delete_issue(self) -> None:
+        # Add labelset.
+        sample_uuid = self.sample_uuids[0]
+        description = "You forgot to label this car."
+        try:
+            issue = self.client.add_issue(sample_uuid, description)
+            self.assertIsInstance(issue, Issue)
+        finally:
+            # Delete issue.
+            self.client.delete_issue(issue.uuid)
+
+    def test_add_issue_validationerror(self) -> None:
+        with self.assertRaises(ValidationError):
+            wrong_sample_uuid = "12345"
+            description = "You forgot to label this car."
+            self.client.add_issue(wrong_sample_uuid, description)
+
+    def test_update_issue_networkerror(self) -> None:
+        with self.assertRaises(NetworkError):
+            wrong_sample_uuid = "12345"
+            description = "You forgot to label this car."
+            self.client.update_issue(wrong_sample_uuid, description)
+
+
 ############
 # Labelset #
 ############
