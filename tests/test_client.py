@@ -17,6 +17,7 @@ from segments.typing import (
     Release,
     Sample,
     TaskType,
+    Issue,
 )
 from typing_extensions import Final
 
