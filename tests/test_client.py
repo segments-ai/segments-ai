@@ -679,12 +679,14 @@ class TestIssue(Test):
     def tearDown(self) -> None:
         super().tearDown()
 
-    def test_add_delete_issue(self) -> None:
+    def test_add_update_delete_issue(self) -> None:
         # Add labelset.
         sample_uuid = self.sample_uuids[0]
         description = "You forgot to label this car."
         try:
             issue = self.client.add_issue(sample_uuid, description)
+            self.assertIsInstance(issue, Issue)
+            issue = self.client.update_issue(sample_uuid, description)
             self.assertIsInstance(issue, Issue)
         finally:
             # Delete issue.
