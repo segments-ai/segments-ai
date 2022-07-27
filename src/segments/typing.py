@@ -76,6 +76,12 @@ class Release(BaseModel):
 #########
 # Issue #
 #########
+class IssueComment(BaseModel):
+    created_at: str
+    created_by: str
+    text: str
+
+
 class Issue(BaseModel):
     uuid: str
     description: str
@@ -83,7 +89,7 @@ class Issue(BaseModel):
     updated_at: str
     created_by: str
     updated_by: str
-    comments: List[Any]
+    comments: List[IssueComment]
     status: IssueStatus
     sample_uuid: str
     sample_name: str
