@@ -140,6 +140,26 @@
 .. automethod:: segments.client.SegmentsClient.delete_labelset
 ```
 
+## Issues
+
+### Create an issue
+
+```{eval-rst}
+.. automethod:: segments.client.SegmentsClient.add_issue
+```
+
+### Update an issue
+
+```{eval-rst}
+.. automethod:: segments.client.SegmentsClient.update_issue
+```
+
+### Delete an issue
+
+```{eval-rst}
+.. automethod:: segments.client.SegmentsClient.delete_issue
+```
+
 ## Releases
 
 ### List releases
