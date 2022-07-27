@@ -1,5 +1,4 @@
 from typing import Any, Dict, List, Optional, Tuple, Union
-
 from pydantic import BaseModel, Extra
 from typing_extensions import Literal, TypedDict
 
