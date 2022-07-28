@@ -114,7 +114,7 @@ def exception_handler(
                     #         remove_attributes_from_list(m, remove_attributes)
                     #     else:
                     #         remove_attributes_from_model(m, remove_attributes)
-                    # return m
+                    return m
             return r
         except requests.exceptions.Timeout as e:
             # Maybe set up for a retry, or continue in a retry loop
