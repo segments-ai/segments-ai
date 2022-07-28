@@ -686,14 +686,14 @@ class TestIssue(Test):
         try:
             issue = self.client.add_issue(sample_uuid, description)
             self.assertIsInstance(issue, Issue)
-            issue = self.client.update_issue(sample_uuid, description)
+            issue = self.client.update_issue(issue.uuid, description)
             self.assertIsInstance(issue, Issue)
         finally:
             # Delete issue.
             self.client.delete_issue(issue.uuid)
 
-    def test_add_issue_validationerror(self) -> None:
-        with self.assertRaises(ValidationError):
+    def test_add_issue_networkerror(self) -> None:
+        with self.assertRaises(NetworkError):
             wrong_sample_uuid = "12345"
             description = "You forgot to label this car."
             self.client.add_issue(wrong_sample_uuid, description)
