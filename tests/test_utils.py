@@ -11,13 +11,13 @@ def test_export_dataset(
     owner: str,
     datasets: List[str],
     releases: List[str],
-    TMP_DIR: str,
+    ARTIFACTS_DIR: str,
 ) -> None:
 
     # Get the dataset
     dataset_identifier, name = f"{owner}/{datasets[0]}", releases[0]
     release = client.get_release(dataset_identifier, name)
-    dataset = SegmentsDataset(release, segments_dir=f"{TMP_DIR}/segments")
+    dataset = SegmentsDataset(release, segments_dir=f"{ARTIFACTS_DIR}/segments")
 
     # Export the dataset
     export_formats = [
@@ -29,7 +29,7 @@ def test_export_dataset(
         "semantic",
         "semantic-color",
     ]
-    export_folder = "./tmp"
+    export_folder = f"{ARTIFACTS_DIR}"
     for export_format in export_formats:
         if export_format == "yolo":
             with pytest.raises(ValueError):

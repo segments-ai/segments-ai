@@ -86,5 +86,5 @@ def TIME_INTERVAL() -> float:
 
 
 @pytest.fixture
-def TMP_DIR() -> str:
-    return "./tmp"
+def ARTIFACTS_DIR() -> str:
+    return "./test_artifacts"
