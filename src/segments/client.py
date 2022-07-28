@@ -37,6 +37,8 @@ from segments.typing import (
     Collaborator,
     Dataset,
     File,
+    Issue,
+    IssueStatus,
     Label,
     LabelAttributes,
     Labelset,
@@ -78,8 +80,21 @@ def exception_handler(
         :exc:`~segments.exceptions.TimeoutError`: If the request times out - catches :exc:`requests.exceptions.TimeoutError`.
     """
 
+    # def remove_attributes_from_model(
+    #     model: Type[T], remove_attributes: List[str]
+    # ) -> None:
+    #     for remove_attribute in remove_attributes:
+    #         delattr(model, remove_attribute)
+
+    # def remove_attributes_from_list(l: Type[T], remove_attributes: List[str]) -> None:
+    #     for e in l:
+    #         remove_attributes_from_model(e, remove_attributes)
+
     def wrapper_function(
-        *args: Any, model: Optional[Type[T]] = None, **kwargs: Any
+        *args: Any,
+        model: Optional[Type[T]] = None,
+        # remove_attributes: Optional[List[str]] = None,
+        **kwargs: Any,
     ) -> Union[requests.Response, T]:
         try:
             r = f(*args, **kwargs)
@@ -93,6 +108,11 @@ def exception_handler(
                         raise APILimitError(message)
                 if model:
                     m = parse_obj_as(model, r_json)
+                    # if remove_attributes:
+                    #     if isinstance(m, list):
+                    #         remove_attributes_from_list(m, remove_attributes)
+                    #     else:
+                    #         remove_attributes_from_model(m, remove_attributes)
                     return m
             return r
         except requests.exceptions.Timeout as e:
@@ -1201,6 +1221,103 @@ class SegmentsClient:
         """
 
         self._delete(f"/datasets/{dataset_identifier}/labelsets/{name}/")
+
+    ##########
+    # Issues #
+    ##########
+
+    def add_issue(
+        self,
+        sample_uuid: str,
+        description: str,
+        status: IssueStatus = "OPEN",
+    ) -> Issue:
+        """Add an issue to a sample.
+
+        .. code-block:: python
+
+            sample_uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
+            description = 'You forgot to label the cars in this image.'
+
+            client.add_issue(sample_uuid, description)
+
+        Args:
+            sample_uuid: The sample uuid.
+            description: The issue description.
+            status: The issue status. One of ``OPEN`` or ``CLOSED``. Defaults to ``OPEN``.
+
+        Raises:
+            :exc:`~segments.exceptions.ValidationError`: If validation of the issue fails.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+        """
+
+        payload: Dict[str, Any] = {
+            "description": description,
+            "status": status,
+        }
+
+        r = self._post(f"/samples/{sample_uuid}/issues/", data=payload, model=Issue)
+
+        return cast(Issue, r)
+
+    def update_issue(
+        self,
+        uuid: str,
+        description: Optional[str] = None,
+        status: Optional[IssueStatus] = None,
+    ) -> Issue:
+        """Add an issue to a sample.
+
+        .. code-block:: python
+
+            uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
+            description = 'You forgot to label the cars in this image.'
+
+            client.update_issue(sample_uuid, description)
+
+        Args:
+            uuid: The issue uuid.
+            description: The issue description. Defaults to :obj:`None`.
+            status: The issue status. One of ``OPEN`` or ``CLOSED``. Defaults to :obj:`None`.
+
+        Raises:
+            :exc:`~segments.exceptions.ValidationError`: If validation of the issue fails.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+        """
+
+        payload: Dict[str, Any] = {}
+
+        if description:
+            payload["description"] = description
+
+        if status:
+            payload["status"] = status
+
+        r = self._patch(f"/issues/{uuid}/", data=payload, model=Issue)
+
+        return cast(Issue, r)
+
+    def delete_issue(self, uuid: str) -> None:
+        """Delete an issue.
+
+        .. code-block:: python
+
+            uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
+            client.delete_issue(uuid)
+
+        Args:
+            uuid: The issue uuid.
+        Raises:
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+        """
+
+        self._delete(f"/issues/{uuid}/")
 
     ############
     # Releases #

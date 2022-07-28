@@ -32,6 +32,7 @@ TaskType = Literal[
 DataType = Literal["IMAGE"]
 Role = Literal["labeler", "reviewer", "admin"]
 Status = Literal["PENDING", "SUCCEEDED", "FAILED"]
+IssueStatus = Literal["OPEN", "CLOSED"]
 ReleaseType = Literal["JSON"]
 ImageVectorAnnotationType = Literal["bbox", "polygon", "polyline", "point"]
 PointcloudAnnotationType = Literal["cuboid"]
@@ -70,6 +71,28 @@ class Release(BaseModel):
     status_info: str
     created_at: str
     samples_count: int
+
+
+#########
+# Issue #
+#########
+class IssueComment(BaseModel):
+    created_at: str
+    created_by: str
+    text: str
+
+
+class Issue(BaseModel):
+    uuid: str
+    description: str
+    created_at: str
+    updated_at: str
+    created_by: str
+    updated_by: str
+    comments: List[IssueComment]
+    status: IssueStatus
+    sample_uuid: str
+    sample_name: str
 
 
 ########
@@ -332,6 +355,7 @@ class Sample(BaseModel):
     comments: List[str]
     priority: float
     has_embedding: bool
+    issues: Optional[List[Issue]]
 
 
 ########################
