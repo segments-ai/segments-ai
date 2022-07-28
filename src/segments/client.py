@@ -81,20 +81,20 @@ def exception_handler(
         :exc:`~segments.exceptions.TimeoutError`: If the request times out - catches :exc:`requests.exceptions.TimeoutError`.
     """
 
-    def remove_attributes_from_model(
-        model: Type[T], remove_attributes: List[str]
-    ) -> None:
-        for remove_attribute in remove_attributes:
-            delattr(model, remove_attribute)
+    # def remove_attributes_from_model(
+    #     model: Type[T], remove_attributes: List[str]
+    # ) -> None:
+    #     for remove_attribute in remove_attributes:
+    #         delattr(model, remove_attribute)
 
-    def remove_attributes_from_list(l: Type[T], remove_attributes: List[str]) -> None:
-        for e in l:
-            remove_attributes_from_model(e, remove_attributes)
+    # def remove_attributes_from_list(l: Type[T], remove_attributes: List[str]) -> None:
+    #     for e in l:
+    #         remove_attributes_from_model(e, remove_attributes)
 
     def wrapper_function(
         *args: Any,
         model: Optional[Type[T]] = None,
-        remove_attributes: Optional[List[str]] = None,
+        # remove_attributes: Optional[List[str]] = None,
         **kwargs: Any,
     ) -> Union[requests.Response, T]:
         try:
@@ -109,12 +109,12 @@ def exception_handler(
                         raise APILimitError(message)
                 if model:
                     m = parse_obj_as(model, r_json)
-                    if remove_attributes:
-                        if isinstance(m, list):
-                            remove_attributes_from_list(m, remove_attributes)
-                        else:
-                            remove_attributes_from_model(m, remove_attributes)
-                    return m
+                    # if remove_attributes:
+                    #     if isinstance(m, list):
+                    #         remove_attributes_from_list(m, remove_attributes)
+                    #     else:
+                    #         remove_attributes_from_model(m, remove_attributes)
+                    # return m
             return r
         except requests.exceptions.Timeout as e:
             # Maybe set up for a retry, or continue in a retry loop
