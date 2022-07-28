@@ -17,7 +17,6 @@ from typing import (
     TypeVar,
     Union,
     cast,
-    Set,
 )
 
 import numpy.typing as npt
@@ -38,11 +37,11 @@ from segments.typing import (
     Collaborator,
     Dataset,
     File,
+    Issue,
+    IssueStatus,
     Label,
     LabelAttributes,
     Labelset,
-    Issue,
-    IssueStatus,
     LabelStatus,
     PresignedPostFields,
     Release,

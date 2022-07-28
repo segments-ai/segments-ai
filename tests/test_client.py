@@ -12,12 +12,12 @@ from segments.typing import (
     Collaborator,
     Dataset,
     File,
+    Issue,
     Label,
     Labelset,
     Release,
     Sample,
     TaskType,
-    Issue,
 )
 from typing_extensions import Final
 
