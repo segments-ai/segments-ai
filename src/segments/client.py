@@ -559,10 +559,40 @@ class SegmentsClient:
 
         return cast(Dataset, r)
 
+    #################
+    # Collaborators #
+    #################
+    def get_dataset_collaborator(
+        self, dataset_identifier: str, username: str
+    ) -> Collaborator:
+        """Get a dataset collaborator.
+
+        .. code-block:: python
+
+            dataset_identifier = 'jane/flowers'
+            username = 'john'
+            client.get_dataset_collaborator(dataset_identifier, username)
+
+        Args:
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+            username: The username of the collaborator to be added.
+        Raises:
+            :exc:`~segments.exceptions.ValidationError`: If validation of the collaborator fails.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+        """
+        r = self._get(
+            f"/datasets/{dataset_identifier}/collaborators/{username}",
+            model=Collaborator,
+        )
+
+        return cast(Collaborator, r)
+
     def add_dataset_collaborator(
         self, dataset_identifier: str, username: str, role: Role = "labeler"
     ) -> Collaborator:
-        """Add a collaborator to a dataset.
+        """Add a dataset collaborator.
 
         .. code-block:: python
 
@@ -584,6 +614,37 @@ class SegmentsClient:
         payload = {"user": username, "role": role}
         r = self._post(
             f"/datasets/{dataset_identifier}/collaborators/",
+            data=payload,
+            model=Collaborator,
+        )
+
+        return cast(Collaborator, r)
+
+    def update_dataset_collaborator(
+        self, dataset_identifier: str, username: str, role: Role
+    ) -> Collaborator:
+        """ "Update a dataset collaborator.
+
+        .. code-block:: python
+
+            dataset_identifier = 'jane/flowers'
+            username = 'john'
+            role = 'admin'
+            client.update_dataset_collaborator(dataset_identifier, username, role)
+
+        Args:
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+            username: The username of the collaborator to be added.
+            role: The role of the collaborator to be added. Defaults to ``labeler``.
+        Raises:
+            :exc:`~segments.exceptions.ValidationError`: If validation of the collaborator fails.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+        """
+        payload = {"role": role}
+        r = self._patch(
+            f"/datasets/{dataset_identifier}/collaborators/{username}",
             data=payload,
             model=Collaborator,
         )
@@ -1225,7 +1286,6 @@ class SegmentsClient:
     ##########
     # Issues #
     ##########
-
     def add_issue(
         self,
         sample_uuid: str,
@@ -1245,7 +1305,6 @@ class SegmentsClient:
             sample_uuid: The sample uuid.
             description: The issue description.
             status: The issue status. One of ``OPEN`` or ``CLOSED``. Defaults to ``OPEN``.
-
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the issue fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -1281,7 +1340,6 @@ class SegmentsClient:
             uuid: The issue uuid.
             description: The issue description. Defaults to :obj:`None`.
             status: The issue status. One of ``OPEN`` or ``CLOSED``. Defaults to :obj:`None`.
-
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the issue fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
