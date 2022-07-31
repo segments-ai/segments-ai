@@ -178,10 +178,10 @@ class SegmentsClient:
             api_key = os.getenv("SEGMENTS_API_KEY")
             if api_key is None:
                 raise AuthenticationError(
-                    message="Please provide an api_key argument or set SEGMENTS_API_KEY in your environment."
+                    message="Please provide the api_key argument or set SEGMENTS_API_KEY in your environment."
                 )
             else:
-                logger.info("Found a Segments API key in your environment.")
+                print("Found a Segments API key in your environment.")
 
         self.api_key = api_key
         self.api_url = api_url
@@ -207,7 +207,9 @@ class SegmentsClient:
                 cast(requests.exceptions.RequestException, e.cause).response.status_code
                 == 426
             ):
-                logger.info("The response HTTP status code is 426 Upgrade Required.")
+                logger.warning(
+                    "There's a new version available. Please upgrade by running 'pip install --upgrade segments-ai'"
+                )
             else:
                 raise AuthenticationError(
                     message="Something went wrong. Did you use the right API key?"
@@ -234,7 +236,7 @@ class SegmentsClient:
         """
         self.api_session.close()
         self.s3_session.close()
-        logger.info("Closed successfully.")
+        # logger.info("Closed successfully.")
 
     # Use SegmentsClient as a context manager (e.g., with SegmentsClient() as client: client.add_dataset()).
     def __enter__(self) -> SegmentsClient:
@@ -485,7 +487,7 @@ class SegmentsClient:
             payload["enable_ratings"] = enable_ratings
 
         r = self._patch(f"/datasets/{dataset_identifier}/", data=payload, model=Dataset)
-        logger.info(f"Updated {dataset_identifier}")
+        # logger.info(f"Updated {dataset_identifier}")
 
         return cast(Dataset, r)
 
@@ -865,7 +867,7 @@ class SegmentsClient:
             data=payload,
             model=Sample,
         )
-        logger.info(f"Added {name}")
+        # logger.info(f"Added {name}")
 
         return cast(Sample, r)
 
@@ -973,7 +975,7 @@ class SegmentsClient:
             payload["embedding"] = embedding
 
         r = self._patch(f"/samples/{uuid}/", data=payload, model=Sample)
-        logger.info(f"Updated {uuid}")
+        # logger.info(f"Updated {uuid}")
 
         return cast(Sample, r)
 

@@ -55,7 +55,7 @@ class SegmentsDataset:
 
             # Print the sample name and list of labeled objects
             print(sample['name'])
-            logger.info(sample['annotations'])
+            print(sample['annotations'])
 
             # Show the image
             plt.imshow(sample['image'])
@@ -156,7 +156,7 @@ class SegmentsDataset:
         self.load_dataset()
 
     def load_dataset(self) -> None:
-        logger.info("Initializing dataset...")
+        print("Initializing dataset...")
 
         # Setup cache
         if (
@@ -211,7 +211,7 @@ class SegmentsDataset:
             and self.preload
             and self.task_type not in ["pointcloud-segmentation", "pointcloud-cuboid"]
         ):
-            logger.info("Preloading all samples. This may take a while...")
+            print("Preloading all samples. This may take a while...")
             with ThreadPool(16) as pool:
                 # list(tqdm(pool.imap_unordered(self.__getitem__, range(num_samples)), total=num_samples))
                 list(
@@ -221,7 +221,7 @@ class SegmentsDataset:
                     )
                 )
 
-        logger.info(f"Initialized dataset with {num_samples} images.")
+        print(f"Initialized dataset with {num_samples} images.")
 
     def _load_image_from_cache(
         self, sample: Dict[str, Any]

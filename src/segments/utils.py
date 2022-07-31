@@ -119,7 +119,13 @@ def export_dataset(
         TODO
     """
 
-    logger.info("Exporting dataset. This may take a while...")
+    try:
+        import skimage
+    except ImportError as e:
+        logger.error("Please install scikit-image first: pip install scikit-image.")
+        raise e
+
+    print("Exporting dataset. This may take a while...")
     if export_format == "coco-panoptic":
         if dataset.task_type not in [
             "segmentation-bitmap",

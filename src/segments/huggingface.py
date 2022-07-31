@@ -42,7 +42,7 @@ def push_to_hub(
 
     # Upload the label file (https://huggingface.co/datasets/huggingface/label-files)
     if hasattr(self, "id2label"):
-        logger.info("Uploading id2label.json")
+        # print("Uploading id2label.json")
         tmpfile = os.path.join(tempfile.gettempdir(), "id2label.json")
         with open(tmpfile, "w") as f:
             json.dump(self.id2label, f)
@@ -55,7 +55,7 @@ def push_to_hub(
 
     # Upload README.md
     if hasattr(self, "readme"):
-        logger.info("Uploading README.md")
+        # print("Uploading README.md")
         tmpfile = os.path.join(tempfile.gettempdir(), "README.md")
         with open(tmpfile, "w") as f:
             f.write(self.readme)
@@ -230,8 +230,6 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
             data_row["label"] = error_label
 
         data_rows.append(data_row)
-
-    # print(data_rows)
 
     # Now transform to column format
     dataset_dict: Dict[str, Any] = {key: [] for key in features.keys()}

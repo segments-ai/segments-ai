@@ -273,7 +273,7 @@ def export_coco_instance(
             ):
                 if instance["id"] not in regions:
                     # Only happens when the instance has 0 labeled pixels, which should not happen.
-                    logger.info(
+                    logger.warning(
                         f"Skipping instance with 0 labeled pixels: {sample['file_name']}, instance_id: {instance['id']}, category_id: {category_id}"
                     )
                     continue
@@ -354,7 +354,7 @@ def export_coco_instance(
 
                 # polyline
                 elif instance["type"] == "polyline":
-                    print("WARNING: polyline annotations are not exported.")
+                    logger.warning("Polyline annotations are not exported.")
 
                 else:
                     assert False
@@ -379,7 +379,7 @@ def export_coco_instance(
     with open(file_name, "w") as f:
         json.dump(json_data, f)
 
-    logger.info(f"Exported to {file_name}. Images and labels in {dataset.image_dir}")
+    print(f"Exported to {file_name}. Images in {dataset.image_dir}")
     return file_name, dataset.image_dir
 
 
@@ -412,7 +412,6 @@ def export_coco_panoptic(
                 isthing=isthing,
             )
         )
-    # print(categories)
 
     categories_dict: Dict[int, SegmentsDatasetCategory] = {
         category.id: category for category in categories
@@ -462,7 +461,7 @@ def export_coco_panoptic(
 
             if instance["id"] not in regions:
                 # Only happens when the instance has 0 labeled pixels, which should not happen.
-                logger.info(
+                logger.warning(
                     f"Skipping instance with 0 labeled pixels: {sample['file_name']}, instance_id: {instance['id']}, category_id: {category_id}"
                 )
                 continue
@@ -549,7 +548,7 @@ def export_coco_panoptic(
     with open(file_name, "w") as f:
         json.dump(json_data, f)
 
-    logger.info(f"Exported to {file_name}. Images and labels in {dataset.image_dir}")
+    print(f"Exported to {file_name}. Images and labels in {dataset.image_dir}")
     return file_name, dataset.image_dir
 
 
@@ -641,7 +640,7 @@ def export_image(
             )
             Image.fromarray(img_as_ubyte(semantic_label_colored)).save(export_file)
 
-    logger.info(f"Exported to {dataset.image_dir}")
+    print(f"Exported to {dataset.image_dir}")
     return dataset.image_dir
 
 
@@ -698,12 +697,12 @@ def export_yolo(
         raise ValueError("You can only export bounding box datasets to YOLO format.")
 
     if dataset.task_type == "vector":
-        logger.info(
+        logger.warning(
             "Only bounding box annotations will be processed. Polygon, polyline and keypoint annotations will be ignored."
         )
 
     if dataset.task_type == "image-vector-sequence":
-        logger.info(
+        logger.warning(
             "Note that the sequences will be exported as individual frames, disregarding the tracking information."
         )
         for i in tqdm(range(len(dataset))):
@@ -759,5 +758,5 @@ def export_yolo(
                     cast(float, image_height),
                 )
 
-    logger.info(f"Exported. Images and labels in {dataset.image_dir}")
+    print(f"Exported. Images and labels in {dataset.image_dir}")
     return dataset.image_dir

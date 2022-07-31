@@ -17,3 +17,4 @@ pytest-dotenv==0.5.2
 
 # General
 pycocotools
+scikit-image
