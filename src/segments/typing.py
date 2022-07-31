@@ -68,7 +68,7 @@ class Release(BaseModel):
     release_type: ReleaseType
     attributes: URL
     status: Status
-    status_info: str
+    # status_info: str
     created_at: str
     samples_count: int
 
@@ -438,14 +438,14 @@ class Statistics(BaseModel):
 class Labelset(BaseModel):
     name: str
     description: str
-    uuid: Optional[str] = None
-    readme: Optional[str] = None
-    task_type: Optional[TaskType] = None
-    attributes: Optional[Union[str, TaskAttributes]] = None
+    # uuid: Optional[str] = None
+    # readme: Optional[str] = None
+    # task_type: Optional[TaskType] = None
+    # attributes: Optional[Union[str, TaskAttributes]] = None
     is_groundtruth: Optional[bool] = None
-    statistics: Optional[Statistics] = None
+    # statistics: Optional[Statistics] = None
     created_at: Optional[str] = None
-    stats: Optional[Dict[str, Any]] = None
+    # stats: Optional[Dict[str, Any]] = None
 
 
 class LabelStats(BaseModel):
@@ -459,7 +459,7 @@ class Dataset(BaseModel):
     name: str
     cloned_from: Optional[str] = None
     description: str
-    data_type: DataType
+    # data_type: DataType
     category: Category
     public: bool
     owner: Owner
@@ -469,7 +469,7 @@ class Dataset(BaseModel):
     enable_skip_reviewing: bool
     enable_save_button: bool
     task_type: TaskType
-    task_readme: str
+    # task_readme: str
     label_stats: LabelStats
     samples_count: Optional[Union[str, int]] = None
     collaborators_count: Optional[int] = None
@@ -479,7 +479,7 @@ class Dataset(BaseModel):
     readme: Optional[str] = None
     noncollaborator_can_label: Optional[bool] = None
     noncollaborator_can_review: Optional[bool] = None
-    tasks: Optional[List[Dict[str, Any]]] = None
+    # tasks: Optional[List[Dict[str, Any]]] = None
     embeddings_enabled: Optional[bool] = None
 
 
