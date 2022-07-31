@@ -37,13 +37,13 @@
     :show-inheritance:
 ```
 
-### 3D point cloud
+### Point cloud
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.PointcloudSampleAttributes
 ```
 
-### 3D point cloud sequence
+### Point cloud sequence
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.PointcloudSequenceSampleAttributes
@@ -96,13 +96,13 @@
     :show-inheritance:
 ```
 
-### 3D point cloud segmentation
+### Point cloud segmentation
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.PointcloudSegmentationLabelAttributes
 ```
 
-### 3D point cloud cuboid
+### Point cloud cuboid
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.PointcloudCuboidLabelAttributes
@@ -112,7 +112,7 @@
 .. autopydantic_model:: segments.typing.PointcloudCuboidAnnotation
 ```
 
-### 3D point cloud sequence segmentation
+### Point cloud sequence segmentation
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.PointcloudSequenceSegmentationLabelAttributes
@@ -126,7 +126,7 @@
 .. autopydantic_model:: segments.typing.PointcloudSequenceSegmentationAnnotation
 ```
 
-### 3D point cloud sequence cuboid
+### Point cloud sequence cuboid
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.PointcloudSequenceCuboidLabelAttributes
