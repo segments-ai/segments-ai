@@ -69,14 +69,14 @@ def bitmap2file(
 def get_semantic_bitmap(
     instance_bitmap: Optional[npt.NDArray[np.uint32]] = None,
     annotations: Optional[Dict[str, Any]] = None,
-    id_increment: int = 1,
+    id_increment: int = 0,
 ) -> Optional[npt.NDArray[np.uint32]]:
     """Convert an instance bitmap and annotations dict into a segmentation bitmap.
 
     Args:
         instance_bitmap: A :class:`numpy.ndarray` with :class:`numpy.uint32` ``dtype`` where each unique value represents an instance id. Defaults to :obj:`None`.
         annotations: An annotations dictionary. Defaults to :obj:`None`.
-        id_increment: Increment the category ids with this number. Defaults to ``1``.
+        id_increment: Increment the category ids with this number. Defaults to ``0``.
     Returns:
         An array here each unique value represents a category id.
     """
@@ -105,7 +105,7 @@ def export_dataset(
         "semantic",
         "semantic-color",
     ] = "coco-panoptic",
-    id_increment: int = 1,
+    id_increment: int = 0,
     **kwargs: Any,
 ) -> Optional[Union[Tuple[str, Optional[str]], Optional[str]]]:
     """Export a dataset to a different format.
@@ -114,7 +114,7 @@ def export_dataset(
         dataset: A :class:`.SegmentsDataset`.
         export_folder: The folder to export the dataset to. Defaults to ``.``.
         export_format: The destination format. Defaults to ``coco-panoptic``.
-        id_increment: Increment the category ids with this number. Defaults to ``1``. Ignored unless ``export_format`` is ``semantic`` or ``semantic-color``.
+        id_increment: Increment the category ids with this number. Defaults to ``0``. Ignored unless ``export_format`` is ``semantic`` or ``semantic-color``.
     Returns:
         TODO
     """

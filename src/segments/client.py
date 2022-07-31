@@ -350,7 +350,7 @@ class SegmentsClient:
             name: The dataset name. Example: ``flowers``.
             description: The dataset description. Defaults to ``''``.
             task_type: The dataset's task type. Defaults to ``segmentation-bitmap``.
-            task_attributes: The dataset's task attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/categories-and-task-attributes#object-attribute-format>`__. Defaults to ``{'format_version': '0.1', 'categories': [{'id': 0, 'name': 'object'}]}``.
+            task_attributes: The dataset's task attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/categories-and-task-attributes#object-attribute-format>`__. Defaults to ``{'format_version': '0.1', 'categories': [{'id': 1, 'name': 'object'}]}``.
             category: The dataset category. Defaults to ``other``.
             public: The dataset visibility. Defaults to :obj:`False`.
             readme: The dataset readme. Defaults to ``''``.
@@ -375,7 +375,7 @@ class SegmentsClient:
         if task_attributes is None:
             task_attributes = {
                 "format_version": "0.1",
-                "categories": [{"id": 0, "name": "object"}],
+                "categories": [{"id": 1, "name": "object"}],
             }
 
         if type(task_attributes) is dict:
