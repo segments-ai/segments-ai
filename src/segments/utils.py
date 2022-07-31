@@ -120,7 +120,7 @@ def export_dataset(
     """
 
     try:
-        import skimage
+        import skimage  # noqa: F401
     except ImportError as e:
         logger.error("Please install scikit-image first: pip install scikit-image.")
         raise e
