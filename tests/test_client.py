@@ -194,13 +194,22 @@ class TestDataset(Test):
             # Delete dataset
             self.client.delete_dataset(f"{clone.owner.username}/{clone.name}")
 
-    def test_add_delete_dataset_collaborator(self) -> None:
+    def test_get_add_update_delete_dataset_collaborator(self) -> None:
         dataset_identifier = self.owner + "/" + self.datasets[0]
         username = "admin-arnout"
         role: Final = "admin"
+        new_role: Final = "reviewer"
         try:
             collaborator = self.client.add_dataset_collaborator(
                 dataset_identifier, username, role
+            )
+            self.assertIsInstance(collaborator, Collaborator)
+            collaborator = self.client.get_dataset_collaborator(
+                dataset_identifier, username
+            )
+            self.assertIsInstance(collaborator, Collaborator)
+            collaborator = self.client.update_dataset_collaborator(
+                dataset_identifier, username, new_role
             )
             self.assertIsInstance(collaborator, Collaborator)
         finally:
