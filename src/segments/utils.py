@@ -30,8 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 def bitmap2file(
-    bitmap: npt.NDArray[np.uint32],
-    is_segmentation_bitmap: bool = True,
+    bitmap: npt.NDArray[np.uint32], is_segmentation_bitmap: bool = True,
 ) -> BytesIO:
     """Convert a label bitmap to a file with the proper format.
 
@@ -228,9 +227,7 @@ def load_label_bitmap_from_url(
         save_filename: The filename to save to.
     """
 
-    def extract_bitmap(
-        bitmap: Image.Image,
-    ) -> npt.NDArray[np.uint32]:
+    def extract_bitmap(bitmap: Image.Image,) -> npt.NDArray[np.uint32]:
 
         bitmap_array = np.array(bitmap)
         bitmap_array[:, :, 3] = 0

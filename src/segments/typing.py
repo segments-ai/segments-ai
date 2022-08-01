@@ -400,10 +400,7 @@ class CheckboxTaskAttribute(BaseModel):
 
 
 TaskAttribute = Union[
-    SelectTaskAttribute,
-    TextTaskAttribute,
-    NumberTaskAttribute,
-    CheckboxTaskAttribute,
+    SelectTaskAttribute, TextTaskAttribute, NumberTaskAttribute, CheckboxTaskAttribute,
 ]
 
 

@@ -322,11 +322,7 @@ def export_coco_instance(
                     x1 = points[1][0]
                     y1 = points[1][1]
 
-                    annotation.update(
-                        {
-                            "bbox": [x0, y0, x1 - x0, y1 - y0],
-                        }
-                    )
+                    annotation.update({"bbox": [x0, y0, x1 - x0, y1 - y0]})
 
                 # keypoints
                 elif instance["type"] == "point":
@@ -346,11 +342,7 @@ def export_coco_instance(
 
                 # polygon
                 elif instance["type"] == "polygon":
-                    annotation.update(
-                        {
-                            "points": instance["points"],
-                        }
-                    )
+                    annotation.update({"points": instance["points"]})
 
                 # polyline
                 elif instance["type"] == "polyline":
@@ -406,10 +398,7 @@ def export_coco_panoptic(
 
         categories.append(
             SegmentsDatasetCategory(
-                id=category.id,
-                name=category.name,
-                color=color,
-                isthing=isthing,
+                id=category.id, name=category.name, color=color, isthing=isthing,
             )
         )
 
@@ -598,8 +587,7 @@ def export_image(
             # Instance png
             instance_label = sample["segmentation_bitmap"]
             export_file = os.path.join(
-                dataset.image_dir,
-                f"{file_name}_label_{dataset.labelset}_instance.png",
+                dataset.image_dir, f"{file_name}_label_{dataset.labelset}_instance.png",
             )
             instance_label.save(export_file)
 
@@ -620,8 +608,7 @@ def export_image(
                 instance_label, sample["annotations"], id_increment
             )
             export_file = os.path.join(
-                dataset.image_dir,
-                f"{file_name}_label_{dataset.labelset}_semantic.png",
+                dataset.image_dir, f"{file_name}_label_{dataset.labelset}_semantic.png",
             )
             Image.fromarray(img_as_ubyte(semantic_label)).save(export_file)
 
