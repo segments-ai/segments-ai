@@ -1,6 +1,6 @@
 # Segments.ai Python SDK
 
-![tests](https://github.com/segments-ai/python-sdk-improvements/actions/workflows/tests.yaml/badge.svg)
+[![tests](https://github.com/segments-ai/segments-ai/actions/workflows/tests.yml/badge.svg?branch=feat/sdk-improvements)](https://github.com/segments-ai/segments-ai/actions)
 [![docs](https://readthedocs.org/projects/segments-python-sdk/badge/?version=latest)](https://segments-python-sdk.readthedocs.io/en/latest/?badge=latest)
 
 [Segments.ai](https://segments.ai/) is the training data platform for computer vision engineers and labeling teams. Our powerful labeling interfaces, easy-to-use management features, and extensive API integrations help you iterate quickly between data labeling, model training and failure case discovery.
