@@ -1,0 +1,14 @@
+cff-version: "1.0.0"
+date-released: 2022-08
+message: "If you use this software, please cite it using these metadata."
+title: "Segments.ai - The training data platform for computer vision engineers and labeling teams"
+url: "https://segments.ai/"
+authors: 
+  - family-names: De Brabandere
+    given-names: Bert
+  - family-names: Debals
+    given-names: Otto
+  - family-names: Hillen
+    given-names: Arnout
+  - family-names: Cornille
+    given-names: Tobias
