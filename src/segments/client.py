@@ -672,7 +672,9 @@ class SegmentsClient:
             :exc:`~segments.exceptions.NetworkError`: If the response status code is 4XX (client error) or 5XX (server error).
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
-        self._delete(f"/datasets/{dataset_identifier}/collaborators/{username}",)
+        self._delete(
+            f"/datasets/{dataset_identifier}/collaborators/{username}",
+        )
 
     ###########
     # Samples #
@@ -861,7 +863,9 @@ class SegmentsClient:
             payload["embedding"] = embedding
 
         r = self._post(
-            f"/datasets/{dataset_identifier}/samples/", data=payload, model=Sample,
+            f"/datasets/{dataset_identifier}/samples/",
+            data=payload,
+            model=Sample,
         )
         # logger.info(f"Added {name}")
 
@@ -1254,7 +1258,9 @@ class SegmentsClient:
             "attributes": "{}",
         }
         r = self._post(
-            f"/datasets/{dataset_identifier}/labelsets/", data=payload, model=Labelset,
+            f"/datasets/{dataset_identifier}/labelsets/",
+            data=payload,
+            model=Labelset,
         )
 
         return cast(Labelset, r)
@@ -1283,7 +1289,10 @@ class SegmentsClient:
     # Issues #
     ##########
     def add_issue(
-        self, sample_uuid: str, description: str, status: IssueStatus = "OPEN",
+        self,
+        sample_uuid: str,
+        description: str,
+        status: IssueStatus = "OPEN",
     ) -> Issue:
         """Add an issue to a sample.
 
@@ -1449,7 +1458,9 @@ class SegmentsClient:
 
         payload = {"name": name, "description": description}
         r = self._post(
-            f"/datasets/{dataset_identifier}/releases/", data=payload, model=Release,
+            f"/datasets/{dataset_identifier}/releases/",
+            data=payload,
+            model=Release,
         )
 
         return cast(Release, r)
@@ -1521,7 +1532,10 @@ class SegmentsClient:
     ####################
     @exception_handler
     def _get(
-        self, endpoint: str, auth: bool = True, model: Optional[T] = None,
+        self,
+        endpoint: str,
+        auth: bool = True,
+        model: Optional[T] = None,
     ) -> requests.Response:
         """Send a GET request.
 

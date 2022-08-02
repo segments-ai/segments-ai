@@ -398,7 +398,10 @@ def export_coco_panoptic(
 
         categories.append(
             SegmentsDatasetCategory(
-                id=category.id, name=category.name, color=color, isthing=isthing,
+                id=category.id,
+                name=category.name,
+                color=color,
+                isthing=isthing,
             )
         )
 
@@ -587,7 +590,8 @@ def export_image(
             # Instance png
             instance_label = sample["segmentation_bitmap"]
             export_file = os.path.join(
-                dataset.image_dir, f"{file_name}_label_{dataset.labelset}_instance.png",
+                dataset.image_dir,
+                f"{file_name}_label_{dataset.labelset}_instance.png",
             )
             instance_label.save(export_file)
 
@@ -608,7 +612,8 @@ def export_image(
                 instance_label, sample["annotations"], id_increment
             )
             export_file = os.path.join(
-                dataset.image_dir, f"{file_name}_label_{dataset.labelset}_semantic.png",
+                dataset.image_dir,
+                f"{file_name}_label_{dataset.labelset}_semantic.png",
             )
             Image.fromarray(img_as_ubyte(semantic_label)).save(export_file)
 

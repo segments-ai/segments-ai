@@ -264,7 +264,8 @@ class SegmentsDataset:
         if self.caching_enabled:
             # segmentation_bitmap_filename = os.path.join(self.image_dir, '{}{}'.format(label['uuid'], url_extension))
             segmentation_bitmap_filename = os.path.join(
-                self.image_dir, f"{sample_name}_label_{labelset}{url_extension}",
+                self.image_dir,
+                f"{sample_name}_label_{labelset}{url_extension}",
             )
             if not os.path.exists(segmentation_bitmap_filename):
                 return load_label_bitmap_from_url(
