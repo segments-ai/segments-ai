@@ -181,7 +181,9 @@ class TestDataset(Test):
 
         try:
             clone = self.client.clone_dataset(
-                dataset_identifier, new_name=new_name, new_task_type=new_task_type,
+                dataset_identifier,
+                new_name=new_name,
+                new_task_type=new_task_type,
             )
 
             self.assertIsInstance(clone, Dataset)
@@ -330,7 +332,11 @@ class TestSample(Test):
                 )
                 self.assertIsInstance(sample, Sample)
                 sample = self.client.update_sample(
-                    sample.uuid, name, attributes, metadata, priority,  # embedding
+                    sample.uuid,
+                    name,
+                    attributes,
+                    metadata,
+                    priority,  # embedding
                 )
                 self.assertIsInstance(sample, Sample)
             finally:
