@@ -36,3 +36,19 @@ Please refer to [the documentation](http://segments-python-sdk.rtfd.io/) for usa
 ## Blog
 
 Read [our blog posts](https://segments.ai/blog) to learn more about the platform.
+
+## Changelog
+
+The most notable changes in v1.0 of the Python SDK compared to v0.73 include:
+
+- Added Python type hints and better auto-generated docs.
+- Improved error handling: functions now raise proper exceptions.
+- New functions for managing issues and collaborators.
+
+You can upgrade to v1.0 with `pip install —upgrade segments-ai`. Please be mindful of following breaking changes:
+
+- The client functions now return classes instead of dicts, so you should access properties using dot-based indexing (e.g. `dataset.description`) instead of dict-based indexing (e.g. `dataset[’description’]`).
+- Functions now consistently raise exceptions, instead of sometimes silently failing with a print statement. You might want to handle these exceptions with a try-except block.
+- Some legacy fields are no longer returned: `dataset.tasks`, `dataset.task_readme`, `dataset.data_type`.
+- The default value of the `id_increment` argument in `utils.export_dataset()` and `utils.get_semantic_bitmap()` is changed from 1 to 0.
+- Python 3.6 and lower are no longer supported.
