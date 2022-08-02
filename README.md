@@ -35,4 +35,4 @@ Please refer to [the documentation](http://segments-python-sdk.rtfd.io/) for usa
 
 ## Blog
 
-Read [our blogs posts](https://segments.ai/blog) to learn more about the platform.
+Read [our blog posts](https://segments.ai/blog) to learn more about the platform.
