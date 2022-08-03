@@ -172,11 +172,9 @@ class SegmentsDataset:
             filtered_samples = []
             for sample in samples:
                 if sample["labels"][self.labelset]:
-                    label_status = sample["labels"][self.labelset][
-                        "label_status"
-                    ].lower()
+                    label_status = sample["labels"][self.labelset]["label_status"]
                 else:
-                    label_status = "unlabeled"
+                    label_status = "UNLABELED"
 
                 if self.filter_by and label_status in self.filter_by:
                     filtered_samples.append(sample)

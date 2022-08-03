@@ -14,6 +14,7 @@ LabelStatus = Literal[
     "REJECTED",
     "PRELABELED",
     "SKIPPED",
+    "UNLABELED",
 ]
 TaskType = Literal[
     "segmentation-bitmap",
