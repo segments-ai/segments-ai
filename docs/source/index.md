@@ -23,7 +23,7 @@ The Python SDK is a convenient wrapper for the API.
 
 setup
 client
-dataset
+segmentsdataset
 utils
 huggingface
 types
