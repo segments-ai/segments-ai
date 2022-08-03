@@ -355,7 +355,9 @@ class Sample(BaseModel):
     comments: List[str]
     priority: float
     has_embedding: bool
+    label: Optional[Label]
     issues: Optional[List[Issue]]
+    dataset_full_name: str
 
 
 ########################
@@ -457,6 +459,7 @@ class LabelStats(BaseModel):
 
 class Dataset(BaseModel):
     name: str
+    full_name: str
     cloned_from: Optional[str] = None
     description: str
     # data_type: DataType
@@ -468,6 +471,8 @@ class Dataset(BaseModel):
     enable_skip_labeling: bool
     enable_skip_reviewing: bool
     enable_save_button: bool
+    enable_same_dimensions_track_constraint: bool
+    enable_interpolation: bool
     task_type: TaskType
     # task_readme: str
     label_stats: LabelStats

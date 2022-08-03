@@ -312,15 +312,16 @@ class SegmentsClient:
     def add_dataset(
         self,
         name: str,
-        description: Optional[str] = None,
+        description: str = "",
         task_type: TaskType = "segmentation-bitmap",
         task_attributes: Optional[Union[Dict[str, Any], TaskAttributes]] = None,
         category: Category = "other",
         public: bool = False,
-        readme: Optional[str] = None,
+        readme: str = "",
         enable_skip_labeling: bool = True,
         enable_skip_reviewing: bool = False,
         enable_ratings: bool = False,
+        enable_interpolation: bool = True,
         organization: Optional[str] = None,
     ) -> Dataset:
         """Add a dataset.
@@ -366,6 +367,7 @@ class SegmentsClient:
             enable_skip_labeling: Enable the skip button in the labeling workflow. Defaults to :obj:`True`.
             enable_skip_reviewing: Enable the skip button in the reviewing workflow. Defaults to :obj:`False`.
             enable_ratings: Enable star-ratings for labeled images. Defaults to :obj:`False`.
+            enable_interpolation: Enable label interpolation in sequence datasets. Ignored for non-sequence datasets. Defaults to :obj:`True`.
             organization: The username of the organization for which this dataset should be created. None will create a dataset for the current user. Defaults to :obj:`None`.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the task attributes fails.
@@ -375,12 +377,6 @@ class SegmentsClient:
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
-
-        if description is None:
-            description = ""
-
-        if readme is None:
-            readme = ""
 
         if task_attributes is None:
             task_attributes = {
@@ -410,6 +406,7 @@ class SegmentsClient:
             "enable_skip_labeling": enable_skip_labeling,
             "enable_skip_reviewing": enable_skip_reviewing,
             "enable_ratings": enable_ratings,
+            "enable_interpolation": enable_interpolation,
             "data_type": "IMAGE",
         }
 
@@ -435,6 +432,7 @@ class SegmentsClient:
         enable_skip_labeling: Optional[bool] = None,
         enable_skip_reviewing: Optional[bool] = None,
         enable_ratings: Optional[bool] = None,
+        enable_interpolation: Optional[bool] = None,
     ) -> Dataset:
         """Update a dataset.
 
@@ -456,6 +454,7 @@ class SegmentsClient:
             enable_skip_labeling: Enable the skip button in the labeling workflow. Defaults to :obj:`None`.
             enable_skip_reviewing: Enable the skip button in the reviewing workflow. Defaults to :obj:`None`.
             enable_ratings: Enable star-ratings for labeled images. Defaults to :obj:`None`.
+            enable_interpolation: Enable label interpolation in sequence datasets. Ignored for non-sequence datasets. Defaults to :obj:`None`.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -496,6 +495,9 @@ class SegmentsClient:
 
         if enable_ratings:
             payload["enable_ratings"] = enable_ratings
+
+        if enable_interpolation:
+            payload["enable_interpolation"] = enable_interpolation
 
         r = self._patch(f"/datasets/{dataset_identifier}/", data=payload, model=Dataset)
         # logger.info(f"Updated {dataset_identifier}")
@@ -1258,7 +1260,7 @@ class SegmentsClient:
         return cast(Labelset, r)
 
     def add_labelset(
-        self, dataset_identifier: str, name: str, description: Optional[str] = None
+        self, dataset_identifier: str, name: str, description: str = ""
     ) -> Labelset:
         """Add a labelset to a dataset.
 
@@ -1280,10 +1282,6 @@ class SegmentsClient:
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
-
-        if description is None:
-            description = ""
-
         payload = {
             "name": name,
             "description": description,
@@ -1468,7 +1466,7 @@ class SegmentsClient:
         return cast(Release, r)
 
     def add_release(
-        self, dataset_identifier: str, name: str, description: Optional[str] = None
+        self, dataset_identifier: str, name: str, description: str = ""
     ) -> Release:
         """Add a release to a dataset.
 
@@ -1492,9 +1490,6 @@ class SegmentsClient:
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
-
-        if description is None:
-            description = ""
 
         payload = {"name": name, "description": description}
         r = self._post(
