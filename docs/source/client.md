@@ -126,27 +126,27 @@
 .. automethod:: segments.client.SegmentsClient.delete_label
 ```
 
-## Label sets
+## Labelsets
 
-### List label sets
+### List labelsets
 
 ```{eval-rst}
 .. automethod:: segments.client.SegmentsClient.get_labelsets
 ```
 
-### Get a label set
+### Get a labelset
 
 ```{eval-rst}
 .. automethod:: segments.client.SegmentsClient.get_labelset
 ```
 
-### Create a label set
+### Create a labelset
 
 ```{eval-rst}
 .. automethod:: segments.client.SegmentsClient.add_labelset
 ```
 
-### Delete a label set
+### Delete a labelset
 
 ```{eval-rst}
 .. automethod:: segments.client.SegmentsClient.delete_labelset

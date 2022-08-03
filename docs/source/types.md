@@ -151,7 +151,7 @@
 .. autopydantic_model:: segments.typing.TextAnnotation
 ```
 
-## Label sets
+## Labelsets
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.Labelset

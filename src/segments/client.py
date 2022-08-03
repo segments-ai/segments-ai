@@ -24,9 +24,11 @@ import pydantic
 import requests
 from pydantic import parse_obj_as
 from segments.exceptions import (
+    AlreadyExistsError,
     APILimitError,
     AuthenticationError,
     NetworkError,
+    NotFoundError,
     TimeoutError,
     ValidationError,
 )
@@ -119,7 +121,12 @@ def exception_handler(
             # Maybe set up for a retry, or continue in a retry loop
             raise TimeoutError(message=str(e), cause=e)
         except requests.exceptions.HTTPError as e:
-            raise NetworkError(message=e.response.text, cause=e)
+            text = e.response.text
+            if "Not found" in text:
+                raise NotFoundError(message=text, cause=e)
+            if "already exists" in text:
+                raise AlreadyExistsError(message=text, cause=e)
+            raise NetworkError(message=text, cause=e)
         except requests.exceptions.TooManyRedirects as e:
             # Tell the user their URL was bad and try a different one
             raise NetworkError(message="Bad url, please try a different one.", cause=e)
@@ -267,7 +274,8 @@ class SegmentsClient:
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the datasets fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
-            :exc:`~segments.exceptions.NetworkError`: If the request is not valid (e.g., if the dataset does not exist) or if the server experienced an error.
+            :exc:`~segments.exceptions.NotFoundError`: If one of the datasets is not found.
+            :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
@@ -292,6 +300,7 @@ class SegmentsClient:
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the dataset is not found.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid (e.g., if the dataset does not exist) or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
@@ -362,6 +371,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.ValidationError`: If validation of the task attributes fails.
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.AlreadyExistsError`: If the dataset already exists.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
@@ -449,6 +459,7 @@ class SegmentsClient:
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the dataset is not found.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
@@ -503,6 +514,7 @@ class SegmentsClient:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the dataset is not found.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
@@ -539,6 +551,7 @@ class SegmentsClient:
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the dataset is not found.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
@@ -581,6 +594,7 @@ class SegmentsClient:
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the collaborator fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the dataset or dataset collaborator is not found.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid (e.g., if the dataset collaborator does not exist) or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
@@ -641,6 +655,7 @@ class SegmentsClient:
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the collaborator fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the dataset or dataset collaborator is not found.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
@@ -669,6 +684,7 @@ class SegmentsClient:
             username: The username of the collaborator to be deleted.
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the dataset or dataset collaborator is not found.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
@@ -711,6 +727,7 @@ class SegmentsClient:
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the samples fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the dataset is not found.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
@@ -774,6 +791,7 @@ class SegmentsClient:
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the samples fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the sample is not found.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid (e.g., if the sample does not exist) or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
@@ -833,6 +851,8 @@ class SegmentsClient:
             :exc:`~segments.exceptions.ValidationError`: If validation of the sample attributes fails.
             :exc:`~segments.exceptions.ValidationError`: If validation of the sample fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the dataset is not found.
+            :exc:`~segments.exceptions.AlreadyExistsError`: If the sample already exists.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
@@ -884,6 +904,8 @@ class SegmentsClient:
             :exc:`~segments.exceptions.ValidationError`: If validation of the attributes of a sample fails.
             :exc:`~segments.exceptions.ValidationError`: If validation of a sample fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the dataset is not found.
+            :exc:`~segments.exceptions.AlreadyExistsError`: If one of the samples already exists.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
@@ -949,6 +971,7 @@ class SegmentsClient:
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.ValidationError`: If validation of the samples fails.
+            :exc:`~segments.exceptions.NotFoundError`: If the sample is not found.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
@@ -991,6 +1014,7 @@ class SegmentsClient:
             uuid: The sample uuid.
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the sample is not found.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
@@ -1015,7 +1039,8 @@ class SegmentsClient:
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the label fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
-            :exc:`~segments.exceptions.NetworkError`: If the request is not valid (e.g., if the sample or labelset does not exist) or if the server experienced an error.
+            :exc:`~segments.exceptions.NotFoundError`: If the sample or labelset is not found.
+            :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
@@ -1033,7 +1058,7 @@ class SegmentsClient:
     ) -> Label:
         """Add a label to a sample.
 
-        A label is added to a sample in relation to a `label set`, such as the default `ground-truth` label set, or a newly created label set for `uploading model predictions <https://docs.segments.ai/guides/upload-model-predictions>`__. You can create a new label set by clicking the "Add new label set" link on the Samples tab.
+        A label is added to a sample in relation to a `labelset`, such as the default `ground-truth` labelset, or a newly created labelset for `uploading model predictions <https://docs.segments.ai/guides/upload-model-predictions>`__. You can create a new labelset by clicking the "Add new labelset" link on the Samples tab.
 
         Note:
             The content of the ``attributes`` field depends on the `label type <https://docs.segments.ai/reference/sample-and-label-types/label-types>`__.
@@ -1067,6 +1092,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.ValidationError`: If validation of the attributes fails.
             :exc:`~segments.exceptions.ValidationError`: If validation of the label fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the sample or labelset is not found.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
@@ -1132,6 +1158,7 @@ class SegmentsClient:
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the label fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the sample or labelset is not found.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
@@ -1167,6 +1194,7 @@ class SegmentsClient:
             labelset: The labelset this label belongs to.
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the sample or labelset is not found.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
@@ -1191,6 +1219,7 @@ class SegmentsClient:
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the labelsets fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the dataset is not found.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid (e.g., if the dataset does not exist) or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
@@ -1217,6 +1246,7 @@ class SegmentsClient:
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the labelset fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the dataset or labelset is not found.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid (e.g., if the dataset does not exist) or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
@@ -1245,6 +1275,8 @@ class SegmentsClient:
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the labelset fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the dataset is not found.
+            :exc:`~segments.exceptions.AlreadyExistsError`: If the labelset already exists.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
@@ -1279,6 +1311,7 @@ class SegmentsClient:
             name: The name of the labelset.
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the dataset or labelset is not found.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
@@ -1310,6 +1343,7 @@ class SegmentsClient:
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the issue fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the sample is not found.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
@@ -1345,6 +1379,7 @@ class SegmentsClient:
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the issue fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the issue is not found.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
@@ -1373,6 +1408,7 @@ class SegmentsClient:
             uuid: The issue uuid.
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the issue is not found.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
@@ -1397,7 +1433,8 @@ class SegmentsClient:
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the releases fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
-            :exc:`~segments.exceptions.NetworkError`: If the request is not valid (e.g., if the dataset does not exist) or if the server experienced an error.
+            :exc:`~segments.exceptions.NotFoundError`: If the dataset is not found.
+            :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
@@ -1421,6 +1458,7 @@ class SegmentsClient:
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the release fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the dataset or release is not found.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid (e.g., if the dataset does not exist) or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
@@ -1449,6 +1487,8 @@ class SegmentsClient:
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the release fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the dataset is not found.
+            :exc:`~segments.exceptions.AlreadyExistsError`: If the release already exists.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
@@ -1479,6 +1519,7 @@ class SegmentsClient:
             name: The name of the release.
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the dataset or release is not found.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """

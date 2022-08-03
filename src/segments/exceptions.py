@@ -32,7 +32,19 @@ class AuthorizationError(SegmentsError):
 
 
 class NetworkError(SegmentsError):
-    """Raised when an HTTPError occurs."""
+    """Raised when an HTTP error occurs."""
+
+
+class NotFoundError(NetworkError):
+    """Raised when the requested object is not found (e.g., because the name is misspelled)."""
+
+    pass
+
+
+class AlreadyExistsError(NetworkError):
+    """Raised when the object (e.g., dataset, labelset, release, ...) already exists."""
+
+    pass
 
 
 class TimeoutError(SegmentsError):
