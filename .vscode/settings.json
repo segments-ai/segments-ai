@@ -1,21 +1,40 @@
 {
   "editor.formatOnSave": true,
-  "esbonio.sphinx.confDir": "",
+  // "esbonio.sphinx.confDir": "",
+  "python.envFile": "${workspaceFolder}/.env",
+  "python.linting.enabled": true,
+  // Black
   "python.formatting.provider": "black",
+  //  Flake8
+  "python.linting.flake8Enabled": true,
+  // Mypy
   "python.linting.mypyEnabled": true,
+  // "python.analysis.typeCheckingMode": "basic",
   "python.linting.mypyArgs": [
     "--ignore-missing-imports",
     "--follow-imports=silent",
     "--show-column-numbers",
     "--strict",
-    "--warn-redundant-casts",
+    "--warn-redundant-casts"
   ],
-  "python.linting.enabled": true,
+  // isort
+  "python.sortImports.args": ["--profile", "black"],
+  "[python]": {
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true
+    }
+  },
+
+  // Pytest
   "python.testing.unittestArgs": ["-v", "-s", "./tests", "-p", "test_*.py"],
-  "python.testing.pytestArgs": [".", "--exitfirst", "--verbose", "-rsA", "--no-cov"],
+  "python.testing.pytestArgs": [
+    ".",
+    "--exitfirst",
+    "--verbose",
+    "-rsA",
+    "--no-cov"
+  ],
   "python.testing.unittestEnabled": false,
-  "python.testing.nosetestsEnabled": false,
-  "python.testing.pytestEnabled": true,
-  "python.analysis.typeCheckingMode": "basic",
-  "python.envFile": "${workspaceFolder}/.env",
+  // "python.testing.nosetestsEnabled": false,
+  "python.testing.pytestEnabled": true
 }
