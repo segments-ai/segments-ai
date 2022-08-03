@@ -38,6 +38,8 @@
 .. automethod:: segments.client.SegmentsClient.clone_dataset
 ```
 
+## Dataset collaborators
+
 ### Get a dataset collaborator
 
 ```{eval-rst}
