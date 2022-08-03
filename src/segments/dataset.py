@@ -368,13 +368,13 @@ class SegmentsDataset:
 
         return item
 
-    def __iter__(self) -> SegmentsDataset:
-        return self
+    # def __iter__(self) -> SegmentsDataset:
+    #     return self
 
-    def __next__(self) -> Dict[str, Any]:
-        if self._index < len(self):
-            result = self[self._index]
-            self._index += 1
-            return result
-        else:
-            raise StopIteration
+    # def __next__(self) -> Dict[str, Any]:
+    #     if self._index < len(self):
+    #         result = self[self._index]
+    #         self._index += 1
+    #         return result
+    #     else:
+    #         raise StopIteration
