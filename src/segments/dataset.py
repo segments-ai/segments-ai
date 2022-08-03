@@ -96,9 +96,11 @@ class SegmentsDataset:
     ):
 
         self.labelset = labelset
-        self.filter_by = (
-            [filter_by] if filter_by and not isinstance(filter_by, list) else filter_by
-        )
+        if isinstance(filter_by, list):
+            filter_by = [f.upper() for f in filter_by]
+        elif filter_by:
+            filter_by = [filter_by.upper()]
+        self.filter_by = filter_by
         # if self.filter_by:
         #     self.filter_by = [s.lower() for s in self.filter_by]
         self.filter_by_metadata = filter_by_metadata
