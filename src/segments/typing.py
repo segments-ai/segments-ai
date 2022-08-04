@@ -358,7 +358,7 @@ class Sample(BaseModel):
     has_embedding: bool
     label: Optional[Label]
     issues: Optional[List[Issue]]
-    dataset_full_name: str
+    dataset_full_name: Optional[str]
 
 
 ########################

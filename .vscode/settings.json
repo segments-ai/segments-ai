@@ -3,10 +3,13 @@
   // "esbonio.sphinx.confDir": "",
   "python.envFile": "${workspaceFolder}/.env",
   "python.linting.enabled": true,
+
   // Black
   "python.formatting.provider": "black",
+
   //  Flake8
   "python.linting.flake8Enabled": true,
+
   // Mypy
   "python.linting.mypyEnabled": true,
   // "python.analysis.typeCheckingMode": "basic",
@@ -17,6 +20,7 @@
     "--strict",
     "--warn-redundant-casts"
   ],
+
   // isort
   "python.sortImports.args": ["--profile", "black"],
   "[python]": {
