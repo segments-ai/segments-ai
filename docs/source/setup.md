@@ -1,6 +1,6 @@
 # Setup
 
-```{note}
+```{seealso}
 Please refer to the [Python SDK quickstart](https://docs.segments.ai/tutorials/python-sdk-quickstart) for a full example of working with the Python SDK.
 ```
 

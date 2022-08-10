@@ -120,7 +120,7 @@ html_theme_options = {
 pygments_style = "default"
 html_logo = "_static/logo_blue_background.png"
 html_title = "Python SDK"
-html_favicon = "_static/favicon.ico"
+html_favicon = "_static/favicon_small.ico"
 
 
 # Add any paths that contain custom static files (such as style sheets) here,
