@@ -552,6 +552,10 @@ def export_image(
     **kwargs: Any,
 ) -> Optional[str]:
     # Create export folder
+
+    if export_folder == ".":
+        export_folder = dataset.image_dir
+
     os.makedirs(export_folder, exist_ok=True)
 
     # CATEGORIES
@@ -590,7 +594,7 @@ def export_image(
             # Instance png
             instance_label = sample["segmentation_bitmap"]
             export_file = os.path.join(
-                dataset.image_dir,
+                export_folder,
                 f"{file_name}_label_{dataset.labelset}_instance.png",
             )
             instance_label.save(export_file)
@@ -600,7 +604,7 @@ def export_image(
             instance_label = sample["segmentation_bitmap"]
             instance_label_colored = colorize(np.uint8(instance_label))
             export_file = os.path.join(
-                dataset.image_dir,
+                export_folder,
                 f"{file_name}_label_{dataset.labelset}_instance_colored.png",
             )
             Image.fromarray(img_as_ubyte(instance_label_colored)).save(export_file)
@@ -612,7 +616,7 @@ def export_image(
                 instance_label, sample["annotations"], id_increment
             )
             export_file = os.path.join(
-                dataset.image_dir,
+                export_folder,
                 f"{file_name}_label_{dataset.labelset}_semantic.png",
             )
             Image.fromarray(img_as_ubyte(semantic_label)).save(export_file)
@@ -627,13 +631,13 @@ def export_image(
                 np.uint8(semantic_label), colormap=[c.color for c in categories]
             )
             export_file = os.path.join(
-                dataset.image_dir,
+                export_folder,
                 f"{file_name}_label_{dataset.labelset}_semantic_colored.png",
             )
             Image.fromarray(img_as_ubyte(semantic_label_colored)).save(export_file)
 
-    print(f"Exported to {dataset.image_dir}")
-    return dataset.image_dir
+    print(f"Exported to {export_folder}")
+    return export_folder
 
 
 def write_yolo_file(
