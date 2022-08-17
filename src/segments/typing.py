@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel, Extra, validator
+from segments.exceptions import ValidationError
 from typing_extensions import Literal, TypedDict
 
 #######################################
@@ -41,6 +42,15 @@ PCDType = Literal["pcd", "kitti", "nuscenes"]
 InputType = Literal["select", "text", "number", "checkbox"]
 Category = Literal[
     "street_scenery", "garden", "agriculture", "satellite", "people", "medical", "other"
+]
+_category_list = [
+    "street_scenery",
+    "garden",
+    "agriculture",
+    "satellite",
+    "people",
+    "medical",
+    "other",
 ]
 RGB = Tuple[int, int, int]
 RGBA = Tuple[int, int, int, int]
@@ -464,7 +474,7 @@ class Dataset(BaseModel):
     cloned_from: Optional[str] = None
     description: str
     # data_type: DataType
-    category: Category
+    category: str  # Category
     public: bool
     owner: Owner
     created_at: str
@@ -487,6 +497,14 @@ class Dataset(BaseModel):
     noncollaborator_can_review: Optional[bool] = None
     # tasks: Optional[List[Dict[str, Any]]] = None
     embeddings_enabled: Optional[bool] = None
+
+    @validator("category")
+    def check_category(cls, category: str) -> str:
+        if category not in _category_list and "custom-" not in category:
+            raise ValidationError(
+                f"The category should be one of {_category_list}, but is {category}."
+            )
+        return category
 
 
 ####################
