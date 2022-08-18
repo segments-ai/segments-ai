@@ -43,8 +43,7 @@ InputType = Literal["select", "text", "number", "checkbox"]
 Category = Literal[
     "street_scenery", "garden", "agriculture", "satellite", "people", "medical", "other"
 ]
-DistortionModel = Literal["plumb_bob"]
-_category_list = [
+_Category = [
     "street_scenery",
     "garden",
     "agriculture",
@@ -53,6 +52,7 @@ _category_list = [
     "medical",
     "other",
 ]
+DistortionModel = Literal["plumb_bob"]
 RGB = Tuple[int, int, int]
 RGBA = Tuple[int, int, int, int]
 FormatVersion = Union[float, str]
@@ -520,9 +520,9 @@ class Dataset(BaseModel):
 
     @validator("category")
     def check_category(cls, category: str) -> str:
-        if category not in _category_list and "custom-" not in category:
+        if category not in _Category and "custom-" not in category:
             raise ValidationError(
-                f"The category should be one of {_category_list}, but is {category}."
+                f"The category should be one of {_Category}, but is {category}."
             )
         return category
 
