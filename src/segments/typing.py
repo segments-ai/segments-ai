@@ -336,7 +336,7 @@ class CameraIntrinsics(BaseModel):
     intrinsic_matrix: List[List[float]]
 
 
-class CameraExtrinsincs(BaseModel):
+class CameraExtrinsics(BaseModel):
     translation: XYZ
     rotation: XYZW
 
@@ -345,7 +345,7 @@ class CalibratedImage(URL):
     row: int
     col: int
     intrinsics: Optional[CameraIntrinsics] = None
-    extrinsics: Optional[CameraExtrinsincs] = None
+    extrinsics: Optional[CameraExtrinsics] = None
 
 
 class PointcloudSampleAttributes(BaseModel):
