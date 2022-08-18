@@ -82,23 +82,13 @@ def exception_handler(
         :exc:`~segments.exceptions.TimeoutError`: If the request times out - catches :exc:`requests.exceptions.TimeoutError`.
     """
 
-    # def remove_attributes_from_model(
-    #     model: Type[T], remove_attributes: List[str]
-    # ) -> None:
-    #     for remove_attribute in remove_attributes:
-    #         delattr(model, remove_attribute)
-
-    # def remove_attributes_from_list(l: Type[T], remove_attributes: List[str]) -> None:
-    #     for e in l:
-    #         remove_attributes_from_model(e, remove_attributes)
-
     def wrapper_function(
         *args: Any,
         model: Optional[Type[T]] = None,
-        # remove_attributes: Optional[List[str]] = None,
         **kwargs: Any,
     ) -> Union[requests.Response, T]:
         try:
+            self = args[0]
             r = f(*args, **kwargs)
             r.raise_for_status()
             if r.content:
@@ -109,12 +99,17 @@ def exception_handler(
                     if message.startswith("You have exceeded"):
                         raise APILimitError(message)
                 if model:
-                    m = parse_obj_as(model, r_json)
-                    # if remove_attributes:
-                    #     if isinstance(m, list):
-                    #         remove_attributes_from_list(m, remove_attributes)
-                    #     else:
-                    #         remove_attributes_from_model(m, remove_attributes)
+                    if self.disable_typechecking:
+                        try:
+                            if isinstance(model.__origin__(), list):
+                                model_without_list = model.__args__[0]
+                                m = [
+                                    model_without_list.construct(r_j) for r_j in r_json
+                                ]
+                        except AttributeError:
+                            m = model.construct(r_json)
+                    else:
+                        m = parse_obj_as(model, r_json)
                     return m
             return r
         except requests.exceptions.Timeout as e:
@@ -179,7 +174,10 @@ class SegmentsClient:
     """
 
     def __init__(
-        self, api_key: Optional[str] = None, api_url: str = "https://api.segments.ai/"
+        self,
+        api_key: Optional[str] = None,
+        api_url: str = "https://api.segments.ai/",
+        disable_typechecking: bool = False,
     ):
         if api_key is None:
             api_key = os.getenv("SEGMENTS_API_KEY")
@@ -192,6 +190,7 @@ class SegmentsClient:
 
         self.api_key = api_key
         self.api_url = api_url
+        self.disable_typechecking = disable_typechecking
 
         # https://realpython.com/python-requests/#performance
         # https://stackoverflow.com/questions/21371809/cleanly-setting-max-retries-on-python-requests-get-or-post-method
