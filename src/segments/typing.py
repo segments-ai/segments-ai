@@ -1,4 +1,3 @@
-from lib2to3.pgen2.token import OP
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel, Extra, validator
