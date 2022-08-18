@@ -215,3 +215,15 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.PCD
 ```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.CalibratedImage
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.CameraIntrinsics
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.CameraExtrinsics
+```

@@ -342,6 +342,8 @@ class CameraExtrinsincs(BaseModel):
 
 
 class CalibratedImage(URL):
+    row: int
+    col: int
     intrinsics: Optional[CameraIntrinsics] = None
     extrinsics: Optional[CameraExtrinsincs] = None
 
