@@ -43,7 +43,7 @@ InputType = Literal["select", "text", "number", "checkbox"]
 Category = Literal[
     "street_scenery", "garden", "agriculture", "satellite", "people", "medical", "other"
 ]
-_category_list = [
+_Category = [
     "street_scenery",
     "garden",
     "agriculture",
@@ -52,6 +52,7 @@ _category_list = [
     "medical",
     "other",
 ]
+DistortionModel = Literal["plumb_bob"]
 RGB = Tuple[int, int, int]
 RGBA = Tuple[int, int, int, int]
 FormatVersion = Union[float, str]
@@ -329,8 +330,27 @@ class EgoPose(BaseModel):
     heading: XYZW
 
 
+class CameraIntrinsics(BaseModel):
+    distortion_model: Optional[DistortionModel] = None
+    distortion_params: Optional[List[float]] = None
+    intrinsic_matrix: List[List[float]]
+
+
+class CameraExtrinsics(BaseModel):
+    translation: XYZ
+    rotation: XYZW
+
+
+class CalibratedImage(URL):
+    row: int
+    col: int
+    intrinsics: Optional[CameraIntrinsics] = None
+    extrinsics: Optional[CameraExtrinsics] = None
+
+
 class PointcloudSampleAttributes(BaseModel):
     pcd: PCD
+    images: Optional[List[CalibratedImage]] = None
     ego_pose: Optional[EgoPose] = None
     default_z: Optional[float] = None
     name: Optional[str] = None
@@ -500,9 +520,9 @@ class Dataset(BaseModel):
 
     @validator("category")
     def check_category(cls, category: str) -> str:
-        if category not in _category_list and "custom-" not in category:
+        if category not in _Category and "custom-" not in category:
             raise ValidationError(
-                f"The category should be one of {_category_list}, but is {category}."
+                f"The category should be one of {_Category}, but is {category}."
             )
         return category
 
