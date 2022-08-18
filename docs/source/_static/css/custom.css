@@ -32,6 +32,8 @@ h2 {
   border-radius: 0px;
 }
 /* Remove border if a h2 follows a h1 to prevent double lines */
+h1 + h2,
+h1 + section > h2,
 h1 + div > h2 {
   border: 0px solid;
   margin: 0px;
