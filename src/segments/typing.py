@@ -1,3 +1,4 @@
+from lib2to3.pgen2.token import OP
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel, Extra, validator
@@ -43,6 +44,7 @@ InputType = Literal["select", "text", "number", "checkbox"]
 Category = Literal[
     "street_scenery", "garden", "agriculture", "satellite", "people", "medical", "other"
 ]
+DistortionModel = Literal["plumb_bob"]
 _category_list = [
     "street_scenery",
     "garden",
@@ -329,8 +331,25 @@ class EgoPose(BaseModel):
     heading: XYZW
 
 
+class CameraIntrinsics(BaseModel):
+    distortion_model: Optional[DistortionModel] = None
+    distortion_params: Optional[List[float]] = None
+    intrinsic_matrix: List[List[float]]
+
+
+class CameraExtrinsincs(BaseModel):
+    translation: XYZ
+    rotation: XYZW
+
+
+class CalibratedImage(URL):
+    intrinsics: Optional[CameraIntrinsics] = None
+    extrinsics: Optional[CameraExtrinsincs] = None
+
+
 class PointcloudSampleAttributes(BaseModel):
     pcd: PCD
+    images: Optional[List[CalibratedImage]] = None
     ego_pose: Optional[EgoPose] = None
     default_z: Optional[float] = None
     name: Optional[str] = None
