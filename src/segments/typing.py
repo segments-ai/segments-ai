@@ -452,6 +452,9 @@ class TaskAttributes(BaseModel):
     format_version: Optional[FormatVersion] = None
     categories: Optional[List[TaskAttributeCategory]] = None
 
+    class Config:
+        extra = Extra.allow
+
 
 class Owner(BaseModel):
     username: str
