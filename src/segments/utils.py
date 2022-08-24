@@ -178,7 +178,8 @@ def export_dataset(
         from .export import export_image
 
         return export_image(dataset, export_folder, export_format, id_increment)
-    return None
+    else:
+        raise ValueError("Please choose a valid export_format.")
 
 
 def load_image_from_url(
