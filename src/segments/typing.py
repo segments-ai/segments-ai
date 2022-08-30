@@ -331,8 +331,6 @@ class EgoPose(BaseModel):
 
 
 class CameraIntrinsics(BaseModel):
-    distortion_model: Optional[DistortionModel] = None
-    distortion_params: Optional[List[float]] = None
     intrinsic_matrix: List[List[float]]
 
 
