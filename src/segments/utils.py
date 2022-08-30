@@ -104,6 +104,7 @@ def export_dataset(
         "instance-color",
         "semantic",
         "semantic-color",
+        "polygon",
     ] = "coco-panoptic",
     id_increment: int = 0,
     **kwargs: Any,
@@ -178,6 +179,17 @@ def export_dataset(
         from .export import export_image
 
         return export_image(dataset, export_folder, export_format, id_increment)
+    elif export_format == "polygon":
+        if dataset.task_type not in [
+            "segmentation-bitmap",
+            "segmentation-bitmap-highres",
+        ]:
+            raise ValueError(
+                'Only datasets of type "segmentation-bitmap" and "segmentation-bitmap-highres" can be exported to this format.'
+            )
+        from .export import export_polygon
+
+        return export_polygon(dataset, export_folder)
     else:
         raise ValueError("Please choose a valid export_format.")
 

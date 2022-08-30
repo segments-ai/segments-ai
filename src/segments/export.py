@@ -67,6 +67,9 @@ COLORMAP: ColorMap = [
 ]
 
 
+##################
+# Helper methods #
+##################
 # https://github.com/cocodataset/panopticapi/blob/master/panopticapi/utils.py
 class IdGenerator:
     """
@@ -192,6 +195,9 @@ def get_bbox(binary_mask: npt.NDArray[Any]) -> Union[Tuple[int, int, int, int], 
         return False
 
 
+##################
+# Export methods #
+##################
 def export_coco_instance(
     dataset: SegmentsDataset, export_folder: str
 ) -> Tuple[str, Optional[str]]:
@@ -376,7 +382,7 @@ def export_coco_instance(
 
 
 def export_coco_panoptic(
-    dataset: SegmentsDataset, export_folder: str, **kwargs: Any
+    dataset: SegmentsDataset, export_folder: str
 ) -> Tuple[str, Optional[str]]:
     # Create export folder
     os.makedirs(export_folder, exist_ok=True)
@@ -549,7 +555,6 @@ def export_image(
     export_folder: str,
     export_format: str,
     id_increment: int,
-    **kwargs: Any,
 ) -> Optional[str]:
     # Create export folder
 
@@ -640,34 +645,6 @@ def export_image(
     return export_folder
 
 
-def write_yolo_file(
-    file_name: str, annotations: Any, image_width: float, image_height: float
-) -> None:
-    with open(file_name, "w") as f:
-        for annotation in annotations:
-            if annotation["type"] == "bbox":
-                category_id = annotation["category_id"]
-                [[x0, y0], [x1, y1]] = annotation["points"]
-
-                # Normalize
-                x0, x1 = x0 / image_width, x1 / image_width
-                y0, y1 = y0 / image_height, y1 / image_height
-
-                # Get center, width and height of bbox
-                x_center = (x0 + x1) / 2
-                y_center = (y0 + y1) / 2
-                width = abs(x1 - x0)
-                height = abs(y1 - y0)
-
-                # Save it to the file
-                # print(category_id, x_center, y_center, width, height)
-                f.write(
-                    "{} {:.6f} {:.6f} {:.6f} {:.6f}\n".format(
-                        category_id, x_center, y_center, width, height
-                    )
-                )
-
-
 def export_yolo(
     dataset: SegmentsDataset,
     export_folder: str,
@@ -686,6 +663,34 @@ def export_yolo(
         :exc:`ValueError`: If the dataset is not a bounding box dataset.
         :exc:`ValueError`: If the dataset is an ``image-vector-sequence``and the image width or image height is :obj:`None`.
     """
+
+    def write_yolo_file(
+        file_name: str, annotations: Any, image_width: float, image_height: float
+    ) -> None:
+        with open(file_name, "w") as f:
+            for annotation in annotations:
+                if annotation["type"] == "bbox":
+                    category_id = annotation["category_id"]
+                    [[x0, y0], [x1, y1]] = annotation["points"]
+
+                    # Normalize
+                    x0, x1 = x0 / image_width, x1 / image_width
+                    y0, y1 = y0 / image_height, y1 / image_height
+
+                    # Get center, width and height of bbox
+                    x_center = (x0 + x1) / 2
+                    y_center = (y0 + y1) / 2
+                    width = abs(x1 - x0)
+                    height = abs(y1 - y0)
+
+                    # Save it to the file
+                    # print(category_id, x_center, y_center, width, height)
+                    f.write(
+                        "{} {:.6f} {:.6f} {:.6f} {:.6f}\n".format(
+                            category_id, x_center, y_center, width, height
+                        )
+                    )
+
     # Create export folder
     os.makedirs(os.path.join(export_folder, dataset.image_dir), exist_ok=True)
 
@@ -705,12 +710,6 @@ def export_yolo(
             sample = dataset[i]
             image_name = os.path.splitext(os.path.basename(sample["name"]))[0]
 
-            # Get the image width and height
-            # if "image_width" in kwargs and "image_height" in kwargs:
-            #     image_width = kwargs["image_width"]
-            #     image_height = kwargs["image_height"]
-            # else:
-            #     assert False, "Please provide image_width and image_height parameters."
             if image_width is None or image_height is None:
                 raise ValueError(
                     "Please provide image_width and image_height parameters (i.e., not None)."
@@ -756,3 +755,9 @@ def export_yolo(
 
     print(f"Exported. Images and labels in {dataset.image_dir}")
     return dataset.image_dir
+
+
+def export_polygon(
+    dataset: SegmentsDataset, export_folder: str
+) -> Tuple[str, Optional[str]]:
+    pass
