@@ -111,6 +111,26 @@ def export_dataset(
 ) -> Optional[Union[Tuple[str, Optional[str]], Optional[str]]]:
     """Export a dataset to a different format.
 
+    +------------------+----------------------------------------------------------------------------------------------------+
+    | Export format    | Supported dataset type                                                                             |
+    +==================+====================================================================================================+
+    | COCO panoptic    | ``segmentation-bitmap`` and ``segmentation-bitmap-highres``                                        |
+    +------------------+----------------------------------------------------------------------------------------------------+
+    | COCO instance    | ``segmentation-bitmap`` and ``segmentation-bitmap-highres``                                        |
+    +------------------+----------------------------------------------------------------------------------------------------+
+    | YOLO             | ``segmentation-bitmap``, ``segmentation-bitmap-highres``, ``vector``, ``bboxes`` and ``keypoints`` |
+    +------------------+----------------------------------------------------------------------------------------------------+
+    | Instance         | ``segmentation-bitmap`` and ``segmentation-bitmap-highres``                                        |
+    +------------------+----------------------------------------------------------------------------------------------------+
+    | Colored instance | ``segmentation-bitmap`` and ``segmentation-bitmap-highres``                                        |
+    +------------------+----------------------------------------------------------------------------------------------------+
+    | Semantic         | ``segmentation-bitmap`` and ``segmentation-bitmap-highres``                                        |
+    +------------------+----------------------------------------------------------------------------------------------------+
+    | Colored semantic | ``segmentation-bitmap`` and ``segmentation-bitmap-highres``                                        |
+    +------------------+----------------------------------------------------------------------------------------------------+
+    | Polygon          | ``segmentation-bitmap`` and ``segmentation-bitmap-highres``                                        |
+    +------------------+----------------------------------------------------------------------------------------------------+
+
     Args:
         dataset: A :class:`.SegmentsDataset`.
         export_folder: The folder to export the dataset to. Defaults to ``.``.
