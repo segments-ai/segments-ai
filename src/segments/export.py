@@ -842,9 +842,7 @@ def export_polygon(
 
     file_name = os.path.join(
         export_folder,
-        "export_polygon_{}_{}.json".format(
-            dataset.dataset_identifier, dataset.release["name"]
-        ),
+        f"export_polygon_{dataset.dataset_identifier}_{dataset.release['name']}.json",
     )
     with open(file_name, "w") as f:
         json.dump(json_data, f)
