@@ -191,8 +191,8 @@ def get_bbox(binary_mask: npt.NDArray[Any]) -> Union[Tuple[int, int, int, int], 
     if len(regions) == 1:
         bbox = regions[0].bbox
         return cast(Tuple[int, int, int, int], bbox)
-    else:
-        return False
+
+    return False
 
 
 ##################
@@ -760,4 +760,94 @@ def export_yolo(
 def export_polygon(
     dataset: SegmentsDataset, export_folder: str
 ) -> Tuple[str, Optional[str]]:
-    pass
+    try:
+        import cv2 as cv
+    except ImportError as e:
+        logger.error("Please install OpenCV first: pip install opencv-python.")
+        raise e
+
+    # Create export folder
+    os.makedirs(export_folder, exist_ok=True)
+
+    categories = dataset.categories
+    # task_type = dataset.task_type
+
+    images = []
+    annotations = []
+
+    annotation_id = 1
+    for i in tqdm(range(len(dataset))):
+        sample = dataset[i]
+
+        if sample["annotations"] is None:
+            continue
+
+        image_id = i + 1
+        images.append(
+            {
+                "id": image_id,
+                "file_name": sample["file_name"],
+                "height": sample["image"].size[1] if sample["image"] else None,
+                "width": sample["image"].size[0] if sample["image"] else None,
+            }
+        )
+
+        # https://scikit-image.org/docs/dev/api/skimage.measure.html#skimage.measure.regionprops
+        regions = regionprops(np.array(sample["segmentation_bitmap"], np.uint32))
+        regions = {region.label: region for region in regions}
+
+        for instance in sample["annotations"]:
+            category_id = instance["category_id"]
+
+            annotation = {
+                "id": annotation_id,
+                "image_id": image_id,
+                "category_id": category_id,
+            }
+
+            if instance["id"] not in regions:
+                # Only happens when the instance has 0 labeled pixels, which should not happen.
+                logger.warning(
+                    f"Skipping instance with 0 labeled pixels: {sample['file_name']}, instance_id: {instance['id']}, category_id: {category_id}"
+                )
+                continue
+
+            instance_mask = (
+                np.array(sample["segmentation_bitmap"], np.uint8) == instance["id"]
+            )
+
+            # Map booleans to black and white
+            black_white_image = np.vectorize(lambda x: 255 if x else 0)(instance_mask)
+            # Allowed OpenCV data types: https://stackoverflow.com/questions/12785121/access-opencv-matrix-cv-32s-element
+            black_white_image = black_white_image.astype("uint8")
+
+            # Contour retrieval modes (all, outer, in a hierarchy, etc.): https://docs.opencv.org/4.x/d3/dc0/group__imgproc__shape.html#ga819779b9857cc2f8601e6526a3a5bc71
+            contours, hierarchy = cv.findContours(
+                black_white_image, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE
+            )
+
+            # Make object json serializable
+            contours = [np.squeeze(contour).tolist() for contour in contours]
+
+            annotation.update({"polygons": contours})
+
+            annotations.append(annotation)
+            annotation_id += 1
+
+    json_data = {
+        "categories": [category.dict() for category in categories],
+        "images": images,
+        "annotations": annotations,
+    }
+
+    file_name = os.path.join(
+        export_folder,
+        "export_polygon_{}_{}.json".format(
+            dataset.dataset_identifier, dataset.release["name"]
+        ),
+    )
+    with open(file_name, "w") as f:
+        json.dump(json_data, f)
+
+    print(f"Exported to {file_name}. Images in {dataset.image_dir}")
+    return file_name, dataset.image_dir
