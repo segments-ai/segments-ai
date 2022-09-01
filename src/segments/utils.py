@@ -137,7 +137,7 @@ def export_dataset(
         export_format: The destination format. Defaults to ``coco-panoptic``.
         id_increment: Increment the category ids with this number. Defaults to ``0``. Ignored unless ``export_format`` is ``semantic`` or ``semantic-color``.
     Returns:
-        TODO
+        Returns the file name and the image directory name (for COCO panoptic, COCO instance, YOLO and polygon), or returns the export folder name (for (colored) instance and (colored) panoptic).
     """
 
     try:

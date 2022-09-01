@@ -205,7 +205,9 @@ def export_coco_instance(
 
     Args:
         dataset: A :class:`.SegmentsDataset`.
-        export_folder: TODO
+        export_folder: The output directory.
+    Returns:
+        Returns the file name and the image directory name.
     Raises:
         :exc:`ImportError`: If pycocotools is not installed.
     """
@@ -384,6 +386,15 @@ def export_coco_instance(
 def export_coco_panoptic(
     dataset: SegmentsDataset, export_folder: str
 ) -> Tuple[str, Optional[str]]:
+    """Export a Segments dataset in COCO panoptic format.
+
+    Args:
+        dataset: A :class:`.SegmentsDataset`.
+        export_folder: The output directory.
+    Returns:
+        Returns the file name and the image directory name.
+    """
+
     # Create export folder
     os.makedirs(export_folder, exist_ok=True)
 
@@ -556,6 +567,16 @@ def export_image(
     export_format: str,
     id_increment: int,
 ) -> Optional[str]:
+    """Export a Segments dataset as images.
+
+    Args:
+        dataset: A :class:`.SegmentsDataset`.
+        export_folder: The output directory.
+        export_format: The export format.
+        id_increment: Increment the category ids with this number.
+    Returns:
+        Returns the export folder.
+    """
     # Create export folder
 
     if export_folder == ".":
@@ -651,10 +672,11 @@ def export_yolo(
     image_width: Optional[float] = None,
     image_height: Optional[float] = None,
 ) -> Optional[str]:
-    """Export a segments dataset to YOLO format.
+    """Export a Segments dataset in YOLO format.
 
     Args:
         dataset: A segments dataset.
+        export_folder: The output directory.
         image_width: The width of the image (needed for ``image-vector-sequence``).
         image_height: The height of the image (needed for ``image-vector-sequence``).
     Returns:
@@ -760,6 +782,16 @@ def export_yolo(
 def export_polygon(
     dataset: SegmentsDataset, export_folder: str
 ) -> Tuple[str, Optional[str]]:
+    """Export a Segments dataset as polygons (i.e., contours).
+
+    Args:
+        dataset: A :class:`.SegmentsDataset`.
+        export_folder: The output directory.
+    Raises:
+        :exc:`ImportError`: If OpenCV is not installed.
+    Returns:
+        Returns the file name and the image directory name.
+    """
     try:
         import cv2 as cv
     except ImportError as e:
