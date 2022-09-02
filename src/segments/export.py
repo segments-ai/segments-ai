@@ -186,6 +186,13 @@ def colorize(
 
 
 def get_bbox(binary_mask: npt.NDArray[Any]) -> Union[Tuple[int, int, int, int], bool]:
+    """Returns the bounding box of the binary mask (if one is found, otherwise returns False)
+
+    Args:
+        binary_mask: The binary mask as a numpy array.
+    Returns:
+        The bounding box or False if no bounding box is found.
+    """
 
     regions = regionprops(np.uint8(binary_mask))
     if len(regions) == 1:
