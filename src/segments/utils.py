@@ -326,7 +326,7 @@ def handle_exif_rotation(image: Image.Image) -> Image.Image:
         return image
 
 
-def plot_polygons(
+def show_polygons(
     image_directory_path: str, image_id: int, exported_polygons_path: str, seed: int = 0
 ) -> None:
     """Plot the exported polygons for an image.
