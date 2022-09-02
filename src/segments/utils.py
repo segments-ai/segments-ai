@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import json
 import logging
+import random
 import re
+from collections import defaultdict
 from io import BytesIO
-from typing import TYPE_CHECKING, Any, Dict, Mapping, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union, cast
 from urllib.parse import urlparse
 
 import numpy as np
@@ -322,3 +324,77 @@ def handle_exif_rotation(image: Image.Image) -> Image.Image:
         return image
     except (AttributeError, KeyError, IndexError, ValueError):
         return image
+
+
+def plot_polygons(
+    image_directory_path: str, image_id: int, exported_polygons_path: str, seed: int = 0
+) -> None:
+    """Plot the exported polygons for an image.
+
+    Args:
+        image_directory_path: The image directory path.
+        image_id: The image id (can be found in the exported polygons JSON file).
+        exported_polygons_path: The exported polygons path.
+        seed: The seed used to generate random colors. Defaults to ``0``.
+    Raises:
+        :exc:`ImportError`: If matplotlib is not installed.
+    """
+
+    try:
+        from matplotlib import image
+        from matplotlib import pyplot as plt
+    except ImportError as e:
+        logger.error("Please install matplotlib first: pip install matplotlib.")
+        raise e
+
+    def find_image_name(images: List[Dict[str, Any]], image_id: int) -> str:
+        for image in images:
+            if image["id"] == image_id:
+                return cast(str, image["file_name"])
+        raise KeyError("Cannot find the image id. Please provide a valid id.")
+
+    def get_random_color() -> Tuple[float, float, float]:
+        return (random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1))
+
+    random.seed(seed)
+
+    with open(exported_polygons_path, "r") as f:
+        polygons = json.load(f)
+
+    image_name = find_image_name(polygons["images"], image_id)
+    image = image.imread(f"{image_directory_path}/{image_name}")
+
+    # {category id: (category name, color)}
+    categories = {
+        category["id"]: (
+            category["name"],
+            category["color"] if category["color"] else get_random_color(),
+        )
+        for category in polygons["categories"]
+    }
+
+    # {category id: polygons}
+    annotations = defaultdict(list)
+    filtered_annotations = filter(
+        lambda dictionary: dictionary["image_id"] == image_id, polygons["annotations"]
+    )
+    for annotation in filtered_annotations:
+        annotations[annotation["category_id"]].extend(annotation["polygons"])
+
+    # {category name: (polygons, color)}
+    category_name_polygons = {
+        category_name: (annotations[category_id], category_color)
+        for category_id, (category_name, category_color) in categories.items()
+    }
+
+    fig, ax = plt.subplots()
+
+    for category_name, (polygons, color) in category_name_polygons.items():
+        if polygons:
+            for polygon in polygons:
+                ax.plot(polygon, label=category_name, color=color)
+
+    ax.axis("off")
+    ax.legend()
+    ax.imshow(image)
+    plt.show()
