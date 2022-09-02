@@ -138,6 +138,9 @@ def export_dataset(
         id_increment: Increment the category ids with this number. Defaults to ``0``. Ignored unless ``export_format`` is ``semantic`` or ``semantic-color``.
     Returns:
         Returns the file name and the image directory name (for COCO panoptic, COCO instance, YOLO and polygon), or returns the export folder name (for (colored) instance and (colored) panoptic).
+    Raises:
+        :exc:`ImportError`: If scikit image is not installed (to install run ``pip install scikit-image``).
+        :exc:`ValueError`: If an unvalid ``export_format`` is used.
     """
 
     try:
