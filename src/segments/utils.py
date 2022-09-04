@@ -329,11 +329,11 @@ def handle_exif_rotation(image: Image.Image) -> Image.Image:
 def show_polygons(
     image_directory_path: str, image_id: int, exported_polygons_path: str, seed: int = 0
 ) -> None:
-    """Plot the exported polygons for an image.
+    """Show the exported contours of a segmented image (i.e., resulting from :func:`.export_dataset` with polygon export format).
 
     Args:
         image_directory_path: The image directory path.
-        image_id: The image id (can be found in the exported polygons JSON file).
+        image_id: The image id (this can be found in the exported polygons JSON file).
         exported_polygons_path: The exported polygons path.
         seed: The seed used to generate random colors. Defaults to ``0``.
     Raises:

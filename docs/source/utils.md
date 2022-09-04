@@ -52,3 +52,11 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 ```{eval-rst}
 .. autofunction:: segments.utils.export_dataset
 ```
+
+## Show
+
+### Show the exported contours of a segmented image
+
+```{eval-rst}
+.. autofunction:: segments.utils.show_polygons
+```
