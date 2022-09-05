@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import json
 import logging
 import random
@@ -343,6 +344,7 @@ def show_polygons(
     try:
         from matplotlib import image
         from matplotlib import pyplot as plt
+        from matplotlib.patches import Polygon
     except ImportError as e:
         logger.error("Please install matplotlib first: pip install matplotlib.")
         raise e
@@ -356,6 +358,10 @@ def show_polygons(
     def get_random_color() -> Tuple[float, float, float]:
         return (random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1))
 
+    def normalize(color: List[int]) -> Tuple[float, float, float]:
+        """Transform a color from 0-255 range to 0-1 range and from a list to a tuple, e.g., [255, 0, 123] to (1, 0, 0.5)."""
+        return (color[0] / 255, color[1] / 255, color[2] / 255)
+
     random.seed(seed)
 
     with open(exported_polygons_path, "r") as f:
@@ -368,7 +374,7 @@ def show_polygons(
     categories = {
         category["id"]: (
             category["name"],
-            category["color"] if category["color"] else get_random_color(),
+            normalize(category["color"]) if category["color"] else get_random_color(),
         )
         for category in polygons["categories"]
     }
@@ -382,19 +388,65 @@ def show_polygons(
         annotations[annotation["category_id"]].extend(annotation["polygons"])
 
     # {category name: (polygons, color)}
-    category_name_polygons = {
+    category_name_polygons_with_annotations = {
         category_name: (annotations[category_id], category_color)
         for category_id, (category_name, category_color) in categories.items()
+        if annotations[category_id]
     }
 
-    fig, ax = plt.subplots()
+    fig, (ax1, ax2, ax3) = plt.subplots(
+        nrows=1, ncols=3, sharex=True, sharey=True, figsize=(25, 10)
+    )
 
-    for category_name, (polygons, color) in category_name_polygons.items():
-        if polygons:
-            for polygon in polygons:
-                ax.plot(polygon, label=category_name, color=color)
+    used_category_names = set()
+    for category_name, (
+        polygons,
+        color,
+    ) in category_name_polygons_with_annotations.items():
+        for p in polygons:
+            polygon = Polygon(
+                xy=np.asarray(p),
+                facecolor=color,
+                edgecolor=color,
+                label=category_name
+                if category_name not in used_category_names
+                else None,
+                closed=True,
+                alpha=0.5,
+            )
 
-    ax.axis("off")
-    ax.legend()
-    ax.imshow(image)
+            used_category_names.add(category_name)
+            polygon_copy = copy.deepcopy(polygon)
+            polygon_copy.set_label(None)
+
+            ax1.add_patch(polygon)
+            # An Artist, container or primitive, cannot be contained in multiple containers, which is consistent with the fact that each Artist holds the parent container as a bare object, not in a list.
+            ax2.add_patch(polygon_copy)
+
+    # Ax 2
+    # ax2.axis("off")
+    ax2.set_title("Both")
+    ax2.imshow(image)
+    ax2.set_xlabel("Width (pixels)")
+
+    # Ax 1 (uses the aspect ratio of the image in axes 2)
+    # ax1.axis("off")
+    ax1.set_title("Label")
+    # ax1.imshow(image)
+    # https://stackoverflow.com/a/44655020
+    aspect = np.diff(ax1.get_xlim())[0] / np.diff(ax1.get_ylim())[0]
+    aspect /= np.diff(ax2.get_xlim())[0] / np.diff(ax2.get_ylim())[0]
+    aspect = np.abs(aspect)
+    ax1.set_aspect(aspect)
+    ax1.set_xlabel("Width (pixels)")
+    ax1.set_ylabel("Height (pixels)")
+
+    # Ax 3
+    # ax3.axis("off")
+    ax3.set_title("Image")
+    ax3.imshow(image)
+    ax3.set_xlabel("Width (pixels)")
+
+    fig.legend()
+
     plt.show()

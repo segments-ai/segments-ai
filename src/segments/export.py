@@ -852,17 +852,11 @@ def export_polygon(
                 continue
 
             instance_mask = (
-                np.array(sample["segmentation_bitmap"], np.uint8) == instance["id"]
+                np.asarray(sample["segmentation_bitmap"], np.uint8) == instance["id"]
             )
 
             # Allowed OpenCV data types: https://stackoverflow.com/questions/12785121/access-opencv-matrix-cv-32s-element
             black_white_image = instance_mask.astype("uint8")
-
-            # TODO remove the next 4 lines before merging
-            from matplotlib import pyplot as plt
-
-            plt.imshow(black_white_image)
-            plt.savefig(f"test_{image_id}_{instance}")
 
             # Contour retrieval modes (all, outer, in a hierarchy, etc.): https://docs.opencv.org/4.x/d3/dc0/group__imgproc__shape.html#ga819779b9857cc2f8601e6526a3a5bc71
             contours, hierarchy = cv.findContours(
