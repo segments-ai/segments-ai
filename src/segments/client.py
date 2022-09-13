@@ -383,7 +383,7 @@ class SegmentsClient:
                 "categories": [{"id": 1, "name": "object"}],
             }
 
-        if type(task_attributes) is dict:
+        if type(task_attributes) is dict and not self.disable_typechecking:
             try:
                 TaskAttributes.parse_obj(task_attributes)
             except pydantic.ValidationError as e:
@@ -770,10 +770,11 @@ class SegmentsClient:
         for result in results:
             result.pop("label", None)
 
-        try:
-            results = parse_obj_as(List[Sample], results)
-        except pydantic.ValidationError as e:
-            raise ValidationError(message=str(e), cause=e)
+        if not self.disable_typechecking:
+            try:
+                results = parse_obj_as(List[Sample], results)
+            except pydantic.ValidationError as e:
+                raise ValidationError(message=str(e), cause=e)
 
         return cast(List[Sample], results)
 
@@ -858,7 +859,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        if type(attributes) is dict:
+        if type(attributes) is dict and not self.disable_typechecking:
             try:
                 parse_obj_as(SampleAttributes, attributes)
             except pydantic.ValidationError as e:
@@ -913,7 +914,7 @@ class SegmentsClient:
 
         # Check the input
         for sample in samples:
-            if type(sample) is dict:
+            if type(sample) is dict and not self.disable_typechecking:
                 if "name" not in sample or "attributes" not in sample:
                     raise KeyError(
                         f"Please add a name and attributes to your sample: {sample}"
@@ -1098,7 +1099,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        if type(attributes) is dict:
+        if type(attributes) is dict and not self.disable_typechecking:
             try:
                 parse_obj_as(LabelAttributes, attributes)
             except pydantic.ValidationError as e:
