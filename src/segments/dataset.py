@@ -109,9 +109,6 @@ class SegmentsDataset:
         self.preload = preload
         self.s3_client = s3_client
 
-        # To iterate over the SegmentsDataset samples
-        self._index = 0
-
         # if urlparse(release_file).scheme in ('http', 'https'): # If it's a url
         if isinstance(release_file, str):  # If it's a file path
             with open(release_file) as f:
@@ -367,14 +364,3 @@ class SegmentsDataset:
         #             item = self.transform(item)
 
         return item
-
-    # def __iter__(self) -> SegmentsDataset:
-    #     return self
-
-    # def __next__(self) -> Dict[str, Any]:
-    #     if self._index < len(self):
-    #         result = self[self._index]
-    #         self._index += 1
-    #         return result
-    #     else:
-    #         raise StopIteration

@@ -67,6 +67,9 @@ COLORMAP: ColorMap = [
 ]
 
 
+##################
+# Helper methods #
+##################
 # https://github.com/cocodataset/panopticapi/blob/master/panopticapi/utils.py
 class IdGenerator:
     """
@@ -183,15 +186,25 @@ def colorize(
 
 
 def get_bbox(binary_mask: npt.NDArray[Any]) -> Union[Tuple[int, int, int, int], bool]:
+    """Returns the bounding box of the binary mask (if one is found, otherwise returns False)
+
+    Args:
+        binary_mask: The binary mask as a numpy array.
+    Returns:
+        The bounding box or False if no bounding box is found.
+    """
 
     regions = regionprops(np.uint8(binary_mask))
     if len(regions) == 1:
         bbox = regions[0].bbox
         return cast(Tuple[int, int, int, int], bbox)
-    else:
-        return False
+
+    return False
 
 
+##################
+# Export methods #
+##################
 def export_coco_instance(
     dataset: SegmentsDataset, export_folder: str
 ) -> Tuple[str, Optional[str]]:
@@ -199,7 +212,9 @@ def export_coco_instance(
 
     Args:
         dataset: A :class:`.SegmentsDataset`.
-        export_folder: TODO
+        export_folder: The output directory.
+    Returns:
+        Returns the file name and the image directory name.
     Raises:
         :exc:`ImportError`: If pycocotools is not installed.
     """
@@ -376,8 +391,17 @@ def export_coco_instance(
 
 
 def export_coco_panoptic(
-    dataset: SegmentsDataset, export_folder: str, **kwargs: Any
+    dataset: SegmentsDataset, export_folder: str
 ) -> Tuple[str, Optional[str]]:
+    """Export a Segments dataset in COCO panoptic format.
+
+    Args:
+        dataset: A :class:`.SegmentsDataset`.
+        export_folder: The output directory.
+    Returns:
+        Returns the file name and the image directory name.
+    """
+
     # Create export folder
     os.makedirs(export_folder, exist_ok=True)
 
@@ -549,8 +573,17 @@ def export_image(
     export_folder: str,
     export_format: str,
     id_increment: int,
-    **kwargs: Any,
 ) -> Optional[str]:
+    """Export a Segments dataset as images.
+
+    Args:
+        dataset: A :class:`.SegmentsDataset`.
+        export_folder: The output directory.
+        export_format: The export format.
+        id_increment: Increment the category ids with this number.
+    Returns:
+        Returns the export folder.
+    """
     # Create export folder
 
     if export_folder == ".":
@@ -640,44 +673,17 @@ def export_image(
     return export_folder
 
 
-def write_yolo_file(
-    file_name: str, annotations: Any, image_width: float, image_height: float
-) -> None:
-    with open(file_name, "w") as f:
-        for annotation in annotations:
-            if annotation["type"] == "bbox":
-                category_id = annotation["category_id"]
-                [[x0, y0], [x1, y1]] = annotation["points"]
-
-                # Normalize
-                x0, x1 = x0 / image_width, x1 / image_width
-                y0, y1 = y0 / image_height, y1 / image_height
-
-                # Get center, width and height of bbox
-                x_center = (x0 + x1) / 2
-                y_center = (y0 + y1) / 2
-                width = abs(x1 - x0)
-                height = abs(y1 - y0)
-
-                # Save it to the file
-                # print(category_id, x_center, y_center, width, height)
-                f.write(
-                    "{} {:.6f} {:.6f} {:.6f} {:.6f}\n".format(
-                        category_id, x_center, y_center, width, height
-                    )
-                )
-
-
 def export_yolo(
     dataset: SegmentsDataset,
     export_folder: str,
     image_width: Optional[float] = None,
     image_height: Optional[float] = None,
 ) -> Optional[str]:
-    """Export a segments dataset to YOLO format.
+    """Export a Segments dataset in YOLO format.
 
     Args:
         dataset: A segments dataset.
+        export_folder: The output directory.
         image_width: The width of the image (needed for ``image-vector-sequence``).
         image_height: The height of the image (needed for ``image-vector-sequence``).
     Returns:
@@ -686,6 +692,34 @@ def export_yolo(
         :exc:`ValueError`: If the dataset is not a bounding box dataset.
         :exc:`ValueError`: If the dataset is an ``image-vector-sequence``and the image width or image height is :obj:`None`.
     """
+
+    def write_yolo_file(
+        file_name: str, annotations: Any, image_width: float, image_height: float
+    ) -> None:
+        with open(file_name, "w") as f:
+            for annotation in annotations:
+                if annotation["type"] == "bbox":
+                    category_id = annotation["category_id"]
+                    [[x0, y0], [x1, y1]] = annotation["points"]
+
+                    # Normalize
+                    x0, x1 = x0 / image_width, x1 / image_width
+                    y0, y1 = y0 / image_height, y1 / image_height
+
+                    # Get center, width and height of bbox
+                    x_center = (x0 + x1) / 2
+                    y_center = (y0 + y1) / 2
+                    width = abs(x1 - x0)
+                    height = abs(y1 - y0)
+
+                    # Save it to the file
+                    # print(category_id, x_center, y_center, width, height)
+                    f.write(
+                        "{} {:.6f} {:.6f} {:.6f} {:.6f}\n".format(
+                            category_id, x_center, y_center, width, height
+                        )
+                    )
+
     # Create export folder
     os.makedirs(os.path.join(export_folder, dataset.image_dir), exist_ok=True)
 
@@ -705,12 +739,6 @@ def export_yolo(
             sample = dataset[i]
             image_name = os.path.splitext(os.path.basename(sample["name"]))[0]
 
-            # Get the image width and height
-            # if "image_width" in kwargs and "image_height" in kwargs:
-            #     image_width = kwargs["image_width"]
-            #     image_height = kwargs["image_height"]
-            # else:
-            #     assert False, "Please provide image_width and image_height parameters."
             if image_width is None or image_height is None:
                 raise ValueError(
                     "Please provide image_width and image_height parameters (i.e., not None)."
@@ -756,3 +784,107 @@ def export_yolo(
 
     print(f"Exported. Images and labels in {dataset.image_dir}")
     return dataset.image_dir
+
+
+def export_polygon(
+    dataset: SegmentsDataset, export_folder: str
+) -> Tuple[str, Optional[str]]:
+    """Export a Segments dataset as polygons (i.e., contours).
+
+    Args:
+        dataset: A :class:`.SegmentsDataset`.
+        export_folder: The output directory.
+    Raises:
+        :exc:`ImportError`: If OpenCV is not installed.
+    Returns:
+        Returns the file name and the image directory name.
+    """
+    try:
+        import cv2 as cv
+    except ImportError as e:
+        logger.error("Please install OpenCV first: pip install opencv-python.")
+        raise e
+
+    # Create export folder
+    os.makedirs(export_folder, exist_ok=True)
+
+    categories = dataset.categories
+    # task_type = dataset.task_type
+
+    images = []
+    annotations = []
+
+    annotation_id = 1
+    for i in tqdm(range(len(dataset))):
+        sample = dataset[i]
+
+        if sample["annotations"] is None:
+            continue
+
+        image_id = i + 1
+        images.append(
+            {
+                "id": image_id,
+                "file_name": sample["file_name"],
+                "height": sample["image"].size[1] if sample["image"] else None,
+                "width": sample["image"].size[0] if sample["image"] else None,
+            }
+        )
+
+        # https://scikit-image.org/docs/dev/api/skimage.measure.html#skimage.measure.regionprops
+        regions = regionprops(np.array(sample["segmentation_bitmap"], np.uint32))
+        regions = {region.label: region for region in regions}
+
+        for instance in sample["annotations"]:
+            category_id = instance["category_id"]
+
+            annotation = {
+                "id": annotation_id,
+                "image_id": image_id,
+                "category_id": category_id,
+            }
+
+            if instance["id"] not in regions:
+                # Only happens when the instance has 0 labeled pixels, which should not happen.
+                logger.warning(
+                    f"Skipping instance with 0 labeled pixels: {sample['file_name']}, instance_id: {instance['id']}, category_id: {category_id}"
+                )
+                continue
+
+            instance_mask = (
+                np.asarray(sample["segmentation_bitmap"], np.uint8) == instance["id"]
+            )
+
+            # Allowed OpenCV data types: https://stackoverflow.com/questions/12785121/access-opencv-matrix-cv-32s-element
+            black_white_image = instance_mask.astype("uint8")
+
+            # Contour retrieval modes (all, outer, in a hierarchy, etc.): https://docs.opencv.org/4.x/d3/dc0/group__imgproc__shape.html#ga819779b9857cc2f8601e6526a3a5bc71
+            contours, hierarchy = cv.findContours(
+                black_white_image, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE
+            )
+
+            # Make object json serializable
+            serializable_contours = [
+                np.squeeze(contour).tolist() for contour in contours
+            ]
+
+            annotation.update({"polygons": serializable_contours})
+
+            annotations.append(annotation)
+            annotation_id += 1
+
+    json_data = {
+        "categories": [category.dict() for category in categories],
+        "images": images,
+        "annotations": annotations,
+    }
+
+    file_name = os.path.join(
+        export_folder,
+        f"export_polygon_{dataset.dataset_identifier}_{dataset.release['name']}.json",
+    )
+    with open(file_name, "w") as f:
+        json.dump(json_data, f)
+
+    print(f"Exported to {file_name}. Images in {dataset.image_dir}")
+    return file_name, dataset.image_dir

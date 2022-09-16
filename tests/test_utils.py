@@ -28,6 +28,7 @@ def test_export_dataset(
         "instance-color",
         "semantic",
         "semantic-color",
+        "polygon",
     ]
     export_folder = f"{ARTIFACTS_DIR}"
     for export_format in export_formats:
