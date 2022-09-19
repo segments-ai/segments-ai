@@ -41,7 +41,14 @@ PointcloudAnnotationType = Literal["cuboid"]
 PCDType = Literal["pcd", "kitti", "nuscenes"]
 InputType = Literal["select", "text", "number", "checkbox"]
 Category = Literal[
-    "street_scenery", "garden", "agriculture", "satellite", "people", "medical", "other"
+    "street_scenery",
+    "garden",
+    "agriculture",
+    "satellite",
+    "people",
+    "medical",
+    "fruit",
+    "other",
 ]
 _Category = [
     "street_scenery",
@@ -50,6 +57,7 @@ _Category = [
     "satellite",
     "people",
     "medical",
+    "fruit",
     "other",
 ]
 DistortionModel = Literal["plumb_bob"]
