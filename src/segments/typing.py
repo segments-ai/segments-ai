@@ -389,9 +389,9 @@ class Sample(BaseModel):
     metadata: Dict[str, Any]
     created_at: str
     created_by: str
-    comments: List[str]
+    comments: Optional[List[str]]
     priority: float
-    has_embedding: bool
+    has_embedding: Optional[bool]
     label: Optional[Label]
     issues: Optional[List[Issue]]
     dataset_full_name: Optional[str]
