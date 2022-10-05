@@ -293,6 +293,7 @@ class Label(BaseModel):
     sample_uuid: str
     label_type: TaskType
     label_status: LabelStatus
+    labelset: str
     attributes: LabelAttributes
     created_at: str
     created_by: str
