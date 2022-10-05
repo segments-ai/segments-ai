@@ -399,6 +399,7 @@ class TestLabel(Test):
         image_or_object_attributes = {  # sample-level attributes
             "scene_type": "crossroads",
             "weather": "sunny",
+            "isRaining": True,
         }
         label_attributes: Dict[str, Dict[str, Any]] = {
             "image-segmentation": {

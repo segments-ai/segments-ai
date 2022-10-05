@@ -1,8 +1,16 @@
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from pydantic import BaseModel, Extra, validator
+from pydantic import BaseModel as PydanticBaseModel
+from pydantic import Extra, validator
 from segments.exceptions import ValidationError
 from typing_extensions import Literal, TypedDict
+
+
+class BaseModel(PydanticBaseModel):
+    class Config:
+        # https://pydantic-docs.helpmanual.io/usage/model_config/#smart-union
+        smart_union = True
+
 
 #######################################
 # Literals, constants and other types #
