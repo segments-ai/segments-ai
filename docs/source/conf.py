@@ -16,6 +16,8 @@ import os
 import sys
 from datetime import datetime
 
+import config
+
 sys.path.insert(0, os.path.abspath(os.path.join("..", "..", "src")))
 
 # -----------------------------------------------------------------------------
@@ -28,7 +30,7 @@ copyright = f"{datetime.today().year}, Segments.ai"
 author = "Segments.ai team"
 
 # The full version, including alpha/beta/rc tags
-release = "1.0.11"
+release = config.RELEASE_VERSION
 
 # -----------------------------------------------------------------------------
 # General configuration

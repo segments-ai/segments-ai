@@ -1,10 +1,7 @@
 from distutils.core import setup
 from typing import List
 
-#############
-# Constants #
-#############
-VERSION = "1.0.11"
+import config
 
 
 ####################
@@ -46,7 +43,7 @@ setup(
     author="Segments.ai",  # Type in your name
     author_email="bert@segments.ai",  # Type in your E-Mail
     url="https://github.com/segments-ai/segments-ai",  # Provide either the link to your github or to your website
-    download_url=f"https://github.com/segments-ai/segments-ai/archive/v{VERSION}.tar.gz",
+    download_url=f"https://github.com/segments-ai/segments-ai/archive/v{config.RELEASE_VERSION}.tar.gz",
     keywords=[
         "image",
         "segmentation",

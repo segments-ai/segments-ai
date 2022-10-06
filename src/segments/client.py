@@ -19,6 +19,7 @@ from typing import (
     cast,
 )
 
+import config
 import numpy.typing as npt
 import pydantic
 import requests
@@ -205,7 +206,7 @@ class SegmentsClient:
         self.s3_session.mount("https://", adapter)
 
         try:
-            r = self._get("/api_status/?lib_version=1.0.11")
+            r = self._get(f"/api_status/?lib_version={config.RELEASE_VERSION}")
             if r.status_code == 200:
                 logger.info("Initialized successfully.")
         except NetworkError as e:
