@@ -1,10 +1,12 @@
+import json
 from distutils.core import setup
 from typing import List
 
 #############
 # Constants #
 #############
-VERSION = "1.0.11"
+config = json.load(open("config.json"))
+VERSION = config["RELEASE_VERSION"]
 
 
 ####################

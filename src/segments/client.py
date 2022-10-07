@@ -1,6 +1,7 @@
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
 from __future__ import annotations
 
+import json
 import logging
 import os
 import urllib.parse
@@ -55,11 +56,13 @@ from segments.typing import (
 )
 from typing_extensions import Literal
 
-#############
-# Variables #
-#############
+################################
+# Constants and type variables #
+################################
 logger = logging.getLogger(__name__)
 T = TypeVar("T")
+config = json.load(open("config.json"))
+VERSION = config["RELEASE_VERSION"]
 
 
 ####################
@@ -205,7 +208,7 @@ class SegmentsClient:
         self.s3_session.mount("https://", adapter)
 
         try:
-            r = self._get("/api_status/?lib_version=1.0.11")
+            r = self._get(f"/api_status/?lib_version={VERSION}")
             if r.status_code == 200:
                 logger.info("Initialized successfully.")
         except NetworkError as e:
