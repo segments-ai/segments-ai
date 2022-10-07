@@ -1,7 +1,12 @@
+import json
 from distutils.core import setup
 from typing import List
 
-import config
+#############
+# Constants #
+#############
+config = json.load(open("config.json"))
+VERSION = config["RELEASE_VERSION"]
 
 
 ####################
@@ -37,13 +42,13 @@ setup(
     package_dir={"": "src"},
     packages=["segments"],  # Chose the same as "name"
     package_data={"segments": ["data/*"]},
-    version=config.RELEASE_VERSION,  # Start with a small number and increase it with every change you make
+    version=VERSION,  # Start with a small number and increase it with every change you make
     license="MIT",  # Chose a license from here: https://help.github.com/articles/licensing-a-repository
     description="",  # Give a short description about your library
     author="Segments.ai",  # Type in your name
     author_email="bert@segments.ai",  # Type in your E-Mail
     url="https://github.com/segments-ai/segments-ai",  # Provide either the link to your github or to your website
-    download_url=f"https://github.com/segments-ai/segments-ai/archive/v{config.RELEASE_VERSION}.tar.gz",
+    download_url=f"https://github.com/segments-ai/segments-ai/archive/v{VERSION}.tar.gz",
     keywords=[
         "image",
         "segmentation",
