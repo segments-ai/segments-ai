@@ -45,7 +45,7 @@ The most notable changes in v1.0 of the Python SDK compared to v0.73 include:
 - Improved error handling: functions now raise proper exceptions.
 - New functions for managing issues and collaborators.
 
-You can upgrade to v1.0 with `pip install —upgrade segments-ai`. Please be mindful of following breaking changes:
+You can upgrade to v1.0 with `pip install -—upgrade segments-ai`. Please be mindful of following breaking changes:
 
 - The client functions now return classes instead of dicts, so you should access properties using dot-based indexing (e.g. `dataset.description`) instead of dict-based indexing (e.g. `dataset[’description’]`).
 - Functions now consistently raise exceptions, instead of sometimes silently failing with a print statement. You might want to handle these exceptions with a try-except block.
