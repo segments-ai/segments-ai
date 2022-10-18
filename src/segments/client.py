@@ -103,14 +103,15 @@ def exception_handler(
                         raise APILimitError(message)
                 if model:
                     if self.disable_typechecking:
-                        try:
-                            if isinstance(model.__origin__(), list):
-                                model_without_list = model.__args__[0]
-                                m = [
-                                    model_without_list.construct(r_j) for r_j in r_json
-                                ]
-                        except AttributeError:
-                            m = model.construct(r_json)
+                        # try:
+                        #        if isinstance(model.__origin__(), list):
+                        #         model_without_list = model.__args__[0]
+                        #         m = [
+                        #             model_without_list.construct(r_j) for r_j in r_json
+                        #         ]
+                        # except AttributeError:
+                        #     m = model.construct(r_json)
+                        m = r_json
                     else:
                         m = parse_obj_as(model, r_json)
                     return m
