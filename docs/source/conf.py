@@ -13,6 +13,7 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
 
+import importlib
 import json
 import os
 import sys
@@ -23,7 +24,8 @@ sys.path.insert(0, os.path.abspath(os.path.join("..", "..", "src")))
 # -----------------------------------------------------------------------------
 # Constants #
 # -----------------------------------------------------------------------------
-config = json.load(open("config.json"))
+# # https://stackoverflow.com/questions/60687577/trying-to-read-json-file-within-a-python-package
+config = json.load(importlib.resources.open_text("segments", "config.json"))
 VERSION = config["RELEASE_VERSION"]
 
 # -----------------------------------------------------------------------------
