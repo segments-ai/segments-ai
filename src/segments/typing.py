@@ -35,6 +35,9 @@ TaskType = Literal[
     "pointcloud-cuboid-sequence",
     "pointcloud-segmentation",
     "pointcloud-segmentation-sequence",
+    "pointcloud-vector",
+    "pointcloud-vector-sequence",
+    "text-named-entities",
     "text-named-entities",
     "text-span-categorization",
     "",
@@ -45,7 +48,7 @@ Status = Literal["PENDING", "SUCCEEDED", "FAILED"]
 IssueStatus = Literal["OPEN", "CLOSED"]
 ReleaseType = Literal["JSON"]
 ImageVectorAnnotationType = Literal["bbox", "polygon", "polyline", "point"]
-PointcloudAnnotationType = Literal["cuboid"]
+PointcloudVectorAnnotationType = Literal["polygon", "polyline", "point"]
 PCDType = Literal["pcd", "kitti", "nuscenes"]
 InputType = Literal["select", "text", "number", "checkbox"]
 Category = Literal[
@@ -227,12 +230,26 @@ class PointcloudCuboidAnnotation(BaseModel):
     position: XYZ
     dimensions: XYZ
     yaw: float
-    type: PointcloudAnnotationType
+    type: Literal["cuboid"]
     attributes: Optional[ObjectAttributes] = None
 
 
 class PointcloudCuboidLabelAttributes(BaseModel):
     annotations: List[PointcloudCuboidAnnotation]
+    format_version: Optional[FormatVersion] = None
+
+
+# Point cloud vector
+class PointcloudVectorAnnotation(BaseModel):
+    id: int
+    category_id: int
+    points: List[List[float]]
+    type: PointcloudVectorAnnotationType
+    attributes: Optional[ObjectAttributes] = None
+
+
+class PointcloudVectorLabelAttributes(BaseModel):
+    annotations: List[PointcloudVectorAnnotation]
     format_version: Optional[FormatVersion] = None
 
 
@@ -273,6 +290,23 @@ class PointcloudSequenceCuboidLabelAttributes(BaseModel):
     format_version: Optional[FormatVersion] = None
 
 
+# Point cloud sequence vector
+class PointcloudSequenceVectorAnnotation(PointcloudVectorAnnotation):
+    track_id: int
+    is_keyframe: bool = False
+
+
+class PointcloudSequenceVectorFrame(BaseModel):
+    timestamp: int
+    annotations: List[PointcloudSequenceVectorAnnotation]
+    format_version: Optional[FormatVersion] = None
+
+
+class PointcloudSequenceVectorLabelAttributes(BaseModel):
+    frames: List[PointcloudSequenceVectorFrame]
+    format_version: Optional[FormatVersion] = None
+
+
 # Text
 class TextAnnotation(BaseModel):
     start: int
@@ -291,8 +325,10 @@ LabelAttributes = Union[
     ImageSequenceVectorLabelAttributes,
     PointcloudSegmentationLabelAttributes,
     PointcloudCuboidLabelAttributes,
+    PointcloudVectorLabelAttributes,
     PointcloudSequenceSegmentationLabelAttributes,
     PointcloudSequenceCuboidLabelAttributes,
+    PointcloudSequenceVectorLabelAttributes,
     TextLabelAttributes,
 ]
 
