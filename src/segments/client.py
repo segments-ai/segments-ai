@@ -45,6 +45,7 @@ from segments.typing import (
     IssueStatus,
     Label,
     LabelAttributes,
+    LabelAttributesList,
     Labelset,
     LabelStatus,
     PresignedPostFields,
@@ -52,6 +53,7 @@ from segments.typing import (
     Role,
     Sample,
     SampleAttributes,
+    SampleAttributesList,
     TaskAttributes,
     TaskType,
 )
@@ -872,7 +874,7 @@ class SegmentsClient:
                     "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
                 )
                 raise ValidationError(message=str(e), cause=e)
-        elif type(attributes) is SampleAttributes:
+        elif type(attributes) in SampleAttributesList:
             attributes = attributes.dict()
 
         payload: Dict[str, Any] = {
@@ -991,7 +993,7 @@ class SegmentsClient:
         if attributes:
             payload["attributes"] = (
                 attributes.dict()
-                if type(attributes) is SampleAttributes
+                if type(attributes) in SampleAttributesList
                 else attributes
             )
 
@@ -1112,7 +1114,7 @@ class SegmentsClient:
                     "Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.",
                 )
                 raise ValidationError(message=str(e), cause=e)
-        elif type(attributes) is LabelAttributes:
+        elif type(attributes) in LabelAttributesList:
             attributes = attributes.dict()
 
         payload: Dict[str, Any] = {
@@ -1174,7 +1176,9 @@ class SegmentsClient:
 
         if attributes:
             payload["attributes"] = (
-                attributes.dict() if type(attributes) is LabelAttributes else attributes
+                attributes.dict()
+                if type(attributes) in LabelAttributesList
+                else attributes
             )
 
         if label_status:
