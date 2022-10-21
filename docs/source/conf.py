@@ -12,8 +12,6 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
-
-import json
 import os
 import sys
 from datetime import datetime
@@ -23,8 +21,7 @@ sys.path.insert(0, os.path.abspath(os.path.join("..", "..", "src")))
 # -----------------------------------------------------------------------------
 # Constants #
 # -----------------------------------------------------------------------------
-config = json.load(open("config.json"))
-VERSION = config["RELEASE_VERSION"]
+VERSION = "1.0.12"
 
 # -----------------------------------------------------------------------------
 # Project information
