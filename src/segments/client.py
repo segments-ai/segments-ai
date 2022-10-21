@@ -833,6 +833,8 @@ class SegmentsClient:
         attributes: Union[Dict[str, Any], SampleAttributes],
         metadata: Optional[Dict[str, Any]] = None,
         priority: float = 0,
+        assigned_labeler: Optional[str] = None,
+        assigned_reviewer: Optional[str] = None,
         embedding: Optional[Union[npt.NDArray[Any], List[float]]] = None,
     ) -> Sample:
         """Add a sample to a dataset.
@@ -867,6 +869,8 @@ class SegmentsClient:
             attributes: The sample attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/sample-and-label-types/sample-types>`__.
             metadata: Any sample metadata. Example: ``{'weather': 'sunny', 'camera_id': 3}``.
             priority: Priority in the labeling queue. Samples with higher values will be labeled first. Defaults to ``0``.
+            assigned_labeler: The username of the user who should label this sample. Leave empty to not assign a specific labeler. Defaults to :obj:`None`.
+            assigned_reviewer: The username of the user who should review this sample. Leave empty to not assign a specific reviewer. Defaults to :obj:`None`.
             embedding: Embedding of this sample represented by an array of floats.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the sample attributes fails.
@@ -899,6 +903,12 @@ class SegmentsClient:
 
         if priority:
             payload["priority"] = priority
+
+        if assigned_labeler:
+            payload["assigned_labeler"] = assigned_labeler
+
+        if assigned_reviewer:
+            payload["assigned_reviewer"] = assigned_reviewer
 
         if embedding:
             payload["embedding"] = embedding
@@ -965,7 +975,9 @@ class SegmentsClient:
         name: Optional[str] = None,
         attributes: Optional[Union[Dict[str, Any], SampleAttributes]] = None,
         metadata: Optional[Dict[str, Any]] = None,
-        priority: float = 0,
+        priority: Optional[float] = None,
+        assigned_labeler: Optional[str] = None,
+        assigned_reviewer: Optional[str] = None,
         embedding: Optional[Union[npt.NDArray[Any], List[float]]] = None,
     ) -> Sample:
         """Update a sample.
@@ -987,7 +999,9 @@ class SegmentsClient:
             name: The name of the sample.
             attributes: The sample attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/sample-and-label-types/sample-types>`__.
             metadata: Any sample metadata. Example: ``{'weather': 'sunny', 'camera_id': 3}``.
-            priority: Priority in the labeling queue. Samples with higher values will be labeled first. Default is ``0``.
+            priority: Priority in the labeling queue. Samples with higher values will be labeled first.
+            assigned_labeler: The username of the user who should label this sample. Leave empty to not assign a specific labeler.
+            assigned_reviewer: The username of the user who should review this sample. Leave empty to not assign a specific reviewer.
             embedding: Embedding of this sample represented by list of floats.
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -1014,6 +1028,12 @@ class SegmentsClient:
 
         if priority:
             payload["priority"] = priority
+
+        if assigned_labeler:
+            payload["assigned_labeler"] = assigned_labeler
+
+        if assigned_reviewer:
+            payload["assigned_reviewer"] = assigned_reviewer
 
         if embedding:
             payload["embedding"] = embedding
