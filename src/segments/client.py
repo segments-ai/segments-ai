@@ -45,7 +45,6 @@ from segments.typing import (
     IssueStatus,
     Label,
     LabelAttributes,
-    LabelAttributesList,
     Labelset,
     LabelStatus,
     PresignedPostFields,
@@ -53,11 +52,10 @@ from segments.typing import (
     Role,
     Sample,
     SampleAttributes,
-    SampleAttributesList,
     TaskAttributes,
     TaskType,
 )
-from typing_extensions import Literal
+from typing_extensions import Literal, get_args
 
 ################################
 # Constants and type variables #
@@ -874,7 +872,7 @@ class SegmentsClient:
                     "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
                 )
                 raise ValidationError(message=str(e), cause=e)
-        elif type(attributes) in SampleAttributesList:
+        elif type(attributes) in get_args(SampleAttributes):
             attributes = attributes.dict()
 
         payload: Dict[str, Any] = {
@@ -993,7 +991,7 @@ class SegmentsClient:
         if attributes:
             payload["attributes"] = (
                 attributes.dict()
-                if type(attributes) in SampleAttributesList
+                if type(attributes) in get_args(SampleAttributes)
                 else attributes
             )
 
@@ -1114,7 +1112,7 @@ class SegmentsClient:
                     "Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.",
                 )
                 raise ValidationError(message=str(e), cause=e)
-        elif type(attributes) in LabelAttributesList:
+        elif type(attributes) in get_args(LabelAttributes):
             attributes = attributes.dict()
 
         payload: Dict[str, Any] = {
@@ -1177,7 +1175,7 @@ class SegmentsClient:
         if attributes:
             payload["attributes"] = (
                 attributes.dict()
-                if type(attributes) in LabelAttributesList
+                if type(attributes) in get_args(LabelAttributes)
                 else attributes
             )
 

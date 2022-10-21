@@ -319,20 +319,7 @@ class TextLabelAttributes(BaseModel):
     format_version: Optional[FormatVersion] = None
 
 
-# Keep in sync.
 LabelAttributes = Union[
-    ImageSegmentationLabelAttributes,
-    ImageVectorLabelAttributes,
-    ImageSequenceVectorLabelAttributes,
-    PointcloudSegmentationLabelAttributes,
-    PointcloudCuboidLabelAttributes,
-    PointcloudVectorLabelAttributes,
-    PointcloudSequenceSegmentationLabelAttributes,
-    PointcloudSequenceCuboidLabelAttributes,
-    PointcloudSequenceVectorLabelAttributes,
-    TextLabelAttributes,
-]
-LabelAttributesList = [
     ImageSegmentationLabelAttributes,
     ImageVectorLabelAttributes,
     ImageSequenceVectorLabelAttributes,
@@ -431,15 +418,7 @@ class TextSampleAttributes(BaseModel):
     text: str
 
 
-# Keep in sync.
 SampleAttributes = Union[
-    ImageSampleAttributes,
-    ImageSequenceSampleAttributes,
-    PointcloudSampleAttributes,
-    PointcloudSequenceSampleAttributes,
-    TextSampleAttributes,
-]
-SampleAttributesList = [
     ImageSampleAttributes,
     ImageSequenceSampleAttributes,
     PointcloudSampleAttributes,
