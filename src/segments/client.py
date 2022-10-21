@@ -322,6 +322,7 @@ class SegmentsClient:
         enable_skip_reviewing: bool = False,
         enable_ratings: bool = False,
         enable_interpolation: bool = True,
+        enable_save_button: bool = False,
         organization: Optional[str] = None,
     ) -> Dataset:
         """Add a dataset.
@@ -368,6 +369,7 @@ class SegmentsClient:
             enable_skip_reviewing: Enable the skip button in the reviewing workflow. Defaults to :obj:`False`.
             enable_ratings: Enable star-ratings for labeled images. Defaults to :obj:`False`.
             enable_interpolation: Enable label interpolation in sequence datasets. Ignored for non-sequence datasets. Defaults to :obj:`True`.
+            enable_save_button: Enable a save button in the labeling and reviewing workflow, to save unfinished work. Defaults to :obj:`False`.
             organization: The username of the organization for which this dataset should be created. None will create a dataset for the current user. Defaults to :obj:`None`.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the task attributes fails.
@@ -407,6 +409,7 @@ class SegmentsClient:
             "enable_skip_reviewing": enable_skip_reviewing,
             "enable_ratings": enable_ratings,
             "enable_interpolation": enable_interpolation,
+            "enable_save_button": enable_save_button,
             "data_type": "IMAGE",
         }
 
@@ -433,6 +436,7 @@ class SegmentsClient:
         enable_skip_reviewing: Optional[bool] = None,
         enable_ratings: Optional[bool] = None,
         enable_interpolation: Optional[bool] = None,
+        enable_save_button: Optional[bool] = None,
     ) -> Dataset:
         """Update a dataset.
 
@@ -455,6 +459,7 @@ class SegmentsClient:
             enable_skip_reviewing: Enable the skip button in the reviewing workflow. Defaults to :obj:`None`.
             enable_ratings: Enable star-ratings for labeled images. Defaults to :obj:`None`.
             enable_interpolation: Enable label interpolation in sequence datasets. Ignored for non-sequence datasets. Defaults to :obj:`None`.
+            enable_save_button: Enable a save button in the labeling and reviewing workflow, to save unfinished work. Defaults to :obj:`False`.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -498,6 +503,9 @@ class SegmentsClient:
 
         if enable_interpolation:
             payload["enable_interpolation"] = enable_interpolation
+
+        if enable_save_button:
+            payload["enable_save_button"] = enable_save_button
 
         r = self._patch(f"/datasets/{dataset_identifier}/", data=payload, model=Dataset)
         # logger.info(f"Updated {dataset_identifier}")
