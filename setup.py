@@ -1,14 +1,10 @@
-import importlib
-import json
 from distutils.core import setup
 from typing import List
 
 #############
 # Constants #
 #############
-# https://stackoverflow.com/questions/60687577/trying-to-read-json-file-within-a-python-package
-config = json.load(importlib.resources.open_text("segments", "config.json"))
-VERSION = config["RELEASE_VERSION"]
+VERSION = "1.0.11"
 
 
 ####################
