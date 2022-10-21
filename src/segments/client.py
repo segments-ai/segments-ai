@@ -60,7 +60,7 @@ from typing_extensions import Literal
 ################################
 logger = logging.getLogger(__name__)
 T = TypeVar("T")
-VERSION = "1.0.11"
+VERSION = "1.0.12"
 
 
 ####################
