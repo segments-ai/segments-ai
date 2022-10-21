@@ -1,8 +1,6 @@
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
 from __future__ import annotations
 
-import importlib
-import json
 import logging
 import os
 import urllib.parse
@@ -62,9 +60,7 @@ from typing_extensions import Literal
 ################################
 logger = logging.getLogger(__name__)
 T = TypeVar("T")
-# https://stackoverflow.com/questions/60687577/trying-to-read-json-file-within-a-python-package
-config = json.load(importlib.resources.open_text("segments", "config.json"))
-VERSION = config["RELEASE_VERSION"]
+VERSION = "1.0.11"
 
 
 ####################
