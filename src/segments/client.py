@@ -322,6 +322,7 @@ class SegmentsClient:
         enable_skip_reviewing: bool = False,
         enable_ratings: bool = False,
         enable_interpolation: bool = True,
+        enable_same_dimensions_track_constraint: bool = False,
         enable_save_button: bool = False,
         organization: Optional[str] = None,
     ) -> Dataset:
@@ -369,6 +370,7 @@ class SegmentsClient:
             enable_skip_reviewing: Enable the skip button in the reviewing workflow. Defaults to :obj:`False`.
             enable_ratings: Enable star-ratings for labeled images. Defaults to :obj:`False`.
             enable_interpolation: Enable label interpolation in sequence datasets. Ignored for non-sequence datasets. Defaults to :obj:`True`.
+            enable_same_dimensions_track_constraint: Enable constraint to keep same cuboid dimensions for the entire object track in point cloud cuboid datasets. Ignored for non-cuboid datasets. Defaults to :obj:`False`.
             enable_save_button: Enable a save button in the labeling and reviewing workflow, to save unfinished work. Defaults to :obj:`False`.
             organization: The username of the organization for which this dataset should be created. None will create a dataset for the current user. Defaults to :obj:`None`.
         Raises:
@@ -409,6 +411,7 @@ class SegmentsClient:
             "enable_skip_reviewing": enable_skip_reviewing,
             "enable_ratings": enable_ratings,
             "enable_interpolation": enable_interpolation,
+            "enable_same_dimensions_track_constraint": enable_same_dimensions_track_constraint,
             "enable_save_button": enable_save_button,
             "data_type": "IMAGE",
         }
@@ -436,6 +439,7 @@ class SegmentsClient:
         enable_skip_reviewing: Optional[bool] = None,
         enable_ratings: Optional[bool] = None,
         enable_interpolation: Optional[bool] = None,
+        enable_same_dimensions_track_constraint: Optional[bool] = None,
         enable_save_button: Optional[bool] = None,
     ) -> Dataset:
         """Update a dataset.
@@ -459,6 +463,7 @@ class SegmentsClient:
             enable_skip_reviewing: Enable the skip button in the reviewing workflow. Defaults to :obj:`None`.
             enable_ratings: Enable star-ratings for labeled images. Defaults to :obj:`None`.
             enable_interpolation: Enable label interpolation in sequence datasets. Ignored for non-sequence datasets. Defaults to :obj:`None`.
+            enable_same_dimensions_track_constraint: Enable constraint to keep same cuboid dimensions for the entire object track in point cloud cuboid datasets. Ignored for non-cuboid datasets. Defaults to :obj:`None`.
             enable_save_button: Enable a save button in the labeling and reviewing workflow, to save unfinished work. Defaults to :obj:`False`.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
@@ -503,6 +508,11 @@ class SegmentsClient:
 
         if enable_interpolation:
             payload["enable_interpolation"] = enable_interpolation
+
+        if enable_same_dimensions_track_constraint:
+            payload[
+                "enable_same_dimensions_track_constraint"
+            ] = enable_same_dimensions_track_constraint
 
         if enable_save_button:
             payload["enable_save_button"] = enable_save_button
