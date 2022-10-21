@@ -326,6 +326,7 @@ class SegmentsClient:
         enable_skip_reviewing: bool = False,
         enable_ratings: bool = False,
         enable_interpolation: bool = True,
+        enable_same_dimensions_track_constraint: bool = False,
         organization: Optional[str] = None,
     ) -> Dataset:
         """Add a dataset.
@@ -372,6 +373,7 @@ class SegmentsClient:
             enable_skip_reviewing: Enable the skip button in the reviewing workflow. Defaults to :obj:`False`.
             enable_ratings: Enable star-ratings for labeled images. Defaults to :obj:`False`.
             enable_interpolation: Enable label interpolation in sequence datasets. Ignored for non-sequence datasets. Defaults to :obj:`True`.
+            enable_same_dimensions_track_constraint: Enable constraint to keep same cuboid dimensions for the entire object track in point cloud cuboid datasets. Ignored for non-cuboid datasets. Defaults to :obj:`False`.
             organization: The username of the organization for which this dataset should be created. None will create a dataset for the current user. Defaults to :obj:`None`.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the task attributes fails.
@@ -411,6 +413,7 @@ class SegmentsClient:
             "enable_skip_reviewing": enable_skip_reviewing,
             "enable_ratings": enable_ratings,
             "enable_interpolation": enable_interpolation,
+            "enable_same_dimensions_track_constraint": enable_same_dimensions_track_constraint,
             "data_type": "IMAGE",
         }
 
@@ -437,6 +440,7 @@ class SegmentsClient:
         enable_skip_reviewing: Optional[bool] = None,
         enable_ratings: Optional[bool] = None,
         enable_interpolation: Optional[bool] = None,
+        enable_same_dimensions_track_constraint: Optional[bool] = None,
     ) -> Dataset:
         """Update a dataset.
 
@@ -459,6 +463,7 @@ class SegmentsClient:
             enable_skip_reviewing: Enable the skip button in the reviewing workflow. Defaults to :obj:`None`.
             enable_ratings: Enable star-ratings for labeled images. Defaults to :obj:`None`.
             enable_interpolation: Enable label interpolation in sequence datasets. Ignored for non-sequence datasets. Defaults to :obj:`None`.
+            enable_same_dimensions_track_constraint: Enable constraint to keep same cuboid dimensions for the entire object track in point cloud cuboid datasets. Ignored for non-cuboid datasets. Defaults to :obj:`None`.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -502,6 +507,11 @@ class SegmentsClient:
 
         if enable_interpolation:
             payload["enable_interpolation"] = enable_interpolation
+
+        if enable_same_dimensions_track_constraint:
+            payload[
+                "enable_same_dimensions_track_constraint"
+            ] = enable_same_dimensions_track_constraint
 
         r = self._patch(f"/datasets/{dataset_identifier}/", data=payload, model=Dataset)
         # logger.info(f"Updated {dataset_identifier}")
