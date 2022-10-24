@@ -434,8 +434,8 @@ class Sample(BaseModel):
     metadata: Dict[str, Any]
     created_at: str
     created_by: str
-    assigned_labeler: str
-    assigned_reviewer: str
+    assigned_labeler: Optional[str]
+    assigned_reviewer: Optional[str]
     comments: Optional[List[str]]
     priority: float
     has_embedding: Optional[bool]
