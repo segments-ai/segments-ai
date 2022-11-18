@@ -105,10 +105,11 @@ def exception_handler(
                             if isinstance(model.__origin__(), list):
                                 model_without_list = model.__args__[0]
                                 m = [
-                                    model_without_list.construct(r_j) for r_j in r_json
+                                    model_without_list.construct(**r_j)
+                                    for r_j in r_json
                                 ]
                         except AttributeError:
-                            m = model.construct(r_json)
+                            m = model.construct(**r_json)
                     else:
                         m = parse_obj_as(model, r_json)
                     return m
@@ -794,6 +795,8 @@ class SegmentsClient:
                 results = parse_obj_as(List[Sample], results)
             except pydantic.ValidationError as e:
                 raise ValidationError(message=str(e), cause=e)
+        else:
+            results = [Sample.construct(**result) for result in results]
 
         return cast(List[Sample], results)
 
