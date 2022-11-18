@@ -12,13 +12,13 @@ class BaseModel(PydanticBaseModel):
     @classmethod
     # Use construct on nested models - https://github.com/pydantic/pydantic/issues/1168.
     def construct(cls, _fields_set: Optional[Any] = None, **values: Any) -> BaseModel:
-        def is_literal_type(t) -> bool:
+        def is_literal_type(t: Any) -> bool:
             return type(t) == _GenericAlias
 
-        def is_any_type(t) -> bool:
+        def is_any_type(t: Any) -> bool:
             return type(t) == _SpecialForm
 
-        def is_union_type(t) -> bool:
+        def is_union_type(t: Any) -> bool:
             return get_origin(t) == Union
 
         m = cls.__new__(cls)
