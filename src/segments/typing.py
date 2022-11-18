@@ -39,8 +39,6 @@ class BaseModel(PydanticBaseModel):
                 ):  # Moved this check since None value can be passed for Optional nested field
                     fields_values[name] = field.get_default()
                 else:
-
-                    print(field.type_, type(field.type_))
                     # Fix problem with literal types - https://github.com/tiangolo/sqlmodel/issues/57.
                     if is_union_type(field.type_):
                         field.type_ = get_args(field.type_)[0]
