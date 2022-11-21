@@ -11,6 +11,7 @@ from segments.exceptions import (
     AlreadyExistsError,
     AuthenticationError,
     AuthorizationError,
+    NetworkError,
     NotFoundError,
     ValidationError,
 )
@@ -36,6 +37,7 @@ class Test(unittest.TestCase):
         API_KEY = os.getenv("SEGMENTS_API_KEY")
         API_URL = os.getenv("SEGMENTS_API_URL")
         self.owner = cast(str, os.getenv("DATASET_OWNER"))
+        self.admin = cast(str, os.getenv("DATASET_ADMIN"))
         self.client = (
             SegmentsClient(api_key=API_KEY, api_url=API_URL)
             if API_URL
@@ -82,7 +84,7 @@ class TestDataset(Test):
         dataset = self.client.get_dataset(dataset_identifier)
         self.assertIsInstance(dataset, Dataset)
 
-    def test_get_dataset_networkerror(self) -> None:
+    def test_get_dataset_notfounderror(self) -> None:
         with self.assertRaises(NotFoundError):
             wrong_dataset_identifier = "abcde"
             self.client.get_dataset(wrong_dataset_identifier)
@@ -141,27 +143,27 @@ class TestDataset(Test):
             self.assertIsInstance(dataset, Dataset)
 
             # Update dataset
-            arguments["dataset_identifier"] = f"{self.owner}/{arguments['name']}"
+            arguments["dataset_identifier"] = f"{self.admin}/{arguments['name']}"
             del arguments["name"]
             dataset = self.client.update_dataset(**arguments)
             self.assertIsInstance(dataset, Dataset)
 
         finally:
             # Delete dataset
-            self.client.delete_dataset(f"{self.owner}/add_dataset")
+            self.client.delete_dataset(f"{self.admin}/add_dataset")
 
-    def test_update_dataset_networkerror(self) -> None:
+    def test_update_dataset_notfounderror(self) -> None:
         with self.assertRaises(NotFoundError):
             wrong_dataset_identifier = "abcde"
             self.client.update_dataset(wrong_dataset_identifier)
 
-    def test_delete_dataset_networkerror(self) -> None:
+    def test_delete_dataset_notfounderror(self) -> None:
         with self.assertRaises(NotFoundError):
             wrong_dataset_identifier = "abcde"
             self.client.delete_dataset(wrong_dataset_identifier)
 
     def test_clone_dataset_networkerror(self) -> None:
-        with self.assertRaises(NotFoundError):
+        with self.assertRaises(NetworkError):
             wrong_dataset_identifier = "abcde"
             self.client.clone_dataset(wrong_dataset_identifier)
 
@@ -221,7 +223,7 @@ class TestDataset(Test):
         finally:
             self.client.delete_dataset_collaborator(dataset_identifier, username)
 
-    def test_delete_dataset_collaborator_networkerror(self) -> None:
+    def test_delete_dataset_collaborator_notfounderror(self) -> None:
         # Wrong dataset identifier and wrong username
         with self.assertRaises(NotFoundError):
             wrong_dataset_identifier = "abcde"
@@ -261,7 +263,7 @@ class TestSample(Test):
         for sample in samples:
             self.assertIsInstance(sample, Sample)
 
-    def test_get_samples_networkerror(self) -> None:
+    def test_get_samples_notfounderror(self) -> None:
         with self.assertRaises(NotFoundError):
             wrong_dataset_identifier = "abcde"
             self.client.get_samples(wrong_dataset_identifier)
@@ -272,7 +274,7 @@ class TestSample(Test):
             sample = self.client.get_sample(sample_uuid, labelset)
             self.assertIsInstance(sample, Sample)
 
-    def test_get_sample_networkerror(self) -> None:
+    def test_get_sample_notfounderror(self) -> None:
         with self.assertRaises(NotFoundError):
             wrong_uuid = "12345"
             self.client.get_sample(wrong_uuid)
@@ -348,12 +350,12 @@ class TestSample(Test):
             finally:
                 self.client.delete_sample(sample.uuid)
 
-    def test_update_sample_networkerror(self) -> None:
+    def test_update_sample_notfounderror(self) -> None:
         with self.assertRaises(NotFoundError):
             wrong_uuid = "12345"
             self.client.update_sample(wrong_uuid)
 
-    def test_delete_sample_networkerror(self) -> None:
+    def test_delete_sample_notfounderror(self) -> None:
         with self.assertRaises(NotFoundError):
             wrong_uuid = "12345"
             self.client.delete_sample(wrong_uuid)
@@ -694,13 +696,13 @@ class TestIssue(Test):
             # Delete issue.
             self.client.delete_issue(issue.uuid)
 
-    def test_add_issue_networkerror(self) -> None:
+    def test_add_issue_notfounderror(self) -> None:
         with self.assertRaises(NotFoundError):
             wrong_sample_uuid = "12345"
             description = "You forgot to label this car."
             self.client.add_issue(wrong_sample_uuid, description)
 
-    def test_update_issue_networkerror(self) -> None:
+    def test_update_issue_notfounderror(self) -> None:
         with self.assertRaises(NotFoundError):
             wrong_sample_uuid = "12345"
             description = "You forgot to label this car."
@@ -723,7 +725,7 @@ class TestLabelset(Test):
         for labelset in labelsets:
             self.assertIsInstance(labelset, Labelset)
 
-    def test_get_labelsets_networkerror(self) -> None:
+    def test_get_labelsets_notfounderror(self) -> None:
         with self.assertRaises(NotFoundError):
             wrong_dataset_identifier = "abcde"
             self.client.get_labelsets(wrong_dataset_identifier)
@@ -734,7 +736,7 @@ class TestLabelset(Test):
             labelset = self.client.get_labelset(dataset_identifier, labelset)
             self.assertIsInstance(labelset, Labelset)
 
-    def test_get_labelset_networkerror(self) -> None:
+    def test_get_labelset_notfounderror(self) -> None:
         # Wrong dataset identifier and wrong name
         with self.assertRaises(NotFoundError):
             wrong_dataset_identifier = "abcde"
@@ -759,12 +761,12 @@ class TestLabelset(Test):
             self.client.delete_labelset(dataset_identifier, name)
 
     def test_add_labelset_networkerror(self) -> None:
-        with self.assertRaises(NotFoundError):
+        with self.assertRaises(NetworkError):
             wrong_dataset_identifier = "abcde"
             wrong_name = "abcde"
             self.client.add_labelset(wrong_dataset_identifier, wrong_name)
 
-    def test_delete_labelset_networkerror(self) -> None:
+    def test_delete_labelset_notfounderror(self) -> None:
         # Wrong dataset identifier and wrong name
         with self.assertRaises(NotFoundError):
             wrong_dataset_identifier = "abcde"
@@ -793,7 +795,7 @@ class TestRelease(Test):
         for release in releases:
             self.assertIsInstance(release, Release)
 
-    def test_get_releases_networkerror(self) -> None:
+    def test_get_releases_notfounderror(self) -> None:
         with self.assertRaises(NotFoundError):
             wrong_dataset_identifier = "abcde"
             self.client.get_releases(wrong_dataset_identifier)
@@ -804,7 +806,7 @@ class TestRelease(Test):
             release = self.client.get_release(dataset_identifier, release)
             self.assertIsInstance(release, Release)
 
-    def test_get_release_networkerror(self) -> None:
+    def test_get_release_notfounderror(self) -> None:
         # Wrong dataset identifier and wrong name
         with self.assertRaises(NotFoundError):
             wrong_dataset_identifier = "abcde"
@@ -831,12 +833,12 @@ class TestRelease(Test):
 
     def test_add_release_networkerror(self) -> None:
         # Wrong dataset identifier and wrong name
-        with self.assertRaises(NotFoundError):
+        with self.assertRaises(NetworkError):
             wrong_dataset_identifier = "abcde"
             wrong_name = "abcde"
             self.client.add_release(wrong_dataset_identifier, wrong_name)
 
-    def test_delete_release_networkerror(self) -> None:
+    def test_delete_release_notfounderror(self) -> None:
         # Wrong dataset identifier and wrong name
         with self.assertRaises(NotFoundError):
             wrong_dataset_identifier = "abcde"
@@ -887,8 +889,13 @@ class TestException(Test):
 
     def test_dataset_already_exists_error(self) -> None:
         with self.assertRaises(AlreadyExistsError):
-            added_dataset = f"{self.owner}/{self.datasets[0]}"
-            self.client.add_dataset(added_dataset)
+            try:
+                dataset = self.datasets[0]
+                self.client.add_dataset(dataset)
+                self.client.add_dataset(dataset)
+            finally:
+                dataset_identifier = f"{self.admin}/{dataset}"
+                self.client.delete_dataset(dataset_identifier)
 
     def test_resource_not_found_error(self) -> None:
         with self.assertRaises(NotFoundError):
@@ -897,17 +904,17 @@ class TestException(Test):
 
     def test_add_label_validationerror(self) -> None:
         with self.assertRaises(ValidationError):
-            wrong_sample_uuid = "12345"
+            sample_uuid = self.sample_uuids[0]
             labelset = "ground-truth"
-            wrong_attributes: Dict[str, Any] = {}
-            self.client.add_label(wrong_sample_uuid, labelset, wrong_attributes)
+            wrong_attributes: Dict[str, Any] = {"wrong_key": "abcde"}
+            self.client.add_label(sample_uuid, labelset, wrong_attributes)
 
     def test_update_label_validationerror(self) -> None:
         with self.assertRaises(ValidationError):
-            wrong_sample_uuid = "12345"
+            sample_uuid = self.sample_uuids[0]
             labelset = "ground-truth"
-            wrong_attributes: Dict[str, Any] = {}
-            self.client.update_label(wrong_sample_uuid, labelset, wrong_attributes)
+            wrong_attributes: Dict[str, Any] = {"wrong_key": "abcde"}
+            self.client.update_label(sample_uuid, labelset, wrong_attributes)
 
 
 if __name__ == "__main__":

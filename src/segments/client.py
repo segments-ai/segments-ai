@@ -22,7 +22,6 @@ from typing import (
 import numpy.typing as npt
 import pydantic
 import requests
-from dotenv import load_dotenv
 from pydantic import parse_obj_as
 from segments.exceptions import (
     AlreadyExistsError,
@@ -65,7 +64,6 @@ from typing_extensions import Literal, get_args
 logger = logging.getLogger(__name__)
 T = TypeVar("T")
 VERSION = "1.0.13"
-load_dotenv()
 
 
 ####################
@@ -122,8 +120,9 @@ def exception_handler(
             # Maybe set up for a retry, or continue in a retry loop
             raise TimeoutError(message=str(e), cause=e)
         except requests.exceptions.HTTPError as e:
-            text = e.response.text
-            if "Not found" in text or "does not exist" in text:
+            # Make string comparison case insensitive.
+            text = e.response.text.lower()
+            if "not found" in text or "does not exist" in text:
                 raise NotFoundError(message=text, cause=e)
             if "already exists" in text or "already have" in text:
                 raise AlreadyExistsError(message=text, cause=e)
@@ -133,12 +132,14 @@ def exception_handler(
             ):
                 raise CollaboratorError(message=text, cause=e)
             if (
-                "organization owner cannot leave the organization" in text
-                or "need to be an administrator in the organization to clone" in text
+                "cannot leave the organization" in text
+                or "need to be an administrator" in text
+                or "do not have permission" in text
             ):
                 raise AuthorizationError(message=text, cause=e)
-            if "free trial ended" in text or "Exceeded user limit" in text:
+            if "free trial ended" in text or "exceeded user limit" in text:
                 raise SubscriptionError(message=text, cause=e)
+            raise NetworkError(message=text, cause=e)
         except requests.exceptions.TooManyRedirects as e:
             # Tell the user their URL was bad and try a different one
             raise NetworkError(message="Bad url, please try a different one.", cause=e)
