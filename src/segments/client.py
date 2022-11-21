@@ -22,13 +22,17 @@ from typing import (
 import numpy.typing as npt
 import pydantic
 import requests
+from dotenv import load_dotenv
 from pydantic import parse_obj_as
 from segments.exceptions import (
     AlreadyExistsError,
     APILimitError,
     AuthenticationError,
+    AuthorizationError,
+    CollaboratorError,
     NetworkError,
     NotFoundError,
+    SubscriptionError,
     TimeoutError,
     ValidationError,
 )
@@ -61,6 +65,7 @@ from typing_extensions import Literal, get_args
 logger = logging.getLogger(__name__)
 T = TypeVar("T")
 VERSION = "1.0.13"
+load_dotenv()
 
 
 ####################
@@ -118,11 +123,22 @@ def exception_handler(
             raise TimeoutError(message=str(e), cause=e)
         except requests.exceptions.HTTPError as e:
             text = e.response.text
-            if "Not found" in text:
+            if "Not found" in text or "does not exist" in text:
                 raise NotFoundError(message=text, cause=e)
-            if "already exists" in text:
+            if "already exists" in text or "already have" in text:
                 raise AlreadyExistsError(message=text, cause=e)
-            raise NetworkError(message=text, cause=e)
+            if (
+                "cannot be added as collaborator" in text
+                or "is already a collaborator" in text
+            ):
+                raise CollaboratorError(message=text, cause=e)
+            if (
+                "organization owner cannot leave the organization" in text
+                or "need to be an administrator in the organization to clone" in text
+            ):
+                raise AuthorizationError(message=text, cause=e)
+            if "free trial ended" in text or "Exceeded user limit" in text:
+                raise SubscriptionError(message=text, cause=e)
         except requests.exceptions.TooManyRedirects as e:
             # Tell the user their URL was bad and try a different one
             raise NetworkError(message="Bad url, please try a different one.", cause=e)
