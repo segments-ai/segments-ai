@@ -909,13 +909,6 @@ class TestException(Test):
             wrong_attributes: Dict[str, Any] = {"wrong_key": "abcde"}
             self.client.add_label(sample_uuid, labelset, wrong_attributes)
 
-    def test_update_label_validationerror(self) -> None:
-        with self.assertRaises(ValidationError):
-            sample_uuid = self.sample_uuids[0]
-            labelset = "ground-truth"
-            wrong_attributes: Dict[str, Any] = {"wrong_key": "abcde"}
-            self.client.update_label(sample_uuid, labelset, wrong_attributes)
-
 
 if __name__ == "__main__":
     unittest.main()
