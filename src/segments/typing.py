@@ -1,75 +1,21 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Tuple, Union, _GenericAlias, _SpecialForm
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel as PydanticBaseModel
 from pydantic import Extra, validator
 from segments.exceptions import ValidationError
-from typing_extensions import Literal, TypedDict, get_args, get_origin
+from typing_extensions import Literal, TypedDict
 
 
 class BaseModel(PydanticBaseModel):
-    @classmethod
-    # Use construct on nested models - https://github.com/pydantic/pydantic/issues/1168.
-    def construct(cls, _fields_set: Optional[Any] = None, **values: Any) -> BaseModel:
-        def is_literal_type(t: Any) -> bool:
-            return type(t) == _GenericAlias
-
-        def is_any_type(t: Any) -> bool:
-            return type(t) == _SpecialForm
-
-        def is_union_type(t: Any) -> bool:
-            return get_origin(t) == Union
-
-        m = cls.__new__(cls)
-        fields_values = {}
-
-        config = cls.__config__
-
-        for name, field in cls.__fields__.items():
-            key = field.alias
-            if (
-                key not in values and config.allow_population_by_field_name
-            ):  # Added this to allow population by field name
-                key = name
-
-            if key in values:
-                if (
-                    values[key] is None and not field.required
-                ):  # Moved this check since None value can be passed for Optional nested field
-                    fields_values[name] = field.get_default()
-                else:
-                    # Fix problem with literal types - https://github.com/tiangolo/sqlmodel/issues/57.
-                    if is_union_type(field.type_):
-                        field.type_ = get_args(field.type_)[0]
-                    elif is_literal_type(field.type_) or is_any_type(field.type_):
-                        fields_values[name] = values[key]
-                    elif issubclass(field.type_, BaseModel):
-                        if field.shape == 2:
-                            fields_values[name] = [
-                                field.type_.construct(**e) for e in values[key]
-                            ]
-                        else:
-                            if is_union_type(field.outer_type_):
-                                field.outer_type_ = get_args(field.outer_type_)[0]
-                            fields_values[name] = field.outer_type_.construct(
-                                **values[key]
-                            )
-                    else:
-                        fields_values[name] = values[key]
-            elif not field.required:
-                fields_values[name] = field.get_default()
-
-        object.__setattr__(m, "__dict__", fields_values)
-        if _fields_set is None:
-            _fields_set = set(values.keys())
-        object.__setattr__(m, "__fields_set__", _fields_set)
-        m._init_private_attributes()
-        return m
-
     class Config:
-        # https://pydantic-docs.helpmanual.io/usage/model_config/#smart-union
+        # Smart union checks all types before deciding which one to pick (otherwise, first type that fits). https://pydantic-docs.helpmanual.io/usage/model_config/#smart-union
         smart_union = True
+        # Use ignore in production and allow in debug mode. https://pydantic-docs.helpmanual.io/usage/model_config/#change-behaviour-globally
+        extra = "ignore"
+        # Use false in production and true in debug mode. https://pydantic-docs.helpmanual.io/usage/types/#arbitrary-types-allowed
+        arbitrary_types_allowed = False
 
 
 #######################################
