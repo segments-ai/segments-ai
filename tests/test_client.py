@@ -37,7 +37,6 @@ class Test(unittest.TestCase):
         API_KEY = os.getenv("SEGMENTS_API_KEY")
         API_URL = os.getenv("SEGMENTS_API_URL")
         self.owner = cast(str, os.getenv("DATASET_OWNER"))
-        self.admin = cast(str, os.getenv("DATASET_ADMIN"))
         self.client = (
             SegmentsClient(api_key=API_KEY, api_url=API_URL)
             if API_URL
@@ -136,6 +135,7 @@ class TestDataset(Test):
             "enable_skip_labeling": True,
             "enable_skip_reviewing": True,
             "enable_ratings": True,
+            "organization": self.owner,
         }
         try:
             # Add dataset
@@ -143,14 +143,15 @@ class TestDataset(Test):
             self.assertIsInstance(dataset, Dataset)
 
             # Update dataset
-            arguments["dataset_identifier"] = f"{self.admin}/{arguments['name']}"
+            arguments["dataset_identifier"] = f"{self.owner}/{arguments['name']}"
             del arguments["name"]
+            del arguments["organization"]
             dataset = self.client.update_dataset(**arguments)
             self.assertIsInstance(dataset, Dataset)
 
         finally:
             # Delete dataset
-            self.client.delete_dataset(f"{self.admin}/add_dataset")
+            self.client.delete_dataset(f"{self.owner}/add_dataset")
 
     def test_update_dataset_notfounderror(self) -> None:
         with self.assertRaises(NotFoundError):
@@ -889,13 +890,9 @@ class TestException(Test):
 
     def test_dataset_already_exists_error(self) -> None:
         with self.assertRaises(AlreadyExistsError):
-            try:
-                dataset = self.datasets[0]
-                self.client.add_dataset(dataset)
-                self.client.add_dataset(dataset)
-            finally:
-                dataset_identifier = f"{self.admin}/{dataset}"
-                self.client.delete_dataset(dataset_identifier)
+            dataset = self.datasets[0]
+            organization = self.owner
+            self.client.add_dataset(dataset, organization=organization)
 
     def test_resource_not_found_error(self) -> None:
         with self.assertRaises(NotFoundError):
