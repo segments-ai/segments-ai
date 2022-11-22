@@ -504,6 +504,7 @@ class TaskAttributeCategory(BaseModel):
 class TaskAttributes(BaseModel):
     format_version: Optional[FormatVersion]
     categories: Optional[List[TaskAttributeCategory]]
+    image_attributes: Optional[ImageAttributes]
 
     class Config:
         extra = "allow"
@@ -591,6 +592,7 @@ class SegmentsDatasetCategory(BaseModel):
     name: str
     color: Optional[Union[RGB, RGBA]]
     attributes: Optional[List[Any]]
+    has_instances: Optional[bool]
 
     class Config:
         allow_population_by_field_name = True
