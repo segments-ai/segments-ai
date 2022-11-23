@@ -89,7 +89,6 @@ def exception_handler(
         **kwargs: Any,
     ) -> Union[requests.Response, T]:
         try:
-            self = args[0]
             r = f(*args, **kwargs)
             r.raise_for_status()
             if r.content:
@@ -100,17 +99,7 @@ def exception_handler(
                     if message.startswith("You have exceeded"):
                         raise APILimitError(message)
                 if model:
-                    if self.disable_typechecking:
-                        try:
-                            if isinstance(model.__origin__(), list):
-                                model_without_list = model.__args__[0]
-                                m = [
-                                    model_without_list.construct(r_j) for r_j in r_json
-                                ]
-                        except AttributeError:
-                            m = model.construct(r_json)
-                    else:
-                        m = parse_obj_as(model, r_json)
+                    m = parse_obj_as(model, r_json)
                     return m
             return r
         except requests.exceptions.Timeout as e:
@@ -178,7 +167,6 @@ class SegmentsClient:
         self,
         api_key: Optional[str] = None,
         api_url: str = "https://api.segments.ai/",
-        disable_typechecking: bool = False,
     ):
         if api_key is None:
             api_key = os.getenv("SEGMENTS_API_KEY")
@@ -191,7 +179,6 @@ class SegmentsClient:
 
         self.api_key = api_key
         self.api_url = api_url
-        self.disable_typechecking = disable_typechecking
 
         # https://realpython.com/python-requests/#performance
         # https://stackoverflow.com/questions/21371809/cleanly-setting-max-retries-on-python-requests-get-or-post-method
@@ -388,7 +375,7 @@ class SegmentsClient:
                 "categories": [{"id": 1, "name": "object"}],
             }
 
-        if type(task_attributes) is dict and not self.disable_typechecking:
+        if type(task_attributes) is dict:
             try:
                 TaskAttributes.parse_obj(task_attributes)
             except pydantic.ValidationError as e:
@@ -789,11 +776,10 @@ class SegmentsClient:
         for result in results:
             result.pop("label", None)
 
-        if not self.disable_typechecking:
-            try:
-                results = parse_obj_as(List[Sample], results)
-            except pydantic.ValidationError as e:
-                raise ValidationError(message=str(e), cause=e)
+        try:
+            results = parse_obj_as(List[Sample], results)
+        except pydantic.ValidationError as e:
+            raise ValidationError(message=str(e), cause=e)
 
         return cast(List[Sample], results)
 
@@ -882,7 +868,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        if type(attributes) is dict and not self.disable_typechecking:
+        if type(attributes) is dict:
             try:
                 parse_obj_as(SampleAttributes, attributes)
             except pydantic.ValidationError as e:
@@ -943,7 +929,7 @@ class SegmentsClient:
 
         # Check the input
         for sample in samples:
-            if type(sample) is dict and not self.disable_typechecking:
+            if type(sample) is dict:
                 if "name" not in sample or "attributes" not in sample:
                     raise KeyError(
                         f"Please add a name and attributes to your sample: {sample}"
@@ -1138,7 +1124,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        if type(attributes) is dict and not self.disable_typechecking:
+        if type(attributes) is dict:
             try:
                 parse_obj_as(LabelAttributes, attributes)
             except pydantic.ValidationError as e:

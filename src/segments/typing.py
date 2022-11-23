@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel as PydanticBaseModel
@@ -8,8 +10,12 @@ from typing_extensions import Annotated, Literal, TypedDict, get_args
 
 class BaseModel(PydanticBaseModel):
     class Config:
-        # https://pydantic-docs.helpmanual.io/usage/model_config/#smart-union
+        # Smart union checks all types before deciding which one to pick (otherwise, first type that fits). https://pydantic-docs.helpmanual.io/usage/model_config/#smart-union
         smart_union = True
+        # Use ignore in production and allow in debug mode. https://pydantic-docs.helpmanual.io/usage/model_config/#change-behaviour-globally
+        extra = "ignore"
+        # Use false in production and true in debug mode. https://pydantic-docs.helpmanual.io/usage/types/#arbitrary-types-allowed
+        arbitrary_types_allowed = False
 
 
 #######################################
