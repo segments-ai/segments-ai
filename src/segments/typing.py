@@ -1,9 +1,9 @@
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel as PydanticBaseModel
-from pydantic import Extra, validator
+from pydantic import Extra, Field, validator
 from segments.exceptions import ValidationError
-from typing_extensions import Literal, TypedDict
+from typing_extensions import Annotated, Literal, TypedDict, get_args
 
 
 class BaseModel(PydanticBaseModel):
@@ -52,16 +52,6 @@ PointcloudVectorAnnotationType = Literal["polygon", "polyline", "point"]
 PCDType = Literal["pcd", "kitti", "nuscenes"]
 InputType = Literal["select", "text", "number", "checkbox"]
 Category = Literal[
-    "street_scenery",
-    "garden",
-    "agriculture",
-    "satellite",
-    "people",
-    "medical",
-    "fruit",
-    "other",
-]
-_Category = [
     "street_scenery",
     "garden",
     "agriculture",
@@ -265,6 +255,7 @@ class PointcloudSequenceSegmentationAnnotation(BaseModel):
 class PointcloudSegmentationFrame(BaseModel):
     annotations: List[PointcloudSequenceSegmentationAnnotation]
     point_annotations: Optional[List[int]] = None
+    timestamp: Optional[int] = None
     format_version: Optional[FormatVersion] = None
 
 
@@ -280,8 +271,8 @@ class PointcloudSequenceCuboidAnnotation(PointcloudCuboidAnnotation):
 
 
 class PointcloudSequenceCuboidFrame(BaseModel):
-    timestamp: int
     annotations: List[PointcloudSequenceCuboidAnnotation]
+    timestamp: Optional[int] = None
     format_version: Optional[FormatVersion] = None
 
 
@@ -297,9 +288,9 @@ class PointcloudSequenceVectorAnnotation(PointcloudVectorAnnotation):
 
 
 class PointcloudSequenceVectorFrame(BaseModel):
-    timestamp: int
     annotations: List[PointcloudSequenceVectorAnnotation]
     format_version: Optional[FormatVersion] = None
+    timestamp: Optional[int] = None
 
 
 class PointcloudSequenceVectorLabelAttributes(BaseModel):
@@ -319,16 +310,18 @@ class TextLabelAttributes(BaseModel):
     format_version: Optional[FormatVersion] = None
 
 
+# Most specific type first
+# https://pydantic-docs.helpmanual.io/usage/types/#unions
 LabelAttributes = Union[
-    ImageSegmentationLabelAttributes,
     ImageVectorLabelAttributes,
+    ImageSegmentationLabelAttributes,
     ImageSequenceVectorLabelAttributes,
-    PointcloudSegmentationLabelAttributes,
     PointcloudCuboidLabelAttributes,
     PointcloudVectorLabelAttributes,
-    PointcloudSequenceSegmentationLabelAttributes,
+    PointcloudSegmentationLabelAttributes,
     PointcloudSequenceCuboidLabelAttributes,
     PointcloudSequenceVectorLabelAttributes,
+    PointcloudSequenceSegmentationLabelAttributes,
     TextLabelAttributes,
 ]
 
@@ -485,11 +478,14 @@ class CheckboxTaskAttribute(BaseModel):
     default_value: Optional[bool] = None
 
 
-TaskAttribute = Union[
-    SelectTaskAttribute,
-    TextTaskAttribute,
-    NumberTaskAttribute,
-    CheckboxTaskAttribute,
+TaskAttribute = Annotated[
+    Union[
+        SelectTaskAttribute,
+        TextTaskAttribute,
+        NumberTaskAttribute,
+        CheckboxTaskAttribute,
+    ],
+    Field(discriminator="input_type"),
 ]
 
 
@@ -576,9 +572,10 @@ class Dataset(BaseModel):
 
     @validator("category")
     def check_category(cls, category: str) -> str:
-        if category not in _Category and "custom-" not in category:
+        category_list = get_args(Category)
+        if category not in category_list and "custom-" not in category:
             raise ValidationError(
-                f"The category should be one of {_Category}, but is {category}."
+                f"The category should be one of {category_list}, but is {category}."
             )
         return category
 
