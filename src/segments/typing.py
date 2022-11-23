@@ -1,15 +1,21 @@
+from __future__ import annotations
+
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel as PydanticBaseModel
 from pydantic import validator
 from segments.exceptions import ValidationError
-from typing_extensions import Literal, TypedDict
+from typing_extensions import Annotated, Literal, TypedDict, get_args
 
 
 class BaseModel(PydanticBaseModel):
     class Config:
-        # https://pydantic-docs.helpmanual.io/usage/model_config/#smart-union
+        # Smart union checks all types before deciding which one to pick (otherwise, first type that fits). https://pydantic-docs.helpmanual.io/usage/model_config/#smart-union
         smart_union = True
+        # Use ignore in production and allow in debug mode. https://pydantic-docs.helpmanual.io/usage/model_config/#change-behaviour-globally
+        extra = "ignore"
+        # Use false in production and true in debug mode. https://pydantic-docs.helpmanual.io/usage/types/#arbitrary-types-allowed
+        arbitrary_types_allowed = False
 
 
 #######################################
@@ -52,16 +58,6 @@ PointcloudVectorAnnotationType = Literal["polygon", "polyline", "point"]
 PCDType = Literal["pcd", "kitti", "nuscenes"]
 InputType = Literal["select", "text", "number", "checkbox"]
 Category = Literal[
-    "street_scenery",
-    "garden",
-    "agriculture",
-    "satellite",
-    "people",
-    "medical",
-    "fruit",
-    "other",
-]
-_Category = [
     "street_scenery",
     "garden",
     "agriculture",
@@ -265,6 +261,7 @@ class PointcloudSequenceSegmentationAnnotation(BaseModel):
 class PointcloudSegmentationFrame(BaseModel):
     annotations: List[PointcloudSequenceSegmentationAnnotation]
     point_annotations: Optional[List[int]]
+    timestamp: Optional[int]
     format_version: Optional[FormatVersion]
 
 
@@ -280,8 +277,8 @@ class PointcloudSequenceCuboidAnnotation(PointcloudCuboidAnnotation):
 
 
 class PointcloudSequenceCuboidFrame(BaseModel):
-    timestamp: int
     annotations: List[PointcloudSequenceCuboidAnnotation]
+    timestamp: Optional[int]
     format_version: Optional[FormatVersion]
 
 
@@ -297,9 +294,9 @@ class PointcloudSequenceVectorAnnotation(PointcloudVectorAnnotation):
 
 
 class PointcloudSequenceVectorFrame(BaseModel):
-    timestamp: int
     annotations: List[PointcloudSequenceVectorAnnotation]
     format_version: Optional[FormatVersion]
+    timestamp: Optional[int]
 
 
 class PointcloudSequenceVectorLabelAttributes(BaseModel):
@@ -319,16 +316,18 @@ class TextLabelAttributes(BaseModel):
     format_version: Optional[FormatVersion]
 
 
+# Most specific type first
+# https://pydantic-docs.helpmanual.io/usage/types/#unions
 LabelAttributes = Union[
-    ImageSegmentationLabelAttributes,
     ImageVectorLabelAttributes,
+    ImageSegmentationLabelAttributes,
     ImageSequenceVectorLabelAttributes,
-    PointcloudSegmentationLabelAttributes,
     PointcloudCuboidLabelAttributes,
     PointcloudVectorLabelAttributes,
-    PointcloudSequenceSegmentationLabelAttributes,
+    PointcloudSegmentationLabelAttributes,
     PointcloudSequenceCuboidLabelAttributes,
     PointcloudSequenceVectorLabelAttributes,
+    PointcloudSequenceSegmentationLabelAttributes,
     TextLabelAttributes,
 ]
 
@@ -485,11 +484,14 @@ class CheckboxTaskAttribute(BaseModel):
     default_value: Optional[bool]
 
 
-TaskAttribute = Union[
-    SelectTaskAttribute,
-    TextTaskAttribute,
-    NumberTaskAttribute,
-    CheckboxTaskAttribute,
+TaskAttribute = Annotated[
+    Union[
+        SelectTaskAttribute,
+        TextTaskAttribute,
+        NumberTaskAttribute,
+        CheckboxTaskAttribute,
+    ],
+    Field(discriminator="input_type"),
 ]
 
 
@@ -577,9 +579,10 @@ class Dataset(BaseModel):
 
     @validator("category")
     def check_category(cls, category: str) -> str:
-        if category not in _Category and "custom-" not in category:
+        category_list = get_args(Category)
+        if category not in category_list and "custom-" not in category:
             raise ValidationError(
-                f"The category should be one of {_Category}, but is {category}."
+                f"The category should be one of {category_list}, but is {category}."
             )
         return category
 

@@ -117,6 +117,16 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 .. autopydantic_model:: segments.typing.PointcloudCuboidAnnotation
 ```
 
+### Point cloud vector
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.PointcloudVectorLabelAttributes
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.PointcloudVectorAnnotation
+```
+
 ### Point cloud sequence segmentation
 
 ```{eval-rst}
@@ -143,6 +153,21 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.PointcloudSequenceCuboidAnnotation
+    :show-inheritance:
+```
+
+### Point cloud sequence vector
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.PointcloudSequenceVectorLabelAttributes
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.PointcloudSequenceVectorFrame
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.PointcloudSequenceVectorAnnotation
     :show-inheritance:
 ```
 
