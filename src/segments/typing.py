@@ -506,7 +506,7 @@ class TaskAttributeCategory(BaseModel):
 class TaskAttributes(BaseModel):
     format_version: Optional[FormatVersion]
     categories: Optional[List[TaskAttributeCategory]]
-    image_attributes: Optional[ImageAttributes]
+    image_attributes: Optional[List[TaskAttribute]]
 
     class Config:
         extra = "allow"
