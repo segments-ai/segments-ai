@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel as PydanticBaseModel
-from pydantic import validator
+from pydantic import Field, validator
 from segments.exceptions import ValidationError
 from typing_extensions import Annotated, Literal, TypedDict, get_args
 
