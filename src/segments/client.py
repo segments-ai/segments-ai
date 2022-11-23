@@ -27,8 +27,11 @@ from segments.exceptions import (
     AlreadyExistsError,
     APILimitError,
     AuthenticationError,
+    AuthorizationError,
+    CollaboratorError,
     NetworkError,
     NotFoundError,
+    SubscriptionError,
     TimeoutError,
     ValidationError,
 )
@@ -106,11 +109,25 @@ def exception_handler(
             # Maybe set up for a retry, or continue in a retry loop
             raise TimeoutError(message=str(e), cause=e)
         except requests.exceptions.HTTPError as e:
-            text = e.response.text
-            if "Not found" in text:
+            # Make string comparison case insensitive.
+            text = e.response.text.lower()
+            if "not found" in text or "does not exist" in text:
                 raise NotFoundError(message=text, cause=e)
-            if "already exists" in text:
+            if "already exists" in text or "already have" in text:
                 raise AlreadyExistsError(message=text, cause=e)
+            if (
+                "cannot be added as collaborator" in text
+                or "is already a collaborator" in text
+            ):
+                raise CollaboratorError(message=text, cause=e)
+            if (
+                "cannot leave the organization" in text
+                or "need to be an administrator" in text
+                or "do not have permission" in text
+            ):
+                raise AuthorizationError(message=text, cause=e)
+            if "free trial ended" in text or "exceeded user limit" in text:
+                raise SubscriptionError(message=text, cause=e)
             raise NetworkError(message=text, cause=e)
         except requests.exceptions.TooManyRedirects as e:
             # Tell the user their URL was bad and try a different one
