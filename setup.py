@@ -4,7 +4,7 @@ from typing import List
 #############
 # Constants #
 #############
-VERSION = "1.0.13"
+VERSION = "1.0.14"
 
 
 ####################
