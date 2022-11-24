@@ -512,6 +512,9 @@ class TaskAttributes(BaseModel):
     categories: Optional[List[TaskAttributeCategory]]
     image_attributes: Optional[List[TaskAttribute]]
 
+    class Config:
+        extra = "allow"
+
 
 class Owner(BaseModel):
     username: str
