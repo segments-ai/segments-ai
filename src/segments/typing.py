@@ -404,7 +404,7 @@ class PointcloudSampleAttributes(BaseModel):
     ego_pose: Optional[EgoPose]
     default_z: Optional[float]
     name: Optional[str]
-    timestamp: Optional[int]
+    timestamp: Optional[str]
 
 
 # Point cloud sequence
