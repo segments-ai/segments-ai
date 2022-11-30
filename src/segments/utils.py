@@ -14,6 +14,7 @@ import numpy as np
 import numpy.typing as npt
 import requests
 from PIL import ExifTags, Image
+from segments.typing import ImageSegmentationLabelAttributes, Label
 from typing_extensions import Literal
 
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
@@ -330,13 +331,13 @@ def handle_exif_rotation(image: Image.Image) -> Image.Image:
 def show_polygons(
     image_directory_path: str, image_id: int, exported_polygons_path: str, seed: int = 0
 ) -> None:
-    """Show the exported contours of a segmented image (i.e., resulting from :func:`.export_dataset` with polygon export format).
+    """Show exported contours of a segmented image (i.e., resulting from :func:`.export_dataset` with polygon export format).
 
     Args:
-        image_directory_path: The image directory path.
-        image_id: The image id (this can be found in the exported polygons JSON file).
-        exported_polygons_path: The exported polygons path.
-        seed: The seed used to generate random colors. Defaults to ``0``.
+        image_directory_path: An image directory path.
+        image_id: An image id (this can be found in the exported polygons JSON file).
+        exported_polygons_path: An exported polygons path.
+        seed: A seed used to generate random colors. Defaults to ``0``.
     Raises:
         :exc:`ImportError`: If matplotlib is not installed.
     """
@@ -450,3 +451,24 @@ def show_polygons(
     fig.legend()
 
     plt.show()
+
+
+def get_segmentation_bitmap(label: Label) -> np.ndarray:
+    """Get a bitmap numpy array from a Segments label.
+
+    Args:
+        label: An image segmentation label.
+    Returns:
+        A segmentation bitmap of shape (H, W, 4). The last dimension is a label (e.g., [0, 0, 0, 255] or [8, 8, 8, 255]).
+    """
+    assert type(label.attributes) == ImageSegmentationLabelAttributes, f"Expected an image segmentation label. Got {type(label)}."
+    assert type(label.attributes.segmentation_bitmap.url) == str, f"Expected a url. Got {label.attributes.segmentation_bitmap.url}"
+
+    return np.asarray(
+        Image.open(
+            requests.get(
+                label.attributes.segmentation_bitmap.url,
+                stream=True,
+            ).raw
+        )
+    )
