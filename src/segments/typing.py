@@ -195,7 +195,7 @@ class ImageSequenceVectorAnnotation(ImageVectorAnnotation):
 
 class ImageVectorFrame(BaseModel):
     annotations: List[ImageSequenceVectorAnnotation]
-    timestamp: Optional[int]
+    timestamp: Optional[str]
     format_version: Optional[FormatVersion]
     image_attributes: Optional[ImageAttributes]
 
@@ -261,7 +261,7 @@ class PointcloudSequenceSegmentationAnnotation(BaseModel):
 class PointcloudSegmentationFrame(BaseModel):
     annotations: List[PointcloudSequenceSegmentationAnnotation]
     point_annotations: Optional[List[int]]
-    timestamp: Optional[int]
+    timestamp: Optional[str]
     format_version: Optional[FormatVersion]
 
 
@@ -278,7 +278,7 @@ class PointcloudSequenceCuboidAnnotation(PointcloudCuboidAnnotation):
 
 class PointcloudSequenceCuboidFrame(BaseModel):
     annotations: List[PointcloudSequenceCuboidAnnotation]
-    timestamp: Optional[int]
+    timestamp: Optional[str]
     format_version: Optional[FormatVersion]
 
 
@@ -296,7 +296,7 @@ class PointcloudSequenceVectorAnnotation(PointcloudVectorAnnotation):
 class PointcloudSequenceVectorFrame(BaseModel):
     annotations: List[PointcloudSequenceVectorAnnotation]
     format_version: Optional[FormatVersion]
-    timestamp: Optional[int]
+    timestamp: Optional[str]
 
 
 class PointcloudSequenceVectorLabelAttributes(BaseModel):
@@ -404,7 +404,7 @@ class PointcloudSampleAttributes(BaseModel):
     ego_pose: Optional[EgoPose]
     default_z: Optional[float]
     name: Optional[str]
-    timestamp: Optional[int]
+    timestamp: Optional[str]
 
 
 # Point cloud sequence
