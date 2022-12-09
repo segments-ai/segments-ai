@@ -842,6 +842,7 @@ def export_polygon(
                 "id": annotation_id,
                 "image_id": image_id,
                 "category_id": category_id,
+                "attributes": instance["attributes"],
             }
 
             if instance["id"] not in regions:
