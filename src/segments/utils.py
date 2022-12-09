@@ -237,13 +237,17 @@ def load_image_from_url(
         )
         if regex:
             bucket = regex.group(1)
-            # region_name = regex.group(2)
-            key = url_parsed.path.lstrip("/")
 
-            file_byte_string = s3_client.get_object(Bucket=bucket, Key=key)[
-                "Body"
-            ].read()
-            image = Image.open(BytesIO(file_byte_string))
+            if bucket == "segmentsai-prod":
+                image = Image.open(BytesIO(session.get(url).content))
+            else:
+                # region_name = regex.group(2)
+                key = url_parsed.path.lstrip("/")
+
+                file_byte_string = s3_client.get_object(Bucket=bucket, Key=key)[
+                    "Body"
+                ].read()
+                image = Image.open(BytesIO(file_byte_string))
     else:
         image = Image.open(BytesIO(session.get(url).content))
         # urllib.request.urlretrieve(url, save_filename)
