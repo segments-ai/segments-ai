@@ -12,9 +12,9 @@ class BaseModel(PydanticBaseModel):
     class Config:
         # Smart union checks all types before deciding which one to pick (otherwise, first type that fits). https://pydantic-docs.helpmanual.io/usage/model_config/#smart-union
         smart_union = True
-        # Use ignore in production and allow in debug mode. https://pydantic-docs.helpmanual.io/usage/model_config/#change-behaviour-globally
+        # What happens with extra fields in dictionaries. Use ignore in production and allow in debug mode. https://pydantic-docs.helpmanual.io/usage/model_config/#change-behaviour-globally
         extra = "ignore"
-        # Use false in production and true in debug mode. https://pydantic-docs.helpmanual.io/usage/types/#arbitrary-types-allowed
+        # What happens with wrong field types. Use false in production and true in debug mode. https://pydantic-docs.helpmanual.io/usage/types/#arbitrary-types-allowed
         arbitrary_types_allowed = False
 
 
