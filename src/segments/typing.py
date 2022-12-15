@@ -3,9 +3,9 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel as PydanticBaseModel
-from pydantic import Field, validator
+from pydantic import validator
 from segments.exceptions import ValidationError
-from typing_extensions import Annotated, Literal, TypedDict, get_args
+from typing_extensions import Literal, TypedDict, get_args
 
 
 class BaseModel(PydanticBaseModel):
@@ -484,14 +484,11 @@ class CheckboxTaskAttribute(BaseModel):
     default_value: Optional[bool]
 
 
-TaskAttribute = Annotated[
-    Union[
-        SelectTaskAttribute,
-        TextTaskAttribute,
-        NumberTaskAttribute,
-        CheckboxTaskAttribute,
-    ],
-    Field(discriminator="input_type"),
+TaskAttribute = Union[
+    SelectTaskAttribute,
+    TextTaskAttribute,
+    NumberTaskAttribute,
+    CheckboxTaskAttribute,
 ]
 
 
