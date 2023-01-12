@@ -48,15 +48,8 @@ TaskType = Literal[
     "text-span-categorization",
     "",
 ]
-DataType = Literal["IMAGE"]
 Role = Literal["labeler", "reviewer", "admin"]
-Status = Literal["PENDING", "SUCCEEDED", "FAILED"]
 IssueStatus = Literal["OPEN", "CLOSED"]
-ReleaseType = Literal["JSON"]
-ImageVectorAnnotationType = Literal["bbox", "polygon", "polyline", "point"]
-PointcloudVectorAnnotationType = Literal["polygon", "polyline", "point"]
-PCDType = Literal["pcd", "kitti", "nuscenes"]
-InputType = Literal["select", "text", "number", "checkbox"]
 Category = Literal[
     "street_scenery",
     "garden",
@@ -67,7 +60,6 @@ Category = Literal[
     "fruit",
     "other",
 ]
-DistortionModel = Literal["plumb_bob"]
 RGB = Tuple[int, int, int]
 RGBA = Tuple[int, int, int, int]
 FormatVersion = Union[float, str]
@@ -92,9 +84,9 @@ class Release(BaseModel):
     uuid: str
     name: str
     description: str
-    release_type: ReleaseType
+    release_type: Literal["JSON"]
     attributes: URL
-    status: Status
+    status: Literal["PENDING", "SUCCEEDED", "FAILED"]
     # status_info: str
     created_at: str
     samples_count: int
@@ -177,7 +169,7 @@ class ImageVectorAnnotation(BaseModel):
     id: int
     category_id: int
     points: List[List[float]]
-    type: ImageVectorAnnotationType
+    type: Literal["bbox", "polygon", "polyline", "point"]
     attributes: Optional[ObjectAttributes]
 
 
@@ -226,7 +218,7 @@ class PointcloudCuboidAnnotation(BaseModel):
     position: XYZ
     dimensions: XYZ
     yaw: float
-    type: Literal["cuboid"]
+    type: Literal["cuboid", "cuboid-sync"]
     attributes: Optional[ObjectAttributes]
 
 
@@ -240,7 +232,7 @@ class PointcloudVectorAnnotation(BaseModel):
     id: int
     category_id: int
     points: List[List[float]]
-    type: PointcloudVectorAnnotationType
+    type: Literal["polygon", "polyline", "point"]
     attributes: Optional[ObjectAttributes]
 
 
@@ -367,7 +359,7 @@ class ImageSequenceSampleAttributes(BaseModel):
 # Point cloud
 class PCD(BaseModel):
     url: str
-    type: PCDType = "pcd"
+    type: Literal["pcd", "kitti", "nuscenes"] = "pcd"
 
 
 class XYZW(BaseModel):
@@ -553,7 +545,7 @@ class Dataset(BaseModel):
     full_name: str
     cloned_from: Optional[str]
     description: str
-    # data_type: DataType
+    # data_type: Literal["IMAGE"]
     category: str  # Category
     public: bool
     owner: Owner
