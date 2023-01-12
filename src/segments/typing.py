@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from pydantic import BaseModel as PydanticBaseModel
 from pydantic import validator
 from segments.exceptions import ValidationError
-from typing_extensions import Literal, TypedDict, get_args
+from typing_extensions import Literal, TypedDict
 
 
 class BaseModel(PydanticBaseModel):
@@ -21,16 +21,6 @@ class BaseModel(PydanticBaseModel):
 #######################################
 # Literals, constants and other types #
 #######################################
-LabelStatus = Literal[
-    "REVIEWED",
-    "REVIEWING_IN_PROGRESS",
-    "LABELED",
-    "LABELING_IN_PROGRESS",
-    "REJECTED",
-    "PRELABELED",
-    "SKIPPED",
-    "UNLABELED",
-]
 TaskType = Literal[
     "segmentation-bitmap",
     "segmentation-bitmap-highres",
@@ -48,26 +38,6 @@ TaskType = Literal[
     "text-span-categorization",
     "",
 ]
-DataType = Literal["IMAGE"]
-Role = Literal["labeler", "reviewer", "admin"]
-Status = Literal["PENDING", "SUCCEEDED", "FAILED"]
-IssueStatus = Literal["OPEN", "CLOSED"]
-ReleaseType = Literal["JSON"]
-ImageVectorAnnotationType = Literal["bbox", "polygon", "polyline", "point"]
-PointcloudVectorAnnotationType = Literal["polygon", "polyline", "point"]
-PCDType = Literal["pcd", "kitti", "nuscenes"]
-InputType = Literal["select", "text", "number", "checkbox"]
-Category = Literal[
-    "street_scenery",
-    "garden",
-    "agriculture",
-    "satellite",
-    "people",
-    "medical",
-    "fruit",
-    "other",
-]
-DistortionModel = Literal["plumb_bob"]
 RGB = Tuple[int, int, int]
 RGBA = Tuple[int, int, int, int]
 FormatVersion = Union[float, str]
@@ -92,9 +62,9 @@ class Release(BaseModel):
     uuid: str
     name: str
     description: str
-    release_type: ReleaseType
+    release_type: Literal["JSON"]
     attributes: URL
-    status: Status
+    status: Literal["PENDING", "SUCCEEDED", "FAILED"]
     # status_info: str
     created_at: str
     samples_count: int
@@ -117,7 +87,7 @@ class Issue(BaseModel):
     created_by: str
     updated_by: str
     comments: List[IssueComment]
-    status: IssueStatus
+    status: Literal["OPEN", "CLOSED"]
     sample_uuid: str
     sample_name: str
 
@@ -177,7 +147,7 @@ class ImageVectorAnnotation(BaseModel):
     id: int
     category_id: int
     points: List[List[float]]
-    type: ImageVectorAnnotationType
+    type: Literal["bbox", "polygon", "polyline", "point"]
     attributes: Optional[ObjectAttributes]
 
 
@@ -226,7 +196,7 @@ class PointcloudCuboidAnnotation(BaseModel):
     position: XYZ
     dimensions: XYZ
     yaw: float
-    type: Literal["cuboid"]
+    type: Literal["cuboid", "cuboid-sync"]
     attributes: Optional[ObjectAttributes]
 
 
@@ -240,7 +210,7 @@ class PointcloudVectorAnnotation(BaseModel):
     id: int
     category_id: int
     points: List[List[float]]
-    type: PointcloudVectorAnnotationType
+    type: Literal["polygon", "polyline", "point"]
     attributes: Optional[ObjectAttributes]
 
 
@@ -335,7 +305,16 @@ LabelAttributes = Union[
 class Label(BaseModel):
     sample_uuid: str
     label_type: TaskType
-    label_status: LabelStatus
+    label_status: Literal[
+        "REVIEWED",
+        "REVIEWING_IN_PROGRESS",
+        "LABELED",
+        "LABELING_IN_PROGRESS",
+        "REJECTED",
+        "PRELABELED",
+        "SKIPPED",
+        "UNLABELED",
+    ]
     labelset: str
     attributes: LabelAttributes
     created_at: str
@@ -367,7 +346,7 @@ class ImageSequenceSampleAttributes(BaseModel):
 # Point cloud
 class PCD(BaseModel):
     url: str
-    type: PCDType = "pcd"
+    type: Literal["pcd", "kitti", "nuscenes"] = "pcd"
 
 
 class XYZW(BaseModel):
@@ -453,7 +432,7 @@ class User(BaseModel):
 
 class Collaborator(BaseModel):
     user: User
-    role: Role
+    role: Literal["labeler", "reviewer", "admin"]
 
 
 class SelectTaskAttribute(BaseModel):
@@ -553,7 +532,7 @@ class Dataset(BaseModel):
     full_name: str
     cloned_from: Optional[str]
     description: str
-    # data_type: DataType
+    # data_type: Literal["IMAGE"]
     category: str  # Category
     public: bool
     owner: Owner
@@ -580,7 +559,16 @@ class Dataset(BaseModel):
 
     @validator("category")
     def check_category(cls, category: str) -> str:
-        category_list = get_args(Category)
+        category_list = [
+            "street_scenery",
+            "garden",
+            "agriculture",
+            "satellite",
+            "people",
+            "medical",
+            "fruit",
+            "other",
+        ]
         if category not in category_list and "custom-" not in category:
             raise ValidationError(
                 f"The category should be one of {category_list}, but is {category}."
