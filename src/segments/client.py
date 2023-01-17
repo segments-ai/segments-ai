@@ -98,8 +98,8 @@ def exception_handler(
                 r_json = r.json()
                 # Check if the API limit is exceeded
                 if isinstance(r_json, dict):
-                    message = r_json.get("message", "")
-                    if message.startswith("You have exceeded"):
+                    message = r_json.get("detail", "")
+                    if "throttled" in message:
                         raise APILimitError(message)
                 if model:
                     m = parse_obj_as(model, r_json)
