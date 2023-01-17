@@ -70,7 +70,7 @@ VERSION = "1.0.16"
 # Helper functions #
 ####################
 # Error handling: https://stackoverflow.com/questions/16511337/correct-way-to-try-except-using-python-requests-module
-def exception_handler(
+def handle_exceptions(
     f: Callable[..., requests.Response]
 ) -> Callable[..., Union[requests.Response, T]]:
     """Catch exceptions and throw Segments exceptions.
@@ -86,7 +86,7 @@ def exception_handler(
         :exc:`~segments.exceptions.TimeoutError`: If the request times out - catches :exc:`requests.exceptions.TimeoutError`.
     """
 
-    def wrapper_function(
+    def throw_segments_exception(
         *args: Any,
         model: Optional[Type[T]] = None,
         **kwargs: Any,
@@ -138,7 +138,7 @@ def exception_handler(
         except pydantic.ValidationError as e:
             raise ValidationError(message=str(e), cause=e)
 
-    return wrapper_function
+    return throw_segments_exception
 
 
 ##########
@@ -1610,7 +1610,7 @@ class SegmentsClient:
     ####################
     # Helper functions #
     ####################
-    @exception_handler
+    @handle_exceptions
     def _get(
         self,
         endpoint: str,
@@ -1638,7 +1638,7 @@ class SegmentsClient:
 
         return r
 
-    @exception_handler
+    @handle_exceptions
     def _post(
         self,
         endpoint: str,
@@ -1669,7 +1669,7 @@ class SegmentsClient:
 
         return r
 
-    @exception_handler
+    @handle_exceptions
     def _put(
         self,
         endpoint: str,
@@ -1700,7 +1700,7 @@ class SegmentsClient:
 
         return r
 
-    @exception_handler
+    @handle_exceptions
     def _patch(
         self,
         endpoint: str,
@@ -1731,7 +1731,7 @@ class SegmentsClient:
 
         return r
 
-    @exception_handler
+    @handle_exceptions
     def _delete(
         self,
         endpoint: str,
@@ -1766,7 +1766,7 @@ class SegmentsClient:
         """Get the authorization header with the API key."""
         return {"Authorization": f"APIKey {self.api_key}"} if self.api_key else None
 
-    @exception_handler
+    @handle_exceptions
     def _upload_to_aws(
         self, file: Union[TextIO, BinaryIO], url: str, aws_fields: AWSFields
     ) -> requests.Response:
