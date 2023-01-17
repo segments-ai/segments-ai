@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 try:
     import datasets
-    from huggingface_hub import upload_file
+    from huggingface_hub import HfApi
 except ImportError:
     logger.error(
         "Please install HuggingFace datasets first: pip install --upgrade datasets"
@@ -31,12 +31,14 @@ except ImportError:
 # Add some functionality to the push_to_hub function of datasets.Dataset
 push_to_hub_original = datasets.Dataset.push_to_hub
 
+hf_api = HfApi()
+
 
 #############
 # Functions #
 #############
 def push_to_hub(
-    self: datasets.Dataset, repo_id: int, *args: Any, **kwargs: Any
+    self: datasets.Dataset, repo_id: str, *args: Any, **kwargs: Any
 ) -> None:
     push_to_hub_original(self, repo_id, *args, **kwargs)
 
@@ -47,10 +49,11 @@ def push_to_hub(
         with open(tmpfile, "w") as f:
             json.dump(self.id2label, f)
 
-        upload_file(
+        hf_api.upload_file(
             path_or_fileobj=tmpfile,
             path_in_repo="id2label.json",
-            repo_id=f"datasets/{repo_id}",
+            repo_id=repo_id,
+            repo_type="dataset",
         )
 
     # Upload README.md
@@ -60,10 +63,11 @@ def push_to_hub(
         with open(tmpfile, "w") as f:
             f.write(self.readme)
 
-        upload_file(
+        hf_api.upload_file(
             path_or_fileobj=tmpfile,
             path_in_repo="README.md",
-            repo_id=f"datasets/{repo_id}",
+            repo_id=repo_id,
+            repo_type="dataset",
         )
 
 
