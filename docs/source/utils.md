@@ -45,6 +45,12 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 .. autofunction:: segments.utils.handle_exif_rotation
 ```
 
+### Parse a release
+
+```{eval-rst}
+.. autofunction:: segments.utils.parse_release
+```
+
 ## Export
 
 ### Export a dataset to a different format
