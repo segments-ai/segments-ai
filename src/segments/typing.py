@@ -592,3 +592,49 @@ class SegmentsDatasetCategory(BaseModel):
     class Config:
         allow_population_by_field_name = True
         extra = "allow"
+
+
+####################
+# Parsed release #
+####################
+class ParsedLabel(BaseModel):
+    label_status: LabelStatus
+    attributes: LabelAttributes
+
+
+class ParsedSample(BaseModel):
+    uuid: str
+    name: str
+    attributes: Optional[SampleAttributes]
+    metadata: Dict[str, Any]
+    labels: Optional[Dict[str, Optional[ParsedLabel]]]
+
+    class Config:
+        extra = "allow"
+
+
+class ParsedLabelset(BaseModel):
+    name: str
+    description: str
+    created_at: str
+    # is_groundtruth: Optional[bool] # Legacy field?
+
+
+class ParsedDataset(BaseModel):
+    name: str
+    description: str
+    # category: str  # Category does not work (e.g., "Other / mixed")
+    created_at: str
+    owner: str
+    task_type: TaskType
+    task_attributes: TaskAttributes
+    # tasks: Dict[str, any] # Legacy field?
+    labelsets: List[ParsedLabelset]
+    samples: List[ParsedSample]
+
+
+class ParsedRelease(BaseModel):
+    name: str
+    description: str
+    created_at: str
+    dataset: ParsedDataset
