@@ -457,15 +457,16 @@ def show_polygons(
     plt.show()
 
 
-def parse_release(release: Union[str, Release]) -> ParsedRelease:
-    """Parse a release (i.e., fetch JSON from the attributes url or load JSON from a file path and return a class).
+def load_release_url(release: Union[str, Release]) -> ParsedRelease:
+    """Load a release (i.e., fetch JSON from the attributes url or load JSON from a file path) and return a class.
 
     Args:
         release: A release resulting from :meth:`.get_release` or a path to the release file.
     Raises:
         :exc:`ValueError`: If the release is pending or has failed.
     """
-    if isinstance(release, str):  # If it's a file path
+    # If it's a file path
+    if isinstance(release, str):
         with open(release) as release_file:
             release_dict = json.load(release_file)
             release = parse_obj_as(Release, release_dict)

@@ -45,10 +45,10 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 .. autofunction:: segments.utils.handle_exif_rotation
 ```
 
-### Parse a release
+### Load a release url
 
 ```{eval-rst}
-.. autofunction:: segments.utils.parse_release
+.. autofunction:: segments.utils.load_release_url
 ```
 
 ## Export
