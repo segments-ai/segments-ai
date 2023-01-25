@@ -350,7 +350,7 @@ class SegmentsDataset:
                 # Update
                 item.annotations = annotations
                 item.attributes = attributes
-            except (KeyError, TypeError, ValueError):
+            except (KeyError, TypeError, ValueError, AttributeError):
                 # Update
                 item.annotations = None
                 item.attributes = None

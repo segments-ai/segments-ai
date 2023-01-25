@@ -78,7 +78,7 @@ def get_taxonomy_table(taxonomy: TaskAttributes) -> str:
     for category in taxonomy.categories:
         id_ = category.id
         name = category.name
-        description = category.description if "description" in category else "-"
+        description = category.description if hasattr(category, "description") else "-"
         markdown_table += f"| {id_} | {name} | {description} |\n"
     return markdown_table
 
@@ -166,7 +166,7 @@ def release2dataset(
     for sample in samples:
         try:
             del sample.labels["ground-truth"].attributes.format_version
-        except (KeyError, TypeError):
+        except (KeyError, TypeError, AttributeError):
             pass
 
         data_row: Dict[str, Any] = {}
@@ -180,7 +180,7 @@ def release2dataset(
         # Status
         try:
             data_row["status"] = sample.labels["ground-truth"].label_status
-        except (KeyError, TypeError):
+        except (KeyError, TypeError, AttributeError):
             data_row["status"] = "UNLABELED"
 
         # Image or text
@@ -192,31 +192,31 @@ def release2dataset(
             "segmentation-bitmap-highres",
         ]:
             try:
-                data_row["image"] = sample.attributes.image
-            except (KeyError, TypeError):
+                data_row["image"] = sample.attributes.image.dict()
+            except (KeyError, TypeError, AttributeError):
                 data_row["image"] = {"url": None}
         elif task_type in ["text-named-entities", "text-span-categorization"]:
             try:
                 data_row["text"] = sample.attributes.text
-            except (KeyError, TypeError):
+            except (KeyError, TypeError, AttributeError):
                 data_row["text"] = None
 
         # Label
         try:
-            label = sample.labels["ground-truth"].attributes
+            label = sample.labels["ground-truth"].attributes.dict()
 
             # Remove the image-level attributes
             if "attributes" in label:
                 del label["attributes"]
 
             # Remove the object-level attributes
-            for annotation in label.annotations:
+            for annotation in label["annotations"]:
                 if "attributes" in annotation:
                     del annotation["attributes"]
 
             data_row["label"] = label
 
-        except (KeyError, TypeError):
+        except (KeyError, TypeError, AttributeError):
             error_label: Dict[str, Any] = {"annotations": []}
             if task_type in ["segmentation-bitmap", "segmentation-bitmap-highres"]:
                 error_label["segmentation_bitmap"] = {"url": None}
@@ -302,7 +302,7 @@ def release2dataset(
     # Create id2label
     id2label = {}
     for category in release.dataset.task_attributes.categories:
-        id2label[category["id"]] = category["name"]
+        id2label[category.id] = category.name
     id2label[0] = "unlabeled"
     dataset.id2label = id2label
 

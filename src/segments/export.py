@@ -328,7 +328,7 @@ def export_coco_instance(
                 )
 
             # Vector labels
-            elif "type" in instance:
+            elif hasattr(instance, "type"):
                 # bbox
                 if instance.type == "bbox":
                     points = instance.points
@@ -384,7 +384,7 @@ def export_coco_instance(
     with open(file_name, "w") as f:
         json.dump(json_data, f)
 
-    print(f"Parsed to {file_name}. Images in {dataset.image_dir}")
+    print(f"Exported to {file_name}. Images in {dataset.image_dir}")
     return file_name, dataset.image_dir
 
 
@@ -674,7 +674,7 @@ def export_image(
             )
             Image.fromarray(img_as_ubyte(semantic_label_colored)).save(export_file)
 
-    print(f"Parsed to {export_folder}")
+    print(f"Exported to {export_folder}")
     return export_folder
 
 
@@ -753,7 +753,7 @@ def export_yolo(
                 # Construct the file name from image and frame name
                 try:
                     frame_name = sample.attributes.frames[j].name
-                except (KeyError, TypeError):
+                except (KeyError, TypeError, AttributeError):
                     frame_name = f"{j + 1:05d}"
                 file_name = os.path.join(
                     export_folder, dataset.image_dir, f"{image_name}-{frame_name}.txt"
@@ -761,7 +761,7 @@ def export_yolo(
 
                 # Testing on x is the same as testing len(x)>0 (this also checks that x is not None - see truthy and falsy values in Python)
                 # https://stackoverflow.com/questions/39983695/what-is-truthy-and-falsy-how-is-it-different-from-true-and-false
-                if "annotations" in frame and frame.annotations:
+                if hasattr(frame, "annotations") and frame.annotations:
                     annotations = frame.annotations
                     write_yolo_file(file_name, annotations, image_width, image_height)
     else:
@@ -776,7 +776,7 @@ def export_yolo(
                 image_width = sample.image.width
                 image_height = sample.image.height
 
-            if "annotations" in sample and sample.annotations:
+            if hasattr(sample, "annotations") and sample.annotations:
                 annotations = sample.annotations
                 write_yolo_file(
                     file_name,
