@@ -14,12 +14,13 @@ import numpy as np
 import numpy.typing as npt
 import requests
 from PIL import ExifTags, Image
+from pydantic import parse_obj_as
+from segments.typing import ParsedRelease, Release
 from typing_extensions import Literal
 
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
 if TYPE_CHECKING:
     from segments.dataset import SegmentsDataset
-    from segments.typing import Release
 
 
 #############
