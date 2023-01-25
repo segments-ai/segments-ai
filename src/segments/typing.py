@@ -623,7 +623,7 @@ class ParsedLabelset(BaseModel):
 class ParsedDataset(BaseModel):
     name: str
     description: str
-    # category: str  # Category does not work (e.g., "Other / mixed")
+    category: str  # Category instead of str does not work (e.g., "Other / mixed")
     created_at: str
     owner: str
     task_type: TaskType
