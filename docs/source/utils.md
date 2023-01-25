@@ -25,6 +25,12 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 .. autofunction:: segments.utils.load_release
 ```
 
+### Load a release as a model
+
+```{eval-rst}
+.. autofunction:: segments.utils.load_release_as_model
+```
+
 ## Transform
 
 ### Turn a bitmap into a file
@@ -43,12 +49,6 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 
 ```{eval-rst}
 .. autofunction:: segments.utils.handle_exif_rotation
-```
-
-### Load a release url
-
-```{eval-rst}
-.. autofunction:: segments.utils.load_release_url
 ```
 
 ## Export
