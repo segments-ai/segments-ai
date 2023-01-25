@@ -470,6 +470,9 @@ def parse_release(release: Union[str, Release]) -> ParsedRelease:
             release_dict = json.load(release_file)
             release = parse_obj_as(Release, release_dict)
 
+    assert isinstance(
+        release, Release
+    ), f"Expected a release of type string or Release, but got a release of type {type(release)}."
     if release.status == "PENDING" or release.status == "FAILED":
         raise ValueError(
             "Your release is not ready yet. Please try again when the status changes to succeeded."
