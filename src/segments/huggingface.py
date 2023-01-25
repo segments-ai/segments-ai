@@ -5,15 +5,18 @@ import logging
 import os
 import tempfile
 from string import Template
-from typing import TYPE_CHECKING, Any, Dict, cast
+from typing import TYPE_CHECKING, Any, Dict
 
-import requests
 from PIL import Image
-from segments.utils import load_image_from_url, load_label_bitmap_from_url
+from segments.utils import (
+    load_image_from_url,
+    load_label_bitmap_from_url,
+    parse_release,
+)
 
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
 if TYPE_CHECKING:
-    from segments.typing import Release
+    from segments.typing import Release, TaskAttributes
 
 
 #############
@@ -70,17 +73,19 @@ def push_to_hub(
 datasets.Dataset.push_to_hub = push_to_hub
 
 
-def get_taxonomy_table(taxonomy: Dict[str, Any]) -> str:
+def get_taxonomy_table(taxonomy: TaskAttributes) -> str:
     markdown_table = ""
-    for category in taxonomy["categories"]:
-        id_ = category["id"]
-        name = category["name"]
-        description = category["description"] if "description" in category else "-"
+    for category in taxonomy.categories:
+        id_ = category.id
+        name = category.name
+        description = category.description if "description" in category else "-"
         markdown_table += f"| {id_} | {name} | {description} |\n"
     return markdown_table
 
 
-def release2dataset(release: Release, download_images: bool = True) -> datasets.Dataset:
+def release2dataset(
+    release_file: Release, download_images: bool = True
+) -> datasets.Dataset:
     """Create a Huggingface dataset from a release.
 
     Args:
@@ -91,20 +96,8 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
     Raises:
         :exc:`ValueError`: If the type of dataset is not yet supported.
     """
-    # try:
-    #     import datasets
-    # except ImportError as e:
-    #     logger.error(
-    #         "Please install HuggingFace datasets first: pip install --upgrade datasets"
-    #     )
-    #     raise e
-
-    content = requests.get(
-        cast(str, release.attributes.url)  # TODO Fix in the backend.
-    )
-    release_dict = json.loads(content.content)
-
-    task_type = release_dict["dataset"]["task_type"]
+    release = parse_release(release_file)
+    task_type = release.dataset.task_type
 
     if task_type in ["vector", "bboxes", "keypoint"]:
         features = datasets.Features(
@@ -167,26 +160,26 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
     else:
         raise ValueError("This type of dataset is not yet supported.")
 
-    samples = release_dict["dataset"]["samples"]
+    samples = release.dataset.samples
 
     data_rows = []
     for sample in samples:
         try:
-            del sample["labels"]["ground-truth"]["attributes"]["format_version"]
+            del sample.labels["ground-truth"].attributes.format_version
         except (KeyError, TypeError):
             pass
 
         data_row: Dict[str, Any] = {}
 
         # Name
-        data_row["name"] = sample["name"]
+        data_row["name"] = sample.name
 
         # Uuid
-        data_row["uuid"] = sample["uuid"]
+        data_row["uuid"] = sample.uuid
 
         # Status
         try:
-            data_row["status"] = sample["labels"]["ground-truth"]["label_status"]
+            data_row["status"] = sample.labels["ground-truth"].label_status
         except (KeyError, TypeError):
             data_row["status"] = "UNLABELED"
 
@@ -199,25 +192,25 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
             "segmentation-bitmap-highres",
         ]:
             try:
-                data_row["image"] = sample["attributes"]["image"]
+                data_row["image"] = sample.attributes.image
             except (KeyError, TypeError):
                 data_row["image"] = {"url": None}
         elif task_type in ["text-named-entities", "text-span-categorization"]:
             try:
-                data_row["text"] = sample["attributes"]["text"]
+                data_row["text"] = sample.attributes.text
             except (KeyError, TypeError):
                 data_row["text"] = None
 
         # Label
         try:
-            label = sample["labels"]["ground-truth"]["attributes"]
+            label = sample.labels["ground-truth"].attributes
 
             # Remove the image-level attributes
             if "attributes" in label:
                 del label["attributes"]
 
             # Remove the object-level attributes
-            for annotation in label["annotations"]:
+            for annotation in label.annotations:
                 if "attributes" in annotation:
                     del annotation["attributes"]
 
@@ -308,7 +301,7 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
 
     # Create id2label
     id2label = {}
-    for category in release_dict["dataset"]["task_attributes"]["categories"]:
+    for category in release.dataset.task_attributes.categories:
         id2label[category["id"]] = category["name"]
     id2label[0] = "unlabeled"
     dataset.id2label = id2label
@@ -316,7 +309,7 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
     # Create readme.md and update DatasetInfo
     # https://stackoverflow.com/questions/6385686/is-there-a-native-templating-system-for-plain-text-files-in-python
 
-    task_type = release_dict["dataset"]["task_type"]
+    task_type = release.dataset.task_type
     if task_type in ["segmentation-bitmap", "segmentation-bitmap-highres"]:
         task_category = "image-segmentation"
     elif task_type in ["vector", "bboxes"]:
@@ -327,13 +320,11 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
         task_category = "other"
 
     info = {
-        "name": release_dict["dataset"]["name"],
-        "segments_url": f'https://segments.ai/{release_dict["dataset"]["owner"]}/{release_dict["dataset"]["name"]}',
-        "short_description": release_dict["dataset"]["description"],
-        "release": release_dict["name"],
-        "taxonomy_table": get_taxonomy_table(
-            release_dict["dataset"]["task_attributes"]
-        ),
+        "name": release.dataset.name,
+        "segments_url": f"https://segments.ai/{release.dataset.owner}/{release.dataset.name}",
+        "short_description": release.dataset.description,
+        "release": release.name,
+        "taxonomy_table": get_taxonomy_table(release.dataset.task_attributes),
         "task_category": task_category,
     }
 

@@ -230,8 +230,8 @@ def export_coco_instance(
     os.makedirs(export_folder, exist_ok=True)
 
     info = {
-        "description": dataset.release["dataset"]["name"],
-        "version": dataset.release["name"],
+        "description": dataset.release.dataset.name,
+        "version": dataset.release.name,
         # 'year': 2022,
     }
 
@@ -251,16 +251,16 @@ def export_coco_instance(
     for i in tqdm(range(len(dataset))):
         sample = dataset[i]
 
-        if sample["annotations"] is None:
+        if sample.annotations is None:
             continue
 
         image_id = i + 1
         images.append(
             {
                 "id": image_id,
-                "file_name": sample["file_name"],
-                "height": sample["image"].size[1] if sample["image"] else None,
-                "width": sample["image"].size[0] if sample["image"] else None,
+                "file_name": sample.file_name,
+                "height": sample.image.size[1] if sample.image else None,
+                "width": sample.image.size[0] if sample.image else None,
             }
         )
 
@@ -269,11 +269,11 @@ def export_coco_instance(
             or task_type == "segmentation-bitmap-highres"
         ):
             # https://scikit-image.org/docs/dev/api/skimage.measure.html#skimage.measure.regionprops
-            regions = regionprops(np.array(sample["segmentation_bitmap"], np.uint32))
+            regions = regionprops(np.array(sample.segmentation_bitmap, np.uint32))
             regions = {region.label: region for region in regions}
 
-        for instance in sample["annotations"]:
-            category_id = instance["category_id"]
+        for instance in sample.annotations:
+            category_id = instance.category_id
 
             annotation = {
                 "id": annotation_id,
@@ -286,18 +286,18 @@ def export_coco_instance(
                 task_type == "segmentation-bitmap"
                 or task_type == "segmentation-bitmap-highres"
             ):
-                if instance["id"] not in regions:
+                if instance.id not in regions:
                     # Only happens when the instance has 0 labeled pixels, which should not happen.
                     logger.warning(
-                        f"Skipping instance with 0 labeled pixels: {sample['file_name']}, instance_id: {instance['id']}, category_id: {category_id}"
+                        f"Skipping instance with 0 labeled pixels: {sample.file_name}, instance_id: {instance.id}, category_id: {category_id}"
                     )
                     continue
 
                 instance_mask = (
-                    np.array(sample["segmentation_bitmap"], np.uint32) == instance["id"]
+                    np.array(sample.segmentation_bitmap, np.uint32) == instance.id
                 )
 
-                region = regions[instance["id"]]
+                region = regions[instance.id]
                 bbox = region.bbox
                 # bbox = get_bbox(instance_mask)
 
@@ -330,8 +330,8 @@ def export_coco_instance(
             # Vector labels
             elif "type" in instance:
                 # bbox
-                if instance["type"] == "bbox":
-                    points = instance["points"]
+                if instance.type == "bbox":
+                    points = instance.points
                     x0 = points[0][0]
                     y0 = points[0][1]
                     x1 = points[1][0]
@@ -340,8 +340,8 @@ def export_coco_instance(
                     annotation.update({"bbox": [x0, y0, x1 - x0, y1 - y0]})
 
                 # keypoints
-                elif instance["type"] == "point":
-                    points = instance["points"]
+                elif instance.type == "point":
+                    points = instance.points
                     x0 = points[0][0]
                     y0 = points[0][1]
 
@@ -356,11 +356,11 @@ def export_coco_instance(
                     )
 
                 # polygon
-                elif instance["type"] == "polygon":
-                    annotation.update({"points": instance["points"]})
+                elif instance.type == "polygon":
+                    annotation.update({"points": instance.points})
 
                 # polyline
-                elif instance["type"] == "polyline":
+                elif instance.type == "polyline":
                     logger.warning("Polyline annotations are not exported.")
 
                 else:
@@ -379,14 +379,12 @@ def export_coco_instance(
 
     file_name = os.path.join(
         export_folder,
-        "export_coco-instance_{}_{}.json".format(
-            dataset.dataset_identifier, dataset.release["name"]
-        ),
+        f"export_coco-instance_{dataset.dataset_identifier}_{dataset.release.name}.json",
     )
     with open(file_name, "w") as f:
         json.dump(json_data, f)
 
-    print(f"Exported to {file_name}. Images in {dataset.image_dir}")
+    print(f"Parsed to {file_name}. Images in {dataset.image_dir}")
     return file_name, dataset.image_dir
 
 
@@ -407,8 +405,8 @@ def export_coco_panoptic(
 
     # INFO
     info = {
-        "description": dataset.release["dataset"]["name"],
-        "version": dataset.release["name"],
+        "description": dataset.release.dataset.name,
+        "version": dataset.release.name,
         # 'year': '2022'
     }
 
@@ -417,7 +415,9 @@ def export_coco_panoptic(
     for i, category in enumerate(dataset.categories):
         color = category.color[:3] if category.color else get_color(i)
         isthing = (
-            int(category.has_instances) if hasattr(category, "has_instances") else 0
+            int(category.has_instances)
+            if hasattr(category, "has_instances") and category.has_instances
+            else 0
         )
 
         categories.append(
@@ -440,7 +440,7 @@ def export_coco_panoptic(
     for i in tqdm(range(len(dataset))):
         sample = dataset[i]
 
-        if sample["annotations"] is None:
+        if sample.annotations is None:
             continue
 
         # Images
@@ -448,17 +448,17 @@ def export_coco_panoptic(
         images.append(
             {
                 "id": image_id,
-                "file_name": sample["file_name"],
-                "height": sample["image"].size[1] if sample["image"] else None,
-                "width": sample["image"].size[0] if sample["image"] else None,
+                "file_name": sample.file_name,
+                "height": sample.image.size[1] if sample.image else None,
+                "width": sample.image.size[0] if sample.image else None,
             }
         )
 
         # Annotations
         panoptic_label = np.zeros(
             (
-                sample["segmentation_bitmap"].size[1],
-                sample["segmentation_bitmap"].size[0],
+                sample.segmentation_bitmap.size[1],
+                sample.segmentation_bitmap.size[0],
                 3,
             ),
             np.uint8,
@@ -467,29 +467,29 @@ def export_coco_panoptic(
         segments_info = []
 
         # https://scikit-image.org/docs/dev/api/skimage.measure.html#skimage.measure.regionprops
-        regions = regionprops(np.array(sample["segmentation_bitmap"], np.uint32))
+        regions = regionprops(np.array(sample.segmentation_bitmap, np.uint32))
         regions = {region.label: region for region in regions}
 
-        for instance in sample["annotations"]:
-            category_id = instance["category_id"]
+        for instance in sample.annotations:
+            category_id = instance.category_id
 
             instance_id, color = id_generator.get_id_and_color(category_id)
 
-            if instance["id"] not in regions:
+            if instance.id not in regions:
                 # Only happens when the instance has 0 labeled pixels, which should not happen.
                 logger.warning(
-                    f"Skipping instance with 0 labeled pixels: {sample['file_name']}, instance_id: {instance['id']}, category_id: {category_id}"
+                    f"Skipping instance with 0 labeled pixels: {sample.file_name}, instance_id: {instance.id}, category_id: {category_id}"
                 )
                 continue
 
             # Read the instance mask and fill in the panoptic label. TODO: take this out of the loop to speed things up.
             instance_mask = (
-                np.array(sample["segmentation_bitmap"], np.uint32) == instance["id"]
+                np.array(sample.segmentation_bitmap, np.uint32) == instance.id
             )
             panoptic_label[instance_mask] = color
 
             # bbox = get_bbox(instance_mask)
-            region = regions[instance["id"]]
+            region = regions[instance.id]
             bbox = region.bbox
             y0, x0, y1, x1 = bbox
 
@@ -507,7 +507,7 @@ def export_coco_panoptic(
                 }
             )
 
-        file_name = os.path.splitext(os.path.basename(sample["name"]))[0]
+        file_name = os.path.splitext(os.path.basename(sample.name))[0]
         label_file_name = f"{file_name}_label_{dataset.labelset}_coco-panoptic.png"
         annotations.append(
             {
@@ -558,7 +558,7 @@ def export_coco_panoptic(
     file_name = os.path.join(
         export_folder,
         "export_coco-panoptic_{}_{}.json".format(
-            dataset.dataset_identifier, dataset.release["name"]
+            dataset.dataset_identifier, dataset.release.name
         ),
     )
     with open(file_name, "w") as f:
@@ -596,7 +596,9 @@ def export_image(
     for i, category in enumerate(dataset.categories):
         color = category.color[:3] if category.color else get_color(i)
         isthing = (
-            int(category.has_instances) if hasattr(category, "has_instances") else 0
+            int(category.has_instances)
+            if hasattr(category, "has_instances") and category.has_instances
+            else 0
         )
 
         categories.append(
@@ -613,10 +615,13 @@ def export_image(
     for i in tqdm(range(len(dataset))):
         sample = dataset[i]
 
-        if sample["annotations"] is None:
+        assert hasattr(sample, "segmentation_bitmap")
+        assert hasattr(sample, "annotations")
+
+        if sample.annotations is None:
             continue
 
-        file_name = os.path.splitext(os.path.basename(sample["name"]))[0]
+        file_name = os.path.splitext(os.path.basename(sample.name))[0]
 
         # # Image
         # image = sample['image']
@@ -625,7 +630,7 @@ def export_image(
 
         if export_format == "instance":
             # Instance png
-            instance_label = sample["segmentation_bitmap"]
+            instance_label = sample.segmentation_bitmap
             export_file = os.path.join(
                 export_folder,
                 f"{file_name}_label_{dataset.labelset}_instance.png",
@@ -634,7 +639,7 @@ def export_image(
 
         elif export_format == "instance-color":
             # Colored instance png
-            instance_label = sample["segmentation_bitmap"]
+            instance_label = sample.segmentation_bitmap
             instance_label_colored = colorize(np.uint8(instance_label))
             export_file = os.path.join(
                 export_folder,
@@ -644,9 +649,9 @@ def export_image(
 
         elif export_format == "semantic":
             # Semantic png
-            instance_label = sample["segmentation_bitmap"]
+            instance_label = sample.segmentation_bitmap
             semantic_label = get_semantic_bitmap(
-                instance_label, sample["annotations"], id_increment
+                instance_label, sample.annotations, id_increment
             )
             export_file = os.path.join(
                 export_folder,
@@ -656,9 +661,9 @@ def export_image(
 
         elif export_format == "semantic-color":
             # Colored semantic png
-            instance_label = sample["segmentation_bitmap"]
+            instance_label = sample.segmentation_bitmap
             semantic_label = get_semantic_bitmap(
-                instance_label, sample["annotations"], id_increment
+                instance_label, sample.annotations, id_increment
             )
             semantic_label_colored = colorize(
                 np.uint8(semantic_label), colormap=[c.color for c in categories]
@@ -669,7 +674,7 @@ def export_image(
             )
             Image.fromarray(img_as_ubyte(semantic_label_colored)).save(export_file)
 
-    print(f"Exported to {export_folder}")
+    print(f"Parsed to {export_folder}")
     return export_folder
 
 
@@ -698,9 +703,9 @@ def export_yolo(
     ) -> None:
         with open(file_name, "w") as f:
             for annotation in annotations:
-                if annotation["type"] == "bbox":
-                    category_id = annotation["category_id"]
-                    [[x0, y0], [x1, y1]] = annotation["points"]
+                if annotation.type == "bbox":
+                    category_id = annotation.category_id
+                    [[x0, y0], [x1, y1]] = annotation.points
 
                     # Normalize
                     x0, x1 = x0 / image_width, x1 / image_width
@@ -737,19 +742,17 @@ def export_yolo(
         )
         for i in tqdm(range(len(dataset))):
             sample = dataset[i]
-            image_name = os.path.splitext(os.path.basename(sample["name"]))[0]
+            image_name = os.path.splitext(os.path.basename(sample.name))[0]
 
             if image_width is None or image_height is None:
                 raise ValueError(
                     "Please provide image_width and image_height parameters (i.e., not None)."
                 )
 
-            for j, frame in enumerate(
-                sample["labels"]["ground-truth"]["attributes"]["frames"]
-            ):
+            for j, frame in enumerate(sample.labels["ground-truth"].attributes.frames):
                 # Construct the file name from image and frame name
                 try:
-                    frame_name = sample["attributes"]["frames"][j]["name"]
+                    frame_name = sample.attributes.frames[j].name
                 except (KeyError, TypeError):
                     frame_name = f"{j + 1:05d}"
                 file_name = os.path.join(
@@ -758,23 +761,23 @@ def export_yolo(
 
                 # Testing on x is the same as testing len(x)>0 (this also checks that x is not None - see truthy and falsy values in Python)
                 # https://stackoverflow.com/questions/39983695/what-is-truthy-and-falsy-how-is-it-different-from-true-and-false
-                if "annotations" in frame and frame["annotations"]:
-                    annotations = frame["annotations"]
+                if "annotations" in frame and frame.annotations:
+                    annotations = frame.annotations
                     write_yolo_file(file_name, annotations, image_width, image_height)
     else:
         for i in tqdm(range(len(dataset))):
             sample = dataset[i]
-            image_name = os.path.splitext(os.path.basename(sample["name"]))[0]
+            image_name = os.path.splitext(os.path.basename(sample.name))[0]
             file_name = os.path.join(
                 export_folder, dataset.image_dir, f"{image_name}.txt"
             )
 
             if image_width is None or image_height is None:
-                image_width = sample["image"].width
-                image_height = sample["image"].height
+                image_width = sample.image.width
+                image_height = sample.image.height
 
-            if "annotations" in sample and sample["annotations"]:
-                annotations = sample["annotations"]
+            if "annotations" in sample and sample.annotations:
+                annotations = sample.annotations
                 write_yolo_file(
                     file_name,
                     annotations,
@@ -818,42 +821,42 @@ def export_polygon(
     for i in tqdm(range(len(dataset))):
         sample = dataset[i]
 
-        if sample["annotations"] is None:
+        if sample.annotations is None:
             continue
 
         image_id = i + 1
         images.append(
             {
                 "id": image_id,
-                "file_name": sample["file_name"],
-                "height": sample["image"].size[1] if sample["image"] else None,
-                "width": sample["image"].size[0] if sample["image"] else None,
+                "file_name": sample.file_name,
+                "height": sample.image.size[1] if sample.image else None,
+                "width": sample.image.size[0] if sample.image else None,
             }
         )
 
         # https://scikit-image.org/docs/dev/api/skimage.measure.html#skimage.measure.regionprops
-        regions = regionprops(np.array(sample["segmentation_bitmap"], np.uint32))
+        regions = regionprops(np.array(sample.segmentation_bitmap, np.uint32))
         regions = {region.label: region for region in regions}
 
-        for instance in sample["annotations"]:
-            category_id = instance["category_id"]
+        for instance in sample.annotations:
+            category_id = instance.category_id
 
             annotation = {
                 "id": annotation_id,
                 "image_id": image_id,
                 "category_id": category_id,
-                "attributes": instance["attributes"],
+                "attributes": instance.attributes,
             }
 
-            if instance["id"] not in regions:
+            if instance.id not in regions:
                 # Only happens when the instance has 0 labeled pixels, which should not happen.
                 logger.warning(
-                    f"Skipping instance with 0 labeled pixels: {sample['file_name']}, instance_id: {instance['id']}, category_id: {category_id}"
+                    f"Skipping instance with 0 labeled pixels: {sample.file_name}, instance_id: {instance.id}, category_id: {category_id}"
                 )
                 continue
 
             instance_mask = (
-                np.asarray(sample["segmentation_bitmap"], np.uint8) == instance["id"]
+                np.asarray(sample.segmentation_bitmap, np.uint8) == instance.id
             )
 
             # Allowed OpenCV data types: https://stackoverflow.com/questions/12785121/access-opencv-matrix-cv-32s-element
@@ -882,7 +885,7 @@ def export_polygon(
 
     file_name = os.path.join(
         export_folder,
-        f"export_polygon_{dataset.dataset_identifier}_{dataset.release['name']}.json",
+        f"export_polygon_{dataset.dataset_identifier}_{dataset.release.name}.json",
     )
     with open(file_name, "w") as f:
         json.dump(json_data, f)

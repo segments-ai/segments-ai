@@ -392,7 +392,7 @@ class SegmentsClient:
                 "categories": [{"id": 1, "name": "object"}],
             }
 
-        if type(task_attributes) is dict:
+        if isinstance(task_attributes, dict):
             try:
                 TaskAttributes.parse_obj(task_attributes)
             except pydantic.ValidationError as e:
@@ -400,7 +400,7 @@ class SegmentsClient:
                     "Did you use the right task attributes? Please refer to the online documentation: https://docs.segments.ai/reference/categories-and-task-attributes#object-attribute-format.",
                 )
                 raise ValidationError(message=str(e), cause=e)
-        elif type(task_attributes) is TaskAttributes:
+        elif isinstance(task_attributes, TaskAttributes):
             task_attributes = task_attributes.dict()
 
         payload: Dict[str, Any] = {
@@ -488,7 +488,7 @@ class SegmentsClient:
         if task_attributes:
             payload["task_attributes"] = (
                 task_attributes.dict()
-                if type(task_attributes) is TaskAttributes
+                if isinstance(task_attributes, TaskAttributes)
                 else task_attributes
             )
 
@@ -885,7 +885,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        if type(attributes) is dict:
+        if isinstance(attributes, dict):
             try:
                 parse_obj_as(SampleAttributes, attributes)
             except pydantic.ValidationError as e:
@@ -946,7 +946,7 @@ class SegmentsClient:
 
         # Check the input
         for sample in samples:
-            if type(sample) is dict:
+            if isinstance(sample, dict):
                 if "name" not in sample or "attributes" not in sample:
                     raise KeyError(
                         f"Please add a name and attributes to your sample: {sample}"
@@ -959,7 +959,7 @@ class SegmentsClient:
                         "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
                     )
                     raise ValidationError(message=str(e), cause=e)
-            elif type(sample) is Sample:
+            elif isinstance(sample, Sample):
                 sample = sample.dict()
 
         payload = samples
@@ -1141,7 +1141,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        if type(attributes) is dict:
+        if isinstance(attributes, dict):
             try:
                 parse_obj_as(LabelAttributes, attributes)
             except pydantic.ValidationError as e:

@@ -2,7 +2,7 @@ from typing import List
 
 from segments.client import SegmentsClient
 from segments.dataset import SegmentsDataset
-from segments.typing import SegmentsDatasetCategory
+from segments.typing import ParsedSample, SegmentsDatasetCategory
 
 
 def test_dataset(
@@ -26,4 +26,4 @@ def test_dataset(
 
     # Iterate over samples
     for sample in dataset:
-        assert isinstance(sample, dict)
+        assert isinstance(sample, ParsedSample)
