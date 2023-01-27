@@ -248,7 +248,7 @@ def export_coco_instance(
     annotations = []
 
     annotation_id = 1
-    for i in tqdm(range(len(dataset))):
+    for i in tqdm(range(len(dataset)), total=len(dataset), color="#FF9900"):
         sample = dataset[i]
 
         if sample["annotations"] is None:
@@ -437,7 +437,7 @@ def export_coco_panoptic(
     # IMAGES AND ANNOTATIONS
     images = []
     annotations = []
-    for i in tqdm(range(len(dataset))):
+    for i in tqdm(range(len(dataset)), total=len(dataset), color="#FF9900"):
         sample = dataset[i]
 
         if sample["annotations"] is None:
@@ -610,7 +610,7 @@ def export_image(
             )
         )
 
-    for i in tqdm(range(len(dataset))):
+    for i in tqdm(range(len(dataset)), total=len(dataset), color="#FF9900"):
         sample = dataset[i]
 
         if sample["annotations"] is None:
@@ -735,7 +735,7 @@ def export_yolo(
         logger.warning(
             "Note that the sequences will be exported as individual frames, disregarding the tracking information."
         )
-        for i in tqdm(range(len(dataset))):
+        for i in tqdm(range(len(dataset)), total=len(dataset), color="#FF9900"):
             sample = dataset[i]
             image_name = os.path.splitext(os.path.basename(sample["name"]))[0]
 
@@ -762,7 +762,7 @@ def export_yolo(
                     annotations = frame["annotations"]
                     write_yolo_file(file_name, annotations, image_width, image_height)
     else:
-        for i in tqdm(range(len(dataset))):
+        for i in tqdm(range(len(dataset)), total=len(dataset), color="#FF9900"):
             sample = dataset[i]
             image_name = os.path.splitext(os.path.basename(sample["name"]))[0]
             file_name = os.path.join(
@@ -815,7 +815,7 @@ def export_polygon(
     annotations = []
 
     annotation_id = 1
-    for i in tqdm(range(len(dataset))):
+    for i in tqdm(range(len(dataset)), total=len(dataset), color="#FF9900"):
         sample = dataset[i]
 
         if sample["annotations"] is None:
