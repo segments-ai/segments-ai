@@ -460,7 +460,9 @@ def show_polygons(
     fig.legend()
 
     if output_path:
-        path = os.path.join(output_path, f"exported_polygons_from_image_id_{image_id}")
+        path = os.path.join(
+            output_path, f"exported_polygons_from_image_id_{image_id:04d}"
+        )
         plt.savefig(path, bbox_inches="tight")
 
     plt.show()
