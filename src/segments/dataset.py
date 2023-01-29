@@ -215,7 +215,7 @@ class SegmentsDataset:
                     tqdm(
                         pool.imap_unordered(_load_image, range(num_samples)),
                         total=num_samples,
-                        color="#FF9900",
+                        colour="#FF9900",
                     )
                 )
 
