@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import json
 import logging
+import os
 import random
 import re
 from collections import defaultdict
@@ -332,7 +333,11 @@ def handle_exif_rotation(image: Image.Image) -> Image.Image:
 
 
 def show_polygons(
-    image_directory_path: str, image_id: int, exported_polygons_path: str, seed: int = 0
+    image_directory_path: str,
+    image_id: int,
+    exported_polygons_path: str,
+    seed: int = 0,
+    output_path: Optional[str] = None,
 ) -> None:
     """Show the exported contours of a segmented image (i.e., resulting from :func:`.export_dataset` with polygon export format).
 
@@ -341,6 +346,7 @@ def show_polygons(
         image_id: The image id (this can be found in the exported polygons JSON file).
         exported_polygons_path: The exported polygons path.
         seed: The seed used to generate random colors. Defaults to ``0``.
+        output_path: The directory to save the plot to. Defaults to :obj:`None`.
     Raises:
         :exc:`ImportError`: If matplotlib is not installed.
     """
@@ -409,7 +415,7 @@ def show_polygons(
     ) in category_name_polygons_with_annotations.items():
         for p in polygons:
             polygon = Polygon(
-                xy=np.asarray(p),
+                xy=np.asarray(p).reshape(-1, 2),
                 facecolor=color,
                 edgecolor=color,
                 label=category_name
@@ -452,5 +458,11 @@ def show_polygons(
     ax3.set_xlabel("Width (pixels)")
 
     fig.legend()
+
+    if output_path:
+        path = os.path.join(
+            output_path, f"exported_polygons_from_image_id_{image_id:04d}"
+        )
+        plt.savefig(path, bbox_inches="tight")
 
     plt.show()
