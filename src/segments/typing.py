@@ -30,6 +30,7 @@ LabelStatus = Literal[
     "PRELABELED",
     "SKIPPED",
     "UNLABELED",
+    "VERIFIED",
 ]
 TaskType = Literal[
     "segmentation-bitmap",
@@ -554,6 +555,7 @@ class Dataset(BaseModel):
     enable_skip_labeling: bool
     enable_skip_reviewing: bool
     enable_save_button: bool
+    enable_label_status_verified: bool
     enable_same_dimensions_track_constraint: bool
     enable_interpolation: bool
     task_type: TaskType
