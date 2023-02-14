@@ -684,6 +684,12 @@ class TestIssue(Test):
     def tearDown(self) -> None:
         super().tearDown()
 
+    def test_get_issues(self) -> None:
+        dataset_identifier = f"{self.owner}/{self.datasets[0]}"
+        issues = self.client.get_issues(dataset_identifier)
+        for issue in issues:
+            self.assertIsInstance(issue, Issue)
+
     def test_add_update_delete_issue(self) -> None:
         # Add labelset.
         sample_uuid = self.sample_uuids[0]
