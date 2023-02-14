@@ -205,7 +205,7 @@ class TestDataset(Test):
 
     def test_get_add_update_delete_dataset_collaborator(self) -> None:
         dataset_identifier = f"{self.owner}/{self.datasets[0]}"
-        username = "admin-arnout"
+        username = "admin-arnaud"
         role: Final = "admin"
         new_role: Final = "reviewer"
         try:
