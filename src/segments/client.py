@@ -1371,6 +1371,29 @@ class SegmentsClient:
     ##########
     # Issues #
     ##########
+    def get_issues(self, dataset_identifier: str) -> List[Issue]:
+        """Get all issues for a dataset.
+
+        .. code-block:: python
+
+            dataset_identifier = 'jane/flowers'
+            issues = client.get_issues(dataset_identifier)
+            for issue in issues:
+                print(issue.uuid, issue.description, issue.status, issue.sample_uuid)
+
+        Args:
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+        Raises:
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the dataset is not found.
+            :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+        """
+
+        r = self._get(f"/datasets/{dataset_identifier}/issues/", model=List[Issue])
+
+        return cast(List[Issue], r)
+
     def add_issue(
         self,
         sample_uuid: str,

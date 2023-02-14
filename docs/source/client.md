@@ -161,6 +161,12 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 
 ## Issues
 
+### List issues
+
+```{eval-rst}
+.. automethod:: segments.client.SegmentsClient.get_issues
+```
+
 ### Create an issue
 
 ```{eval-rst}
