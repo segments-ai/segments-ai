@@ -135,6 +135,8 @@ def export_dataset(
     | Polygon          | ``segmentation-bitmap`` and ``segmentation-bitmap-highres``                                        |
     +------------------+----------------------------------------------------------------------------------------------------+
 
+    Example:
+
     .. code-block:: python
 
         # pip install segments-ai
@@ -150,11 +152,11 @@ def export_dataset(
         export_dataset(dataset, export_format='coco-panoptic')
 
 
-    Alternatively, you can use the initialized SegmentsDataset to loop through the samples and labels, and visualize or process them in any way you please:
+    Alternatively, you can use the initialized :class:`.SegmentsDataset` to loop through the samples and labels, and visualize or process them in any way you please:
 
     .. code-block:: python
 
-        `import matplotlib.pyplot as plt
+        import matplotlib.pyplot as plt
         from segments.utils import get_semantic_bitmap
 
         for sample in dataset:
