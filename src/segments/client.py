@@ -329,6 +329,7 @@ class SegmentsClient:
         enable_same_dimensions_track_constraint: bool = False,
         enable_save_button: bool = False,
         enable_label_status_verified: bool = False,
+        enable_3d_cuboid_rotation: bool = False,
         organization: Optional[str] = None,
     ) -> Dataset:
         """Add a dataset.
@@ -378,6 +379,7 @@ class SegmentsClient:
             enable_same_dimensions_track_constraint: Enable constraint to keep same cuboid dimensions for the entire object track in point cloud cuboid datasets. Ignored for non-cuboid datasets. Defaults to :obj:`False`.
             enable_save_button: Enable a save button in the labeling and reviewing workflow, to save unfinished work. Defaults to :obj:`False`.
             enable_label_status_verified: Enable an additional label status "Verified". Defaults to :obj:`False`.
+            enable_3d_cuboid_rotation: Enable 3D cuboid rotation (i.e., yaw, pitch and roll). Defaults to :obj:`False`.
             organization: The username of the organization for which this dataset should be created. None will create a dataset for the current user. Defaults to :obj:`None`.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the task attributes fails.
@@ -420,6 +422,7 @@ class SegmentsClient:
             "enable_same_dimensions_track_constraint": enable_same_dimensions_track_constraint,
             "enable_save_button": enable_save_button,
             "enable_label_status_verified": enable_label_status_verified,
+            "enable_3d_cuboid_rotation": enable_3d_cuboid_rotation,
             "data_type": "IMAGE",
         }
 
@@ -449,6 +452,7 @@ class SegmentsClient:
         enable_same_dimensions_track_constraint: Optional[bool] = None,
         enable_save_button: Optional[bool] = None,
         enable_label_status_verified: Optional[bool] = None,
+        enable_3d_cuboid_rotation: Optional[bool] = None,
     ) -> Dataset:
         """Update a dataset.
 
@@ -474,6 +478,7 @@ class SegmentsClient:
             enable_same_dimensions_track_constraint: Enable constraint to keep same cuboid dimensions for the entire object track in point cloud cuboid datasets. Ignored for non-cuboid datasets. Defaults to :obj:`None`.
             enable_save_button: Enable a save button in the labeling and reviewing workflow, to save unfinished work. Defaults to :obj:`False`.
             enable_label_status_verified: Enable an additional label status "Verified". Defaults to :obj:`False`.
+            enable_3d_cuboid_rotation: Enable 3D cuboid rotation (i.e., yaw, pitch and roll). Defaults to :obj:`False`.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -528,6 +533,9 @@ class SegmentsClient:
 
         if enable_label_status_verified:
             payload["enable_label_status_verified"] = enable_label_status_verified
+
+        if enable_3d_cuboid_rotation:
+            payload["enable_3d_cuboid_rotation"] = enable_3d_cuboid_rotation
 
         r = self._patch(f"/datasets/{dataset_identifier}/", data=payload, model=Dataset)
         # logger.info(f"Updated {dataset_identifier}")
