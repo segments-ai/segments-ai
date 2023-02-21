@@ -360,7 +360,7 @@ class ImageSequenceSampleAttributes(BaseModel):
 # Point cloud
 class PCD(BaseModel):
     url: str
-    type: Literal["pcd", "kitti", "nuscenes"] = "pcd"
+    type: Literal["pcd", "kitti", "nuscenes"]
 
 
 class XYZW(BaseModel):
