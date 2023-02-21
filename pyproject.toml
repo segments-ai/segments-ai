@@ -7,6 +7,9 @@ addopts = "--cov=segments"
 testpaths = [
     "tests",
 ]
+pythonpath = [
+  "."
+]
 
 [tool.mypy]
 mypy_path = "src"
