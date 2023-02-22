@@ -219,6 +219,7 @@ class PointcloudCuboidAnnotation(BaseModel):
     position: XYZ
     dimensions: XYZ
     yaw: float
+    rotation: Optional[XYZW]
     type: Literal["cuboid", "cuboid-sync"]
     attributes: Optional[ObjectAttributes]
 
