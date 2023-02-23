@@ -1,6 +1,5 @@
 {
   "editor.formatOnSave": true,
-  // "esbonio.sphinx.confDir": "",
   "python.envFile": "${workspaceFolder}/.env",
   "python.linting.enabled": true,
 
@@ -22,7 +21,7 @@
   ],
 
   // isort
-  "python.sortImports.args": ["--profile", "black"],
+  "isort.args": ["--profile", "black"],
   "[python]": {
     "editor.codeActionsOnSave": {
       "source.organizeImports": true
@@ -39,6 +38,5 @@
     "--no-cov"
   ],
   "python.testing.unittestEnabled": false,
-  // "python.testing.nosetestsEnabled": false,
   "python.testing.pytestEnabled": true
 }
