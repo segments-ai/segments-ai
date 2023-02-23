@@ -211,6 +211,13 @@ class XYZ(BaseModel):
     z: float
 
 
+class XYZW(BaseModel):
+    qx: float
+    qy: float
+    qz: float
+    qw: float
+
+
 # Point cloud cuboid
 # https://stackoverflow.com/questions/51575931/class-inheritance-in-python-3-7-dataclasses
 class PointcloudCuboidAnnotation(BaseModel):
@@ -362,13 +369,6 @@ class ImageSequenceSampleAttributes(BaseModel):
 class PCD(BaseModel):
     url: str
     type: Literal["pcd", "kitti", "nuscenes"]
-
-
-class XYZW(BaseModel):
-    qx: float
-    qy: float
-    qz: float
-    qw: float
 
 
 class EgoPose(BaseModel):
