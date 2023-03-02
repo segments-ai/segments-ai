@@ -43,21 +43,21 @@ class Test(unittest.TestCase):
             else SegmentsClient(api_key=API_KEY)
         )
         self.datasets = json.loads(cast(str, os.getenv("DATASETS")))
-        # First sample uuid.
+        # First sample uuid
         self.sample_uuids = json.loads(cast(str, os.getenv("SAMPLE_UUIDS")))
-        # First sample of first dataset.
+        # First sample of first dataset
         self.labelsets = json.loads(cast(str, os.getenv("LABELSETS")))
-        # Releases of first dataset.
+        # Releases of first dataset
         self.releases = json.loads(cast(str, os.getenv("RELEASES")))
-        # Sample attribute type of the datasets.
+        # Sample attribute type of the datasets
         self.sample_attribute_types = json.loads(
             cast(str, os.getenv("SAMPLE_ATTRIBUTE_TYPES"))
         )
-        # Label attribute type of the datasets.
+        # Label attribute type of the datasets
         self.label_attribute_types = json.loads(
             cast(str, os.getenv("LABEL_ATTRIBUTE_TYPES"))
         )
-        self.TIME_INTERVAL = 0.2  # Wait for API call to complete.
+        self.TIME_INTERVAL = 0.2  # Wait for API call to complete
 
     def tearDown(self) -> None:
         self.client.close()
@@ -280,6 +280,89 @@ class TestSample(Test):
             wrong_uuid = "12345"
             self.client.get_sample(wrong_uuid)
 
+    def test_add_update_sample_validationerror(self) -> None:
+        metadata = {"weather": "sunny", "camera_id": 3}
+        priority = 0
+        # embedding = np.zeros(100).tolist()
+        name = "Test sample"
+        attributes_dict: Dict[str, Dict[str, Any]] = {
+            "image": {"image": {"url": "url"}},
+            "image-sequence": {
+                "frames": [{"image": {"url": "url"}}, {"image": {"url": ""}}]
+            },
+            "pointcloud": {
+                "pcd": {"url": "url", "type": "kitti"},
+                "ego_pose": {
+                    "position": {"x": 0, "y": 0, "z": 0},
+                    "heading": {"qx": 0, "qy": 0, "qz": 0, "qw": 1},
+                },
+                "default_z": -1,
+                "name": "test_name",
+                "timestamp": 1000,
+            },
+            "pointcloud-sequence": {
+                "frames": [
+                    {
+                        "pcd": {"url": "url", "type": "kitti"},
+                        "ego_pose": {
+                            "position": {"x": 0, "y": 0, "z": 0},
+                            "heading": {"qx": 0, "qy": 0, "qz": 0, "qw": 1},
+                        },
+                        "default_z": -1,
+                        "name": "test_name",
+                        "timestamp": 1000,
+                    },
+                    {
+                        "pcd": {"url": "url", "type": "kitti"},
+                        "ego_pose": {
+                            "position": {"x": 0, "y": 0, "z": 0},
+                            "heading": {"qx": 0, "qy": 0, "qz": 0, "qw": 1},
+                        },
+                        "default_z": -1,
+                        "name": "test_name",
+                        "timestamp": 1000,
+                    },
+                ]
+            },
+            "text": {"text": "This is a test sentence."},
+        }
+        mid = len(self.sample_attribute_types) // 2
+        rotated_sample_attribute_types = (
+            self.sample_attribute_types[mid:] + self.sample_attribute_types[:mid]
+        )
+        for sample_attribute_type, dataset, sample_uuid in zip(
+            rotated_sample_attribute_types, self.datasets, self.sample_uuids
+        ):
+            dataset_identifier = f"{self.owner}/{dataset}"
+            attributes = attributes_dict[sample_attribute_type]
+            with self.assertRaises(ValidationError):
+                self.client.add_sample(
+                    dataset_identifier,
+                    name,
+                    attributes,
+                    metadata,
+                    priority,
+                    # embedding
+                )
+            with self.assertRaises(ValidationError):
+                self.client.update_sample(
+                    sample_uuid,
+                    name,
+                    attributes,
+                    metadata,
+                    priority,
+                    # embedding
+                )
+
+        # Sequence with no frames
+        dataset_identifier = f"{self.owner}/{self.datasets[2]}"
+        samples = [{"name": "abcde", "attributes": {"frames": []}}]
+        with self.assertRaises(ValidationError):
+            self.client.add_samples(
+                dataset_identifier,
+                samples,
+            )
+
     def test_add_update_delete_sample(self) -> None:
         metadata = {"weather": "sunny", "camera_id": 3}
         priority = 0
@@ -294,7 +377,7 @@ class TestSample(Test):
                 "pcd": {"url": "url", "type": "kitti"},
                 "ego_pose": {
                     "position": {"x": 0, "y": 0, "z": 0},
-                    "heading": {"qx": 0, "qy": 0, "qz": 0, "qw": 0},
+                    "heading": {"qx": 0, "qy": 0, "qz": 0, "qw": 1},
                 },
                 "default_z": -1,
                 "name": "test_name",
@@ -306,7 +389,7 @@ class TestSample(Test):
                         "pcd": {"url": "url", "type": "kitti"},
                         "ego_pose": {
                             "position": {"x": 0, "y": 0, "z": 0},
-                            "heading": {"qx": 0, "qy": 0, "qz": 0, "qw": 0},
+                            "heading": {"qx": 0, "qy": 0, "qz": 0, "qw": 1},
                         },
                         "default_z": -1,
                         "name": "test_name",
@@ -316,7 +399,7 @@ class TestSample(Test):
                         "pcd": {"url": "url", "type": "kitti"},
                         "ego_pose": {
                             "position": {"x": 0, "y": 0, "z": 0},
-                            "heading": {"qx": 0, "qy": 0, "qz": 0, "qw": 0},
+                            "heading": {"qx": 0, "qy": 0, "qz": 0, "qw": 1},
                         },
                         "default_z": -1,
                         "name": "test_name",
@@ -337,7 +420,8 @@ class TestSample(Test):
                     name,
                     attributes,
                     metadata,
-                    priority,  # embedding
+                    priority,
+                    # embedding
                 )
                 self.assertIsInstance(sample, Sample)
                 sample = self.client.update_sample(
@@ -345,7 +429,8 @@ class TestSample(Test):
                     name,
                     attributes,
                     metadata,
-                    priority,  # embedding
+                    priority,
+                    # embedding
                 )
                 self.assertIsInstance(sample, Sample)
             finally:
@@ -673,6 +758,269 @@ class TestLabel(Test):
                 time.sleep(self.TIME_INTERVAL)
                 self.client.delete_label(sample_uuid, labelset)
 
+    def test_add_update_label_validationerror(self) -> None:
+        image_or_object_attributes = {  # sample-level attributes
+            "scene_type": "crossroads",
+            "weather": "sunny",
+            "isRaining": True,
+        }
+        label_attributes: Dict[str, Dict[str, Any]] = {
+            "image-segmentation": {
+                "format_version": "0.1",
+                "annotations": [
+                    {
+                        "id": 1,
+                        "category_id": 1,
+                        "attributes": image_or_object_attributes,
+                    },
+                    {
+                        "id": 2,
+                        "category_id": 1,
+                        "attributes": image_or_object_attributes,
+                    },
+                    {
+                        "id": 3,
+                        "category_id": 4,
+                        "attributes": image_or_object_attributes,
+                    },
+                ],
+                "segmentation_bitmap": {
+                    "url": "https://segmentsai-staging.s3.eu-west-2.amazonaws.com/assets/davy/ddf55e99-1a6f-42d2-83e9-8657de3259a1.png"
+                },
+                "image_attributes": image_or_object_attributes,
+            },
+            "image-vector": {
+                "format_version": "0.1",
+                "annotations": [
+                    {
+                        "id": 1,
+                        "category_id": 1,
+                        "type": "bbox",
+                        "points": [[12.34, 56.78], [90.12, 34.56]],
+                        "attributes": image_or_object_attributes,
+                    },
+                    {
+                        "id": 2,
+                        "category_id": 2,
+                        "type": "polygon",
+                        "points": [
+                            [12.34, 56.78],
+                            [90.12, 34.56],
+                            [78.91, 23.45],
+                            [67.89, 98.76],
+                            [54.32, 10.01],
+                        ],
+                        "attributes": image_or_object_attributes,
+                    },
+                    {
+                        "id": 3,
+                        "category_id": 3,
+                        "type": "polyline",
+                        "points": [
+                            [12.34, 56.78],
+                            [90.12, 34.56],
+                            [78.91, 23.45],
+                            [67.89, 98.76],
+                            [54.32, 10.01],
+                        ],
+                        "attributes": image_or_object_attributes,
+                    },
+                    {
+                        "id": 4,
+                        "category_id": 4,
+                        "type": "point",
+                        "points": [[12.34, 56.78]],
+                        "attributes": image_or_object_attributes,
+                    },
+                ],
+                "image_attributes": image_or_object_attributes,
+            },
+            "image-sequence-vector": {
+                "format_version": "0.2",
+                "frames": [
+                    {
+                        "format_version": "0.1",
+                        "timestamp": "00001",
+                        "annotations": [
+                            {
+                                "id": 1,
+                                "category_id": 1,
+                                "track_id": 6,
+                                "is_keyframe": True,
+                                "type": "bbox",
+                                "points": [[12.34, 56.78], [90.12, 34.56]],
+                                "attributes": image_or_object_attributes,
+                            },
+                            {
+                                "id": 2,
+                                "category_id": 2,
+                                "track_id": 5,
+                                "is_keyframe": True,
+                                "type": "polygon",
+                                "points": [
+                                    [12.34, 56.78],
+                                    [90.12, 34.56],
+                                    [78.91, 23.45],
+                                    [67.89, 98.76],
+                                    [54.32, 10.01],
+                                ],
+                                "attributes": image_or_object_attributes,
+                            },
+                            {
+                                "id": 3,
+                                "category_id": 3,
+                                "track_id": 4,
+                                "is_keyframe": True,
+                                "type": "polyline",
+                                "points": [
+                                    [12.34, 56.78],
+                                    [90.12, 34.56],
+                                    [78.91, 23.45],
+                                    [67.89, 98.76],
+                                    [54.32, 10.01],
+                                ],
+                                "attributes": image_or_object_attributes,
+                            },
+                            {
+                                "id": 4,
+                                "category_id": 4,
+                                "track_id": 3,
+                                "is_keyframe": True,
+                                "type": "point",
+                                "points": [[12.34, 56.78]],
+                                "attributes": image_or_object_attributes,
+                            },
+                        ],
+                        "image_attributes": image_or_object_attributes,
+                    }
+                ],
+            },
+            "pointcloud-segmentation": {
+                "format_version": "0.1",
+                "annotations": [
+                    {
+                        "id": 1,
+                        "category_id": 1,
+                        "attributes": image_or_object_attributes,
+                    },
+                    {
+                        "id": 2,
+                        "category_id": 1,
+                        "attributes": image_or_object_attributes,
+                    },
+                    {
+                        "id": 3,
+                        "category_id": 4,
+                        "attributes": image_or_object_attributes,
+                    },
+                ],
+                "point_annotations": [0, 0, 0, 3, 2, 2, 2, 1, 3],
+            },
+            "pointcloud-cuboid": {
+                "format_version": "0.1",
+                "annotations": [
+                    {
+                        "id": 1,
+                        "category_id": 1,
+                        "type": "cuboid",
+                        "position": {"x": 0.0, "y": 0.2, "z": 0.5},
+                        "dimensions": {"x": 1.2, "y": 1, "z": 1},
+                        "yaw": 1.63,
+                    }
+                ],
+            },
+            "pointcloud-sequence-segmentation": {
+                "format_version": "0.2",
+                "frames": [
+                    {
+                        "format_version": "0.2",
+                        "annotations": [
+                            {
+                                "id": 1,  # the object id
+                                "category_id": 1,  # the category id
+                                "track_id": 3,  # this id is used to link objects across frames
+                            },
+                            {"id": 2, "category_id": 1, "track_id": 4},
+                            {"id": 3, "category_id": 4, "track_id": 5},
+                        ],
+                        "point_annotations": [
+                            0,
+                            0,
+                            0,
+                            3,
+                            2,
+                            2,
+                            2,
+                            1,
+                            3,
+                        ],  # refers to object ids
+                    }
+                ],
+            },
+            "pointcloud-sequence-cuboid": {
+                "format_version": "0.2",
+                "frames": [
+                    {
+                        "format_version": "0.2",
+                        "timestamp": "00001",  # this field is only included if the sample has a timestamp
+                        "annotations": [
+                            {
+                                "id": 1,  # the object id
+                                "category_id": 1,  # the category id
+                                "type": "cuboid",  # refers to the annotation type (cuboid)
+                                "position": {"x": 0.0, "y": 0.2, "z": 0.5},
+                                "dimensions": {"x": 1.2, "y": 1, "z": 1},
+                                "yaw": 1.63,
+                                "is_keyframe": True,  # whether this frame is a keyframe
+                                "track_id": 6,  # this id is used to links objects across frames
+                            },
+                            {
+                                "id": 2,
+                                "category_id": 2,
+                                "type": "cuboid",
+                                "position": {"x": 0.0, "y": 0.2, "z": 0.5},
+                                "dimensions": {"x": 1.2, "y": 1, "z": 1},
+                                "yaw": 1.63,
+                                "is_keyframe": False,
+                                "track_id": 7,
+                            },
+                        ],
+                    },
+                ],
+            },
+            "text": {
+                "format_version": "0.1",
+                "annotations": [
+                    {
+                        "start": 0,  # the first character index of the label
+                        "end": 5,  # the last character index of the the label (exclusive)
+                        "category_id": 1,  # the category id
+                    },
+                    {"start": 7, "end": 12, "category_id": 0},
+                    {"start": 20, "end": 30, "category_id": 2},
+                ],
+            },
+        }
+        labelset = "ground-truth"
+        label_status: Final = "PRELABELED"
+        score = 1
+        mid = len(self.sample_uuids) // 2
+        rotated_sample_uuids = self.sample_uuids[mid:] + self.sample_uuids[:mid]
+        for sample_uuid, label_attribute_type in zip(
+            rotated_sample_uuids, self.label_attribute_types
+        ):
+            attributes = label_attributes[label_attribute_type]
+            # Add
+            with self.assertRaises(ValidationError):
+                self.client.add_label(
+                    sample_uuid, labelset, attributes, label_status, score
+                )
+            # Update
+            with self.assertRaises(ValidationError):
+                self.client.update_label(
+                    sample_uuid, labelset, attributes, label_status, score
+                )
+
 
 #########
 # Issue #
@@ -756,7 +1104,7 @@ class TestLabelset(Test):
             self.client.get_labelset(right_dataset_identifier, wrong_name)
 
     def test_add_delete_labelset(self) -> None:
-        # Add labelset.
+        # Add labelset
         dataset_identifier = f"{self.owner}/{self.datasets[0]}"
         name = "labelset4"
         description = "Test add_delete_labelset description."
@@ -764,7 +1112,7 @@ class TestLabelset(Test):
             labelset = self.client.add_labelset(dataset_identifier, name, description)
             self.assertIsInstance(labelset, Labelset)
         finally:
-            # Delete labelset.
+            # Delete labelset
             self.client.delete_labelset(dataset_identifier, name)
 
     def test_add_labelset_networkerror(self) -> None:

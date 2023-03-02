@@ -348,6 +348,32 @@ class Label(BaseModel):
     reviewed_by: Optional[str]
 
 
+task_type_to_label_attributes = {
+    "segmentation-bitmap": ImageSegmentationLabelAttributes,
+    "segmentation-bitmap-highres": ImageSegmentationLabelAttributes,
+    "image-vector-sequence": ImageSequenceVectorLabelAttributes,
+    "bboxes": ImageVectorLabelAttributes,
+    "vector": ImageVectorLabelAttributes,
+    "pointcloud-cuboid": PointcloudCuboidLabelAttributes,
+    "pointcloud-cuboid-sequence": PointcloudSequenceCuboidLabelAttributes,
+    "pointcloud-segmentation": PointcloudSegmentationLabelAttributes,
+    "pointcloud-segmentation-sequence": PointcloudSequenceSegmentationLabelAttributes,
+    "pointcloud-vector": PointcloudVectorLabelAttributes,
+    "pointcloud-vector-sequence": PointcloudSequenceVectorLabelAttributes,
+    "text-named-entities": TextLabelAttributes,
+    "text-named-entities": TextLabelAttributes,
+    "text-span-categorization": TextLabelAttributes,
+    "": LabelAttributes,
+}
+
+sequence_label_attributes = [
+    ImageSequenceVectorLabelAttributes,
+    PointcloudSequenceCuboidLabelAttributes,
+    PointcloudSequenceVectorLabelAttributes,
+    PointcloudSequenceSegmentationLabelAttributes,
+]
+
+
 ##########
 # Sample #
 ##########
@@ -437,6 +463,30 @@ class Sample(BaseModel):
     dataset_full_name: Optional[str]
 
 
+task_type_to_sample_attributes = {
+    "segmentation-bitmap": ImageSampleAttributes,
+    "segmentation-bitmap-highres": ImageSampleAttributes,
+    "image-vector-sequence": ImageSequenceSampleAttributes,
+    "bboxes": ImageSampleAttributes,
+    "vector": ImageSampleAttributes,
+    "pointcloud-cuboid": PointcloudSampleAttributes,
+    "pointcloud-cuboid-sequence": PointcloudSequenceSampleAttributes,
+    "pointcloud-segmentation": PointcloudSampleAttributes,
+    "pointcloud-segmentation-sequence": PointcloudSequenceSampleAttributes,
+    "pointcloud-vector": PointcloudSampleAttributes,
+    "pointcloud-vector-sequence": PointcloudSequenceSampleAttributes,
+    "text-named-entities": TextSampleAttributes,
+    "text-named-entities": TextSampleAttributes,
+    "text-span-categorization": TextSampleAttributes,
+    "": SampleAttributes,
+}
+
+sequence_sample_attributes = [
+    ImageSequenceSampleAttributes,
+    PointcloudSequenceSampleAttributes,
+]
+
+
 ########################
 # Dataset and labelset #
 ########################
@@ -479,10 +529,7 @@ class CheckboxTaskAttribute(BaseModel):
 
 
 TaskAttribute = Union[
-    SelectTaskAttribute,
-    TextTaskAttribute,
-    NumberTaskAttribute,
-    CheckboxTaskAttribute,
+    SelectTaskAttribute, TextTaskAttribute, NumberTaskAttribute, CheckboxTaskAttribute,
 ]
 
 

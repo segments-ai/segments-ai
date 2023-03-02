@@ -55,8 +55,12 @@ from segments.typing import (
     SampleAttributes,
     TaskAttributes,
     TaskType,
+    sequence_label_attributes,
+    sequence_sample_attributes,
+    task_type_to_label_attributes,
+    task_type_to_sample_attributes,
 )
-from typing_extensions import Literal, get_args
+from typing_extensions import Literal
 
 ################################
 # Constants and type variables #
@@ -901,16 +905,31 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
+        # Get the dataset task type
+        task_type = self.get_dataset(dataset_identifier).task_type
+        SampleAttributesType = task_type_to_sample_attributes[task_type]
+
         if type(attributes) is dict:
             try:
-                parse_obj_as(SampleAttributes, attributes)
+                parse_obj_as(SampleAttributesType, attributes)
             except pydantic.ValidationError as e:
                 logger.error(
-                    "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
+                    f"Your dataset task type is {task_type}. Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
                 )
                 raise ValidationError(message=str(e), cause=e)
-        elif type(attributes) in get_args(SampleAttributes):
+        elif type(attributes) is SampleAttributesType:
             attributes = attributes.dict()
+        else:
+            raise ValidationError(
+                message=f"Your dataset task type is {task_type}. Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types."
+            )
+
+        # Check if the sequence contains a frame
+        if (
+            SampleAttributesType in sequence_sample_attributes
+            and not attributes["frames"]
+        ):
+            raise ValidationError("The sequence must contain at least one frame.")
 
         payload: Dict[str, Any] = {
             "name": name,
@@ -937,7 +956,6 @@ class SegmentsClient:
             data=payload,
             model=Sample,
         )
-        # logger.info(f"Added {name}")
 
         return cast(Sample, r)
 
@@ -960,23 +978,39 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
+        # Get the dataset task type
+        task_type = self.get_dataset(dataset_identifier).task_type
+        SampleAttributesType = task_type_to_sample_attributes[task_type]
+
         # Check the input
-        for sample in samples:
+        for i, sample in enumerate(samples):
             if type(sample) is dict:
                 if "name" not in sample or "attributes" not in sample:
                     raise KeyError(
-                        f"Please add a name and attributes to your sample: {sample}"
+                        f"Please add a name and attributes to your sample (index {i}): {sample})"
                     )
-
                 try:
-                    parse_obj_as(SampleAttributes, sample["attributes"])
+                    parse_obj_as(SampleAttributesType, sample["attributes"])
                 except pydantic.ValidationError as e:
                     logger.error(
-                        "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
+                        f"Your dataset task type is {task_type}. Did you use the right sample attributes for sample {i}? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
                     )
                     raise ValidationError(message=str(e), cause=e)
-            elif type(sample) is Sample:
+            elif type(sample) is SampleAttributesType:
                 sample = sample.dict()
+            else:
+                raise ValidationError(
+                    message=f"Your dataset task type is {task_type}. Did you use the right sample attributes for sample {i}? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types."
+                )
+
+            # Check if the sequence contains a frame
+            if (
+                SampleAttributesType in sequence_sample_attributes
+                and not sample["attributes"]["frames"]
+            ):
+                raise ValidationError(
+                    f"The sequence of sample {i} must contain at least one frame."
+                )
 
         payload = samples
 
@@ -1036,11 +1070,35 @@ class SegmentsClient:
             payload["name"] = name
 
         if attributes:
-            payload["attributes"] = (
-                attributes.dict()
-                if type(attributes) in get_args(SampleAttributes)
-                else attributes
-            )
+
+            # Get the dataset task type
+            sample = self.get_sample(uuid)
+            task_type = self.get_dataset(sample.dataset_full_name).task_type
+            SampleAttributesType = task_type_to_sample_attributes[task_type]
+
+            if type(attributes) is dict:
+                try:
+                    parse_obj_as(SampleAttributesType, attributes)
+                except pydantic.ValidationError as e:
+                    logger.error(
+                        f"Your dataset task type is {task_type}. Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
+                    )
+                    raise ValidationError(message=str(e), cause=e)
+            elif type(attributes) is SampleAttributesType:
+                attributes = attributes.dict()
+            else:
+                raise ValidationError(
+                    message=f"Your dataset task type is {task_type}. Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types."
+                )
+
+            # Check if the sequence contains a frame
+            if (
+                SampleAttributesType in sequence_sample_attributes
+                and not attributes["frames"]
+            ):
+                raise ValidationError("The sequence must contain at least one frame.")
+
+            payload["attributes"] = attributes
 
         if metadata:
             payload["metadata"] = metadata
@@ -1157,16 +1215,32 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
+        # Get the dataset task type
+        sample = self.get_sample(sample_uuid)
+        task_type = self.get_dataset(sample.dataset_full_name).task_type
+        LabelAttributesType = task_type_to_label_attributes[task_type]
+
         if type(attributes) is dict:
             try:
-                parse_obj_as(LabelAttributes, attributes)
+                parse_obj_as(LabelAttributesType, attributes)
             except pydantic.ValidationError as e:
                 logger.error(
-                    "Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.",
+                    f"Your dataset task type is {task_type}. Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.",
                 )
                 raise ValidationError(message=str(e), cause=e)
-        elif type(attributes) in get_args(LabelAttributes):
+        elif type(attributes) is LabelAttributesType:
             attributes = attributes.dict()
+        else:
+            raise ValidationError(
+                message=f"Your dataset task type is {task_type}. Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types."
+            )
+
+        # Check if the sequence contains a frame
+        if (
+            LabelAttributesType in sequence_label_attributes
+            and not attributes["frames"]
+        ):
+            raise ValidationError("The sequence must contain at least one frame.")
 
         payload: Dict[str, Any] = {
             "label_status": label_status,
@@ -1226,11 +1300,35 @@ class SegmentsClient:
         payload: Dict[str, Any] = {}
 
         if attributes:
-            payload["attributes"] = (
-                attributes.dict()
-                if type(attributes) in get_args(LabelAttributes)
-                else attributes
-            )
+
+            # Get the dataset task type
+            sample = self.get_sample(sample_uuid)
+            task_type = self.get_dataset(sample.dataset_full_name).task_type
+            LabelAttributesType = task_type_to_label_attributes[task_type]
+
+            if type(attributes) is dict:
+                try:
+                    parse_obj_as(LabelAttributesType, attributes)
+                except pydantic.ValidationError as e:
+                    logger.error(
+                        f"Your dataset task type is {task_type}. Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.",
+                    )
+                    raise ValidationError(message=str(e), cause=e)
+            elif type(attributes) is LabelAttributesType:
+                attributes = attributes.dict()
+            else:
+                raise ValidationError(
+                    message=f"Your dataset task type is {task_type}. Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types."
+                )
+
+            # Check if the sequence contains a frame
+            if (
+                LabelAttributesType in sequence_label_attributes
+                and not attributes["frames"]
+            ):
+                raise ValidationError("The sequence must contain at least one frame.")
+
+            payload["attributes"] = attributes
 
         if label_status:
             payload["label_status"] = label_status
