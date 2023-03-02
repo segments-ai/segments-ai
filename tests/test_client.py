@@ -1039,7 +1039,7 @@ class TestIssue(Test):
             self.assertIsInstance(issue, Issue)
 
     def test_add_update_delete_issue(self) -> None:
-        # Add labelset.
+        # Add labelset
         sample_uuid = self.sample_uuids[0]
         description = "You forgot to label this car."
         try:
@@ -1048,7 +1048,7 @@ class TestIssue(Test):
             issue = self.client.update_issue(issue.uuid, description)
             self.assertIsInstance(issue, Issue)
         finally:
-            # Delete issue.
+            # Delete issue
             self.client.delete_issue(issue.uuid)
 
     def test_add_issue_notfounderror(self) -> None:
