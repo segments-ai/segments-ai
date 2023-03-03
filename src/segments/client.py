@@ -983,6 +983,7 @@ class SegmentsClient:
         SampleAttributesType = task_type_to_sample_attributes[task_type]
 
         # Check the input
+        checked_samples = []
         for i, sample in enumerate(samples):
             if type(sample) is dict:
                 if "name" not in sample or "attributes" not in sample:
@@ -1003,6 +1004,8 @@ class SegmentsClient:
                     message=f"Your dataset task type is {task_type}. Did you use the right sample attributes for sample {i}? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types."
                 )
 
+            checked_samples.append(sample)
+
             # Check if the sequence contains a frame
             if (
                 SampleAttributesType in sequence_sample_attributes
@@ -1012,7 +1015,7 @@ class SegmentsClient:
                     f"The sequence of sample {i} must contain at least one frame."
                 )
 
-        payload = samples
+        payload = checked_samples
 
         r = self._post(
             f"/datasets/{dataset_identifier}/samples_bulk/",
