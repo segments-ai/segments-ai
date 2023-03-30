@@ -120,6 +120,8 @@ def handle_exceptions(
                 or "is already a collaborator" in text
             ):
                 raise CollaboratorError(message=text, cause=e)
+            if "authentication credentials were not provided" in text:
+                raise AuthenticationError(message=text, cause=e)
             if (
                 "cannot leave the organization" in text
                 or "need to be an administrator" in text
