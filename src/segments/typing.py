@@ -455,12 +455,14 @@ class SelectTaskAttribute(BaseModel):
     input_type: Literal["select"]
     values: List[str]
     default_value: Optional[str]
+    is_mandatory: Optional[bool]
 
 
 class TextTaskAttribute(BaseModel):
     name: str
     input_type: Literal["text"]
     default_value: Optional[str]
+    is_mandatory: Optional[bool]
 
 
 class NumberTaskAttribute(BaseModel):
@@ -470,6 +472,7 @@ class NumberTaskAttribute(BaseModel):
     min: Optional[float]
     max: Optional[float]
     step: Optional[float]
+    is_mandatory: Optional[bool]
 
 
 class CheckboxTaskAttribute(BaseModel):
