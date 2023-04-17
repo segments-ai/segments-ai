@@ -45,7 +45,6 @@ TaskType = Literal[
     "pointcloud-vector",
     "pointcloud-vector-sequence",
     "text-named-entities",
-    "text-named-entities",
     "text-span-categorization",
     "",
 ]
