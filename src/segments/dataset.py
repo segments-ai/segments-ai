@@ -10,7 +10,7 @@ from urllib.parse import urlparse
 import numpy as np
 import numpy.typing as npt
 import requests
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 from pydantic import parse_obj_as
 from segments.typing import LabelStatus, Release, SegmentsDatasetCategory
 from segments.utils import (
@@ -242,7 +242,13 @@ class SegmentsDataset:
                         image_url, image_filename, self.s3_client
                     )
                 else:
-                    image = Image.open(image_filename)
+                    try:
+                        image = Image.open(image_filename)
+                    except UnidentifiedImageError:
+                        image = None
+                        logger.error(
+                            f"Something went wrong loading image: {image_filename}"
+                        )
             else:
                 image = load_image_from_url(image_url, self.s3_client)
 
