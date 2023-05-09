@@ -299,9 +299,10 @@ class SegmentsDataset:
             return sample
 
         # Load the image
+        image, image_filename = None, None
         try:
             image, image_filename = self._load_image_from_cache(sample)
-        except TypeError:
+        except (KeyError, TypeError):
             logger.error(
                 f"Something went wrong loading sample {sample['name']}: {sample}"
             )
@@ -334,7 +335,7 @@ class SegmentsDataset:
                         "attributes": attributes,
                     }
                 )
-            except TypeError:
+            except (KeyError, TypeError):
                 item.update(
                     {
                         "segmentation_bitmap": None,
