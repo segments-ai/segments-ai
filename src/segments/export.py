@@ -715,9 +715,7 @@ def export_yolo(
                     # Save it to the file
                     # print(category_id, x_center, y_center, width, height)
                     f.write(
-                        "{} {:.6f} {:.6f} {:.6f} {:.6f}\n".format(
-                            category_id, x_center, y_center, width, height
-                        )
+                        f"{category_id} {x_center:.6f} {y_center:.6f} {width:.6f} {height:.6f}\n"
                     )
 
     # Create export folder
@@ -769,17 +767,23 @@ def export_yolo(
                 export_folder, dataset.image_dir, f"{image_name}.txt"
             )
 
-            if image_width is None or image_height is None:
-                image_width = sample["image"].width
-                image_height = sample["image"].height
-
             if "annotations" in sample and sample["annotations"]:
                 annotations = sample["annotations"]
                 write_yolo_file(
                     file_name,
                     annotations,
-                    cast(float, image_width),
-                    cast(float, image_height),
+                    cast(
+                        float,
+                        image_width
+                        if image_width is not None
+                        else sample["image"].width,
+                    ),
+                    cast(
+                        float,
+                        image_height
+                        if image_height is not None
+                        else sample["image"].height,
+                    ),
                 )
 
     print(f"Exported. Images and labels in {dataset.image_dir}")
