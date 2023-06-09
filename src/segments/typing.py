@@ -304,7 +304,7 @@ class PointcloudSequenceVectorLabelAttributes(BaseModel):
     format_version: Optional[FormatVersion]
 
 
-# Multi sensor
+# Multi-sensor
 class MultiSensorPointcloudSequenceCuboidLabelAttributes(BaseModel):
     name: str
     task_type: Literal["pointcloud-cuboid-sequence"]
@@ -428,7 +428,7 @@ class PointcloudSequenceSampleAttributes(BaseModel):
     frames: List[PointcloudSampleAttributes]
 
 
-# Multi sensor
+# Multi-sensor
 class MultiSensorPointcloudSequenceSampleAttributes(BaseModel):
     name: str
     task_type: Literal["pointcloud-cuboid-sequence"]
