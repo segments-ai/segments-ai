@@ -304,9 +304,14 @@ class PointcloudSequenceVectorLabelAttributes(BaseModel):
     format_version: Optional[FormatVersion]
 
 
-# Multi-sensor
+# Multi sensor
 class MultiSensorLabelAttributes(BaseModel):
-    sensors: Dict[str, LabelAttributes]
+    sensors: Dict[
+        str,
+        Union[
+            PointcloudSequenceCuboidLabelAttributes, ImageSequenceVectorLabelAttributes
+        ],
+    ]
 
 
 # Text
@@ -333,6 +338,7 @@ LabelAttributes = Union[
     PointcloudSequenceCuboidLabelAttributes,
     PointcloudSequenceVectorLabelAttributes,
     PointcloudSequenceSegmentationLabelAttributes,
+    MultiSensorLabelAttributes,
     TextLabelAttributes,
 ]
 
@@ -342,7 +348,7 @@ class Label(BaseModel):
     label_type: TaskType
     label_status: LabelStatus
     labelset: str
-    attributes: Union[LabelAttributes, MultiSensorLabelAttributes]
+    attributes: LabelAttributes
     created_at: str
     created_by: str
     updated_at: str
@@ -409,9 +415,13 @@ class PointcloudSampleAttributes(BaseModel):
 class PointcloudSequenceSampleAttributes(BaseModel):
     frames: List[PointcloudSampleAttributes]
 
-# Multi-sensor
+
+# Multi sensor
 class MultiSensorSampleAttributes(BaseModel):
-    sensors: Dict[str, SampleAttributes]
+    sensors: Dict[
+        str, Union[ImageSequenceSampleAttributes, PointcloudSequenceSampleAttributes]
+    ]
+
 
 # Text
 class TextSampleAttributes(BaseModel):
@@ -423,6 +433,7 @@ SampleAttributes = Union[
     ImageSequenceSampleAttributes,
     PointcloudSampleAttributes,
     PointcloudSequenceSampleAttributes,
+    MultiSensorSampleAttributes,
     TextSampleAttributes,
 ]
 
@@ -430,7 +441,7 @@ SampleAttributes = Union[
 class Sample(BaseModel):
     uuid: str
     name: str
-    attributes: Union[SampleAttributes, MultiSensorSampleAttributes]
+    attributes: SampleAttributes
     metadata: Dict[str, Any]
     created_at: str
     created_by: str
