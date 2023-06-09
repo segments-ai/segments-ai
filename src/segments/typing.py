@@ -305,11 +305,23 @@ class PointcloudSequenceVectorLabelAttributes(BaseModel):
 
 
 # Multi sensor
+class MultiSensorPointcloudSequenceCuboidLabelAttributes(BaseModel):
+    name: str
+    task_type: Literal["pointcloud-cuboid-sequence"]
+    attributes: PointcloudSequenceCuboidLabelAttributes
+
+
+class MultiSensorImageSequenceVectorLabelAttributes(BaseModel):
+    name: str
+    task_type: Literal["image-vector-sequence"]
+    attributes: ImageSequenceVectorLabelAttributes
+
+
 class MultiSensorLabelAttributes(BaseModel):
-    sensors: Dict[
-        str,
+    sensors: List[
         Union[
-            PointcloudSequenceCuboidLabelAttributes, ImageSequenceVectorLabelAttributes
+            MultiSensorPointcloudSequenceCuboidLabelAttributes,
+            MultiSensorImageSequenceVectorLabelAttributes,
         ],
     ]
 
@@ -417,9 +429,24 @@ class PointcloudSequenceSampleAttributes(BaseModel):
 
 
 # Multi sensor
+class MultiSensorPointcloudSequenceSampleAttributes(BaseModel):
+    name: str
+    task_type: Literal["pointcloud-cuboid-sequence"]
+    attributes: PointcloudSequenceSampleAttributes
+
+
+class MultiSensorImageSequenceSampleAttributes(BaseModel):
+    name: str
+    task_type: Literal["image-vector-sequence"]
+    attributes: ImageSequenceSampleAttributes
+
+
 class MultiSensorSampleAttributes(BaseModel):
-    sensors: Dict[
-        str, Union[ImageSequenceSampleAttributes, PointcloudSequenceSampleAttributes]
+    sensors: List[
+        Union[
+            MultiSensorPointcloudSequenceSampleAttributes,
+            MultiSensorImageSequenceSampleAttributes,
+        ],
     ]
 
 
