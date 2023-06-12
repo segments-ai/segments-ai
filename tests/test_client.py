@@ -351,6 +351,17 @@ class TestSample(Test):
             finally:
                 self.client.delete_sample(sample.uuid)
 
+            # Bulk endpoint
+            try:
+                samples = [
+                    {"name": f"sample_{1}", "attributes": attributes},
+                    {"name": f"sample_{2}", "attributes": attributes},
+                ]
+                returned_samples = self.client.add_samples(dataset_identifier, samples)
+            finally:
+                for sample in returned_samples:
+                    self.client.delete_sample(sample.uuid)
+
     def test_update_sample_notfounderror(self) -> None:
         with self.assertRaises(NotFoundError):
             wrong_uuid = "12345"
