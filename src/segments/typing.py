@@ -44,6 +44,8 @@ TaskType = Literal[
     "pointcloud-segmentation-sequence",
     "pointcloud-vector",
     "pointcloud-vector-sequence",
+    "multisensor",
+    "multisensor-sequence",
     "text-named-entities",
     "text-span-categorization",
     "",
