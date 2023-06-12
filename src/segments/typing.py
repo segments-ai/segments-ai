@@ -475,6 +475,13 @@ class NumberTaskAttribute(BaseModel):
     step: Optional[float]
     is_mandatory: Optional[bool]
 
+    @validator("min", "max", "step", pre=True)
+    def empty_str_to_none(cls, v):
+        # min, max and step are empty strings when not filled in
+        if v.strip() == "":
+            return None
+        return v
+
 
 class CheckboxTaskAttribute(BaseModel):
     name: str
