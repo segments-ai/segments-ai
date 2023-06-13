@@ -673,17 +673,17 @@ class TestLabel(Test):
                 {
                     "name": "Lidar",
                     "task_type": "pointcloud-cuboid-sequence",
-                    attributes: label_attributes["pointcloud-sequence-cuboid"],
+                    "attributes": label_attributes["pointcloud-sequence-cuboid"],
                 },
                 {
                     "name": "Camera 1",
                     "task_type": "image-vector-sequence",
-                    attributes: label_attributes["image-sequence-vector"],
+                    "attributes": label_attributes["image-sequence-vector"],
                 },
                 {
                     "name": "Camera 2",
                     "task_type": "image-vector-sequence",
-                    attributes: label_attributes["image-sequence-vector"],
+                    "attributes": label_attributes["image-sequence-vector"],
                 },
             ]
         }
