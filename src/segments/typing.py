@@ -219,6 +219,28 @@ class XYZW(BaseModel):
     qw: float
 
 
+class FisheyeDistortionCoefficients(BaseModel):
+    k1: float
+    k2: float
+    k3: float
+    k4: float
+
+
+class BrownConradyDistortionCoefficients(BaseModel):
+    k1: float
+    k2: float
+    p1: float
+    p2: float
+    k3: float
+
+
+class Distortion(BaseModel):
+    model: Literal["fisheye", "brown-conrady"]
+    coefficients: Union[
+        FisheyeDistortionCoefficients, BrownConradyDistortionCoefficients
+    ]
+
+
 # Point cloud cuboid
 # https://stackoverflow.com/questions/51575931/class-inheritance-in-python-3-7-dataclasses
 class PointcloudCuboidAnnotation(BaseModel):
@@ -414,6 +436,7 @@ class CalibratedImage(URL):
     col: int
     intrinsics: Optional[CameraIntrinsics]
     extrinsics: Optional[CameraExtrinsics]
+    distortion: Optional[Distortion]
 
 
 class PointcloudSampleAttributes(BaseModel):
