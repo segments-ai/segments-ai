@@ -266,7 +266,12 @@ class SegmentsClient:
     ############
     # Datasets #
     ############
-    def get_datasets(self, user: Optional[str] = None) -> List[Dataset]:
+    def get_datasets(
+        self,
+        user: Optional[str] = None,
+        per_page: int = 1000,
+        page: int = 1,
+    ) -> List[Dataset]:
         """Get a list of datasets.
 
         .. code-block:: python
@@ -277,6 +282,8 @@ class SegmentsClient:
 
         Args:
             user: The user for which to get the datasets. Leave empty to get datasets of current user. Defaults to :obj:`None`.
+            per_page: Pagination parameter indicating the maximum number of datasets to return. Defaults to ``1000``.
+            page: Pagination parameter indicating the page to return. Defaults to ``1``.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the datasets fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -285,10 +292,13 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
+        # pagination
+        query_string = f"?per_page={per_page}&page={page}"
+
         if user:
-            r = self._get(f"/users/{user}/datasets/", model=List[Dataset])
+            r = self._get(f"/users/{user}/datasets/{query_string}", model=List[Dataset])
         else:
-            r = self._get("/user/datasets/", model=List[Dataset])
+            r = self._get(f"/user/datasets/{query_string}", model=List[Dataset])
 
         return cast(List[Dataset], r)
 
