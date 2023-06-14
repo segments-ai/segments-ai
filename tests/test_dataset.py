@@ -9,21 +9,31 @@ def test_dataset(
     client: SegmentsClient,
     owner: str,
     datasets: List[str],
-    releases: List[str],
     ARTIFACTS_DIR: str,
 ) -> None:
+    # Get the datasets
+    datasets = client.get_datasets(owner)
 
-    # Get the dataset
-    dataset_identifier, name = f"{owner}/{datasets[0]}", releases[0]
-    release = client.get_release(dataset_identifier, name)
-    dataset = SegmentsDataset(release, segments_dir=f"{ARTIFACTS_DIR}/segments")
+    for dataset in datasets:
+        # Skip the example-multi-sensor dataset
+        if dataset.name == "example-multi-sensor":
+            continue
 
-    # Load the categories
-    categories = dataset.categories
-    assert isinstance(categories, list)
-    for category in categories:
-        assert isinstance(category, SegmentsDatasetCategory)
+        # Get the releases
+        dataset_identifier = f"{owner}/{dataset.name}"
+        releases = client.get_releases(dataset_identifier)
 
-    # Iterate over samples
-    for sample in dataset:
-        assert isinstance(sample, dict)
+        for release in releases:
+            # Get the dataset
+            release = client.get_release(dataset_identifier, release.name)
+            dataset = SegmentsDataset(release, segments_dir=f"{ARTIFACTS_DIR}/segments")
+
+            # Load the categories
+            categories = dataset.categories
+            assert isinstance(categories, list)
+            for category in categories:
+                assert isinstance(category, SegmentsDatasetCategory)
+
+            # Iterate over samples
+            for sample in dataset:
+                assert isinstance(sample, dict)
