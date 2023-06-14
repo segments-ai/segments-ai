@@ -662,7 +662,7 @@ class SegmentsClient:
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
             username: The username of the collaborator to be added.
-            role: The role of the collaborator to be added. Defaults to ``labeler``.
+            role: The role of the collaborator to be added. One of ``labeler``, ``reviewer``, ``manager``, ``admin``. Defaults to ``labeler``.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the collaborator fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
