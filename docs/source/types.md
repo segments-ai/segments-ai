@@ -54,6 +54,12 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 .. autopydantic_model:: segments.typing.PointcloudSequenceSampleAttributes
 ```
 
+### Multi-sensor
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.MultiSensorSampleAttributes
+```
+
 ### Text
 
 ```{eval-rst}
@@ -169,6 +175,12 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.PointcloudSequenceVectorAnnotation
     :show-inheritance:
+```
+
+### Multi-sensor
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.MultiSensorLabelAttributes
 ```
 
 ### Text

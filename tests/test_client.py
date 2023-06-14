@@ -326,6 +326,26 @@ class TestSample(Test):
             },
             "text": {"text": "This is a test sentence."},
         }
+        # Multi-sensor
+        attributes_dict["multi-sensor"] = {
+            "sensors": [
+                {
+                    "name": "Lidar",
+                    "task_type": "pointcloud-cuboid-sequence",
+                    "attributes": attributes_dict["pointcloud-sequence"],
+                },
+                {
+                    "name": "Camera 1",
+                    "task_type": "image-vector-sequence",
+                    "attributes": attributes_dict["image-sequence"],
+                },
+                {
+                    "name": "Camera 2",
+                    "task_type": "image-vector-sequence",
+                    "attributes": attributes_dict["image-sequence"],
+                },
+            ]
+        }
         for sample_attribute_type, dataset in zip(
             self.sample_attribute_types, self.datasets
         ):
@@ -657,6 +677,26 @@ class TestLabel(Test):
                     {"start": 20, "end": 30, "category_id": 2},
                 ],
             },
+        }
+        # Multi-sensor
+        label_attributes["multi-sensor"] = {
+            "sensors": [
+                {
+                    "name": "Lidar",
+                    "task_type": "pointcloud-cuboid-sequence",
+                    "attributes": label_attributes["pointcloud-sequence-cuboid"],
+                },
+                {
+                    "name": "Camera 1",
+                    "task_type": "image-vector-sequence",
+                    "attributes": label_attributes["image-sequence-vector"],
+                },
+                {
+                    "name": "Camera 2",
+                    "task_type": "image-vector-sequence",
+                    "attributes": label_attributes["image-sequence-vector"],
+                },
+            ]
         }
         labelset = "ground-truth"
         label_status: Final = "PRELABELED"

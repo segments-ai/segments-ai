@@ -306,6 +306,28 @@ class PointcloudSequenceVectorLabelAttributes(BaseModel):
     format_version: Optional[FormatVersion]
 
 
+# Multi-sensor
+class MultiSensorPointcloudSequenceCuboidLabelAttributes(BaseModel):
+    name: str
+    task_type: Literal["pointcloud-cuboid-sequence"]
+    attributes: PointcloudSequenceCuboidLabelAttributes
+
+
+class MultiSensorImageSequenceVectorLabelAttributes(BaseModel):
+    name: str
+    task_type: Literal["image-vector-sequence"]
+    attributes: ImageSequenceVectorLabelAttributes
+
+
+class MultiSensorLabelAttributes(BaseModel):
+    sensors: List[
+        Union[
+            MultiSensorPointcloudSequenceCuboidLabelAttributes,
+            MultiSensorImageSequenceVectorLabelAttributes,
+        ],
+    ]
+
+
 # Text
 class TextAnnotation(BaseModel):
     start: int
@@ -330,6 +352,7 @@ LabelAttributes = Union[
     PointcloudSequenceCuboidLabelAttributes,
     PointcloudSequenceVectorLabelAttributes,
     PointcloudSequenceSegmentationLabelAttributes,
+    MultiSensorLabelAttributes,
     TextLabelAttributes,
 ]
 
@@ -407,6 +430,28 @@ class PointcloudSequenceSampleAttributes(BaseModel):
     frames: List[PointcloudSampleAttributes]
 
 
+# Multi-sensor
+class MultiSensorPointcloudSequenceSampleAttributes(BaseModel):
+    name: str
+    task_type: Literal["pointcloud-cuboid-sequence"]
+    attributes: PointcloudSequenceSampleAttributes
+
+
+class MultiSensorImageSequenceSampleAttributes(BaseModel):
+    name: str
+    task_type: Literal["image-vector-sequence"]
+    attributes: ImageSequenceSampleAttributes
+
+
+class MultiSensorSampleAttributes(BaseModel):
+    sensors: List[
+        Union[
+            MultiSensorPointcloudSequenceSampleAttributes,
+            MultiSensorImageSequenceSampleAttributes,
+        ],
+    ]
+
+
 # Text
 class TextSampleAttributes(BaseModel):
     text: str
@@ -417,6 +462,7 @@ SampleAttributes = Union[
     ImageSequenceSampleAttributes,
     PointcloudSampleAttributes,
     PointcloudSequenceSampleAttributes,
+    MultiSensorSampleAttributes,
     TextSampleAttributes,
 ]
 
