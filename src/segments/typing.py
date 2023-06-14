@@ -50,7 +50,7 @@ TaskType = Literal[
     "text-span-categorization",
     "",
 ]
-Role = Literal["labeler", "reviewer", "admin"]
+Role = Literal["labeler", "reviewer", "manager", "admin"]
 IssueStatus = Literal["OPEN", "CLOSED"]
 Category = Literal[
     "street_scenery",
