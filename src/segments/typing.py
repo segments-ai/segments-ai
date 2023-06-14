@@ -217,11 +217,26 @@ class XYZW(BaseModel):
     qw: float
 
 
-class FisheyeDistortion(BaseModel):
+class FisheyeDistortionCoefficients(BaseModel):
     k1: float
     k2: float
     k3: float
     k4: float
+
+
+class BrownConradyDistortionCoefficients(BaseModel):
+    k1: float
+    k2: float
+    p1: float
+    p2: float
+    k3: float
+
+
+class Distortion(BaseModel):
+    model: Literal["fisheye", "brown-conrady"]
+    coefficients: Union[
+        FisheyeDistortionCoefficients, BrownConradyDistortionCoefficients
+    ]
 
 
 # Point cloud cuboid
@@ -396,7 +411,7 @@ class CalibratedImage(URL):
     col: int
     intrinsics: Optional[CameraIntrinsics]
     extrinsics: Optional[CameraExtrinsics]
-    distortion: Optional[FisheyeDistortion]
+    distortion: Optional[Distortion]
 
 
 class PointcloudSampleAttributes(BaseModel):
