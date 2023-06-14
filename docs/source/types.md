@@ -253,3 +253,15 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.CameraExtrinsics
 ```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.Distortion
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.FisheyeDistortionCoefficients
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.BrownConradyDistortionCoefficients
+```
