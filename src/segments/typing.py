@@ -80,6 +80,7 @@ class URL(BaseModel):
     url: Optional[
         str
     ]  # TODO Remove optional (e.g., the backend does not return an URL when adding a release).
+    signed_url: Optional[str]
 
 
 class Release(BaseModel):
@@ -157,7 +158,7 @@ class Annotation(BaseModel):
     attributes: Optional[ObjectAttributes]
 
 
-# Image segmenation
+# Image segmentation
 class ImageSegmentationLabelAttributes(BaseModel):
     annotations: List[Annotation]
     segmentation_bitmap: URL
@@ -413,7 +414,7 @@ class ImageSequenceSampleAttributes(BaseModel):
 
 # Point cloud
 class PCD(BaseModel):
-    url: str
+    url: URL
     type: Literal["pcd", "kitti", "nuscenes"]
 
 
