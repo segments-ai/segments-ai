@@ -832,7 +832,7 @@ class SegmentsClient:
         self,
         uuid: str,
         labelset: Optional[str] = None,
-        include_signed_url: Optional[bool] = None,
+        include_signed_url: bool = False,
     ) -> Sample:
         """Get a sample.
 
@@ -845,7 +845,7 @@ class SegmentsClient:
         Args:
             uuid: The sample uuid.
             labelset: If defined, this additionally returns the label for the given labelset. Defaults to :obj:`None`.
-            include_signed_url: Whether to return the pre-signed URL in case of private S3 buckets. Defaults to :obj:`None`.
+            include_signed_url: Whether to return the pre-signed URL in case of private S3 buckets. Defaults to :obj:`False`.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the samples fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
