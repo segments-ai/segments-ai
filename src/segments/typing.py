@@ -414,7 +414,7 @@ class ImageSequenceSampleAttributes(BaseModel):
 # Point cloud
 class PCD(BaseModel):
     url: str
-    signed_url: str
+    signed_url: Optional[str]
     type: Literal["pcd", "kitti", "nuscenes"]
 
 
