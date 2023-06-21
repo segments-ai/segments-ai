@@ -80,7 +80,6 @@ class URL(BaseModel):
     url: Optional[
         str
     ]  # TODO Remove optional (e.g., the backend does not return an URL when adding a release).
-    signed_url: Optional[str]
 
 
 class Release(BaseModel):
@@ -414,7 +413,8 @@ class ImageSequenceSampleAttributes(BaseModel):
 
 # Point cloud
 class PCD(BaseModel):
-    url: URL
+    url: str
+    signed_url: str
     type: Literal["pcd", "kitti", "nuscenes"]
 
 
