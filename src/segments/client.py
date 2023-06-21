@@ -334,6 +334,7 @@ class SegmentsClient:
         category: Category = "other",
         public: bool = False,
         readme: str = "",
+        metadata: Optional[Dict[str, Any]] = None,
         enable_skip_labeling: bool = True,
         enable_skip_reviewing: bool = False,
         enable_ratings: bool = False,
@@ -384,6 +385,7 @@ class SegmentsClient:
             category: The dataset category. Defaults to ``other``.
             public: The dataset visibility. Defaults to :obj:`False`.
             readme: The dataset readme. Defaults to ``''``.
+            metadata: Any dataset metadata. Example: ``{'day': 'sunday', 'robot_id': 3}``.
             enable_skip_labeling: Enable the skip button in the labeling workflow. Defaults to :obj:`True`.
             enable_skip_reviewing: Enable the skip button in the reviewing workflow. Defaults to :obj:`False`.
             enable_ratings: Enable star-ratings for labeled images. Defaults to :obj:`False`.
@@ -438,6 +440,9 @@ class SegmentsClient:
             "data_type": "IMAGE",
         }
 
+        if metadata:
+            payload["metadata"] = metadata
+
         endpoint = (
             f"/organizations/{organization}/datasets/"
             if organization is not None
@@ -457,6 +462,7 @@ class SegmentsClient:
         category: Optional[Category] = None,
         public: Optional[bool] = None,
         readme: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None,
         enable_skip_labeling: Optional[bool] = None,
         enable_skip_reviewing: Optional[bool] = None,
         enable_ratings: Optional[bool] = None,
@@ -483,6 +489,7 @@ class SegmentsClient:
             category: The dataset category. Defaults to :obj:`None`.
             public: The dataset visibility. Defaults to :obj:`None`.
             readme: The dataset readme. Defaults to :obj:`None`.
+            metadata: Any dataset metadata. Example: ``{'day': 'sunday', 'robot_id': 3}``.
             enable_skip_labeling: Enable the skip button in the labeling workflow. Defaults to :obj:`None`.
             enable_skip_reviewing: Enable the skip button in the reviewing workflow. Defaults to :obj:`None`.
             enable_ratings: Enable star-ratings for labeled images. Defaults to :obj:`None`.
@@ -522,6 +529,9 @@ class SegmentsClient:
 
         if readme:
             payload["readme"] = readme
+
+        if metadata:
+            payload["metadata"] = metadata
 
         if enable_skip_labeling:
             payload["enable_skip_labeling"] = enable_skip_labeling
