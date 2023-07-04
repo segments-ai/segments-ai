@@ -432,8 +432,8 @@ class CameraExtrinsics(BaseModel):
 
 
 class CalibratedImage(URL):
-    row: int
-    col: int
+    row: Optional[int]
+    col: Optional[int]
     intrinsics: Optional[CameraIntrinsics]
     extrinsics: Optional[CameraExtrinsics]
     distortion: Optional[Distortion]
