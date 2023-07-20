@@ -148,7 +148,8 @@ class TestDataset(Test):
             del arguments["organization"]
             dataset = self.client.update_dataset(**arguments)
             self.assertIsInstance(dataset, Dataset)
-
+        except AlreadyExistsError:
+            pass
         finally:
             # Delete dataset
             self.client.delete_dataset(f"{self.owner}/add_dataset")
@@ -223,6 +224,8 @@ class TestDataset(Test):
                 dataset_identifier, username, new_role
             )
             self.assertIsInstance(collaborator, Collaborator)
+        except AlreadyExistsError:
+            pass
         finally:
             self.client.delete_dataset_collaborator(dataset_identifier, username)
 
@@ -374,15 +377,19 @@ class TestSample(Test):
                 self.client.delete_sample(sample.uuid)
 
             # Bulk endpoint
+            returned_samples = None
             try:
                 samples = [
                     {"name": f"sample_{1}", "attributes": attributes},
                     {"name": f"sample_{2}", "attributes": attributes},
                 ]
                 returned_samples = self.client.add_samples(dataset_identifier, samples)
+            except AlreadyExistsError:
+                pass
             finally:
-                for sample in returned_samples:
-                    self.client.delete_sample(sample.uuid)
+                if returned_samples:
+                    for sample in returned_samples:
+                        self.client.delete_sample(sample.uuid)
 
     def test_update_sample_notfounderror(self) -> None:
         with self.assertRaises(NotFoundError):
@@ -721,6 +728,8 @@ class TestLabel(Test):
                 # Get
                 label = self.client.get_label(sample_uuid, labelset)
                 self.assertIsInstance(label, Label)
+            except AlreadyExistsError:
+                pass
             finally:
                 # Delete
                 time.sleep(self.TIME_INTERVAL)
@@ -747,14 +756,18 @@ class TestIssue(Test):
         # Add labelset.
         sample_uuid = self.sample_uuids[0]
         description = "You forgot to label this car."
+        issue = None
         try:
             issue = self.client.add_issue(sample_uuid, description)
             self.assertIsInstance(issue, Issue)
             issue = self.client.update_issue(issue.uuid, description)
             self.assertIsInstance(issue, Issue)
+        except AlreadyExistsError:
+            pass
         finally:
             # Delete issue.
-            self.client.delete_issue(issue.uuid)
+            if issue:
+                self.client.delete_issue(issue.uuid)
 
     def test_add_issue_notfounderror(self) -> None:
         with self.assertRaises(NotFoundError):
@@ -816,6 +829,8 @@ class TestLabelset(Test):
         try:
             labelset = self.client.add_labelset(dataset_identifier, name, description)
             self.assertIsInstance(labelset, Labelset)
+        except AlreadyExistsError:
+            pass
         finally:
             # Delete labelset.
             self.client.delete_labelset(dataset_identifier, name)
@@ -886,6 +901,8 @@ class TestRelease(Test):
             # Add release
             release = self.client.add_release(dataset_identifier, name, description)
             self.assertIsInstance(release, Release)
+        except AlreadyExistsError:
+            pass
         finally:
             # Delete release
             time.sleep(self.TIME_INTERVAL)
