@@ -60,6 +60,14 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 .. autopydantic_model:: segments.typing.MultiSensorSampleAttributes
 ```
 
+```{eval-rst}
+.. autopydantic_model:: segments.typing.MultiSensorPointcloudSequenceSampleAttributes
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.MultiSensorImageSequenceSampleAttributes
+```
+
 ### Text
 
 ```{eval-rst}
@@ -181,6 +189,14 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.MultiSensorLabelAttributes
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.MultiSensorPointcloudSequenceCuboidLabelAttributes
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.MultiSensorImageSequenceVectorLabelAttributes
 ```
 
 ### Text

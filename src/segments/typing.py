@@ -649,6 +649,7 @@ class Dataset(BaseModel):
     labelsets: Optional[List[Labelset]]
     role: Optional[str]
     readme: Optional[str]
+    metadata: Dict[str, Any]
     noncollaborator_can_label: Optional[bool]
     noncollaborator_can_review: Optional[bool]
     # tasks: Optional[List[Dict[str, Any]]]
