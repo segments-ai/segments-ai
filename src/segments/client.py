@@ -589,6 +589,7 @@ class SegmentsClient:
         new_name: Optional[str] = None,
         new_task_type: Optional[TaskType] = None,
         new_public: Optional[bool] = None,
+        organization: Optional[str] = None,
     ) -> Dataset:
         """Clone a dataset.
 
@@ -610,6 +611,7 @@ class SegmentsClient:
             new_name: The dataset name for the clone. Defaults to ``f'{old_dataset_name}-clone'``.
             new_task_type: The task type for the clone. Defaults to the task type of the original dataset.
             new_public: The visibility for the clone. Defaults to the visibility of the original dataset.
+            organization: The username of the organization for which this dataset should be created. None will create a dataset for the current user. Defaults to :obj:`None`.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -629,6 +631,9 @@ class SegmentsClient:
 
         if new_public:
             payload["public"] = new_public
+
+        if organization:
+            payload["owner"] = organization
 
         r = self._post(
             f"/datasets/{dataset_identifier}/clone/", data=payload, model=Dataset
