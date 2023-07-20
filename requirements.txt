@@ -1,11 +1,11 @@
 # General
-numpy>=1.20 # Include type stubs.
-requests
-Pillow
-tqdm
+numpy>=1.20,<2 # Include type stubs
+requests==2.*
+Pillow==9.*
+tqdm==4.*
 
 # Type hints
-typing_extensions
-pydantic
-types-Pillow
-types-requests
+typing_extensions==4.*
+pydantic==1.*
+types-Pillow==10.*
+types-requests==2.*
