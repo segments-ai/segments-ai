@@ -168,7 +168,9 @@ class TestDataset(Test):
     def test_clone_dataset_defaults(self) -> None:
         dataset_identifier = f"{self.owner}/example-images-segmentation"
         try:
-            clone = self.client.clone_dataset(dataset_identifier)
+            clone = self.client.clone_dataset(
+                dataset_identifier, organization=self.owner
+            )
 
             self.assertIsInstance(clone, Dataset)
             self.assertEqual(clone.name, "example-images-segmentation-clone")
