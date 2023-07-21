@@ -157,7 +157,7 @@ class Annotation(BaseModel):
     attributes: Optional[ObjectAttributes]
 
 
-# Image segmenation
+# Image segmentation
 class ImageSegmentationLabelAttributes(BaseModel):
     annotations: List[Annotation]
     segmentation_bitmap: URL
@@ -414,6 +414,7 @@ class ImageSequenceSampleAttributes(BaseModel):
 # Point cloud
 class PCD(BaseModel):
     url: str
+    signed_url: Optional[str]
     type: Literal["pcd", "kitti", "nuscenes"]
 
 
