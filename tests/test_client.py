@@ -45,10 +45,6 @@ class Test(unittest.TestCase):
         self.datasets = json.loads(cast(str, os.getenv("DATASETS")))
         # First sample uuid.
         self.sample_uuids = json.loads(cast(str, os.getenv("SAMPLE_UUIDS")))
-        # First sample of first dataset.
-        self.labelsets = json.loads(cast(str, os.getenv("LABELSETS")))
-        # Releases of first dataset.
-        self.releases = json.loads(cast(str, os.getenv("RELEASES")))
         # Sample attribute type of the datasets.
         self.sample_attribute_types = json.loads(
             cast(str, os.getenv("SAMPLE_ATTRIBUTE_TYPES"))
@@ -79,9 +75,10 @@ class TestDataset(Test):
             self.assertIsInstance(dataset, Dataset)
 
     def test_get_dataset(self) -> None:
-        dataset_identifier = f"{self.owner}/{self.datasets[0]}"
-        dataset = self.client.get_dataset(dataset_identifier)
-        self.assertIsInstance(dataset, Dataset)
+        for dataset in self.datasets:
+            dataset_identifier = f"{self.owner}/{dataset}"
+            dataset = self.client.get_dataset(dataset_identifier)
+            self.assertIsInstance(dataset, Dataset)
 
     def test_get_dataset_notfounderror(self) -> None:
         with self.assertRaises(NotFoundError):
@@ -206,25 +203,26 @@ class TestDataset(Test):
             self.client.delete_dataset(f"{clone.owner.username}/{clone.name}")
 
     def test_get_add_update_delete_dataset_collaborator(self) -> None:
-        dataset_identifier = f"{self.owner}/{self.datasets[0]}"
         username = "admin-arnaud"
         role: Final = "admin"
         new_role: Final = "reviewer"
-        try:
-            collaborator = self.client.add_dataset_collaborator(
-                dataset_identifier, username, role
-            )
-            self.assertIsInstance(collaborator, Collaborator)
-            collaborator = self.client.get_dataset_collaborator(
-                dataset_identifier, username
-            )
-            self.assertIsInstance(collaborator, Collaborator)
-            collaborator = self.client.update_dataset_collaborator(
-                dataset_identifier, username, new_role
-            )
-            self.assertIsInstance(collaborator, Collaborator)
-        finally:
-            self.client.delete_dataset_collaborator(dataset_identifier, username)
+        for dataset in self.datasets:
+            dataset_identifier = f"{self.owner}/{dataset}"
+            try:
+                collaborator = self.client.add_dataset_collaborator(
+                    dataset_identifier, username, role
+                )
+                self.assertIsInstance(collaborator, Collaborator)
+                collaborator = self.client.get_dataset_collaborator(
+                    dataset_identifier, username
+                )
+                self.assertIsInstance(collaborator, Collaborator)
+                collaborator = self.client.update_dataset_collaborator(
+                    dataset_identifier, username, new_role
+                )
+                self.assertIsInstance(collaborator, Collaborator)
+            finally:
+                self.client.delete_dataset_collaborator(dataset_identifier, username)
 
     def test_delete_dataset_collaborator_notfounderror(self) -> None:
         # Wrong dataset identifier and wrong username
@@ -254,17 +252,18 @@ class TestSample(Test):
         super().tearDown()
 
     def test_get_samples(self) -> None:
-        dataset_identifier = f"{self.owner}/{self.datasets[0]}"
         name = None
         label_status = None
         metadata = None
         sort: Final = "created"
         direction: Final = "desc"
-        samples = self.client.get_samples(
-            dataset_identifier, name, label_status, metadata, sort, direction
-        )
-        for sample in samples:
-            self.assertIsInstance(sample, Sample)
+        for dataset in self.datasets:
+            dataset_identifier = f"{self.owner}/{dataset}"
+            samples = self.client.get_samples(
+                dataset_identifier, name, label_status, metadata, sort, direction
+            )
+            for sample in samples:
+                self.assertIsInstance(sample, Sample)
 
     def test_get_samples_notfounderror(self) -> None:
         with self.assertRaises(NotFoundError):
@@ -738,23 +737,24 @@ class TestIssue(Test):
         super().tearDown()
 
     def test_get_issues(self) -> None:
-        dataset_identifier = f"{self.owner}/{self.datasets[0]}"
-        issues = self.client.get_issues(dataset_identifier)
-        for issue in issues:
-            self.assertIsInstance(issue, Issue)
+        for dataset in self.datasets:
+            dataset_identifier = f"{self.owner}/{dataset}"
+            issues = self.client.get_issues(dataset_identifier)
+            for issue in issues:
+                self.assertIsInstance(issue, Issue)
 
     def test_add_update_delete_issue(self) -> None:
-        # Add labelset.
-        sample_uuid = self.sample_uuids[0]
         description = "You forgot to label this car."
-        try:
-            issue = self.client.add_issue(sample_uuid, description)
-            self.assertIsInstance(issue, Issue)
-            issue = self.client.update_issue(issue.uuid, description)
-            self.assertIsInstance(issue, Issue)
-        finally:
-            # Delete issue.
-            self.client.delete_issue(issue.uuid)
+        for sample_uuid in self.sample_uuids:
+            try:
+                # Add issue.
+                issue = self.client.add_issue(sample_uuid, description)
+                self.assertIsInstance(issue, Issue)
+                issue = self.client.update_issue(issue.uuid, description)
+                self.assertIsInstance(issue, Issue)
+            finally:
+                # Delete issue.
+                self.client.delete_issue(issue.uuid)
 
     def test_add_issue_notfounderror(self) -> None:
         with self.assertRaises(NotFoundError):
@@ -780,10 +780,11 @@ class TestLabelset(Test):
         super().tearDown()
 
     def test_get_labelsets(self) -> None:
-        dataset_identifier = f"{self.owner}/{self.datasets[0]}"
-        labelsets = self.client.get_labelsets(dataset_identifier)
-        for labelset in labelsets:
-            self.assertIsInstance(labelset, Labelset)
+        for dataset in self.datasets:
+            dataset_identifier = f"{self.owner}/{dataset}"
+            labelsets = self.client.get_labelsets(dataset_identifier)
+            for labelset in labelsets:
+                self.assertIsInstance(labelset, Labelset)
 
     def test_get_labelsets_notfounderror(self) -> None:
         with self.assertRaises(NotFoundError):
@@ -791,10 +792,12 @@ class TestLabelset(Test):
             self.client.get_labelsets(wrong_dataset_identifier)
 
     def test_get_labelset(self) -> None:
-        dataset_identifier = f"{self.owner}/{self.datasets[0]}"
-        for labelset in self.labelsets:
-            labelset = self.client.get_labelset(dataset_identifier, labelset)
-            self.assertIsInstance(labelset, Labelset)
+        for dataset in self.datasets:
+            dataset_identifier = f"{self.owner}/{dataset}"
+            labelsets = self.client.get_labelsets(dataset_identifier)
+            for labelset in labelsets:
+                labelset = self.client.get_labelset(dataset_identifier, labelset.name)
+                self.assertIsInstance(labelset, Labelset)
 
     def test_get_labelset_notfounderror(self) -> None:
         # Wrong dataset identifier and wrong name
@@ -809,16 +812,19 @@ class TestLabelset(Test):
             self.client.get_labelset(right_dataset_identifier, wrong_name)
 
     def test_add_delete_labelset(self) -> None:
-        # Add labelset.
-        dataset_identifier = f"{self.owner}/{self.datasets[0]}"
         name = "labelset4"
         description = "Test add_delete_labelset description."
-        try:
-            labelset = self.client.add_labelset(dataset_identifier, name, description)
-            self.assertIsInstance(labelset, Labelset)
-        finally:
-            # Delete labelset.
-            self.client.delete_labelset(dataset_identifier, name)
+        for dataset in self.datasets:
+            # Add labelset.
+            dataset_identifier = f"{self.owner}/{dataset}"
+            try:
+                labelset = self.client.add_labelset(
+                    dataset_identifier, name, description
+                )
+                self.assertIsInstance(labelset, Labelset)
+            finally:
+                # Delete labelset.
+                self.client.delete_labelset(dataset_identifier, name)
 
     def test_add_labelset_networkerror(self) -> None:
         with self.assertRaises(NetworkError):
@@ -850,10 +856,11 @@ class TestRelease(Test):
         super().tearDown()
 
     def test_get_releases(self) -> None:
-        dataset_identifier = f"{self.owner}/{self.datasets[0]}"
-        releases = self.client.get_releases(dataset_identifier)
-        for release in releases:
-            self.assertIsInstance(release, Release)
+        for dataset in self.datasets:
+            dataset_identifier = f"{self.owner}/{dataset}"
+            releases = self.client.get_releases(dataset_identifier)
+            for release in releases:
+                self.assertIsInstance(release, Release)
 
     def test_get_releases_notfounderror(self) -> None:
         with self.assertRaises(NotFoundError):
@@ -861,10 +868,12 @@ class TestRelease(Test):
             self.client.get_releases(wrong_dataset_identifier)
 
     def test_get_release(self) -> None:
-        dataset_identifier = f"{self.owner}/{self.datasets[0]}"
-        for release in self.releases:
-            release = self.client.get_release(dataset_identifier, release)
-            self.assertIsInstance(release, Release)
+        for dataset in self.datasets:
+            dataset_identifier = f"{self.owner}/{dataset}"
+            releases = self.client.get_releases(dataset_identifier)
+            for release in releases:
+                release = self.client.get_release(dataset_identifier, release.name)
+                self.assertIsInstance(release, Release)
 
     def test_get_release_notfounderror(self) -> None:
         # Wrong dataset identifier and wrong name
@@ -879,17 +888,18 @@ class TestRelease(Test):
             self.client.get_release(right_dataset_identifier, wrong_name)
 
     def test_add_delete_release(self) -> None:
-        dataset_identifier = f"{self.owner}/{self.datasets[0]}"
         name = "v0.4"
         description = "Test release description."
-        try:
-            # Add release
-            release = self.client.add_release(dataset_identifier, name, description)
-            self.assertIsInstance(release, Release)
-        finally:
-            # Delete release
-            time.sleep(self.TIME_INTERVAL)
-            self.client.delete_release(dataset_identifier, name)
+        for dataset in self.datasets:
+            dataset_identifier = f"{self.owner}/{dataset}"
+            try:
+                # Add release
+                release = self.client.add_release(dataset_identifier, name, description)
+                self.assertIsInstance(release, Release)
+            finally:
+                # Delete release
+                time.sleep(self.TIME_INTERVAL)
+                self.client.delete_release(dataset_identifier, name)
 
     def test_add_release_networkerror(self) -> None:
         # Wrong dataset identifier and wrong name
@@ -948,10 +958,10 @@ class TestException(Test):
             self.client.get_dataset(dataset_identifier)
 
     def test_dataset_already_exists_error(self) -> None:
-        with self.assertRaises(AlreadyExistsError):
-            dataset = self.datasets[0]
-            organization = self.owner
-            self.client.add_dataset(dataset, organization=organization)
+        organization = self.owner
+        for dataset in self.datasets:
+            with self.assertRaises(AlreadyExistsError):
+                self.client.add_dataset(dataset, organization=organization)
 
     def test_resource_not_found_error(self) -> None:
         with self.assertRaises(NotFoundError):
@@ -959,11 +969,11 @@ class TestException(Test):
             self.client.get_dataset(wrong_dataset_identifier)
 
     def test_add_label_validationerror(self) -> None:
-        with self.assertRaises(ValidationError):
-            sample_uuid = self.sample_uuids[0]
-            labelset = "ground-truth"
-            wrong_attributes: Dict[str, Any] = {"wrong_key": "abcde"}
-            self.client.add_label(sample_uuid, labelset, wrong_attributes)
+        labelset = "ground-truth"
+        wrong_attributes: Dict[str, Any] = {"wrong_key": "abcde"}
+        for sample_uuid in self.sample_uuids:
+            with self.assertRaises(ValidationError):
+                self.client.add_label(sample_uuid, labelset, wrong_attributes)
 
 
 if __name__ == "__main__":

@@ -94,7 +94,6 @@ class SegmentsDataset:
         preload: bool = True,
         s3_client: Optional[Any] = None,
     ):
-
         self.labelset = labelset
         if isinstance(filter_by, list):
             filter_by = [f.upper() for f in filter_by]
@@ -149,7 +148,7 @@ class SegmentsDataset:
             "pointcloud-segmentation",
         ]:
             raise ValueError(
-                "You can only create a dataset for tasks of type 'segmentation-bitmap', 'segmentation-bitmap-highres', 'vector', 'bboxes', 'keypoints', 'image-vector-sequence', 'pointcloud-cuboid', 'pointcloud-segmentation' for now."
+                f"You can only create a dataset for tasks of type 'segmentation-bitmap', 'segmentation-bitmap-highres', 'vector', 'bboxes', 'keypoints', 'image-vector-sequence', 'pointcloud-cuboid', 'pointcloud-segmentation' for now. Got {self.task_type}."
             )
 
         self.load_dataset()
@@ -224,7 +223,6 @@ class SegmentsDataset:
     def _load_image_from_cache(
         self, sample: Dict[str, Any]
     ) -> Tuple[Optional[Image.Image], str]:
-
         sample_name = os.path.splitext(sample["name"])[0]
         image_url = sample["attributes"]["image"]["url"]
         image_url_parsed = urlparse(image_url)
@@ -259,7 +257,6 @@ class SegmentsDataset:
     def _load_segmentation_bitmap_from_cache(
         self, sample: Dict[str, Any], labelset: str
     ) -> Union[npt.NDArray[np.uint32], Image.Image]:
-
         sample_name = os.path.splitext(sample["name"])[0]
         label = sample["labels"][labelset]
         segmentation_bitmap_url = label["attributes"]["segmentation_bitmap"]["url"]

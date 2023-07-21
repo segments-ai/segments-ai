@@ -10,13 +10,11 @@ def test_export_dataset(
     client: SegmentsClient,
     owner: str,
     datasets: List[str],
-    releases: List[str],
     ARTIFACTS_DIR: str,
 ) -> None:
-
     # Get the dataset
-    dataset_identifier, name = f"{owner}/{datasets[0]}", releases[0]
-    release = client.get_release(dataset_identifier, name)
+    dataset_identifier = f"{owner}/{datasets[0]}"
+    release = client.get_releases(dataset_identifier)[0]
     dataset = SegmentsDataset(release, segments_dir=f"{ARTIFACTS_DIR}/segments")
 
     # Export the dataset
