@@ -43,17 +43,17 @@ class Test(unittest.TestCase):
             else SegmentsClient(api_key=API_KEY)
         )
         self.datasets = json.loads(cast(str, os.getenv("DATASETS")))
-        # First sample uuid.
+        # First sample uuid
         self.sample_uuids = json.loads(cast(str, os.getenv("SAMPLE_UUIDS")))
-        # Sample attribute type of the datasets.
+        # Sample attribute type of the datasets
         self.sample_attribute_types = json.loads(
             cast(str, os.getenv("SAMPLE_ATTRIBUTE_TYPES"))
         )
-        # Label attribute type of the datasets.
+        # Label attribute type of the datasets
         self.label_attribute_types = json.loads(
             cast(str, os.getenv("LABEL_ATTRIBUTE_TYPES"))
         )
-        self.TIME_INTERVAL = 0.2  # Wait for API call to complete.
+        self.TIME_INTERVAL = 0.2  # Wait for API call to complete
 
     def tearDown(self) -> None:
         self.client.close()
@@ -138,14 +138,14 @@ class TestDataset(Test):
             # Add dataset
             dataset = self.client.add_dataset(**arguments)
             self.assertIsInstance(dataset, Dataset)
-
             # Update dataset
             arguments["dataset_identifier"] = f"{self.owner}/{arguments['name']}"
             del arguments["name"]
             del arguments["organization"]
             dataset = self.client.update_dataset(**arguments)
             self.assertIsInstance(dataset, Dataset)
-
+        except AlreadyExistsError:
+            pass
         finally:
             # Delete dataset
             self.client.delete_dataset(f"{self.owner}/add_dataset")
@@ -209,19 +209,25 @@ class TestDataset(Test):
         for dataset in self.datasets:
             dataset_identifier = f"{self.owner}/{dataset}"
             try:
+                # Add collaborator
                 collaborator = self.client.add_dataset_collaborator(
                     dataset_identifier, username, role
                 )
                 self.assertIsInstance(collaborator, Collaborator)
+                # Get collaborator
                 collaborator = self.client.get_dataset_collaborator(
                     dataset_identifier, username
                 )
                 self.assertIsInstance(collaborator, Collaborator)
+                # Update collaborator
                 collaborator = self.client.update_dataset_collaborator(
                     dataset_identifier, username, new_role
                 )
                 self.assertIsInstance(collaborator, Collaborator)
+            except AlreadyExistsError:
+                pass
             finally:
+                # Delete collaborator
                 self.client.delete_dataset_collaborator(dataset_identifier, username)
 
     def test_delete_dataset_collaborator_notfounderror(self) -> None:
@@ -373,15 +379,19 @@ class TestSample(Test):
                 self.client.delete_sample(sample.uuid)
 
             # Bulk endpoint
+            returned_samples = None
             try:
                 samples = [
                     {"name": f"sample_{1}", "attributes": attributes},
                     {"name": f"sample_{2}", "attributes": attributes},
                 ]
                 returned_samples = self.client.add_samples(dataset_identifier, samples)
+            except AlreadyExistsError:
+                pass
             finally:
-                for sample in returned_samples:
-                    self.client.delete_sample(sample.uuid)
+                if returned_samples:
+                    for sample in returned_samples:
+                        self.client.delete_sample(sample.uuid)
 
     def test_update_sample_notfounderror(self) -> None:
         with self.assertRaises(NotFoundError):
@@ -720,6 +730,8 @@ class TestLabel(Test):
                 # Get
                 label = self.client.get_label(sample_uuid, labelset)
                 self.assertIsInstance(label, Label)
+            except AlreadyExistsError:
+                pass
             finally:
                 # Delete
                 time.sleep(self.TIME_INTERVAL)
@@ -746,15 +758,19 @@ class TestIssue(Test):
     def test_add_update_delete_issue(self) -> None:
         description = "You forgot to label this car."
         for sample_uuid in self.sample_uuids:
+            issue = None
             try:
-                # Add issue.
+                # Add issue
                 issue = self.client.add_issue(sample_uuid, description)
                 self.assertIsInstance(issue, Issue)
                 issue = self.client.update_issue(issue.uuid, description)
                 self.assertIsInstance(issue, Issue)
+            except AlreadyExistsError:
+                pass
             finally:
-                # Delete issue.
-                self.client.delete_issue(issue.uuid)
+                # Delete issue
+                if issue:
+                    self.client.delete_issue(issue.uuid)
 
     def test_add_issue_notfounderror(self) -> None:
         with self.assertRaises(NotFoundError):
@@ -815,15 +831,17 @@ class TestLabelset(Test):
         name = "labelset4"
         description = "Test add_delete_labelset description."
         for dataset in self.datasets:
-            # Add labelset.
             dataset_identifier = f"{self.owner}/{dataset}"
             try:
+                # Add labelset
                 labelset = self.client.add_labelset(
                     dataset_identifier, name, description
                 )
                 self.assertIsInstance(labelset, Labelset)
+            except AlreadyExistsError:
+                pass
             finally:
-                # Delete labelset.
+                # Delete labelset
                 self.client.delete_labelset(dataset_identifier, name)
 
     def test_add_labelset_networkerror(self) -> None:
@@ -896,6 +914,8 @@ class TestRelease(Test):
                 # Add release
                 release = self.client.add_release(dataset_identifier, name, description)
                 self.assertIsInstance(release, Release)
+            except AlreadyExistsError:
+                pass
             finally:
                 # Delete release
                 time.sleep(self.TIME_INTERVAL)
