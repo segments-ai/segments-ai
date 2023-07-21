@@ -63,7 +63,7 @@ from typing_extensions import Literal, get_args
 ################################
 logger = logging.getLogger(__name__)
 T = TypeVar("T")
-VERSION = "1.0.25"
+VERSION = "1.0.26"
 
 
 ####################
@@ -843,7 +843,12 @@ class SegmentsClient:
 
         return cast(List[Sample], results)
 
-    def get_sample(self, uuid: str, labelset: Optional[str] = None) -> Sample:
+    def get_sample(
+        self,
+        uuid: str,
+        labelset: Optional[str] = None,
+        include_signed_url: bool = False,
+    ) -> Sample:
         """Get a sample.
 
         .. code-block:: python
@@ -855,6 +860,7 @@ class SegmentsClient:
         Args:
             uuid: The sample uuid.
             labelset: If defined, this additionally returns the label for the given labelset. Defaults to :obj:`None`.
+            include_signed_url: Whether to return the pre-signed URL in case of private S3 buckets. Defaults to :obj:`False`.
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the samples fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -867,6 +873,9 @@ class SegmentsClient:
 
         if labelset:
             query_string += f"?labelset={labelset}"
+
+        if include_signed_url:
+            query_string += "?include_signed_urls=1"
 
         r = self._get(query_string, model=Sample)
 

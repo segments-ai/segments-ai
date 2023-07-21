@@ -48,22 +48,6 @@ def sample_uuids() -> List[str]:
 
 
 @pytest.fixture
-def labelsets() -> List[str]:
-    """Labelsets of first sample of first dataset."""
-    labelsets_str = cast(str, os.getenv("LABELSETS"))
-    labelsets = cast(List[str], json.loads(labelsets_str))
-    return labelsets
-
-
-@pytest.fixture
-def releases() -> List[str]:
-    """Releases of first dataset."""
-    releases_str = cast(str, os.getenv("RELEASES"))
-    releases = cast(List[str], json.loads(releases_str))
-    return releases
-
-
-@pytest.fixture
 def sample_attribute_types() -> List[str]:
     """Sample attribute type of the datasets."""
     sample_attribute_types_str = cast(str, os.getenv("SAMPLE_ATTRIBUTE_TYPES"))

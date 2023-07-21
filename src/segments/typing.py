@@ -157,7 +157,7 @@ class Annotation(BaseModel):
     attributes: Optional[ObjectAttributes]
 
 
-# Image segmenation
+# Image segmentation
 class ImageSegmentationLabelAttributes(BaseModel):
     annotations: List[Annotation]
     segmentation_bitmap: URL
@@ -414,6 +414,7 @@ class ImageSequenceSampleAttributes(BaseModel):
 # Point cloud
 class PCD(BaseModel):
     url: str
+    signed_url: Optional[str]
     type: Literal["pcd", "kitti", "nuscenes"]
 
 
@@ -432,11 +433,12 @@ class CameraExtrinsics(BaseModel):
 
 
 class CalibratedImage(URL):
-    row: int
-    col: int
+    row: Optional[int]
+    col: Optional[int]
     intrinsics: Optional[CameraIntrinsics]
     extrinsics: Optional[CameraExtrinsics]
     distortion: Optional[Distortion]
+    camera_convention: Optional[Literal["OpenCV", "OpenGL"]] = "OpenGL"
 
 
 class PointcloudSampleAttributes(BaseModel):
