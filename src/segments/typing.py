@@ -438,6 +438,7 @@ class CalibratedImage(URL):
     intrinsics: Optional[CameraIntrinsics]
     extrinsics: Optional[CameraExtrinsics]
     distortion: Optional[Distortion]
+    camera_convention: Optional[Literal["OpenCV", "OpenGL"]] = "OpenGL"
 
 
 class PointcloudSampleAttributes(BaseModel):
