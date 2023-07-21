@@ -262,6 +262,9 @@ class SegmentsDataset:
         segmentation_bitmap_url = label["attributes"]["segmentation_bitmap"]["url"]
         url_extension = os.path.splitext(urlparse(segmentation_bitmap_url).path)[1]
 
+        if not segmentation_bitmap_url:
+            return None
+
         if self.caching_enabled:
             # segmentation_bitmap_filename = os.path.join(self.image_dir, '{}{}'.format(label['uuid'], url_extension))
             segmentation_bitmap_filename = os.path.join(
