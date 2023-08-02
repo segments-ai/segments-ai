@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from enum import Enum
+from enum import Enum as BaseEnum
+from enum import EnumMeta as BaseEnumMeta
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel as PydanticBaseModel
@@ -17,6 +18,25 @@ class BaseModel(PydanticBaseModel):
         extra = "ignore"
         # What happens with wrong field types. Use false in production and true in debug mode. https://pydantic-docs.helpmanual.io/usage/types/#arbitrary-types-allowed
         arbitrary_types_allowed = False
+
+
+class EnumMeta(BaseEnumMeta):
+    # https://stackoverflow.com/questions/43634618/how-do-i-test-if-int-value-exists-in-python-enum-without-using-try-catch
+    def __contains__(self, item):
+        return isinstance(item, self) or item in {
+            v.value for v in self.__members__.values()
+        }
+
+    # https://stackoverflow.com/questions/29503339/how-to-get-all-values-from-python-enum-class
+    def __str__(self):
+        return ", ".join(c.value for c in self)
+
+    def __repr__(self):
+        return self.__str__()
+
+
+class Enum(BaseEnum, metaclass=EnumMeta):
+    pass
 
 
 #################################
@@ -730,13 +750,10 @@ class Dataset(BaseModel):
 
     @validator("category")
     def check_category(cls, category: str) -> str:
-        try:
-            Category(category)  # check if category is valid
-        except ValueError:
-            if "custom-" not in category:
-                raise ValidationError(
-                    f"The category should be one of {Category}, but is {category}."
-                )
+        if category not in Category and "custom-" not in category:
+            raise ValidationError(
+                f"The category should be one of {Category}, but is {category}."
+            )
         return category
 
 
