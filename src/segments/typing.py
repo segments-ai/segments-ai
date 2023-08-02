@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from pydantic import BaseModel as PydanticBaseModel
 from pydantic import validator
 from segments.exceptions import ValidationError
-from typing_extensions import Literal, TypedDict, get_args
+from typing_extensions import Literal, TypedDict
 
 
 class BaseModel(PydanticBaseModel):
@@ -730,10 +730,9 @@ class Dataset(BaseModel):
 
     @validator("category")
     def check_category(cls, category: str) -> str:
-        category_list = get_args(Category)
-        if category not in category_list and "custom-" not in category:
+        if category not in Category and "custom-" not in category:
             raise ValidationError(
-                f"The category should be one of {category_list}, but is {category}."
+                f"The category should be one of {Category}, but is {category}."
             )
         return category
 
