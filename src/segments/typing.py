@@ -730,10 +730,13 @@ class Dataset(BaseModel):
 
     @validator("category")
     def check_category(cls, category: str) -> str:
-        if category not in Category and "custom-" not in category:
-            raise ValidationError(
-                f"The category should be one of {Category}, but is {category}."
-            )
+        try:
+            Category(category)  # check if category is valid
+        except ValueError:
+            if "custom-" not in category:
+                raise ValidationError(
+                    f"The category should be one of {Category}, but is {category}."
+                )
         return category
 
 
