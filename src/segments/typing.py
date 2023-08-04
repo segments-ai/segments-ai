@@ -111,7 +111,7 @@ class InputType(str, Enum):
 
 class CameraDistortionModel(str, Enum):
     FISH_EYE = "fisheye"
-    BROWN_CONRADY = "brown_conrady"
+    BROWN_CONRADY = "brown-conrady"
 
 
 class PCDType(str, Enum):
