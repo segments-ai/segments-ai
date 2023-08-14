@@ -1123,6 +1123,9 @@ class SegmentsClient:
     def get_label(self, sample_uuid: str, labelset: str = "ground-truth") -> Label:
         """Get a label.
 
+        Note:
+            If the sample is unlabeled, a :exc:`~segments.exceptions.NotFoundError` will be raised.
+
         .. code-block:: python
 
             sample_uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
@@ -1135,7 +1138,7 @@ class SegmentsClient:
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the label fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
-            :exc:`~segments.exceptions.NotFoundError`: If the sample or labelset is not found.
+            :exc:`~segments.exceptions.NotFoundError`: If the sample or labelset is not found or if the sample is unlabeled.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
