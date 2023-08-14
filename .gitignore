@@ -137,3 +137,6 @@ dmypy.json
 
 # Environment variables
 .env
+
+# data folder for testing purposes
+data/
