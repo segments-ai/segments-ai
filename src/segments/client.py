@@ -22,7 +22,7 @@ from typing import (
 import numpy.typing as npt
 import pydantic
 import requests
-from pydantic import parse_obj_as
+from pydantic import TypeAdapter
 from segments.exceptions import (
     AlreadyExistsError,
     APILimitError,
@@ -102,7 +102,7 @@ def handle_exceptions(
                     if "throttled" in message:
                         raise APILimitError(message)
                 if model:
-                    m = parse_obj_as(model, r_json)
+                    m = TypeAdapter(model).validate_python(r_json)
                     return m
             return r
         except requests.exceptions.Timeout as e:
@@ -837,7 +837,7 @@ class SegmentsClient:
             result.pop("label", None)
 
         try:
-            results = parse_obj_as(List[Sample], results)
+            results = TypeAdapter(List[Sample]).validate_python(results)
         except pydantic.ValidationError as e:
             raise ValidationError(message=str(e), cause=e)
 
@@ -939,7 +939,7 @@ class SegmentsClient:
 
         if type(attributes) is dict:
             try:
-                parse_obj_as(SampleAttributes, attributes)
+                TypeAdapter(SampleAttributes).validate_python(attributes)
             except pydantic.ValidationError as e:
                 logger.error(
                     "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
@@ -1005,7 +1005,7 @@ class SegmentsClient:
                     )
 
                 try:
-                    parse_obj_as(SampleAttributes, sample["attributes"])
+                    TypeAdapter(SampleAttributes).validate_python(sample["attributes"])
                 except pydantic.ValidationError as e:
                     logger.error(
                         "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
@@ -1198,7 +1198,7 @@ class SegmentsClient:
 
         if type(attributes) is dict:
             try:
-                parse_obj_as(LabelAttributes, attributes)
+                TypeAdapter(LabelAttributes).validate_python(attributes)
             except pydantic.ValidationError as e:
                 logger.error(
                     "Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.",
