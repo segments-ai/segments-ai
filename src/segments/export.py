@@ -600,7 +600,7 @@ def export_image(
         )
 
         categories.append(
-            SegmentsDatasetCategory.parse_obj(
+            SegmentsDatasetCategory.model_validate(
                 {
                     "id": category.id,
                     "name": category.name,

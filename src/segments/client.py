@@ -412,7 +412,7 @@ class SegmentsClient:
 
         if type(task_attributes) is dict:
             try:
-                TaskAttributes.parse_obj(task_attributes)
+                TaskAttributes.model_validate(task_attributes)
             except pydantic.ValidationError as e:
                 logger.error(
                     "Did you use the right task attributes? Please refer to the online documentation: https://docs.segments.ai/reference/categories-and-task-attributes#object-attribute-format.",
@@ -1671,7 +1671,7 @@ class SegmentsClient:
         """
 
         r = self._post("/assets/", data={"filename": filename})
-        presigned_post_fields = PresignedPostFields.parse_obj(
+        presigned_post_fields = PresignedPostFields.model_validate(
             r.json()["presignedPostFields"]
         )
         self._upload_to_aws(
@@ -1679,7 +1679,7 @@ class SegmentsClient:
         )
 
         try:
-            f = File.parse_obj(r.json())
+            f = File.model_validate(r.json())
         except pydantic.ValidationError as e:
             raise ValidationError(message=str(e), cause=e)
 
