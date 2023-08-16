@@ -22,6 +22,7 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 ```{eval-rst}
 .. autoclass:: segments.typing.TaskType
     :members:
+    :undoc-members:
 ```
 
 ## Samples
@@ -41,6 +42,7 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 ```{eval-rst}
 .. autoclass:: segments.typing.IssueStatus
     :members:
+    :undoc-members:
 ```
 
 ### Image sample
@@ -101,6 +103,7 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 ```{eval-rst}
 .. autoclass:: segments.typing.LabelStatus
     :members:
+    :undoc-members:
 ```
 
 ### Image segmentation label
@@ -126,6 +129,7 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 ```{eval-rst}
 .. autoclass:: segments.typing.ImageVectorAnnotationType
     :members:
+    :undoc-members:
 ```
 
 ### Image sequence vector label
@@ -162,6 +166,7 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 ```{eval-rst}
 .. autoclass:: segments.typing.PointcloudCuboidAnnotationType
     :members:
+    :undoc-members:
 ```
 
 ### Point cloud vector label
@@ -177,6 +182,7 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 ```{eval-rst}
 .. autoclass:: segments.typing.PointcloudVectorAnnotationType
     :members:
+    :undoc-members:
 ```
 
 ### Point cloud sequence segmentation
@@ -262,6 +268,7 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 ```{eval-rst}
 .. autoclass:: segments.typing.ReleaseStatus
     :members:
+    :undoc-members:
 ```
 
 ## Files
@@ -272,11 +279,6 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.PresignedPostFields
-```
-
-```{eval-rst}
-.. autoclass:: segments.typing.AWSFields
-    :members:
 ```
 
 ## Helper classes
@@ -300,21 +302,25 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 ```{eval-rst}
 .. autoclass:: segments.typing.SelectTaskAttribute
     :members:
+    :undoc-members:
 ```
 
 ```{eval-rst}
 .. autoclass:: segments.typing.TextTaskAttribute
     :members:
+    :undoc-members:
 ```
 
 ```{eval-rst}
 .. autoclass:: segments.typing.NumberTaskAttribute
     :members:
+    :undoc-members:
 ```
 
 ```{eval-rst}
 .. autoclass:: segments.typing.CheckboxTaskAttribute
     :members:
+    :undoc-members:
 ```
 
 ```{eval-rst}
@@ -344,6 +350,7 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 ```{eval-rst}
 .. autoclass:: segments.typing.PCDType
     :members:
+    :undoc-members:
 ```
 
 ```{eval-rst}
@@ -354,6 +361,7 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 ```{eval-rst}
 .. autoclass:: segments.typing.CameraConvention
     :members:
+    :undoc-members:
 ```
 
 ```{eval-rst}
@@ -371,6 +379,7 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 ```{eval-rst}
 .. autoclass:: segments.typing.CameraDistortionModel
     :members:
+    :undoc-members:
 ```
 
 ```{eval-rst}
