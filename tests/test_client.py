@@ -166,7 +166,8 @@ class TestDataset(Test):
             self.client.clone_dataset(wrong_dataset_identifier)
 
     def test_clone_dataset_defaults(self) -> None:
-        dataset_identifier = f"{self.owner}/example-images-segmentation"
+        name = "example-images-segmentation"
+        dataset_identifier = f"{self.owner}/{name}"
         try:
             clone = self.client.clone_dataset(
                 dataset_identifier, organization=self.owner
@@ -179,7 +180,7 @@ class TestDataset(Test):
 
         finally:
             # Delete dataset
-            self.client.delete_dataset(f"{clone.owner.username}/{clone.name}")
+            self.client.delete_dataset(f"{self.owner}/{name}-clone")
 
     def test_clone_dataset_custom(self) -> None:
         dataset_identifier = f"{self.owner}/example-images-vector"
@@ -192,6 +193,7 @@ class TestDataset(Test):
                 dataset_identifier,
                 new_name=new_name,
                 new_task_type=new_task_type,
+                organization=self.owner,
             )
 
             self.assertIsInstance(clone, Dataset)
@@ -200,7 +202,7 @@ class TestDataset(Test):
 
         finally:
             # Delete dataset
-            self.client.delete_dataset(f"{clone.owner.username}/{clone.name}")
+            self.client.delete_dataset(f"{self.owner}/{new_name}")
 
     def test_get_add_update_delete_dataset_collaborator(self) -> None:
         username = "admin-arnaud"
