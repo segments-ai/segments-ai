@@ -419,7 +419,7 @@ class SegmentsClient:
                 )
                 raise ValidationError(message=str(e), cause=e)
         elif type(task_attributes) is TaskAttributes:
-            task_attributes = task_attributes.dict()
+            task_attributes = task_attributes.model_dump()
 
         payload: Dict[str, Any] = {
             "name": name,
@@ -516,7 +516,7 @@ class SegmentsClient:
 
         if task_attributes:
             payload["task_attributes"] = (
-                task_attributes.dict()
+                task_attributes.model_dump()
                 if type(task_attributes) is TaskAttributes
                 else task_attributes
             )
@@ -946,7 +946,7 @@ class SegmentsClient:
                 )
                 raise ValidationError(message=str(e), cause=e)
         elif type(attributes) in get_args(SampleAttributes):
-            attributes = attributes.dict()
+            attributes = attributes.model_dump()
 
         payload: Dict[str, Any] = {
             "name": name,
@@ -1012,7 +1012,7 @@ class SegmentsClient:
                     )
                     raise ValidationError(message=str(e), cause=e)
             elif type(sample) is Sample:
-                sample = sample.dict()
+                sample = sample.model_dump()
 
         payload = samples
 
@@ -1073,7 +1073,7 @@ class SegmentsClient:
 
         if attributes:
             payload["attributes"] = (
-                attributes.dict()
+                attributes.model_dump()
                 if type(attributes) in get_args(SampleAttributes)
                 else attributes
             )
@@ -1205,7 +1205,7 @@ class SegmentsClient:
                 )
                 raise ValidationError(message=str(e), cause=e)
         elif type(attributes) in get_args(LabelAttributes):
-            attributes = attributes.dict()
+            attributes = attributes.model_dump()
 
         payload: Dict[str, Any] = {
             "label_status": label_status,
@@ -1266,7 +1266,7 @@ class SegmentsClient:
 
         if attributes:
             payload["attributes"] = (
-                attributes.dict()
+                attributes.model_dump()
                 if type(attributes) in get_args(LabelAttributes)
                 else attributes
             )
