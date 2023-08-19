@@ -126,6 +126,7 @@ def rgb2id(color: Union[npt.NDArray[Any], RGB]) -> Union[npt.NDArray[Any], int]:
 
     Args:
         color: An RGB value.
+
     Returns:
         The id.
     """
@@ -142,6 +143,7 @@ def id2rgb(id_map: npt.NDArray[Any]) -> Union[npt.NDArray[Any], RGB]:
 
     Args:
         id_map: An id map.
+
     Returns:
         An rgb.
     """
@@ -190,6 +192,7 @@ def get_bbox(binary_mask: npt.NDArray[Any]) -> Union[Tuple[int, int, int, int], 
 
     Args:
         binary_mask: The binary mask as a numpy array.
+
     Returns:
         The bounding box or False if no bounding box is found.
     """
@@ -213,8 +216,10 @@ def export_coco_instance(
     Args:
         dataset: A :class:`.SegmentsDataset`.
         export_folder: The output directory.
+
     Returns:
         Returns the file name and the image directory name.
+
     Raises:
         :exc:`ImportError`: If pycocotools is not installed.
     """
@@ -398,6 +403,7 @@ def export_coco_panoptic(
     Args:
         dataset: A :class:`.SegmentsDataset`.
         export_folder: The output directory.
+
     Returns:
         Returns the file name and the image directory name.
     """
@@ -581,6 +587,7 @@ def export_image(
         export_folder: The output directory.
         export_format: The export format.
         id_increment: Increment the category ids with this number.
+
     Returns:
         Returns the export folder.
     """
@@ -686,8 +693,10 @@ def export_yolo(
         export_folder: The output directory.
         image_width: The width of the image (needed for ``image-vector-sequence``).
         image_height: The height of the image (needed for ``image-vector-sequence``).
+
     Returns:
         The image directory of the dataset.
+
     Raises:
         :exc:`ValueError`: If the dataset is not a bounding box dataset.
         :exc:`ValueError`: If the dataset is an ``image-vector-sequence``and the image width or image height is :obj:`None`.
@@ -798,8 +807,10 @@ def export_polygon(
     Args:
         dataset: A :class:`.SegmentsDataset`.
         export_folder: The output directory.
+
     Raises:
         :exc:`ImportError`: If OpenCV is not installed.
+
     Returns:
         Returns the file name and the image directory name.
     """

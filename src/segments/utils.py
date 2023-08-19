@@ -42,8 +42,10 @@ def bitmap2file(
     Args:
         bitmap: A :class:`numpy.ndarray` with :class:`numpy.uint32` dtype where each unique value represents an instance id.
         is_segmentation_bitmap: If this is a segmentation bitmap. Defaults to :obj:`True`.
+
     Returns:
         A file object.
+
     Raises:
         :exc:`ValueError`: If the ``dtype`` is not :class:`np.uint32` or :class:`np.uint8`.
         :exc:`ValueError`: If the bitmap is not a segmentation bitmap.
@@ -81,6 +83,7 @@ def get_semantic_bitmap(
         instance_bitmap: A :class:`numpy.ndarray` with :class:`numpy.uint32` ``dtype`` where each unique value represents an instance id. Defaults to :obj:`None`.
         annotations: An annotations dictionary. Defaults to :obj:`None`.
         id_increment: Increment the category ids with this number. Defaults to ``0``.
+
     Returns:
         An array here each unique value represents a category id.
     """
@@ -182,8 +185,10 @@ def export_dataset(
         export_folder: The folder to export the dataset to. Defaults to ``.``.
         export_format: The destination format. Defaults to ``coco-panoptic``.
         id_increment: Increment the category ids with this number. Defaults to ``0``. Ignored unless ``export_format`` is ``semantic`` or ``semantic-color``.
+
     Returns:
         Returns the file name and the image directory name (for COCO panoptic, COCO instance, YOLO and polygon), or returns the export folder name (for (colored) instance and (colored) panoptic).
+
     Raises:
         :exc:`ImportError`: If scikit image is not installed (to install run ``pip install scikit-image``).
         :exc:`ValueError`: If an unvalid ``export_format`` is used.
@@ -336,6 +341,7 @@ def load_release(release: Release) -> Any:
 
     Args:
         release: A Segments release.
+
     Returns:
         A JSON with the release labels.
     """
@@ -349,6 +355,7 @@ def handle_exif_rotation(image: Image.Image) -> Image.Image:
 
     Args:
         image: A PIL image.
+
     Returns:
         A rotated PIL image.
     """
@@ -388,6 +395,7 @@ def show_polygons(
         exported_polygons_path: The exported polygons path.
         seed: The seed used to generate random colors. Defaults to ``0``.
         output_path: The directory to save the plot to. Defaults to :obj:`None`.
+
     Raises:
         :exc:`ImportError`: If matplotlib is not installed.
     """
