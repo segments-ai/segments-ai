@@ -514,7 +514,7 @@ def show_polygons(
     plt.show()
 
 
-def cuboids_to_instance_segmentation(
+def cuboid_to_segmentation(
     pointcloud: np.ndarray,
     label_attributes: PointcloudCuboidLabelAttributes,
     ego_pose: Optional[EgoPose] = None,

@@ -45,6 +45,12 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 .. autofunction:: segments.utils.handle_exif_rotation
 ```
 
+### Turn a cuboid label into a segmentation label
+
+```{eval-rst}
+.. autofunction:: segments.utils.cuboid_to_segmentation
+```
+
 ## Export
 
 ### Export a dataset to a different format
