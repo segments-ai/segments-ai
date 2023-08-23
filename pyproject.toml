@@ -2,17 +2,16 @@
 requires = ["setuptools>=42.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
+# pytest
 [tool.pytest.ini_options]
 addopts = "--cov=segments"
-testpaths = [
-    "tests",
-]
-pythonpath = [
-  "."
-]
+testpaths = ["tests"]
+pythonpath = ["."]
 
+# mypy
 [tool.mypy]
 mypy_path = "src"
+plugins = ["pydantic.mypy"]
 check_untyped_defs = true
 disallow_any_generics = true
 ignore_missing_imports = true
@@ -24,3 +23,8 @@ warn_return_any = true
 warn_unreachable = true
 warn_unused_configs = true
 no_implicit_reexport = true
+
+# ruff
+[tool.ruff]
+ruff_path = "src"
+line-length = 100
