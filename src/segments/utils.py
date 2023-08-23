@@ -15,6 +15,12 @@ import numpy as np
 import numpy.typing as npt
 import requests
 from PIL import ExifTags, Image
+from segments.exceptions import AlreadyExistsError
+from segments.typing import (
+    EgoPose,
+    PointcloudCuboidAnnotation,
+    PointcloudCuboidLabelAttributes,
+)
 from typing_extensions import Literal
 
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
@@ -507,3 +513,180 @@ def show_polygons(
         plt.savefig(path, bbox_inches="tight")
 
     plt.show()
+
+
+def cuboids_to_instance_segmentation(
+    pointcloud: np.ndarray,
+    label_attributes: PointcloudCuboidLabelAttributes,
+    ego_pose: Optional[EgoPose] = None,
+) -> np.ndarray:
+    """Convert a cuboid label to an instance segmentation label.
+
+    Args:
+        pointcloud: A pointcloud of size Nx3.
+        label_attributes: A cuboid label from a single frame interface or one frame from a sequence interface.
+
+    Returns:
+        An instance segmentation label of size Nx1 mapping each point cloud point to a cuboid instance.
+    """
+
+    # check dimensions of input
+    assert pointcloud.shape[1] == 3, "Pointcloud must have shape (N, 3)"
+    assert label_attributes.annotations, "Label must have annotations"
+
+    # map cuboids to 8 xyz points
+    cuboids = {
+        annotation.id: get_cuboid_points(annotation)
+        for annotation in label_attributes.annotations
+    }
+
+    # transform points to world coordinates
+    if ego_pose:
+        try:
+            from pyquaternion import Quaternion
+        except ImportError as e:
+            logger.error("Please install pyquaternion first: pip install pyquaternion.")
+            raise e
+
+        pos, rot = ego_pose.position, ego_pose.heading
+        position = np.array([pos.x, pos.y, pos.z])
+        rotation = Quaternion(
+            x=rot.qx, y=rot.qy, z=rot.qz, w=rot.qw
+        ).inverse.rotation_matrix
+        pointcloud = np.matmul(pointcloud, rotation) + position
+
+    def is_inside(point: np.ndarray, cuboid: np.ndarray) -> bool:
+        """Check if a point is inside a cuboid. Adapted from: https://stackoverflow.com/questions/21037241/how-to-determine-a-point-is-inside-or-outside-a-cube#:~:text=As%20maxim1000's%20answer%20shows%2C%20you,Z%20coordinates%20of%20the%20Cube.&text=If%20the%20aforementioned%20condition%20is,cube%2C%20otherwise%20it%20does%20not.
+
+        Args:
+            point: point numpy array with shape (3,).
+            cuboid: 8 points of a cuboid with shape (8, 3).
+
+        Returns:
+        Returns whether the point is inside the cuboid.
+        """
+        b1, b2, _, b4, t1, _, t3, _ = cuboid
+
+        dir1 = t1 - b1
+        size1 = np.linalg.norm(dir1)
+        dir1 = dir1 / size1
+        dir2 = b2 - b1
+        size2 = np.linalg.norm(dir2)
+        dir2 = dir2 / size2
+        dir3 = b4 - b1
+        size3 = np.linalg.norm(dir3)
+        dir3 = dir3 / size3
+        cuboid_center = (b1 + t3) / 2.0
+        dir_vec = point - cuboid_center
+
+        result = (
+            2 * np.absolute(np.dot(dir_vec, dir1)) < size1
+            and 2 * np.absolute(np.dot(dir_vec, dir2)) < size2
+            and 2 * np.absolute(np.dot(dir_vec, dir3)) < size3
+        )
+
+        return result
+
+    # map each point to a cuboid instance
+    result = np.zeros(pointcloud.shape[0], dtype=np.uint32)
+    for i, point in enumerate(pointcloud):
+        for cuboid_id, points in cuboids.items():
+            if is_inside(point, points):
+                result[i] = cuboid_id
+                break  # assume no overlapping cuboids. if there are, returns first one found
+
+    assert (
+        result.shape[0] == pointcloud.shape[0]
+    ), "Result must have same length as pointcloud"
+    return result
+
+
+def get_cuboid_points(
+    annotation: PointcloudCuboidAnnotation,
+) -> np.ndarray:
+    """Get the 8 points of a cuboid annotation (first bottom plane, then top plane, points in clock wise direction).
+
+    Args:
+        annotation: A cuboid annotation.
+
+    Returns:
+        An array of shape (8, 3) with the 8 points of the cuboid.
+    """
+    position = annotation.position
+    dimension = annotation.dimensions
+    x, dx = position.x, dimension.x / 2
+    y, dy = position.y, dimension.y / 2
+    z, dz = position.z, dimension.z / 2
+
+    # if there is a rotation it contains all the information, else use yaw rotation
+    if annotation.rotation:
+        try:
+            from pyquaternion import Quaternion
+        except ImportError as e:
+            logger.error("Please install pyquaternion first: pip install pyquaternion.")
+            raise e
+
+        rotation = annotation.rotation
+        rot_mat = Quaternion(
+            x=rotation.qx, y=rotation.qy, z=rotation.qz, w=rotation.qw
+        ).rotation_matrix
+    else:
+        yaw = annotation.yaw if annotation.yaw is not None else 0
+        rot_mat = np.array(
+            [[np.cos(yaw), -np.sin(yaw), 0], [np.sin(yaw), np.cos(yaw), 0], [0, 0, 1]],
+        )  # 2D rotation around z-axis
+
+    vertices_hom = []
+    for z_i in [-dz, dz]:  # bottom and top plane
+        for x_i, y_i in [(-dx, -dy), (-dx, dy), (dx, dy), (dx, -dy)]:  # clockwise
+            vertex = rot_mat.dot(np.array([x_i, y_i, z_i]))
+            vertex = np.add(vertex, np.array([x, y, z]))
+            vertices_hom.append(vertex)
+
+    return np.array(vertices_hom)
+
+
+if __name__ == "__main__":
+    import open3d
+    from segments import SegmentsClient
+
+    api_key = "35b4900fbf99106a9a44530791893aa0c177230a"
+    client = SegmentsClient(api_key=api_key)
+    cuboid_sample_uuid = "ac07f17b-c398-4b1a-b084-21285820530d"
+    label = client.get_label(cuboid_sample_uuid)
+    sample = client.get_sample(cuboid_sample_uuid)
+    pcd = "/Users/arnaudhillen/scripts/data/81c52d5f-ac44-43e5-bdbb-0571428232aa.pcd"
+    pointcloud = open3d.io.read_point_cloud(
+        pcd,
+        format="pcd",
+        remove_nan_points=True,
+        print_progress=True,
+        remove_infinite_points=True,
+    )
+    points = np.asarray(pointcloud.points)
+    label_attributes = label.attributes.frames[0]
+    ego_pose = sample.attributes.frames[0].ego_pose
+    instance_segmentation_label = cuboids_to_instance_segmentation(
+        points, label_attributes, ego_pose
+    )
+
+    try:
+        sample_uuid = "01b9a974-df81-43e6-b04d-321726bff3a8"
+        labelset = "ground-truth"
+        attributes = {
+            "format_version": "0.2",
+            "frames": [
+                {
+                    "format_version": "0.2",
+                    "annotations": [
+                        {"id": int(id), "category_id": 1, "track_id": 1}
+                        for id in set(np.unique(instance_segmentation_label)) - {0}
+                    ],
+                    "point_annotations": instance_segmentation_label.tolist(),
+                }
+            ],
+        }
+        client.add_label(sample_uuid, labelset, attributes=attributes)
+    except AlreadyExistsError:
+        client.update_label(sample_uuid, labelset, attributes=attributes)
+        print("label already exists")
