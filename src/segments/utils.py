@@ -15,7 +15,6 @@ import numpy as np
 import numpy.typing as npt
 import requests
 from PIL import ExifTags, Image
-from segments.exceptions import AlreadyExistsError
 from segments.typing import (
     EgoPose,
     PointcloudCuboidAnnotation,
@@ -644,49 +643,3 @@ def get_cuboid_points(
             vertices_hom.append(vertex)
 
     return np.array(vertices_hom)
-
-
-if __name__ == "__main__":
-    import open3d
-    from segments import SegmentsClient
-
-    api_key = "35b4900fbf99106a9a44530791893aa0c177230a"
-    client = SegmentsClient(api_key=api_key)
-    cuboid_sample_uuid = "ac07f17b-c398-4b1a-b084-21285820530d"
-    label = client.get_label(cuboid_sample_uuid)
-    sample = client.get_sample(cuboid_sample_uuid)
-    pcd = "/Users/arnaudhillen/scripts/data/81c52d5f-ac44-43e5-bdbb-0571428232aa.pcd"
-    pointcloud = open3d.io.read_point_cloud(
-        pcd,
-        format="pcd",
-        remove_nan_points=True,
-        print_progress=True,
-        remove_infinite_points=True,
-    )
-    points = np.asarray(pointcloud.points)
-    label_attributes = label.attributes.frames[0]
-    ego_pose = sample.attributes.frames[0].ego_pose
-    instance_segmentation_label = cuboids_to_instance_segmentation(
-        points, label_attributes, ego_pose
-    )
-
-    try:
-        sample_uuid = "01b9a974-df81-43e6-b04d-321726bff3a8"
-        labelset = "ground-truth"
-        attributes = {
-            "format_version": "0.2",
-            "frames": [
-                {
-                    "format_version": "0.2",
-                    "annotations": [
-                        {"id": int(id), "category_id": 1, "track_id": 1}
-                        for id in set(np.unique(instance_segmentation_label)) - {0}
-                    ],
-                    "point_annotations": instance_segmentation_label.tolist(),
-                }
-            ],
-        }
-        client.add_label(sample_uuid, labelset, attributes=attributes)
-    except AlreadyExistsError:
-        client.update_label(sample_uuid, labelset, attributes=attributes)
-        print("label already exists")
