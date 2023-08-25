@@ -560,7 +560,7 @@ def cuboid_to_segmentation(
 
         cuboids[annotation.id] = cuboid
 
-        # transform cuboids to from world to lidar coordinate frame
+        # transform cuboids from world to lidar coordinate frame
         transformation = np.eye(4)
         if ego_pose and ego_pose.position:
             pos = ego_pose.position
