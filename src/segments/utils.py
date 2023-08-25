@@ -15,11 +15,7 @@ import numpy as np
 import numpy.typing as npt
 import requests
 from PIL import ExifTags, Image
-from segments.typing import (
-    EgoPose,
-    PointcloudCuboidAnnotation,
-    PointcloudCuboidLabelAttributes,
-)
+from segments.typing import EgoPose, PointcloudCuboidLabelAttributes
 from typing_extensions import Literal
 
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
@@ -529,117 +525,60 @@ def cuboid_to_segmentation(
         An instance segmentation label of size Nx1 mapping each point cloud point to a cuboid instance.
     """
 
+    try:
+        import open3d as o3d
+    except ImportError as e:
+        logger.error("Please install open3d first: pip install open3d")
+        raise e
+    try:
+        from pyquaternion import Quaternion
+    except ImportError as e:
+        logger.error("Please install pyquaternion first: pip install pyquaternion")
+        raise e
+
     # check dimensions of input
     assert pointcloud.shape[1] == 3, "Pointcloud must have shape (N, 3)"
     assert label_attributes.annotations, "Label must have annotations"
 
-    # map cuboids to 8 xyz points
-    cuboids = {
-        annotation.id: get_cuboid_points(annotation)
-        for annotation in label_attributes.annotations
-    }
 
-    # transform points to world coordinates
-    if ego_pose:
-        try:
-            from pyquaternion import Quaternion
-        except ImportError as e:
-            logger.error("Please install pyquaternion first: pip install pyquaternion.")
-            raise e
+    # create cuboids
+    cuboids = {}
+    for annotation in label_attributes.annotations:
+        center = np.array([annotation.position.x, annotation.position.y, annotation.position.z])
+        extent = np.array([annotation.dimensions.x, annotation.dimensions.y, annotation.dimensions.z])
+        if annotation.rotation:
+            rotation = o3d.geometry.get_rotation_matrix_from_quaternion(np.array([annotation.rotation.qx, annotation.rotation.qy, annotation.rotation.qz, annotation.rotation.qw]))
+        else:
+            rotation = o3d.geometry.get_rotation_matrix_from_xyz((0, 0, annotation.yaw))
 
-        pos, rot = ego_pose.position, ego_pose.heading
-        position = np.array([pos.x, pos.y, pos.z])
-        rotation = Quaternion(
-            x=rot.qx, y=rot.qy, z=rot.qz, w=rot.qw
-        ).inverse.rotation_matrix
-        pointcloud = np.matmul(pointcloud, rotation) + position
-
-    def is_inside(point: np.ndarray, cuboid: np.ndarray) -> bool:
-        """Check if a point is inside a cuboid. Adapted from: https://stackoverflow.com/questions/21037241/how-to-determine-a-point-is-inside-or-outside-a-cube#:~:text=As%20maxim1000's%20answer%20shows%2C%20you,Z%20coordinates%20of%20the%20Cube.&text=If%20the%20aforementioned%20condition%20is,cube%2C%20otherwise%20it%20does%20not.
-
-        Args:
-            point: point numpy array with shape (3,).
-            cuboid: 8 points of a cuboid with shape (8, 3).
-
-        Returns:
-        Returns whether the point is inside the cuboid.
-        """
-        b1, b2, _, b4, t1, _, t3, _ = cuboid
-
-        dir1 = t1 - b1
-        size1 = np.linalg.norm(dir1)
-        dir1 = dir1 / size1
-        dir2 = b2 - b1
-        size2 = np.linalg.norm(dir2)
-        dir2 = dir2 / size2
-        dir3 = b4 - b1
-        size3 = np.linalg.norm(dir3)
-        dir3 = dir3 / size3
-        cuboid_center = (b1 + t3) / 2.0
-        dir_vec = point - cuboid_center
-
-        result = (
-            2 * np.absolute(np.dot(dir_vec, dir1)) < size1
-            and 2 * np.absolute(np.dot(dir_vec, dir2)) < size2
-            and 2 * np.absolute(np.dot(dir_vec, dir3)) < size3
+        # create cuboid
+        cuboid = o3d.geometry.OrientedBoundingBox(
+            center=center,
+            extent=extent,
+            R=rotation
         )
 
-        return result
+        cuboids[annotation.id] = cuboid
+
+        # transform cuboids to from world to lidar coordinate frame
+        transformation = np.eye(4)
+        if ego_pose and ego_pose.position:
+            pos = ego_pose.position
+            transformation[:3, 3] = np.array([pos.x, pos.y, pos.z])
+        if ego_pose and ego_pose.heading:
+            rot = ego_pose.heading
+            rotq = Quaternion(x=rot.qx, y=rot.qy, z=rot.qz, w=rot.qw).inverse.transformation_matrix
+            transformation[:3, :3] = rotq[:3, :3]
+        # tranform = rotate + translate (bug: transform not defined for OrientedBoundingBox)
+        cuboid.translate(-transformation[:3, 3])
+        cuboid.rotate(transformation[:3, :3])
 
     # map each point to a cuboid instance
     result = np.zeros(pointcloud.shape[0], dtype=np.uint32)
-    for i, point in enumerate(pointcloud):
-        for cuboid_id, points in cuboids.items():
-            if is_inside(point, points):
-                result[i] = cuboid_id
-                break  # assume no overlapping cuboids. if there are, returns first one found
+    pointcloud = o3d.utility.Vector3dVector(pointcloud)
+    for id, cuboid in cuboids.items():
+        # get points inside cuboid
+        inside = cuboid.get_point_indices_within_bounding_box(pointcloud)
+        result[inside] = id
 
-    assert (
-        result.shape[0] == pointcloud.shape[0]
-    ), "Result must have same length as pointcloud"
     return result
-
-
-def get_cuboid_points(
-    annotation: PointcloudCuboidAnnotation,
-) -> np.ndarray:
-    """Get the 8 points of a cuboid annotation (first bottom plane, then top plane, points in clock wise direction).
-
-    Args:
-        annotation: A cuboid annotation.
-
-    Returns:
-        An array of shape (8, 3) with the 8 points of the cuboid.
-    """
-    position = annotation.position
-    dimension = annotation.dimensions
-    x, dx = position.x, dimension.x / 2
-    y, dy = position.y, dimension.y / 2
-    z, dz = position.z, dimension.z / 2
-
-    # if there is a rotation it contains all the information, else use yaw rotation
-    if annotation.rotation:
-        try:
-            from pyquaternion import Quaternion
-        except ImportError as e:
-            logger.error("Please install pyquaternion first: pip install pyquaternion.")
-            raise e
-
-        rotation = annotation.rotation
-        rot_mat = Quaternion(
-            x=rotation.qx, y=rotation.qy, z=rotation.qz, w=rotation.qw
-        ).rotation_matrix
-    else:
-        yaw = annotation.yaw if annotation.yaw is not None else 0
-        rot_mat = np.array(
-            [[np.cos(yaw), -np.sin(yaw), 0], [np.sin(yaw), np.cos(yaw), 0], [0, 0, 1]],
-        )  # 2D rotation around z-axis
-
-    vertices_hom = []
-    for z_i in [-dz, dz]:  # bottom and top plane
-        for x_i, y_i in [(-dx, -dy), (-dx, dy), (dx, dy), (dx, -dy)]:  # clockwise
-            vertex = rot_mat.dot(np.array([x_i, y_i, z_i]))
-            vertex = np.add(vertex, np.array([x, y, z]))
-            vertices_hom.append(vertex)
-
-    return np.array(vertices_hom)
