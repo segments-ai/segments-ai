@@ -163,7 +163,6 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.PointcloudSequenceCuboidFrame
-    :show-inheritance:
 ```
 
 ```{eval-rst}
