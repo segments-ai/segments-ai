@@ -1,5 +1,5 @@
 # General
-numpy>=1.20,<2 # Include type stubs
+numpy>=1.20,<=1.23 # Include type stubs
 requests==2.*
 Pillow==9.*
 open3d==0.*
