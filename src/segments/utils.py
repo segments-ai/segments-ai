@@ -8,11 +8,13 @@ import random
 import re
 from collections import defaultdict
 from io import BytesIO
+from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union, cast
 from urllib.parse import urlparse
 
 import numpy as np
 import numpy.typing as npt
+import open3d as o3d
 import requests
 from PIL import ExifTags, Image
 from segments.typing import EgoPose, PointcloudCuboidLabelAttributes
@@ -43,8 +45,10 @@ def bitmap2file(
     Args:
         bitmap: A :class:`numpy.ndarray` with :class:`numpy.uint32` dtype where each unique value represents an instance id.
         is_segmentation_bitmap: If this is a segmentation bitmap. Defaults to :obj:`True`.
+   
     Returns:
         A file object.
+    
     Raises:
         :exc:`ValueError`: If the ``dtype`` is not :class:`np.uint32` or :class:`np.uint8`.
         :exc:`ValueError`: If the bitmap is not a segmentation bitmap.
@@ -82,6 +86,7 @@ def get_semantic_bitmap(
         instance_bitmap: A :class:`numpy.ndarray` with :class:`numpy.uint32` ``dtype`` where each unique value represents an instance id. Defaults to :obj:`None`.
         annotations: An annotations dictionary. Defaults to :obj:`None`.
         id_increment: Increment the category ids with this number. Defaults to ``0``.
+
     Returns:
         An array here each unique value represents a category id.
     """
@@ -264,21 +269,20 @@ def export_dataset(
         raise ValueError("Please choose a valid export_format.")
 
 
-def load_image_from_url(
-    url: str, save_filename: Optional[str] = None, s3_client: Optional[Any] = None
-) -> Image.Image:
+def load_image_from_url(url: str, save_filename: Optional[str] = None, s3_client: Optional[Any] = None) -> Image.Image:
     """Load an image from url.
 
     Args:
         url: The image url.
         save_filename: The filename to save to.
         s3_client: A boto3 S3 client, e.g. ``s3_client = boto3.client("s3")``. Needs to be provided if your images are in a private S3 bucket. Defaults to :obj:`None`.
+
+    Returns:
+        A PIL image.
     """
     if s3_client is not None:
         url_parsed = urlparse(url)
-        regex = re.search(
-            r"(.+).(s3|s3-accelerate).(.+).amazonaws.com", url_parsed.netloc
-        )
+        regex = re.search(r"(.+).(s3|s3-accelerate).(.+).amazonaws.com", url_parsed.netloc)
         if regex:
             bucket = regex.group(1)
 
@@ -288,9 +292,7 @@ def load_image_from_url(
                 # region_name = regex.group(2)
                 key = url_parsed.path.lstrip("/")
 
-                file_byte_string = s3_client.get_object(Bucket=bucket, Key=key)[
-                    "Body"
-                ].read()
+                file_byte_string = s3_client.get_object(Bucket=bucket, Key=key)["Body"].read()
                 image = Image.open(BytesIO(file_byte_string))
     else:
         image = Image.open(BytesIO(session.get(url).content))
@@ -305,14 +307,58 @@ def load_image_from_url(
     return image
 
 
-def load_label_bitmap_from_url(
-    url: str, save_filename: Optional[str] = None
-) -> npt.NDArray[np.uint32]:
+def load_pointcloud_from_url(
+    url: str, save_filename: Optional[str] = None, s3_client: Optional[Any] = None
+) -> o3d.geometry.PointCloud:
+    """Load a pointcloud from url.
+
+    Args:
+        url: The pointcloud url.
+        save_filename: The filename to save to.
+        s3_client: A boto3 S3 client, e.g. ``s3_client = boto3.client("s3")``. Needs to be provided if your point clouds are in a private S3 bucket. Defaults to :obj:`None`.
+
+    Returns:
+        A pointcloud.
+    """
+
+    def load_pointcloud_from_parsed_url(url: str) -> o3d.geometry.PointCloud:
+        with NamedTemporaryFile(suffix=".pcd") as f:
+            f.write(session.get(url).content)
+            pointcloud = o3d.io.read_point_cloud(f.name)
+
+        return pointcloud
+
+    if s3_client is not None:
+        url_parsed = urlparse(url)
+        regex = re.search(r"(.+).(s3|s3-accelerate).(.+).amazonaws.com", url_parsed.netloc)
+        if regex:
+            bucket = regex.group(1)
+
+            if bucket == "segmentsai-prod":
+                pointcloud = load_pointcloud_from_parsed_url(url)
+            else:
+                key = url_parsed.path.lstrip("/")
+                file_byte_string = s3_client.get_object(Bucket=bucket, Key=key)["Body"].read()
+                with NamedTemporaryFile(suffix=".pcd") as f:
+                    f.write(file_byte_string)
+                    pointcloud = o3d.io.read_point_cloud(f.name)
+    else:
+        pointcloud = load_pointcloud_from_parsed_url(url)
+    if save_filename is not None:
+        o3d.io.write_point_cloud(save_filename, pointcloud)
+
+    return pointcloud
+
+
+def load_label_bitmap_from_url(url: str, save_filename: Optional[str] = None) -> npt.NDArray[np.uint32]:
     """Load a label bitmap from url.
 
     Args:
         url: The label bitmap url.
         save_filename: The filename to save to.
+
+    Returns:
+        A :class:`numpy.ndarray` with :class:`numpy.uint32` ``dtype`` where each unique value represents an instance id.
     """
 
     def extract_bitmap(
@@ -337,6 +383,7 @@ def load_release(release: Release) -> Any:
 
     Args:
         release: A Segments release.
+
     Returns:
         A JSON with the release labels.
     """
@@ -350,6 +397,7 @@ def handle_exif_rotation(image: Image.Image) -> Image.Image:
 
     Args:
         image: A PIL image.
+
     Returns:
         A rotated PIL image.
     """
@@ -389,8 +437,12 @@ def show_polygons(
         exported_polygons_path: The exported polygons path.
         seed: The seed used to generate random colors. Defaults to ``0``.
         output_path: The directory to save the plot to. Defaults to :obj:`None`.
+
     Raises:
         :exc:`ImportError`: If matplotlib is not installed.
+
+    Returns:
+        None
     """
 
     try:
@@ -433,9 +485,7 @@ def show_polygons(
 
     # {category id: polygons}
     annotations = defaultdict(list)
-    filtered_annotations = filter(
-        lambda dictionary: dictionary["image_id"] == image_id, polygons["annotations"]
-    )
+    filtered_annotations = filter(lambda dictionary: dictionary["image_id"] == image_id, polygons["annotations"])
     for annotation in filtered_annotations:
         annotations[annotation["category_id"]].extend(annotation["polygons"])
 
@@ -446,9 +496,7 @@ def show_polygons(
         if annotations[category_id]
     }
 
-    fig, (ax1, ax2, ax3) = plt.subplots(
-        nrows=1, ncols=3, sharex=True, sharey=True, figsize=(25, 10)
-    )
+    fig, (ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=3, sharex=True, sharey=True, figsize=(25, 10))
 
     used_category_names = set()
     for category_name, (
@@ -460,9 +508,7 @@ def show_polygons(
                 xy=np.asarray(p).reshape(-1, 2),
                 facecolor=color,
                 edgecolor=color,
-                label=category_name
-                if category_name not in used_category_names
-                else None,
+                label=category_name if category_name not in used_category_names else None,
                 closed=True,
                 alpha=0.5,
             )
@@ -502,9 +548,7 @@ def show_polygons(
     fig.legend()
 
     if output_path:
-        path = os.path.join(
-            output_path, f"exported_polygons_from_image_id_{image_id:04d}"
-        )
+        path = os.path.join(output_path, f"exported_polygons_from_image_id_{image_id:04d}")
         plt.savefig(path, bbox_inches="tight")
 
     plt.show()
@@ -523,13 +567,11 @@ def cuboid_to_segmentation(
 
     Returns:
         An instance segmentation label of size Nx1 mapping each point cloud point to a cuboid instance.
+
+    Raises:
+        :exc:`ImportError`: If pyquaternion is not installed (to install run ``pip install pyquaternion``).
     """
 
-    try:
-        import open3d as o3d
-    except ImportError as e:
-        logger.error("Please install open3d first: pip install open3d")
-        raise e
     try:
         from pyquaternion import Quaternion
     except ImportError as e:
@@ -540,23 +582,22 @@ def cuboid_to_segmentation(
     assert pointcloud.shape[1] == 3, "Pointcloud must have shape (N, 3)"
     assert label_attributes.annotations, "Label must have annotations"
 
-
     # create cuboids
     cuboids = {}
     for annotation in label_attributes.annotations:
         center = np.array([annotation.position.x, annotation.position.y, annotation.position.z])
         extent = np.array([annotation.dimensions.x, annotation.dimensions.y, annotation.dimensions.z])
         if annotation.rotation:
-            rotation = o3d.geometry.get_rotation_matrix_from_quaternion(np.array([annotation.rotation.qx, annotation.rotation.qy, annotation.rotation.qz, annotation.rotation.qw]))
+            rotation = o3d.geometry.get_rotation_matrix_from_quaternion(
+                np.array(
+                    [annotation.rotation.qx, annotation.rotation.qy, annotation.rotation.qz, annotation.rotation.qw]
+                )
+            )
         else:
             rotation = o3d.geometry.get_rotation_matrix_from_xyz((0, 0, annotation.yaw))
 
         # create cuboid
-        cuboid = o3d.geometry.OrientedBoundingBox(
-            center=center,
-            extent=extent,
-            R=rotation
-        )
+        cuboid = o3d.geometry.OrientedBoundingBox(center=center, extent=extent, R=rotation)
 
         cuboids[annotation.id] = cuboid
 

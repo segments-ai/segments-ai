@@ -2,6 +2,7 @@
 numpy>=1.20,<2 # Include type stubs
 requests==2.*
 Pillow==9.*
+open3d==0.*
 tqdm==4.*
 
 # Type hints
