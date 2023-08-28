@@ -45,10 +45,10 @@ def bitmap2file(
     Args:
         bitmap: A :class:`numpy.ndarray` with :class:`numpy.uint32` dtype where each unique value represents an instance id.
         is_segmentation_bitmap: If this is a segmentation bitmap. Defaults to :obj:`True`.
-   
+
     Returns:
         A file object.
-    
+
     Raises:
         :exc:`ValueError`: If the ``dtype`` is not :class:`np.uint32` or :class:`np.uint8`.
         :exc:`ValueError`: If the bitmap is not a segmentation bitmap.
@@ -269,7 +269,9 @@ def export_dataset(
         raise ValueError("Please choose a valid export_format.")
 
 
-def load_image_from_url(url: str, save_filename: Optional[str] = None, s3_client: Optional[Any] = None) -> Image.Image:
+def load_image_from_url(
+    url: str, save_filename: Optional[str] = None, s3_client: Optional[Any] = None
+) -> Image.Image:
     """Load an image from url.
 
     Args:
@@ -282,7 +284,9 @@ def load_image_from_url(url: str, save_filename: Optional[str] = None, s3_client
     """
     if s3_client is not None:
         url_parsed = urlparse(url)
-        regex = re.search(r"(.+).(s3|s3-accelerate).(.+).amazonaws.com", url_parsed.netloc)
+        regex = re.search(
+            r"(.+).(s3|s3-accelerate).(.+).amazonaws.com", url_parsed.netloc
+        )
         if regex:
             bucket = regex.group(1)
 
@@ -292,7 +296,9 @@ def load_image_from_url(url: str, save_filename: Optional[str] = None, s3_client
                 # region_name = regex.group(2)
                 key = url_parsed.path.lstrip("/")
 
-                file_byte_string = s3_client.get_object(Bucket=bucket, Key=key)["Body"].read()
+                file_byte_string = s3_client.get_object(Bucket=bucket, Key=key)[
+                    "Body"
+                ].read()
                 image = Image.open(BytesIO(file_byte_string))
     else:
         image = Image.open(BytesIO(session.get(url).content))
@@ -330,7 +336,9 @@ def load_pointcloud_from_url(
 
     if s3_client is not None:
         url_parsed = urlparse(url)
-        regex = re.search(r"(.+).(s3|s3-accelerate).(.+).amazonaws.com", url_parsed.netloc)
+        regex = re.search(
+            r"(.+).(s3|s3-accelerate).(.+).amazonaws.com", url_parsed.netloc
+        )
         if regex:
             bucket = regex.group(1)
 
@@ -338,7 +346,9 @@ def load_pointcloud_from_url(
                 pointcloud = load_pointcloud_from_parsed_url(url)
             else:
                 key = url_parsed.path.lstrip("/")
-                file_byte_string = s3_client.get_object(Bucket=bucket, Key=key)["Body"].read()
+                file_byte_string = s3_client.get_object(Bucket=bucket, Key=key)[
+                    "Body"
+                ].read()
                 with NamedTemporaryFile(suffix=".pcd") as f:
                     f.write(file_byte_string)
                     pointcloud = o3d.io.read_point_cloud(f.name)
@@ -350,7 +360,9 @@ def load_pointcloud_from_url(
     return pointcloud
 
 
-def load_label_bitmap_from_url(url: str, save_filename: Optional[str] = None) -> npt.NDArray[np.uint32]:
+def load_label_bitmap_from_url(
+    url: str, save_filename: Optional[str] = None
+) -> npt.NDArray[np.uint32]:
     """Load a label bitmap from url.
 
     Args:
@@ -485,7 +497,9 @@ def show_polygons(
 
     # {category id: polygons}
     annotations = defaultdict(list)
-    filtered_annotations = filter(lambda dictionary: dictionary["image_id"] == image_id, polygons["annotations"])
+    filtered_annotations = filter(
+        lambda dictionary: dictionary["image_id"] == image_id, polygons["annotations"]
+    )
     for annotation in filtered_annotations:
         annotations[annotation["category_id"]].extend(annotation["polygons"])
 
@@ -496,7 +510,9 @@ def show_polygons(
         if annotations[category_id]
     }
 
-    fig, (ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=3, sharex=True, sharey=True, figsize=(25, 10))
+    fig, (ax1, ax2, ax3) = plt.subplots(
+        nrows=1, ncols=3, sharex=True, sharey=True, figsize=(25, 10)
+    )
 
     used_category_names = set()
     for category_name, (
@@ -508,7 +524,9 @@ def show_polygons(
                 xy=np.asarray(p).reshape(-1, 2),
                 facecolor=color,
                 edgecolor=color,
-                label=category_name if category_name not in used_category_names else None,
+                label=category_name
+                if category_name not in used_category_names
+                else None,
                 closed=True,
                 alpha=0.5,
             )
@@ -548,7 +566,9 @@ def show_polygons(
     fig.legend()
 
     if output_path:
-        path = os.path.join(output_path, f"exported_polygons_from_image_id_{image_id:04d}")
+        path = os.path.join(
+            output_path, f"exported_polygons_from_image_id_{image_id:04d}"
+        )
         plt.savefig(path, bbox_inches="tight")
 
     plt.show()
@@ -585,19 +605,30 @@ def cuboid_to_segmentation(
     # create cuboids
     cuboids = {}
     for annotation in label_attributes.annotations:
-        center = np.array([annotation.position.x, annotation.position.y, annotation.position.z])
-        extent = np.array([annotation.dimensions.x, annotation.dimensions.y, annotation.dimensions.z])
+        center = np.array(
+            [annotation.position.x, annotation.position.y, annotation.position.z]
+        )
+        extent = np.array(
+            [annotation.dimensions.x, annotation.dimensions.y, annotation.dimensions.z]
+        )
         if annotation.rotation:
             rotation = o3d.geometry.get_rotation_matrix_from_quaternion(
                 np.array(
-                    [annotation.rotation.qx, annotation.rotation.qy, annotation.rotation.qz, annotation.rotation.qw]
+                    [
+                        annotation.rotation.qx,
+                        annotation.rotation.qy,
+                        annotation.rotation.qz,
+                        annotation.rotation.qw,
+                    ]
                 )
             )
         else:
             rotation = o3d.geometry.get_rotation_matrix_from_xyz((0, 0, annotation.yaw))
 
         # create cuboid
-        cuboid = o3d.geometry.OrientedBoundingBox(center=center, extent=extent, R=rotation)
+        cuboid = o3d.geometry.OrientedBoundingBox(
+            center=center, extent=extent, R=rotation
+        )
 
         cuboids[annotation.id] = cuboid
 
@@ -608,7 +639,9 @@ def cuboid_to_segmentation(
             transformation[:3, 3] = np.array([pos.x, pos.y, pos.z])
         if ego_pose and ego_pose.heading:
             rot = ego_pose.heading
-            rotq = Quaternion(x=rot.qx, y=rot.qy, z=rot.qz, w=rot.qw).inverse.transformation_matrix
+            rotq = Quaternion(
+                x=rot.qx, y=rot.qy, z=rot.qz, w=rot.qw
+            ).inverse.transformation_matrix
             transformation[:3, :3] = rotq[:3, :3]
         # tranform = rotate + translate (bug: transform not defined for OrientedBoundingBox)
         cuboid.translate(-transformation[:3, 3])
