@@ -1,10 +1,10 @@
 # Style
-flake8==4.*
+flake8==8.*
 
 # Code formatting
 black==22.*
 isort==5.*
-flynt==0.*
+flynt==1.*
 pre-commit==2.*
 
 # Type checking
