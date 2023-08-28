@@ -181,6 +181,23 @@ class ImageVectorLabelAttributes(BaseModel):
     image_attributes: Optional[ImageAttributes]
 
 
+# Image sequence segmentation
+class ImageSequenceSegmentationAnnotation(Annotation):
+    track_id: int
+    is_keyframe: bool = False
+
+
+class ImageSequenceSegmentationFrame(ImageSegmentationLabelAttributes):
+    annotations: List[ImageSequenceSegmentationAnnotation]
+    timestamp: Optional[Union[str, int]]
+    format_version: Optional[FormatVersion]
+
+
+class ImageSequenceSegmentationLabelAttributes(BaseModel):
+    frames: List[ImageSequenceSegmentationFrame]
+    format_version: Optional[FormatVersion]
+
+
 # Image sequence vector
 class ImageSequenceVectorAnnotation(ImageVectorAnnotation):
     track_id: int
@@ -368,6 +385,7 @@ LabelAttributes = Union[
     ImageVectorLabelAttributes,
     ImageSegmentationLabelAttributes,
     ImageSequenceVectorLabelAttributes,
+    ImageSequenceSegmentationLabelAttributes,
     PointcloudCuboidLabelAttributes,
     PointcloudVectorLabelAttributes,
     PointcloudSegmentationLabelAttributes,
