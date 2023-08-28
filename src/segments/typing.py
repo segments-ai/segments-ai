@@ -4,9 +4,8 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel as PydanticBaseModel
 from pydantic import validator
-from typing_extensions import Literal, TypedDict, get_args
-
 from segments.exceptions import ValidationError
+from typing_extensions import Literal, TypedDict, get_args
 
 
 class BaseModel(PydanticBaseModel):
@@ -36,7 +35,7 @@ LabelStatus = Literal[
 TaskType = Literal[
     "segmentation-bitmap",
     "segmentation-bitmap-highres",
-    "imag-segmentation-sequence",
+    "image-segmentation-sequence",
     "image-vector-sequence",
     "bboxes",
     "vector",
