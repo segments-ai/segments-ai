@@ -4,16 +4,13 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel as PydanticBaseModel
 from pydantic import ConfigDict, field_validator
-from segments.exceptions import ValidationError
 from typing_extensions import Literal, TypedDict, get_args
+
+from segments.exceptions import ValidationError
 
 
 class BaseModel(PydanticBaseModel):
-    # TODO[pydantic]: The following keys were removed: `smart_union`.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-config for more information.
     model_config = ConfigDict(
-        # Smart union checks all types before deciding which one to pick (otherwise, first type that fits). https://pydantic-docs.helpmanual.io/usage/model_config/#smart-union
-        smart_union=True,
         # What happens with extra fields in dictionaries. Use ignore in production and allow in debug mode. https://pydantic-docs.helpmanual.io/usage/model_config/#change-behaviour-globally
         extra="ignore",
         # What happens with wrong field types. Use false in production and true in debug mode. https://pydantic-docs.helpmanual.io/usage/types/#arbitrary-types-allowed
