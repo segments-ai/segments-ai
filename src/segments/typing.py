@@ -653,7 +653,6 @@ class Dataset(BaseModel):
     metadata: Dict[str, Any]
     noncollaborator_can_label: Optional[bool]
     noncollaborator_can_review: Optional[bool]
-    insights_urls: Optional[Dict[str, str]]
     # tasks: Optional[List[Dict[str, Any]]]
     embeddings_enabled: Optional[bool]
 
