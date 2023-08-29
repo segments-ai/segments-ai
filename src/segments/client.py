@@ -765,6 +765,7 @@ class SegmentsClient:
     def get_samples(
         self,
         dataset_identifier: str,
+        labelset: Optional[str] = None,
         name: Optional[str] = None,
         label_status: Optional[Union[LabelStatus, List[LabelStatus]]] = None,
         metadata: Optional[Union[str, List[str]]] = None,
@@ -784,6 +785,7 @@ class SegmentsClient:
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+            labelset: If defined, this additionally returns the label for the given labelset. Defaults to :obj:`None`.
             name: Name to filter by. Defaults to :obj:`None` (no filtering).
             label_status: Sequence of label statuses to filter by. Defaults to :obj:`None` (no filtering).
             metadata: Sequence of 'key:value' metadata attributes to filter by. Defaults to :obj:`None` (no filtering).
@@ -821,6 +823,9 @@ class SegmentsClient:
             query_string += "&labelset=ground-truth&label_status={}".format(
                 ",".join(label_status)
             )
+
+        if labelset:
+            query_string += f"&labelset={labelset}"
 
         # sorting
         sort_dict = {"name": "name", "created": "created_at", "priority": "priority"}
