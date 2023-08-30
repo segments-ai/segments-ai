@@ -58,6 +58,7 @@ class TaskType(str, Enum):
     SEGMENTATION_BITMAP = "segmentation-bitmap"
     SEGMENTATION_BITMAP_HIGHRES = "segmentation-bitmap-highres"
     IMAGE_VECTOR_SEQUENCE = "image-vector-sequence"
+    IMAGE_SEGMENTATION_SEQUENCE = "image-segmentation-sequence"
     BBOXES = "bboxes"
     VECTOR = "vector"
     KEYPOINTS = "keypoints"
@@ -160,10 +161,6 @@ RGBA = Tuple[int, int, int, int]
 FormatVersion = Union[float, str]
 ObjectAttributes = Dict[str, Optional[Union[str, bool]]]
 ImageAttributes = Dict[str, Optional[Union[str, bool]]]
-
-
-class AuthHeader(TypedDict):
-    Authorization: str
 
 
 ###########
@@ -271,6 +268,23 @@ class ImageVectorLabelAttributes(BaseModel):
     annotations: List[ImageVectorAnnotation]
     format_version: Optional[FormatVersion]
     image_attributes: Optional[ImageAttributes]
+
+
+# Image sequence segmentation
+class ImageSequenceSegmentationAnnotation(Annotation):
+    track_id: int
+    is_keyframe: bool = False
+
+
+class ImageSequenceSegmentationFrame(ImageSegmentationLabelAttributes):
+    annotations: List[ImageSequenceSegmentationAnnotation]
+    timestamp: Optional[Union[str, int]]
+    format_version: Optional[FormatVersion]
+
+
+class ImageSequenceSegmentationLabelAttributes(BaseModel):
+    frames: List[ImageSequenceSegmentationFrame]
+    format_version: Optional[FormatVersion]
 
 
 # Image sequence vector
@@ -460,6 +474,7 @@ LabelAttributes = Union[
     ImageVectorLabelAttributes,
     ImageSegmentationLabelAttributes,
     ImageSequenceVectorLabelAttributes,
+    ImageSequenceSegmentationLabelAttributes,
     PointcloudCuboidLabelAttributes,
     PointcloudVectorLabelAttributes,
     PointcloudSegmentationLabelAttributes,
@@ -745,6 +760,7 @@ class Dataset(BaseModel):
     metadata: Dict[str, Any]
     noncollaborator_can_label: Optional[bool]
     noncollaborator_can_review: Optional[bool]
+    insights_urls: Optional[Dict[str, str]]
     # tasks: Optional[List[Dict[str, Any]]]
     embeddings_enabled: Optional[bool]
 
