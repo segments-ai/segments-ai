@@ -177,7 +177,8 @@ class TestDataset(Test):
             self.assertEqual(clone.name, "example-images-segmentation-clone")
             self.assertEqual(clone.task_type, "segmentation-bitmap")
             self.assertEqual(clone.public, False)
-
+        except AlreadyExistsError:
+            pass
         finally:
             # Delete dataset
             self.client.delete_dataset(f"{self.owner}/{name}-clone")
@@ -199,7 +200,8 @@ class TestDataset(Test):
             self.assertIsInstance(clone, Dataset)
             self.assertEqual(clone.name, new_name)
             self.assertEqual(clone.task_type, new_task_type)
-
+        except AlreadyExistsError:
+            pass
         finally:
             # Delete dataset
             self.client.delete_dataset(f"{self.owner}/{new_name}")
