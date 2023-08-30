@@ -69,10 +69,6 @@ ObjectAttributes = Dict[str, Optional[Union[str, bool]]]
 ImageAttributes = Dict[str, Optional[Union[str, bool]]]
 
 
-class AuthHeader(TypedDict):
-    Authorization: str
-
-
 ###########
 # Release #
 ###########

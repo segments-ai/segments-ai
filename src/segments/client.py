@@ -36,7 +36,6 @@ from segments.exceptions import (
     ValidationError,
 )
 from segments.typing import (
-    AuthHeader,
     AWSFields,
     Category,
     Collaborator,
@@ -1708,7 +1707,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out - catches :exc:`requests.exceptions.TimeoutError`.
         """
 
-        headers = self._get_auth_header() if auth else None
+        headers = self._get_headers(auth)
 
         r = self.api_session.get(
             urllib.parse.urljoin(self.api_url, endpoint), headers=headers
@@ -1737,7 +1736,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error - catches :exc:`requests.HTTPError` and catches :exc:`requests.RequestException`.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out - catches :exc:`requests.exceptions.TimeoutError`.
         """
-        headers = self._get_auth_header() if auth else None
+        headers = self._get_headers(auth)
 
         r = self.api_session.post(
             urllib.parse.urljoin(self.api_url, endpoint),
@@ -1768,7 +1767,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error - catches :exc:`requests.HTTPError` and catches :exc:`requests.RequestException`.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out - catches :exc:`requests.exceptions.TimeoutError`.
         """
-        headers = self._get_auth_header() if auth else None
+        headers = self._get_headers(auth)
 
         r = self.api_session.put(
             urllib.parse.urljoin(self.api_url, endpoint),
@@ -1799,7 +1798,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error - catches :exc:`requests.HTTPError` and catches :exc:`requests.RequestException`.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out - catches :exc:`requests.exceptions.TimeoutError`.
         """
-        headers = self._get_auth_header() if auth else None
+        headers = self._get_headers(auth)
 
         r = self.api_session.patch(
             urllib.parse.urljoin(self.api_url, endpoint),
@@ -1830,7 +1829,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error - catches :exc:`requests.HTTPError` and catches :exc:`requests.RequestException`.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out - catches :exc:`requests.exceptions.TimeoutError`.
         """
-        headers = self._get_auth_header() if auth else None
+        headers = self._get_headers(auth)
 
         r = self.api_session.delete(
             urllib.parse.urljoin(self.api_url, endpoint),
@@ -1840,9 +1839,12 @@ class SegmentsClient:
 
         return r
 
-    def _get_auth_header(self) -> Optional[AuthHeader]:
+    def _get_headers(self, auth: bool = True) -> Dict[str, str]:
         """Get the authorization header with the API key."""
-        return {"Authorization": f"APIKey {self.api_key}"} if self.api_key else None
+        headers = {"X-source": "python-sdk"}
+        if auth and self.api_key:
+            headers["Authorization"] = f"APIKey {self.api_key}"
+        return headers
 
     @handle_exceptions
     def _upload_to_aws(
