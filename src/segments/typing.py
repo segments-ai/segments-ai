@@ -35,6 +35,7 @@ LabelStatus = Literal[
 TaskType = Literal[
     "segmentation-bitmap",
     "segmentation-bitmap-highres",
+    "image-segmentation-sequence",
     "image-vector-sequence",
     "bboxes",
     "vector",
@@ -175,6 +176,23 @@ class ImageVectorLabelAttributes(BaseModel):
     annotations: List[ImageVectorAnnotation]
     format_version: Optional[FormatVersion]
     image_attributes: Optional[ImageAttributes]
+
+
+# Image sequence segmentation
+class ImageSequenceSegmentationAnnotation(Annotation):
+    track_id: int
+    is_keyframe: bool = False
+
+
+class ImageSequenceSegmentationFrame(ImageSegmentationLabelAttributes):
+    annotations: List[ImageSequenceSegmentationAnnotation]
+    timestamp: Optional[Union[str, int]]
+    format_version: Optional[FormatVersion]
+
+
+class ImageSequenceSegmentationLabelAttributes(BaseModel):
+    frames: List[ImageSequenceSegmentationFrame]
+    format_version: Optional[FormatVersion]
 
 
 # Image sequence vector
@@ -364,6 +382,7 @@ LabelAttributes = Union[
     ImageVectorLabelAttributes,
     ImageSegmentationLabelAttributes,
     ImageSequenceVectorLabelAttributes,
+    ImageSequenceSegmentationLabelAttributes,
     PointcloudCuboidLabelAttributes,
     PointcloudVectorLabelAttributes,
     PointcloudSegmentationLabelAttributes,
