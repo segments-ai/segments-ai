@@ -90,8 +90,10 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
     Args:
         release: A Segments release resulting from :meth:`.get_release`.
         download_images: If images need to be downloaded from an AWS S3 url. Defaults to :obj:`True`.
+
     Returns:
         A HuggingFace dataset.
+
     Raises:
         :exc:`ValueError`: If the type of dataset is not yet supported.
     """
