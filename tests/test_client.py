@@ -270,7 +270,12 @@ class TestSample(Test):
         for dataset in self.datasets:
             dataset_identifier = f"{self.owner}/{dataset}"
             samples = self.client.get_samples(
-                dataset_identifier, name, label_status, metadata, sort, direction
+                dataset_identifier,
+                name=name,
+                label_status=label_status,
+                metadata=metadata,
+                sort=sort,
+                direction=direction,
             )
             for sample in samples:
                 self.assertIsInstance(sample, Sample)
