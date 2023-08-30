@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+from enum import Enum as BaseEnum
+from enum import EnumMeta as BaseEnumMeta
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel as PydanticBaseModel
 from pydantic import validator
 from segments.exceptions import ValidationError
-from typing_extensions import Literal, TypedDict, get_args
+from typing_extensions import Literal, TypedDict
 
 
 class BaseModel(PydanticBaseModel):
@@ -18,51 +20,142 @@ class BaseModel(PydanticBaseModel):
         arbitrary_types_allowed = False
 
 
-#######################################
-# Literals, constants and other types #
-#######################################
-LabelStatus = Literal[
-    "REVIEWED",
-    "REVIEWING_IN_PROGRESS",
-    "LABELED",
-    "LABELING_IN_PROGRESS",
-    "REJECTED",
-    "PRELABELED",
-    "SKIPPED",
-    "UNLABELED",
-    "VERIFIED",
-]
-TaskType = Literal[
-    "segmentation-bitmap",
-    "segmentation-bitmap-highres",
-    "image-segmentation-sequence",
-    "image-vector-sequence",
-    "bboxes",
-    "vector",
-    "pointcloud-cuboid",
-    "pointcloud-cuboid-sequence",
-    "pointcloud-segmentation",
-    "pointcloud-segmentation-sequence",
-    "pointcloud-vector",
-    "pointcloud-vector-sequence",
-    "multisensor",
-    "multisensor-sequence",
-    "text-named-entities",
-    "text-span-categorization",
-    "",
-]
-Role = Literal["labeler", "reviewer", "manager", "admin"]
-IssueStatus = Literal["OPEN", "CLOSED"]
-Category = Literal[
-    "street_scenery",
-    "garden",
-    "agriculture",
-    "satellite",
-    "people",
-    "medical",
-    "fruit",
-    "other",
-]
+class EnumMeta(BaseEnumMeta):
+    # https://stackoverflow.com/questions/43634618/how-do-i-test-if-int-value-exists-in-python-enum-without-using-try-catch
+    def __contains__(self, item):
+        return isinstance(item, self) or item in {
+            v.value for v in self.__members__.values()
+        }
+
+    # https://stackoverflow.com/questions/29503339/how-to-get-all-values-from-python-enum-class
+    def __str__(self):
+        return ", ".join(c.value for c in self)
+
+    def __repr__(self):
+        return self.__str__()
+
+
+class Enum(BaseEnum, metaclass=EnumMeta):
+    pass
+
+
+#################################
+# Literals, constants and enums #
+#################################
+class LabelStatus(str, Enum):
+    REVIEWED = "REVIEWED"
+    REVIEWING_IN_PROGRESS = "REVIEWING_IN_PROGRESS"
+    LABELED = "LABELED"
+    LABELING_IN_PROGRESS = "LABELING_IN_PROGRESS"
+    REJECTED = "REJECTED"
+    PRELABELED = "PRELABELED"
+    SKIPPED = "SKIPPED"
+    UNLABELED = "UNLABELED"
+    VERIFIED = "VERIFIED"
+
+
+class TaskType(str, Enum):
+    SEGMENTATION_BITMAP = "segmentation-bitmap"
+    SEGMENTATION_BITMAP_HIGHRES = "segmentation-bitmap-highres"
+    IMAGE_VECTOR_SEQUENCE = "image-vector-sequence"
+    IMAGE_SEGMENTATION_SEQUENCE = "image-segmentation-sequence"
+    BBOXES = "bboxes"
+    VECTOR = "vector"
+    KEYPOINTS = "keypoints"
+    POINTCLOUD_CUBOID = "pointcloud-cuboid"
+    POINTCLOUD_CUBOID_SEQUENCE = "pointcloud-cuboid-sequence"
+    POINTCLOUD_SEGMENTATION = "pointcloud-segmentation"
+    POINTCLOUD_SEGMENTATION_SEQUENCE = "pointcloud-segmentation-sequence"
+    POINTCLOUD_VECTOR = "pointcloud-vector"
+    POINTCLOUD_VECTOR_SEQUENCE = "pointcloud-vector-sequence"
+    MULTISENSOR = "multisensor"
+    MULTISENSOR_SEQUENCE = "multisensor-sequence"
+    TEXT_NAMED_ENTITIES = "text-named-entities"
+    TEXT_SPAN_CATEGORIZATION = "text-span-categorization"
+    EMPTY = ""
+
+
+class Role(str, Enum):
+    LABELER = "labeler"
+    REVIEWER = "reviewer"
+    MANAGER = "manager"
+    ADMIN = "admin"
+
+
+class IssueStatus(str, Enum):
+    OPEN = "OPEN"
+    CLOSED = "CLOSED"
+
+
+class Category(str, Enum):
+    STREET_SCENERY = "street_scenery"
+    GARDEN = "garden"
+    AGRICULTURE = "agriculture"
+    SATELLITE = "satellite"
+    PEOPLE = "people"
+    MEDICAL = "medical"
+    FRUIT = "fruit"
+    OTHER = "other"
+
+
+class CameraConvention(str, Enum):
+    OPEN_CV = "OpenCV"
+    OPEN_GL = "OpenGL"
+
+
+class InputType(str, Enum):
+    SELECT = "select"
+    TEXT = "text"
+    NUMBER = "number"
+    CHECKBOX = "checkbox"
+
+
+class CameraDistortionModel(str, Enum):
+    FISH_EYE = "fisheye"
+    BROWN_CONRADY = "brown-conrady"
+
+
+class PCDType(str, Enum):
+    PCD = "pcd"
+    KITTI = "kitti"
+    NUSCENES = "nuscenes"
+
+
+class ReleaseStatus(str, Enum):
+    PENDING = "PENDING"
+    SUCCEEDED = "SUCCEEDED"
+    FAILED = "FAILED"
+
+
+class ImageVectorAnnotationType(str, Enum):
+    BBOX = "bbox"
+    POLYGON = "polygon"
+    POLYLINE = "polyline"
+    POINT = "point"
+
+
+class PointcloudCuboidAnnotationType(str, Enum):
+    CUBOID = "cuboid"
+    CUBOID_SYNC = "cuboid-sync"
+
+
+class PointcloudVectorAnnotationType(str, Enum):
+    POLYGON = "polygon"
+    POLYLINE = "polyline"
+    POINT = "point"
+
+
+class ExportFormat(str, Enum):
+    COCO_PANOPTIC = "coco-panoptic"
+    COCO_INSTANCE = "coco-instance"
+    YOLO = "yolo"
+    INSTANCE = "instance"
+    INSTANCE_COLOR = "instance-color"
+    SEMANTIC = "semantic"
+    SEMANTIC_COLOR = "semantic-color"
+    POLYGON = "polygon"
+
+
 RGB = Tuple[int, int, int]
 RGBA = Tuple[int, int, int, int]
 FormatVersion = Union[float, str]
@@ -74,9 +167,8 @@ ImageAttributes = Dict[str, Optional[Union[str, bool]]]
 # Release #
 ###########
 class URL(BaseModel):
-    url: Optional[
-        str
-    ]  # TODO Remove optional (e.g., the backend does not return an URL when adding a release).
+    # TODO remove optional (backend does not return URL when you add release)
+    url: Optional[str]
 
 
 class Release(BaseModel):
@@ -85,7 +177,7 @@ class Release(BaseModel):
     description: str
     release_type: Literal["JSON"]
     attributes: URL
-    status: Literal["PENDING", "SUCCEEDED", "FAILED"]
+    status: ReleaseStatus
     # status_info: str
     created_at: str
     samples_count: int
@@ -168,7 +260,7 @@ class ImageVectorAnnotation(BaseModel):
     id: int
     category_id: int
     points: List[List[float]]
-    type: Literal["bbox", "polygon", "polyline", "point"]
+    type: ImageVectorAnnotationType
     attributes: Optional[ObjectAttributes]
 
 
@@ -249,7 +341,7 @@ class BrownConradyDistortionCoefficients(BaseModel):
 
 
 class Distortion(BaseModel):
-    model: Literal["fisheye", "brown-conrady"]
+    model: CameraDistortionModel
     coefficients: Union[
         FisheyeDistortionCoefficients, BrownConradyDistortionCoefficients
     ]
@@ -264,7 +356,7 @@ class PointcloudCuboidAnnotation(BaseModel):
     dimensions: XYZ
     yaw: float
     rotation: Optional[XYZW]
-    type: Literal["cuboid", "cuboid-sync"]
+    type: PointcloudCuboidAnnotationType
     attributes: Optional[ObjectAttributes]
 
 
@@ -278,7 +370,7 @@ class PointcloudVectorAnnotation(BaseModel):
     id: int
     category_id: int
     points: List[List[float]]
-    type: Literal["polygon", "polyline", "point"]
+    type: PointcloudVectorAnnotationType
     attributes: Optional[ObjectAttributes]
 
 
@@ -345,13 +437,13 @@ class PointcloudSequenceVectorLabelAttributes(BaseModel):
 # Multi-sensor
 class MultiSensorPointcloudSequenceCuboidLabelAttributes(BaseModel):
     name: str
-    task_type: Literal["pointcloud-cuboid-sequence"]
+    task_type: Literal[TaskType.POINTCLOUD_CUBOID_SEQUENCE]
     attributes: PointcloudSequenceCuboidLabelAttributes
 
 
 class MultiSensorImageSequenceVectorLabelAttributes(BaseModel):
     name: str
-    task_type: Literal["image-vector-sequence"]
+    task_type: Literal[TaskType.IMAGE_VECTOR_SEQUENCE]
     attributes: ImageSequenceVectorLabelAttributes
 
 
@@ -430,7 +522,7 @@ class ImageSequenceSampleAttributes(BaseModel):
 class PCD(BaseModel):
     url: str
     signed_url: Optional[str]
-    type: Literal["pcd", "kitti", "nuscenes"]
+    type: PCDType
 
 
 class EgoPose(BaseModel):
@@ -453,7 +545,7 @@ class CalibratedImage(URL):
     intrinsics: Optional[CameraIntrinsics]
     extrinsics: Optional[CameraExtrinsics]
     distortion: Optional[Distortion]
-    camera_convention: Optional[Literal["OpenCV", "OpenGL"]] = "OpenGL"
+    camera_convention: CameraConvention = CameraConvention.OPEN_GL
 
 
 class PointcloudSampleAttributes(BaseModel):
@@ -473,13 +565,13 @@ class PointcloudSequenceSampleAttributes(BaseModel):
 # Multi-sensor
 class MultiSensorPointcloudSequenceSampleAttributes(BaseModel):
     name: str
-    task_type: Literal["pointcloud-cuboid-sequence"]
+    task_type: Literal[TaskType.POINTCLOUD_CUBOID_SEQUENCE]
     attributes: PointcloudSequenceSampleAttributes
 
 
 class MultiSensorImageSequenceSampleAttributes(BaseModel):
     name: str
-    task_type: Literal["image-vector-sequence"]
+    task_type: Literal[TaskType.IMAGE_VECTOR_SEQUENCE]
     attributes: ImageSequenceSampleAttributes
 
 
@@ -539,7 +631,7 @@ class Collaborator(BaseModel):
 
 class SelectTaskAttribute(BaseModel):
     name: str
-    input_type: Literal["select"]
+    input_type: Literal[InputType.SELECT]
     values: List[str]
     default_value: Optional[str]
     is_mandatory: Optional[bool]
@@ -547,14 +639,14 @@ class SelectTaskAttribute(BaseModel):
 
 class TextTaskAttribute(BaseModel):
     name: str
-    input_type: Literal["text"]
+    input_type: Literal[InputType.TEXT]
     default_value: Optional[str]
     is_mandatory: Optional[bool]
 
 
 class NumberTaskAttribute(BaseModel):
     name: str
-    input_type: Literal["number"]
+    input_type: Literal[InputType.NUMBER]
     default_value: Optional[float]
     min: Optional[float]
     max: Optional[float]
@@ -571,7 +663,7 @@ class NumberTaskAttribute(BaseModel):
 
 class CheckboxTaskAttribute(BaseModel):
     name: str
-    input_type: Literal["checkbox"]
+    input_type: Literal[InputType.CHECKBOX]
     default_value: Optional[bool]
 
 
@@ -674,10 +766,9 @@ class Dataset(BaseModel):
 
     @validator("category")
     def check_category(cls, category: str) -> str:
-        category_list = get_args(Category)
-        if category not in category_list and "custom-" not in category:
+        if category not in Category and "custom-" not in category:
             raise ValidationError(
-                f"The category should be one of {category_list}, but is {category}."
+                f"The category should be one of {Category}, but is {category}."
             )
         return category
 

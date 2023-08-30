@@ -15,7 +15,7 @@ import numpy as np
 import numpy.typing as npt
 import requests
 from PIL import ExifTags, Image
-from typing_extensions import Literal
+from segments.typing import ExportFormat, TaskType
 
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
 if TYPE_CHECKING:
@@ -103,16 +103,7 @@ def get_semantic_bitmap(
 def export_dataset(
     dataset: SegmentsDataset,
     export_folder: str = ".",
-    export_format: Literal[
-        "coco-panoptic",
-        "coco-instance",
-        "yolo",
-        "instance",
-        "instance-color",
-        "semantic",
-        "semantic-color",
-        "polygon",
-    ] = "coco-panoptic",
+    export_format: ExportFormat = ExportFormat.COCO_PANOPTIC,
     id_increment: int = 0,
     **kwargs: Any,
 ) -> Optional[Union[Tuple[str, Optional[str]], Optional[str]]]:
@@ -200,37 +191,63 @@ def export_dataset(
         logger.error("Please install scikit-image first: pip install scikit-image.")
         raise e
 
+    COMPATIBLE_TASK_TYPES = {
+        ExportFormat.COCO_PANOPTIC: {
+            TaskType.SEGMENTATION_BITMAP,
+            TaskType.SEGMENTATION_BITMAP_HIGHRES,
+        },
+        ExportFormat.COCO_INSTANCE: {
+            TaskType.SEGMENTATION_BITMAP,
+            TaskType.SEGMENTATION_BITMAP_HIGHRES,
+        },
+        ExportFormat.YOLO: {
+            TaskType.SEGMENTATION_BITMAP,
+            TaskType.SEGMENTATION_BITMAP_HIGHRES,
+            TaskType.VECTOR,
+            TaskType.BBOXES,
+            TaskType.KEYPOINTS,
+        },
+        ExportFormat.INSTANCE: {
+            TaskType.SEGMENTATION_BITMAP,
+            TaskType.SEGMENTATION_BITMAP_HIGHRES,
+        },
+        ExportFormat.INSTANCE_COLOR: {
+            TaskType.SEGMENTATION_BITMAP,
+            TaskType.SEGMENTATION_BITMAP_HIGHRES,
+        },
+        ExportFormat.SEMANTIC: {
+            TaskType.SEGMENTATION_BITMAP,
+            TaskType.SEGMENTATION_BITMAP_HIGHRES,
+        },
+        ExportFormat.SEMANTIC_COLOR: {
+            TaskType.SEGMENTATION_BITMAP,
+            TaskType.SEGMENTATION_BITMAP_HIGHRES,
+        },
+        ExportFormat.POLYGON: {
+            TaskType.SEGMENTATION_BITMAP,
+            TaskType.SEGMENTATION_BITMAP_HIGHRES,
+        },
+    }
+
     print("Exporting dataset. This may take a while...")
-    if export_format == "coco-panoptic":
-        if dataset.task_type not in [
-            "segmentation-bitmap",
-            "segmentation-bitmap-highres",
-        ]:
+    if export_format == ExportFormat.COCO_PANOPTIC:
+        if dataset.task_type not in COMPATIBLE_TASK_TYPES[export_format]:
             raise ValueError(
                 "Only datasets of type 'segmentation-bitmap' and 'segmentation-bitmap-highres' can be exported to this format."
             )
         from .export import export_coco_panoptic
 
         return export_coco_panoptic(dataset, export_folder)
-    elif export_format == "coco-instance":
-        if dataset.task_type not in [
-            "segmentation-bitmap",
-            "segmentation-bitmap-highres",
-        ]:
+    elif export_format == ExportFormat.COCO_INSTANCE:
+        if dataset.task_type not in COMPATIBLE_TASK_TYPES[export_format]:
             raise ValueError(
                 "Only datasets of type 'segmentation-bitmap' and 'segmentation-bitmap-highres' can be exported to this format."
             )
         from .export import export_coco_instance
 
         return export_coco_instance(dataset, export_folder)
-    elif export_format == "yolo":
-        if dataset.task_type not in [
-            "segmentation-bitmap",
-            "segmentation-bitmap-highres",
-            "vector",
-            "bboxes",
-            "keypoints",
-        ]:
+    elif export_format == ExportFormat.YOLO:
+        if dataset.task_type not in COMPATIBLE_TASK_TYPES[export_format]:
             raise ValueError(
                 'Only datasets of type "segmentation-bitmap", "segmentation-bitmap-highres", "vector", "bboxes" and "keypoints" can be exported to this format.'
             )
@@ -242,22 +259,21 @@ def export_dataset(
             image_width=kwargs.get("image_width", None),
             image_height=kwargs.get("image_height", None),
         )
-    elif export_format in ["semantic-color", "instance-color", "semantic", "instance"]:
-        if dataset.task_type not in [
-            "segmentation-bitmap",
-            "segmentation-bitmap-highres",
-        ]:
+    elif export_format in {
+        ExportFormat.SEMANTIC_COLOR,
+        ExportFormat.INSTANCE_COLOR,
+        ExportFormat.SEMANTIC,
+        ExportFormat.INSTANCE,
+    }:
+        if dataset.task_type not in COMPATIBLE_TASK_TYPES[export_format]:
             raise ValueError(
                 "Only datasets of type 'segmentation-bitmap' and 'segmentation-bitmap-highres' can be exported to this format."
             )
         from .export import export_image
 
         return export_image(dataset, export_folder, export_format, id_increment)
-    elif export_format == "polygon":
-        if dataset.task_type not in [
-            "segmentation-bitmap",
-            "segmentation-bitmap-highres",
-        ]:
+    elif export_format == ExportFormat.POLYGON:
+        if dataset.task_type not in COMPATIBLE_TASK_TYPES[export_format]:
             raise ValueError(
                 'Only datasets of type "segmentation-bitmap" and "segmentation-bitmap-highres" can be exported to this format.'
             )

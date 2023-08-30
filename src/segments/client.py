@@ -333,9 +333,9 @@ class SegmentsClient:
         self,
         name: str,
         description: str = "",
-        task_type: TaskType = "segmentation-bitmap",
+        task_type: TaskType = TaskType.SEGMENTATION_BITMAP,
         task_attributes: Optional[Union[Dict[str, Any], TaskAttributes]] = None,
-        category: Category = "other",
+        category: Category = Category.OTHER,
         public: bool = False,
         readme: str = "",
         metadata: Optional[Dict[str, Any]] = None,
@@ -682,7 +682,7 @@ class SegmentsClient:
         return cast(Collaborator, r)
 
     def add_dataset_collaborator(
-        self, dataset_identifier: str, username: str, role: Role = "labeler"
+        self, dataset_identifier: str, username: str, role: Role = Role.LABELER
     ) -> Collaborator:
         """Add a dataset collaborator.
 
@@ -1171,7 +1171,7 @@ class SegmentsClient:
         sample_uuid: str,
         labelset: str,
         attributes: Union[Dict[str, Any], LabelAttributes],
-        label_status: LabelStatus = "PRELABELED",
+        label_status: LabelStatus = LabelStatus.PRELABELED,
         score: Optional[float] = None,
     ) -> Label:
         """Add a label to a sample.
@@ -1244,7 +1244,7 @@ class SegmentsClient:
         sample_uuid: str,
         labelset: str,
         attributes: Union[Dict[str, Any], LabelAttributes],
-        label_status: LabelStatus = "PRELABELED",
+        label_status: LabelStatus = LabelStatus.PRELABELED,
         score: Optional[float] = None,
     ) -> Label:
         """Update a label.
@@ -1472,7 +1472,7 @@ class SegmentsClient:
         self,
         sample_uuid: str,
         description: str,
-        status: IssueStatus = "OPEN",
+        status: IssueStatus = IssueStatus.OPEN,
     ) -> Issue:
         """Add an issue to a sample.
 
