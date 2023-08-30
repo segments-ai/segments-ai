@@ -36,7 +36,6 @@ from segments.exceptions import (
     ValidationError,
 )
 from segments.typing import (
-    AuthHeader,
     AWSFields,
     Category,
     Collaborator,
