@@ -167,6 +167,7 @@ class TestDataset(Test):
 
     def test_clone_dataset_defaults(self) -> None:
         dataset_identifier = f"{self.owner}/example-images-segmentation"
+        new_name = "example-images-segmentation-clone"
         try:
             clone = self.client.clone_dataset(
                 dataset_identifier, organization=self.owner
@@ -176,10 +177,11 @@ class TestDataset(Test):
             self.assertEqual(clone.name, "example-images-segmentation-clone")
             self.assertEqual(clone.task_type, "segmentation-bitmap")
             self.assertEqual(clone.public, False)
-
+        except AlreadyExistsError:
+            pass
         finally:
             # Delete dataset
-            self.client.delete_dataset(f"{clone.owner.username}/{clone.name}")
+            self.client.delete_dataset(f"{self.owner}/{new_name}")
 
     def test_clone_dataset_custom(self) -> None:
         dataset_identifier = f"{self.owner}/example-images-vector"
@@ -192,15 +194,17 @@ class TestDataset(Test):
                 dataset_identifier,
                 new_name=new_name,
                 new_task_type=new_task_type,
+                organization=self.owner,
             )
 
             self.assertIsInstance(clone, Dataset)
             self.assertEqual(clone.name, new_name)
             self.assertEqual(clone.task_type, new_task_type)
-
+        except AlreadyExistsError:
+            pass
         finally:
             # Delete dataset
-            self.client.delete_dataset(f"{clone.owner.username}/{clone.name}")
+            self.client.delete_dataset(f"{self.owner}/{new_name}")
 
     def test_get_add_update_delete_dataset_collaborator(self) -> None:
         username = "admin-arnaud"
