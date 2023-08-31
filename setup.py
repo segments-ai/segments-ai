@@ -1,10 +1,12 @@
 from distutils.core import setup
 from typing import List
 
+from version import __version__
+
 #############
 # Constants #
 #############
-VERSION = "1.0.26"
+VERSION = __version__
 
 
 ####################

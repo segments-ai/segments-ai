@@ -16,12 +16,14 @@ import os
 import sys
 from datetime import datetime
 
+from version import __version__
+
 sys.path.insert(0, os.path.abspath(os.path.join("..", "..", "src")))
 
 # -----------------------------------------------------------------------------
 # Constants #
 # -----------------------------------------------------------------------------
-VERSION = "1.0.26"
+VERSION = __version__
 
 # -----------------------------------------------------------------------------
 # Project information

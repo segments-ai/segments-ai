@@ -56,13 +56,14 @@ from segments.typing import (
     TaskType,
 )
 from typing_extensions import Literal, get_args
+from version import __version__
 
 ################################
 # Constants and type variables #
 ################################
 logger = logging.getLogger(__name__)
 T = TypeVar("T")
-VERSION = "1.0.26"
+VERSION = __version__
 
 
 ####################
