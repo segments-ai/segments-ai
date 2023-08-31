@@ -14,14 +14,19 @@ from urllib.parse import urlparse
 
 import numpy as np
 import numpy.typing as npt
-import open3d as o3d
 import requests
 from PIL import ExifTags, Image
-from segments.typing import EgoPose, PointcloudCuboidLabelAttributes
-from typing_extensions import Literal
+from segments.typing import (
+    EgoPose,
+    ExportFormat,
+    PointcloudCuboidLabelAttributes,
+    TaskType,
+)
 
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
+# https://stackoverflow.com/questions/61384752/how-to-type-hint-with-an-optional-import
 if TYPE_CHECKING:
+    import open3d as o3d
     from segments.dataset import SegmentsDataset
     from segments.typing import Release
 
@@ -106,16 +111,7 @@ def get_semantic_bitmap(
 def export_dataset(
     dataset: SegmentsDataset,
     export_folder: str = ".",
-    export_format: Literal[
-        "coco-panoptic",
-        "coco-instance",
-        "yolo",
-        "instance",
-        "instance-color",
-        "semantic",
-        "semantic-color",
-        "polygon",
-    ] = "coco-panoptic",
+    export_format: ExportFormat = ExportFormat.COCO_PANOPTIC,
     id_increment: int = 0,
     **kwargs: Any,
 ) -> Optional[Union[Tuple[str, Optional[str]], Optional[str]]]:
@@ -188,8 +184,10 @@ def export_dataset(
         export_folder: The folder to export the dataset to. Defaults to ``.``.
         export_format: The destination format. Defaults to ``coco-panoptic``.
         id_increment: Increment the category ids with this number. Defaults to ``0``. Ignored unless ``export_format`` is ``semantic`` or ``semantic-color``.
+
     Returns:
         Returns the file name and the image directory name (for COCO panoptic, COCO instance, YOLO and polygon), or returns the export folder name (for (colored) instance and (colored) panoptic).
+
     Raises:
         :exc:`ImportError`: If scikit image is not installed (to install run ``pip install scikit-image``).
         :exc:`ValueError`: If an unvalid ``export_format`` is used.
@@ -201,37 +199,63 @@ def export_dataset(
         logger.error("Please install scikit-image first: pip install scikit-image.")
         raise e
 
+    COMPATIBLE_TASK_TYPES = {
+        ExportFormat.COCO_PANOPTIC: {
+            TaskType.SEGMENTATION_BITMAP,
+            TaskType.SEGMENTATION_BITMAP_HIGHRES,
+        },
+        ExportFormat.COCO_INSTANCE: {
+            TaskType.SEGMENTATION_BITMAP,
+            TaskType.SEGMENTATION_BITMAP_HIGHRES,
+        },
+        ExportFormat.YOLO: {
+            TaskType.SEGMENTATION_BITMAP,
+            TaskType.SEGMENTATION_BITMAP_HIGHRES,
+            TaskType.VECTOR,
+            TaskType.BBOXES,
+            TaskType.KEYPOINTS,
+        },
+        ExportFormat.INSTANCE: {
+            TaskType.SEGMENTATION_BITMAP,
+            TaskType.SEGMENTATION_BITMAP_HIGHRES,
+        },
+        ExportFormat.INSTANCE_COLOR: {
+            TaskType.SEGMENTATION_BITMAP,
+            TaskType.SEGMENTATION_BITMAP_HIGHRES,
+        },
+        ExportFormat.SEMANTIC: {
+            TaskType.SEGMENTATION_BITMAP,
+            TaskType.SEGMENTATION_BITMAP_HIGHRES,
+        },
+        ExportFormat.SEMANTIC_COLOR: {
+            TaskType.SEGMENTATION_BITMAP,
+            TaskType.SEGMENTATION_BITMAP_HIGHRES,
+        },
+        ExportFormat.POLYGON: {
+            TaskType.SEGMENTATION_BITMAP,
+            TaskType.SEGMENTATION_BITMAP_HIGHRES,
+        },
+    }
+
     print("Exporting dataset. This may take a while...")
-    if export_format == "coco-panoptic":
-        if dataset.task_type not in [
-            "segmentation-bitmap",
-            "segmentation-bitmap-highres",
-        ]:
+    if export_format == ExportFormat.COCO_PANOPTIC:
+        if dataset.task_type not in COMPATIBLE_TASK_TYPES[export_format]:
             raise ValueError(
                 "Only datasets of type 'segmentation-bitmap' and 'segmentation-bitmap-highres' can be exported to this format."
             )
         from .export import export_coco_panoptic
 
         return export_coco_panoptic(dataset, export_folder)
-    elif export_format == "coco-instance":
-        if dataset.task_type not in [
-            "segmentation-bitmap",
-            "segmentation-bitmap-highres",
-        ]:
+    elif export_format == ExportFormat.COCO_INSTANCE:
+        if dataset.task_type not in COMPATIBLE_TASK_TYPES[export_format]:
             raise ValueError(
                 "Only datasets of type 'segmentation-bitmap' and 'segmentation-bitmap-highres' can be exported to this format."
             )
         from .export import export_coco_instance
 
         return export_coco_instance(dataset, export_folder)
-    elif export_format == "yolo":
-        if dataset.task_type not in [
-            "segmentation-bitmap",
-            "segmentation-bitmap-highres",
-            "vector",
-            "bboxes",
-            "keypoints",
-        ]:
+    elif export_format == ExportFormat.YOLO:
+        if dataset.task_type not in COMPATIBLE_TASK_TYPES[export_format]:
             raise ValueError(
                 'Only datasets of type "segmentation-bitmap", "segmentation-bitmap-highres", "vector", "bboxes" and "keypoints" can be exported to this format.'
             )
@@ -243,22 +267,21 @@ def export_dataset(
             image_width=kwargs.get("image_width", None),
             image_height=kwargs.get("image_height", None),
         )
-    elif export_format in ["semantic-color", "instance-color", "semantic", "instance"]:
-        if dataset.task_type not in [
-            "segmentation-bitmap",
-            "segmentation-bitmap-highres",
-        ]:
+    elif export_format in {
+        ExportFormat.SEMANTIC_COLOR,
+        ExportFormat.INSTANCE_COLOR,
+        ExportFormat.SEMANTIC,
+        ExportFormat.INSTANCE,
+    }:
+        if dataset.task_type not in COMPATIBLE_TASK_TYPES[export_format]:
             raise ValueError(
                 "Only datasets of type 'segmentation-bitmap' and 'segmentation-bitmap-highres' can be exported to this format."
             )
         from .export import export_image
 
         return export_image(dataset, export_folder, export_format, id_increment)
-    elif export_format == "polygon":
-        if dataset.task_type not in [
-            "segmentation-bitmap",
-            "segmentation-bitmap-highres",
-        ]:
+    elif export_format == ExportFormat.POLYGON:
+        if dataset.task_type not in COMPATIBLE_TASK_TYPES[export_format]:
             raise ValueError(
                 'Only datasets of type "segmentation-bitmap" and "segmentation-bitmap-highres" can be exported to this format.'
             )
@@ -323,9 +346,18 @@ def load_pointcloud_from_url(
         save_filename: The filename to save to.
         s3_client: A boto3 S3 client, e.g. ``s3_client = boto3.client("s3")``. Needs to be provided if your point clouds are in a private S3 bucket. Defaults to :obj:`None`.
 
+    Raises:
+        :exc:`ImportError`: If open3d is not installed (to install run ``pip install open3d``).
+
     Returns:
         A pointcloud.
     """
+
+    try:
+        import open3d as o3d
+    except ImportError as e:
+        logger.error("Please install open3d first: pip install open3d")
+        raise e
 
     def load_pointcloud_from_parsed_url(url: str) -> o3d.geometry.PointCloud:
         with NamedTemporaryFile(suffix=".pcd") as f:
@@ -590,12 +622,18 @@ def cuboid_to_segmentation(
 
     Raises:
         :exc:`ImportError`: If pyquaternion is not installed (to install run ``pip install pyquaternion``).
+        :exc:`ImportError`: If open3d is not installed (to install run ``pip install open3d``).
     """
 
     try:
         from pyquaternion import Quaternion
     except ImportError as e:
         logger.error("Please install pyquaternion first: pip install pyquaternion")
+        raise e
+    try:
+        import open3d as o3d
+    except ImportError as e:
+        logger.error("Please install open3d first: pip install open3d")
         raise e
 
     # check dimensions of input

@@ -36,7 +36,6 @@ from segments.exceptions import (
     ValidationError,
 )
 from segments.typing import (
-    AuthHeader,
     AWSFields,
     Category,
     Collaborator,
@@ -77,8 +76,10 @@ def handle_exceptions(
 
     Args:
         model: The class to parse the JSON response into. Defaults to :obj:`None`.
+
     Returns:
         A wrapper function (of this exception handler decorator).
+
     Raises:
         :exc:`~segments.exceptions.ValidationError`: If validation of the response fails - catches :exc:`pydantic.ValidationError`.
         :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -178,6 +179,7 @@ class SegmentsClient:
     Args:
         api_key: Your Segments.ai API key. If no API key given, reads ``SEGMENTS_API_KEY`` from the environment. Defaults to :obj:`None`.
         api_url: URL of the Segments.ai API. Defaults to ``https://api.segments.ai/``.
+
     Raises:
         :exc:`~segments.exceptions.AuthenticationError`: If an invalid API key is used or (when not passing the API key directly) if ``SEGMENTS_API_KEY`` is not found in your environment.
     """
@@ -284,6 +286,7 @@ class SegmentsClient:
             user: The user for which to get the datasets. Leave empty to get datasets of current user. Defaults to :obj:`None`.
             per_page: Pagination parameter indicating the maximum number of datasets to return. Defaults to ``1000``.
             page: Pagination parameter indicating the page to return. Defaults to ``1``.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the datasets fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -313,6 +316,7 @@ class SegmentsClient:
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -329,9 +333,9 @@ class SegmentsClient:
         self,
         name: str,
         description: str = "",
-        task_type: TaskType = "segmentation-bitmap",
+        task_type: TaskType = TaskType.SEGMENTATION_BITMAP,
         task_attributes: Optional[Union[Dict[str, Any], TaskAttributes]] = None,
-        category: Category = "other",
+        category: Category = Category.OTHER,
         public: bool = False,
         readme: str = "",
         metadata: Optional[Dict[str, Any]] = None,
@@ -395,6 +399,7 @@ class SegmentsClient:
             enable_label_status_verified: Enable an additional label status "Verified". Defaults to :obj:`False`.
             enable_3d_cuboid_rotation: Enable 3D cuboid rotation (i.e., yaw, pitch and roll). Defaults to :obj:`False`.
             organization: The username of the organization for which this dataset should be created. None will create a dataset for the current user. Defaults to :obj:`None`.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the task attributes fails.
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
@@ -498,6 +503,7 @@ class SegmentsClient:
             enable_save_button: Enable a save button in the labeling and reviewing workflow, to save unfinished work. Defaults to :obj:`False`.
             enable_label_status_verified: Enable an additional label status "Verified". Defaults to :obj:`False`.
             enable_3d_cuboid_rotation: Enable 3D cuboid rotation (i.e., yaw, pitch and roll). Defaults to :obj:`False`.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -574,6 +580,7 @@ class SegmentsClient:
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NotFoundError`: If the dataset is not found.
@@ -612,6 +619,7 @@ class SegmentsClient:
             new_task_type: The task type for the clone. Defaults to the task type of the original dataset.
             new_public: The visibility for the clone. Defaults to the visibility of the original dataset.
             organization: The username of the organization for which this dataset should be created. None will create a dataset for the current user. Defaults to :obj:`None`.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -658,6 +666,7 @@ class SegmentsClient:
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
             username: The username of the collaborator to be added.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the collaborator fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -673,7 +682,7 @@ class SegmentsClient:
         return cast(Collaborator, r)
 
     def add_dataset_collaborator(
-        self, dataset_identifier: str, username: str, role: Role = "labeler"
+        self, dataset_identifier: str, username: str, role: Role = Role.LABELER
     ) -> Collaborator:
         """Add a dataset collaborator.
 
@@ -688,6 +697,7 @@ class SegmentsClient:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
             username: The username of the collaborator to be added.
             role: The role of the collaborator to be added. One of ``labeler``, ``reviewer``, ``manager``, ``admin``. Defaults to ``labeler``.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the collaborator fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -719,6 +729,7 @@ class SegmentsClient:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
             username: The username of the collaborator to be added.
             role: The role of the collaborator to be added. Defaults to ``labeler``.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the collaborator fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -749,6 +760,7 @@ class SegmentsClient:
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
             username: The username of the collaborator to be deleted.
+
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NotFoundError`: If the dataset or dataset collaborator is not found.
@@ -791,6 +803,7 @@ class SegmentsClient:
             direction: Sorting direction. One of ``asc`` (ascending) or ``desc`` (descending). Defaults to ``asc``.
             per_page: Pagination parameter indicating the maximum number of samples to return. Defaults to ``1000``.
             page: Pagination parameter indicating the page to return. Defaults to ``1``.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the samples fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -861,6 +874,7 @@ class SegmentsClient:
             uuid: The sample uuid.
             labelset: If defined, this additionally returns the label for the given labelset. Defaults to :obj:`None`.
             include_signed_url: Whether to return the pre-signed URL in case of private S3 buckets. Defaults to :obj:`False`.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the samples fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -927,6 +941,7 @@ class SegmentsClient:
             assigned_labeler: The username of the user who should label this sample. Leave empty to not assign a specific labeler. Defaults to :obj:`None`.
             assigned_reviewer: The username of the user who should review this sample. Leave empty to not assign a specific reviewer. Defaults to :obj:`None`.
             embedding: Embedding of this sample represented by an array of floats.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the sample attributes fails.
             :exc:`~segments.exceptions.ValidationError`: If validation of the sample fails.
@@ -985,6 +1000,7 @@ class SegmentsClient:
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
             samples: A list of dicts with required ``name``, ``attributes`` fields and optional ``metadata``, ``priority``, ``embedding`` fields. See :meth:`.add_sample` for details.
+
         Raises:
             :exc:`KeyError`: If 'name' or 'attributes' is not in a sample dict.
             :exc:`~segments.exceptions.ValidationError`: If validation of the attributes of a sample fails.
@@ -1058,6 +1074,7 @@ class SegmentsClient:
             assigned_labeler: The username of the user who should label this sample. Leave empty to not assign a specific labeler.
             assigned_reviewer: The username of the user who should review this sample. Leave empty to not assign a specific reviewer.
             embedding: Embedding of this sample represented by list of floats.
+
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.ValidationError`: If validation of the samples fails.
@@ -1108,6 +1125,7 @@ class SegmentsClient:
 
         Args:
             uuid: The sample uuid.
+
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NotFoundError`: If the sample is not found.
@@ -1135,6 +1153,7 @@ class SegmentsClient:
         Args:
             sample_uuid: The sample uuid.
             labelset: The labelset this label belongs to. Defaults to ``ground-truth``.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the label fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -1152,7 +1171,7 @@ class SegmentsClient:
         sample_uuid: str,
         labelset: str,
         attributes: Union[Dict[str, Any], LabelAttributes],
-        label_status: LabelStatus = "PRELABELED",
+        label_status: LabelStatus = LabelStatus.PRELABELED,
         score: Optional[float] = None,
     ) -> Label:
         """Add a label to a sample.
@@ -1187,6 +1206,7 @@ class SegmentsClient:
             attributes: The label attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/sample-and-label-types/label-types>`__.
             label_status: The label status. Defaults to ``PRELABELED``.
             score: The label score. Defaults to :obj:`None`.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the attributes fails.
             :exc:`~segments.exceptions.ValidationError`: If validation of the label fails.
@@ -1224,7 +1244,7 @@ class SegmentsClient:
         sample_uuid: str,
         labelset: str,
         attributes: Union[Dict[str, Any], LabelAttributes],
-        label_status: LabelStatus = "PRELABELED",
+        label_status: LabelStatus = LabelStatus.PRELABELED,
         score: Optional[float] = None,
     ) -> Label:
         """Update a label.
@@ -1254,6 +1274,7 @@ class SegmentsClient:
             attributes: The label attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/sample-and-label-types/label-types>`__.
             label_status: The label status. Defaults to ``PRELABELED``.
             score: The label score. Defaults to :obj:`None`.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the label fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -1293,6 +1314,7 @@ class SegmentsClient:
         Args:
             sample_uuid: The sample uuid.
             labelset: The labelset this label belongs to.
+
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NotFoundError`: If the sample or labelset is not found.
@@ -1317,6 +1339,7 @@ class SegmentsClient:
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the labelsets fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -1344,6 +1367,7 @@ class SegmentsClient:
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
             name: The name of the labelset.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the labelset fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -1373,6 +1397,7 @@ class SegmentsClient:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
             name: The name of the labelset.
             description: The labelset description. Defaults to ``''``.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the labelset fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -1406,6 +1431,7 @@ class SegmentsClient:
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
             name: The name of the labelset.
+
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NotFoundError`: If the dataset or labelset is not found.
@@ -1430,6 +1456,7 @@ class SegmentsClient:
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NotFoundError`: If the dataset is not found.
@@ -1445,7 +1472,7 @@ class SegmentsClient:
         self,
         sample_uuid: str,
         description: str,
-        status: IssueStatus = "OPEN",
+        status: IssueStatus = IssueStatus.OPEN,
     ) -> Issue:
         """Add an issue to a sample.
 
@@ -1460,6 +1487,7 @@ class SegmentsClient:
             sample_uuid: The sample uuid.
             description: The issue description.
             status: The issue status. One of ``OPEN`` or ``CLOSED``. Defaults to ``OPEN``.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the issue fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -1496,6 +1524,7 @@ class SegmentsClient:
             uuid: The issue uuid.
             description: The issue description. Defaults to :obj:`None`.
             status: The issue status. One of ``OPEN`` or ``CLOSED``. Defaults to :obj:`None`.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the issue fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -1526,6 +1555,7 @@ class SegmentsClient:
 
         Args:
             uuid: The issue uuid.
+
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NotFoundError`: If the issue is not found.
@@ -1550,6 +1580,7 @@ class SegmentsClient:
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the releases fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -1575,6 +1606,7 @@ class SegmentsClient:
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
             name: The name of the release.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the release fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -1604,6 +1636,7 @@ class SegmentsClient:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
             name: The name of the release.
             description: The release description. Defaults to ``''``.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the release fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -1634,6 +1667,7 @@ class SegmentsClient:
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
             name: The name of the release.
+
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NotFoundError`: If the dataset or release is not found.
@@ -1663,6 +1697,7 @@ class SegmentsClient:
         Args:
             file: A file object.
             filename: The file name. Defaults to ``label.png``.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the file fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -1701,6 +1736,7 @@ class SegmentsClient:
             endpoint: The API endpoint.
             auth: If we want to authorize the request. Defaults to :obj:`True`.
             model: The class to parse the JSON response into. Defaults to :obj:`None`.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the response fails - catches :exc:`pydantic.ValidationError`.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -1708,7 +1744,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out - catches :exc:`requests.exceptions.TimeoutError`.
         """
 
-        headers = self._get_auth_header() if auth else None
+        headers = self._get_headers(auth)
 
         r = self.api_session.get(
             urllib.parse.urljoin(self.api_url, endpoint), headers=headers
@@ -1731,13 +1767,14 @@ class SegmentsClient:
             data: The JSON data. Defaults to :obj:`None`.
             auth: If we want to authorize the request with the API key. Defaults to :obj:`True`.
             model: The class to parse the JSON response into. Defaults to :obj:`None`.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the response fails - catches :exc:`pydantic.ValidationError`.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error - catches :exc:`requests.HTTPError` and catches :exc:`requests.RequestException`.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out - catches :exc:`requests.exceptions.TimeoutError`.
         """
-        headers = self._get_auth_header() if auth else None
+        headers = self._get_headers(auth)
 
         r = self.api_session.post(
             urllib.parse.urljoin(self.api_url, endpoint),
@@ -1762,13 +1799,14 @@ class SegmentsClient:
             data: The JSON data. Defaults to :obj:`None`.
             auth: If we want to authorize the request with the API key. Defaults to :obj:`True`.
             model: The class to parse the JSON response into. Defaults to :obj:`None`.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the response fails - catches :exc:`pydantic.ValidationError`.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error - catches :exc:`requests.HTTPError` and catches :exc:`requests.RequestException`.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out - catches :exc:`requests.exceptions.TimeoutError`.
         """
-        headers = self._get_auth_header() if auth else None
+        headers = self._get_headers(auth)
 
         r = self.api_session.put(
             urllib.parse.urljoin(self.api_url, endpoint),
@@ -1793,13 +1831,14 @@ class SegmentsClient:
             data: The JSON data. Defaults to :obj:`None`.
             auth: If we want to authorize the request with the API key. Defaults to :obj:`True`.
             model: The class to parse the JSON response into. Defaults to :obj:`None`.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the response fails - catches :exc:`pydantic.ValidationError`.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error - catches :exc:`requests.HTTPError` and catches :exc:`requests.RequestException`.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out - catches :exc:`requests.exceptions.TimeoutError`.
         """
-        headers = self._get_auth_header() if auth else None
+        headers = self._get_headers(auth)
 
         r = self.api_session.patch(
             urllib.parse.urljoin(self.api_url, endpoint),
@@ -1824,13 +1863,14 @@ class SegmentsClient:
             data: The JSON data. Defaults to :obj:`None`.
             auth: If we want to authorize the request with the API key. Defaults to :obj:`True`.
             model: The class to parse the JSON response into. Defaults to :obj:`None`.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the response fails - catches :exc:`pydantic.ValidationError`.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error - catches :exc:`requests.HTTPError` and catches :exc:`requests.RequestException`.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out - catches :exc:`requests.exceptions.TimeoutError`.
         """
-        headers = self._get_auth_header() if auth else None
+        headers = self._get_headers(auth)
 
         r = self.api_session.delete(
             urllib.parse.urljoin(self.api_url, endpoint),
@@ -1840,9 +1880,12 @@ class SegmentsClient:
 
         return r
 
-    def _get_auth_header(self) -> Optional[AuthHeader]:
+    def _get_headers(self, auth: bool = True) -> Dict[str, str]:
         """Get the authorization header with the API key."""
-        return {"Authorization": f"APIKey {self.api_key}"} if self.api_key else None
+        headers = {"X-source": "python-sdk"}
+        if auth and self.api_key:
+            headers["Authorization"] = f"APIKey {self.api_key}"
+        return headers
 
     @handle_exceptions
     def _upload_to_aws(
@@ -1854,6 +1897,7 @@ class SegmentsClient:
             file: The file we want to upload.
             url: The request's url.
             aws_fields: The AWS fields.
+
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
