@@ -13,6 +13,12 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 .. autofunction:: segments.utils.load_image_from_url
 ```
 
+### Load a point cloud from a url
+
+```{eval-rst}
+.. autofunction:: segments.utils.load_pointcloud_from_url
+```
+
 ### Load a label bitmap from a url
 
 ```{eval-rst}
@@ -43,6 +49,12 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 
 ```{eval-rst}
 .. autofunction:: segments.utils.handle_exif_rotation
+```
+
+### Turn a cuboid label into a segmentation label
+
+```{eval-rst}
+.. autofunction:: segments.utils.cuboid_to_segmentation
 ```
 
 ## Export

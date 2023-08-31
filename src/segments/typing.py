@@ -293,7 +293,7 @@ class ImageSequenceVectorAnnotation(ImageVectorAnnotation):
     is_keyframe: bool = False
 
 
-class ImageVectorFrame(BaseModel):
+class ImageVectorFrame(ImageVectorLabelAttributes):
     annotations: List[ImageSequenceVectorAnnotation]
     timestamp: Optional[Union[str, int]] = None
     format_version: Optional[FormatVersion] = None
@@ -380,15 +380,13 @@ class PointcloudVectorLabelAttributes(BaseModel):
 
 
 # Point cloud sequence segmentation
-class PointcloudSequenceSegmentationAnnotation(BaseModel):
-    id: int
-    category_id: int
+class PointcloudSequenceSegmentationAnnotation(Annotation):
     track_id: int
     is_keyframe: bool = False
     attributes: Optional[ObjectAttributes] = None
 
 
-class PointcloudSegmentationFrame(BaseModel):
+class PointcloudSegmentationFrame(PointcloudSegmentationLabelAttributes):
     annotations: List[PointcloudSequenceSegmentationAnnotation]
     point_annotations: Optional[List[int]] = None
     timestamp: Optional[Union[str, int]] = None
@@ -406,7 +404,7 @@ class PointcloudSequenceCuboidAnnotation(PointcloudCuboidAnnotation):
     is_keyframe: bool = False
 
 
-class PointcloudSequenceCuboidFrame(BaseModel):
+class PointcloudSequenceCuboidFrame(PointcloudCuboidLabelAttributes):
     annotations: List[PointcloudSequenceCuboidAnnotation]
     timestamp: Optional[Union[str, int]] = None
     format_version: Optional[FormatVersion] = None
@@ -423,7 +421,7 @@ class PointcloudSequenceVectorAnnotation(PointcloudVectorAnnotation):
     is_keyframe: bool = False
 
 
-class PointcloudSequenceVectorFrame(BaseModel):
+class PointcloudSequenceVectorFrame(PointcloudVectorLabelAttributes):
     annotations: List[PointcloudSequenceVectorAnnotation]
     format_version: Optional[FormatVersion] = None
     timestamp: Optional[Union[str, int]] = None

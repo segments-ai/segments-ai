@@ -8,6 +8,7 @@ import random
 import re
 from collections import defaultdict
 from io import BytesIO
+from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union, cast
 from urllib.parse import urlparse
 
@@ -15,10 +16,17 @@ import numpy as np
 import numpy.typing as npt
 import requests
 from PIL import ExifTags, Image
-from segments.typing import ExportFormat, TaskType
+from segments.typing import (
+    EgoPose,
+    ExportFormat,
+    PointcloudCuboidLabelAttributes,
+    TaskType,
+)
 
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
+# https://stackoverflow.com/questions/61384752/how-to-type-hint-with-an-optional-import
 if TYPE_CHECKING:
+    import open3d as o3d
     from segments.dataset import SegmentsDataset
     from segments.typing import Release
 
@@ -293,6 +301,9 @@ def load_image_from_url(
         url: The image url.
         save_filename: The filename to save to.
         s3_client: A boto3 S3 client, e.g. ``s3_client = boto3.client("s3")``. Needs to be provided if your images are in a private S3 bucket. Defaults to :obj:`None`.
+
+    Returns:
+        A PIL image.
     """
     if s3_client is not None:
         url_parsed = urlparse(url)
@@ -325,6 +336,62 @@ def load_image_from_url(
     return image
 
 
+def load_pointcloud_from_url(
+    url: str, save_filename: Optional[str] = None, s3_client: Optional[Any] = None
+) -> o3d.geometry.PointCloud:
+    """Load a pointcloud from url.
+
+    Args:
+        url: The pointcloud url.
+        save_filename: The filename to save to.
+        s3_client: A boto3 S3 client, e.g. ``s3_client = boto3.client("s3")``. Needs to be provided if your point clouds are in a private S3 bucket. Defaults to :obj:`None`.
+
+    Raises:
+        :exc:`ImportError`: If open3d is not installed (to install run ``pip install open3d``).
+
+    Returns:
+        A pointcloud.
+    """
+
+    try:
+        import open3d as o3d
+    except ImportError as e:
+        logger.error("Please install open3d first: pip install open3d")
+        raise e
+
+    def load_pointcloud_from_parsed_url(url: str) -> o3d.geometry.PointCloud:
+        with NamedTemporaryFile(suffix=".pcd") as f:
+            f.write(session.get(url).content)
+            pointcloud = o3d.io.read_point_cloud(f.name)
+
+        return pointcloud
+
+    if s3_client is not None:
+        url_parsed = urlparse(url)
+        regex = re.search(
+            r"(.+).(s3|s3-accelerate).(.+).amazonaws.com", url_parsed.netloc
+        )
+        if regex:
+            bucket = regex.group(1)
+
+            if bucket == "segmentsai-prod":
+                pointcloud = load_pointcloud_from_parsed_url(url)
+            else:
+                key = url_parsed.path.lstrip("/")
+                file_byte_string = s3_client.get_object(Bucket=bucket, Key=key)[
+                    "Body"
+                ].read()
+                with NamedTemporaryFile(suffix=".pcd") as f:
+                    f.write(file_byte_string)
+                    pointcloud = o3d.io.read_point_cloud(f.name)
+    else:
+        pointcloud = load_pointcloud_from_parsed_url(url)
+    if save_filename is not None:
+        o3d.io.write_point_cloud(save_filename, pointcloud)
+
+    return pointcloud
+
+
 def load_label_bitmap_from_url(
     url: str, save_filename: Optional[str] = None
 ) -> npt.NDArray[np.uint32]:
@@ -333,6 +400,9 @@ def load_label_bitmap_from_url(
     Args:
         url: The label bitmap url.
         save_filename: The filename to save to.
+
+    Returns:
+        A :class:`numpy.ndarray` with :class:`numpy.uint32` ``dtype`` where each unique value represents an instance id.
     """
 
     def extract_bitmap(
@@ -414,6 +484,9 @@ def show_polygons(
 
     Raises:
         :exc:`ImportError`: If matplotlib is not installed.
+
+    Returns:
+        None
     """
 
     try:
@@ -531,3 +604,93 @@ def show_polygons(
         plt.savefig(path, bbox_inches="tight")
 
     plt.show()
+
+
+def cuboid_to_segmentation(
+    pointcloud: np.ndarray,
+    label_attributes: PointcloudCuboidLabelAttributes,
+    ego_pose: Optional[EgoPose] = None,
+) -> np.ndarray:
+    """Convert a cuboid label to an instance segmentation label.
+
+    Args:
+        pointcloud: A pointcloud of size Nx3.
+        label_attributes: A cuboid label from a single frame interface or one frame from a sequence interface.
+
+    Returns:
+        An instance segmentation label of size Nx1 mapping each point cloud point to a cuboid instance.
+
+    Raises:
+        :exc:`ImportError`: If pyquaternion is not installed (to install run ``pip install pyquaternion``).
+        :exc:`ImportError`: If open3d is not installed (to install run ``pip install open3d``).
+    """
+
+    try:
+        from pyquaternion import Quaternion
+    except ImportError as e:
+        logger.error("Please install pyquaternion first: pip install pyquaternion")
+        raise e
+    try:
+        import open3d as o3d
+    except ImportError as e:
+        logger.error("Please install open3d first: pip install open3d")
+        raise e
+
+    # check dimensions of input
+    assert pointcloud.shape[1] == 3, "Pointcloud must have shape (N, 3)"
+    assert label_attributes.annotations, "Label must have annotations"
+
+    # create cuboids
+    cuboids = {}
+    for annotation in label_attributes.annotations:
+        center = np.array(
+            [annotation.position.x, annotation.position.y, annotation.position.z]
+        )
+        extent = np.array(
+            [annotation.dimensions.x, annotation.dimensions.y, annotation.dimensions.z]
+        )
+        if annotation.rotation:
+            rotation = o3d.geometry.get_rotation_matrix_from_quaternion(
+                np.array(
+                    [
+                        annotation.rotation.qx,
+                        annotation.rotation.qy,
+                        annotation.rotation.qz,
+                        annotation.rotation.qw,
+                    ]
+                )
+            )
+        else:
+            rotation = o3d.geometry.get_rotation_matrix_from_xyz((0, 0, annotation.yaw))
+
+        # create cuboid
+        cuboid = o3d.geometry.OrientedBoundingBox(
+            center=center, extent=extent, R=rotation
+        )
+
+        cuboids[annotation.id] = cuboid
+
+        # transform cuboids from world to lidar coordinate frame
+        transformation = np.eye(4)
+        if ego_pose and ego_pose.position:
+            pos = ego_pose.position
+            transformation[:3, 3] = np.array([pos.x, pos.y, pos.z])
+        if ego_pose and ego_pose.heading:
+            rot = ego_pose.heading
+            rotq = Quaternion(
+                x=rot.qx, y=rot.qy, z=rot.qz, w=rot.qw
+            ).inverse.transformation_matrix
+            transformation[:3, :3] = rotq[:3, :3]
+        # tranform = rotate + translate (bug: transform not defined for OrientedBoundingBox)
+        cuboid.translate(-transformation[:3, 3])
+        cuboid.rotate(transformation[:3, :3])
+
+    # map each point to a cuboid instance
+    result = np.zeros(pointcloud.shape[0], dtype=np.uint32)
+    pointcloud = o3d.utility.Vector3dVector(pointcloud)
+    for id, cuboid in cuboids.items():
+        # get points inside cuboid
+        inside = cuboid.get_point_indices_within_bounding_box(pointcloud)
+        result[inside] = id
+
+    return result
