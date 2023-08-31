@@ -16,7 +16,18 @@ import os
 import sys
 from datetime import datetime
 
-from segments.version import __version__
+# https://gist.github.com/benkehoe/066a73903e84576a8d6d911cfedc2df6
+try:
+    # importlib.metadata is present in Python 3.8 and later
+    import importlib.metadata as importlib_metadata
+except ImportError:
+    # use the shim package importlib-metadata pre-3.8
+    import importlib_metadata as importlib_metadata
+try:
+    # __package__ allows for the case where __name__ is "__main__"
+    __version__ = importlib_metadata.version(__package__ or __name__)
+except importlib_metadata.PackageNotFoundError:
+    __version__ = "0.0.0"
 
 sys.path.insert(0, os.path.abspath(os.path.join("..", "..", "src")))
 

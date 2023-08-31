@@ -1,12 +1,11 @@
 from distutils.core import setup
 from typing import List
 
-from segments.version import __version__
-
 #############
 # Constants #
 #############
-VERSION = __version__
+MAJOR, MINOR, PATCH = 1, 0, 27
+VERSION = f"{MAJOR}.{MINOR}.{PATCH}"
 
 
 ####################
