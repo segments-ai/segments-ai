@@ -62,7 +62,7 @@ from typing_extensions import Literal, get_args
 ################################
 logger = logging.getLogger(__name__)
 T = TypeVar("T")
-VERSION = "1.0.26"
+VERSION = "1.0.27"
 
 
 ####################
