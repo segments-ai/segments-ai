@@ -56,7 +56,7 @@ from segments.typing import (
     TaskType,
 )
 from typing_extensions import Literal, get_args
-from version import __version__
+from segments.version import __version__
 
 ################################
 # Constants and type variables #

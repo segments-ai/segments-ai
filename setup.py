@@ -1,15 +1,11 @@
-import os
-import sys
 from distutils.core import setup
 from typing import List
 
-sys.path.insert(0, os.path.abspath("."))
-from version import __version__  # noqa: E402
+from segments.version import __version__
 
 #############
 # Constants #
 #############
-
 VERSION = __version__
 
 
