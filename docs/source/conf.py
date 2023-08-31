@@ -18,6 +18,7 @@ from datetime import datetime
 
 from version import __version__
 
+sys.path.insert(0, os.path.abspath(os.path.join("..", "..")))
 sys.path.insert(0, os.path.abspath(os.path.join("..", "..", "src")))
 
 # -----------------------------------------------------------------------------
