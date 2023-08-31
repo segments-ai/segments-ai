@@ -22,7 +22,7 @@ from typing import (
 import numpy.typing as npt
 import pydantic
 import requests
-from pydantic import parse_obj_as
+from pydantic import TypeAdapter
 from segments.exceptions import (
     AlreadyExistsError,
     APILimitError,
@@ -103,7 +103,7 @@ def handle_exceptions(
                     if "throttled" in message:
                         raise APILimitError(message)
                 if model:
-                    m = parse_obj_as(model, r_json)
+                    m = TypeAdapter(model).validate_python(r_json)
                     return m
             return r
         except requests.exceptions.Timeout as e:
@@ -417,14 +417,14 @@ class SegmentsClient:
 
         if type(task_attributes) is dict:
             try:
-                TaskAttributes.parse_obj(task_attributes)
+                TaskAttributes.model_validate(task_attributes)
             except pydantic.ValidationError as e:
                 logger.error(
                     "Did you use the right task attributes? Please refer to the online documentation: https://docs.segments.ai/reference/categories-and-task-attributes#object-attribute-format.",
                 )
                 raise ValidationError(message=str(e), cause=e)
         elif type(task_attributes) is TaskAttributes:
-            task_attributes = task_attributes.dict()
+            task_attributes = task_attributes.model_dump()
 
         payload: Dict[str, Any] = {
             "name": name,
@@ -522,7 +522,7 @@ class SegmentsClient:
 
         if task_attributes:
             payload["task_attributes"] = (
-                task_attributes.dict()
+                task_attributes.model_dump()
                 if type(task_attributes) is TaskAttributes
                 else task_attributes
             )
@@ -850,7 +850,7 @@ class SegmentsClient:
             result.pop("label", None)
 
         try:
-            results = parse_obj_as(List[Sample], results)
+            results = TypeAdapter(List[Sample]).validate_python(results)
         except pydantic.ValidationError as e:
             raise ValidationError(message=str(e), cause=e)
 
@@ -954,14 +954,14 @@ class SegmentsClient:
 
         if type(attributes) is dict:
             try:
-                parse_obj_as(SampleAttributes, attributes)
+                TypeAdapter(SampleAttributes).validate_python(attributes)
             except pydantic.ValidationError as e:
                 logger.error(
                     "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
                 )
                 raise ValidationError(message=str(e), cause=e)
         elif type(attributes) in get_args(SampleAttributes):
-            attributes = attributes.dict()
+            attributes = attributes.model_dump()
 
         payload: Dict[str, Any] = {
             "name": name,
@@ -1021,14 +1021,14 @@ class SegmentsClient:
                     )
 
                 try:
-                    parse_obj_as(SampleAttributes, sample["attributes"])
+                    TypeAdapter(SampleAttributes).validate_python(sample["attributes"])
                 except pydantic.ValidationError as e:
                     logger.error(
                         "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
                     )
                     raise ValidationError(message=str(e), cause=e)
             elif type(sample) is Sample:
-                sample = sample.dict()
+                sample = sample.model_dump()
 
         payload = samples
 
@@ -1090,7 +1090,7 @@ class SegmentsClient:
 
         if attributes:
             payload["attributes"] = (
-                attributes.dict()
+                attributes.model_dump()
                 if type(attributes) in get_args(SampleAttributes)
                 else attributes
             )
@@ -1218,14 +1218,14 @@ class SegmentsClient:
 
         if type(attributes) is dict:
             try:
-                parse_obj_as(LabelAttributes, attributes)
+                TypeAdapter(LabelAttributes).validate_python(attributes)
             except pydantic.ValidationError as e:
                 logger.error(
                     "Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.",
                 )
                 raise ValidationError(message=str(e), cause=e)
         elif type(attributes) in get_args(LabelAttributes):
-            attributes = attributes.dict()
+            attributes = attributes.model_dump()
 
         payload: Dict[str, Any] = {
             "label_status": label_status,
@@ -1287,7 +1287,7 @@ class SegmentsClient:
 
         if attributes:
             payload["attributes"] = (
-                attributes.dict()
+                attributes.model_dump()
                 if type(attributes) in get_args(LabelAttributes)
                 else attributes
             )
@@ -1706,7 +1706,7 @@ class SegmentsClient:
         """
 
         r = self._post("/assets/", data={"filename": filename})
-        presigned_post_fields = PresignedPostFields.parse_obj(
+        presigned_post_fields = PresignedPostFields.model_validate(
             r.json()["presignedPostFields"]
         )
         self._upload_to_aws(
@@ -1714,7 +1714,7 @@ class SegmentsClient:
         )
 
         try:
-            f = File.parse_obj(r.json())
+            f = File.model_validate(r.json())
         except pydantic.ValidationError as e:
             raise ValidationError(message=str(e), cause=e)
 

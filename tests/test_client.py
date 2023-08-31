@@ -166,8 +166,8 @@ class TestDataset(Test):
             self.client.clone_dataset(wrong_dataset_identifier)
 
     def test_clone_dataset_defaults(self) -> None:
-        dataset_identifier = f"{self.owner}/example-images-segmentation"
-        new_name = "example-images-segmentation-clone"
+        name = "example-images-segmentation"
+        dataset_identifier = f"{self.owner}/{name}"
         try:
             clone = self.client.clone_dataset(
                 dataset_identifier, organization=self.owner
@@ -181,7 +181,7 @@ class TestDataset(Test):
             pass
         finally:
             # Delete dataset
-            self.client.delete_dataset(f"{self.owner}/{new_name}")
+            self.client.delete_dataset(f"{self.owner}/{name}-clone")
 
     def test_clone_dataset_custom(self) -> None:
         dataset_identifier = f"{self.owner}/example-images-vector"

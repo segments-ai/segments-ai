@@ -5,5 +5,5 @@ myst_parser==0.*
 sphinx-autobuild==2021.*
 sphinx-copybutton==0.*
 sphinx_autodoc_typehints==1.*
-autodoc_pydantic==1.*
+autodoc_pydantic==2.*
 datasets==2.*
