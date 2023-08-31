@@ -11,7 +11,7 @@ import numpy as np
 import numpy.typing as npt
 import requests
 from PIL import Image, UnidentifiedImageError
-from pydantic import parse_obj_as
+from pydantic import TypeAdapter
 from segments.typing import LabelStatus, Release, SegmentsDatasetCategory
 from segments.utils import (
     handle_exif_rotation,
@@ -283,8 +283,7 @@ class SegmentsDataset:
 
     @property
     def categories(self) -> List[SegmentsDatasetCategory]:
-        return parse_obj_as(
-            List[SegmentsDatasetCategory],
+        return TypeAdapter(List[SegmentsDatasetCategory]).validate_python(
             self.release["dataset"]["task_attributes"]["categories"],
         )
         # categories = {}

@@ -140,6 +140,7 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.ImageVectorFrame
+    :show-inheritance:
 ```
 
 ```{eval-rst}
@@ -193,10 +194,12 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.PointcloudSegmentationFrame
+    :show-inheritance:
 ```
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.PointcloudSequenceSegmentationAnnotation
+    :show-inheritance:
 ```
 
 ### Point cloud sequence cuboid label
@@ -207,6 +210,7 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.PointcloudSequenceCuboidFrame
+    :show-inheritance:
 ```
 
 ```{eval-rst}
@@ -222,6 +226,7 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.PointcloudSequenceVectorFrame
+    :show-inheritance:
 ```
 
 ```{eval-rst}
