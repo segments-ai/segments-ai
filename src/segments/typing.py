@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from pydantic import BaseModel as PydanticBaseModel
 from pydantic import ConfigDict, field_validator
 from segments.exceptions import ValidationError
-from typing_extensions import Literal, TypedDict, get_args
+from typing_extensions import Literal, TypedDict
 
 
 class BaseModel(PydanticBaseModel):
