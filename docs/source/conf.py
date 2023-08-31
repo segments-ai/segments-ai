@@ -16,7 +16,7 @@ import os
 import sys
 from datetime import datetime
 
-from segments import __version__
+from segments.version import __version__
 
 sys.path.insert(0, os.path.abspath(os.path.join("..", "..", "src")))
 

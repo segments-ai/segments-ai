@@ -23,7 +23,6 @@ import numpy.typing as npt
 import pydantic
 import requests
 from pydantic import TypeAdapter
-from segments import __version__
 from segments.exceptions import (
     AlreadyExistsError,
     APILimitError,
@@ -56,6 +55,7 @@ from segments.typing import (
     TaskAttributes,
     TaskType,
 )
+from segments.version import __version__
 from typing_extensions import Literal, get_args
 
 ################################
