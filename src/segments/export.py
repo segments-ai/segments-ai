@@ -376,7 +376,7 @@ def export_coco_instance(
 
     json_data = {
         "info": info,
-        "categories": [category.dict() for category in categories],
+        "categories": [category.model_dump() for category in categories],
         "images": images,
         "annotations": annotations
         # "segment_info": [] # Only in Panoptic annotations
@@ -555,7 +555,7 @@ def export_coco_panoptic(
     # PUT EVERYTHING TOGETHER
     json_data = {
         "info": info,
-        "categories": [category.dict() for category in categories],
+        "categories": [category.model_dump() for category in categories],
         "images": images,
         "annotations": annotations,
     }
@@ -607,7 +607,7 @@ def export_image(
         )
 
         categories.append(
-            SegmentsDatasetCategory.parse_obj(
+            SegmentsDatasetCategory.model_validate(
                 {
                     "id": category.id,
                     "name": category.name,
@@ -890,7 +890,7 @@ def export_polygon(
             annotation_id += 1
 
     json_data = {
-        "categories": [category.dict() for category in categories],
+        "categories": [category.model_dump() for category in categories],
         "images": images,
         "annotations": annotations,
     }
