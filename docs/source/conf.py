@@ -17,10 +17,10 @@ import sys
 from datetime import datetime
 
 sys.path.insert(0, os.path.abspath(os.path.join("..", "..", "src")))
-from segments.version import __version__  # noqa: E402
+from src.segments.version import __version__  # noqa: E402
 
 # -----------------------------------------------------------------------------
-# Constants #
+# Constants
 # -----------------------------------------------------------------------------
 VERSION = __version__
 
