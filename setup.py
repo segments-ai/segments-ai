@@ -1,7 +1,7 @@
 from distutils.core import setup
 from typing import List
 
-from src.segments.version import __version__
+from segments import __version__
 
 #############
 # Constants #
