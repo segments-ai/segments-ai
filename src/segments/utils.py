@@ -480,7 +480,7 @@ def show_polygons(
         image_id: The image id (this can be found in the exported polygons JSON file).
         exported_polygons_path: The exported polygons path.
         seed: The seed used to generate random colors. Defaults to ``0``.
-        output_path: The directory to save the plot to. Defaults to :obj:`None`
+        output_path: The directory to save the plot to. Defaults to :obj:`None`.
 
     Returns:
         None
@@ -706,10 +706,10 @@ def array_to_pcd(
     """Convert a numpy array to a pcd file.
 
     Args:
-        positions: Array of xyz points (Nx3 shape)
-        output_path: Path to write the pcd
-        intensity: Optional array of intensity values (Nx1 shape)
-        rgb: optional Array of rgb values (Nx3 shape)
+        positions: Array of xyz points (Nx3 shape).
+        output_path: Path to write the pcd.
+        intensity: Optional array of intensity values (Nx1 shape).
+        rgb: optional Array of rgb values (Nx3 shape).
 
     Returns:
         None
