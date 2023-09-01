@@ -346,11 +346,11 @@ def load_pointcloud_from_url(
         save_filename: The filename to save to.
         s3_client: A boto3 S3 client, e.g. ``s3_client = boto3.client("s3")``. Needs to be provided if your point clouds are in a private S3 bucket. Defaults to :obj:`None`.
 
-    Raises:
-        :exc:`ImportError`: If open3d is not installed (to install run ``pip install open3d``).
-
     Returns:
         A pointcloud.
+
+    Raises:
+        :exc:`ImportError`: If open3d is not installed (to install run ``pip install open3d``).
     """
 
     try:
@@ -480,13 +480,13 @@ def show_polygons(
         image_id: The image id (this can be found in the exported polygons JSON file).
         exported_polygons_path: The exported polygons path.
         seed: The seed used to generate random colors. Defaults to ``0``.
-        output_path: The directory to save the plot to. Defaults to :obj:`None`.
-
-    Raises:
-        :exc:`ImportError`: If matplotlib is not installed.
+        output_path: The directory to save the plot to. Defaults to :obj:`None`
 
     Returns:
         None
+
+    Raises:
+        :exc:`ImportError`: If matplotlib is not installed.
     """
 
     try:
@@ -630,6 +630,7 @@ def cuboid_to_segmentation(
     except ImportError as e:
         logger.error("Please install pyquaternion first: pip install pyquaternion")
         raise e
+
     try:
         import open3d as o3d
     except ImportError as e:
@@ -694,3 +695,133 @@ def cuboid_to_segmentation(
         result[inside] = id
 
     return result
+
+
+def array_to_pcd(
+    positions: np.ndarray,
+    output_path: str,
+    intensity: Optional[np.ndarray] = None,
+    rgb: Optional[np.ndarray] = None,
+) -> None:
+    """Convert a numpy array to a pcd file.
+
+    Args:
+        positions: Array of xyz points (Nx3 shape)
+        output_path: Path to write the pcd
+        intensity: Optional array of intensity values (Nx1 shape)
+        rgb: optional Array of rgb values (Nx3 shape)
+
+    Returns:
+        None
+
+    Raises:
+        :exc:`ImportError`: If open3d is not installed (to install run ``pip install open3d``).
+        :exc:`AssertionError`: If the positions array does not have shape (N, 3).
+        :exc:`AssertionError`: If the intensity array does not have shape (N, 1).
+        :exc:`AssertionError`: If the rgb array does not have shape (N, 3).
+        :exc:`AssertionError`: If the intensity array does not have the same length as the positions array.
+        :exc:`AssertionError`: If the rgb array does not have the same length as the positions array.
+    """
+
+    try:
+        import open3d as o3d
+    except ImportError as e:
+        logger.error("Please install open3d first: pip install open3d")
+        raise e
+
+    assert (
+        positions.shape[1] == 3
+    ), f"Positions must have shape (N, 3) but thas shape {positions.shape}"
+
+    device = o3d.core.Device("CPU:0")
+    dtype = o3d.core.float32
+    pcd = o3d.t.geometry.PointCloud(device)
+    pcd.point["positions"] = o3d.core.Tensor(positions, dtype, device)
+
+    if intensity is not None:
+        assert len(intensity) == len(
+            positions
+        ), f"Intensity must have same length as positions but intensity has shape {intensity.shape} and positions has shape {positions.shape}"
+        assert (
+            len(intensity.shape) == 2 and intensity.shape[1] == 1
+        ), f"Intensity must have shape (N,) but has shape {intensity.shape}"
+        pcd.point["intensity"] = o3d.core.Tensor(intensity, dtype, device)
+
+    if rgb is not None:
+        assert len(rgb) == len(
+            positions
+        ), f"RGB must have same length as positions but RGB has shape {rgb.shape} and positions has shape {positions.shape}"
+        assert (
+            rgb.shape[1] == 3
+        ), f"RGB must have shape (N, 3) but has shape {rgb.shape}"
+        pcd.point["colors"] = o3d.core.Tensor(rgb, dtype, device)
+
+    o3d.t.io.write_point_cloud(
+        output_path, pcd, compressed=True, write_ascii=False, print_progress=True
+    )
+
+
+def ply_to_pcd(ply_file: str) -> None:
+    """Convert a .ply file to a .pcd file.
+
+    Args:
+        ply_file: The path to the .ply file.
+
+    Returns:
+        None
+
+    Raises:
+        :exc:`ImportError`: If plyfile is not installed (to install run ``pip install plyfile``).
+        :exc:`KeyError`: If the positions are not found in the ply file (expected colum names are ``x``, ``y`` and ``z``).
+    """
+
+    try:
+        from plyfile import PlyData
+    except ImportError as e:
+        logger.error("Please install plyfile first: pip install plyfile")
+        raise e
+
+    with open(ply_file, "rb") as f:
+        ply = PlyData.read(f)
+
+    try:
+        positions = np.stack(
+            (ply["vertex"]["x"], ply["vertex"]["y"], ply["vertex"]["z"]), axis=-1
+        )
+    except KeyError:
+        raise KeyError("Could not find the positions in the ply file.")
+
+    try:
+        intensity = np.array(ply["vertex"]["intensity"]).reshape(-1, 1)
+    except KeyError:
+        try:
+            intensity = np.array(ply["vertex"]["i"]).reshape(-1, 1)
+        except KeyError:
+            intensity = None
+
+    try:
+        rgb = (
+            np.stack(
+                (ply["vertex"]["r"], ply["vertex"]["g"], ply["vertex"]["b"]), axis=-1
+            )
+            / 255.0  # normalize to 0-1
+        )
+
+    except KeyError:
+        try:
+            rgb = (
+                np.stack(
+                    (
+                        ply["vertex"]["red"],
+                        ply["vertex"]["green"],
+                        ply["vertex"]["blue"],
+                    ),
+                    axis=-1,
+                )
+                / 255.0  # normalize to 0-1
+            )
+        except KeyError:
+            rgb = None
+
+    pcd_path = ply_file.replace(".ply", ".pcd")
+    array_to_pcd(positions, pcd_path, intensity=intensity, rgb=rgb)
