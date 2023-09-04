@@ -825,5 +825,5 @@ def ply_to_pcd(ply_file: str) -> None:
 
     pcd_path = ply_file.replace(".ply", ".pcd")
     # prefer RGB over intensity (tiled point cloud does not support both)
-    intensity = intensity if rgb is not None else None
+    intensity = intensity if rgb is None else None
     array_to_pcd(positions, pcd_path, intensity=intensity, rgb=rgb)
