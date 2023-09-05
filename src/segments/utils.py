@@ -855,5 +855,9 @@ def sample_pcd(
         output_path = output_path.replace(".pcd", "_sampled.pcd")
 
     pcd = o3d.io.read_point_cloud(pcd_path)
-    pcd = pcd.uniform_down_sample(points)
-    o3d.io.write_point_cloud(pcd_path, pcd)
+    # open3d expects a step size (not a number of points)
+    points_step_size = len(pcd) // points
+    pcd = pcd.uniform_down_sample(points_step_size)
+    o3d.io.write_point_cloud(
+        pcd_path, pcd, write_ascii=False, compressed=True, print_progress=True
+    )
