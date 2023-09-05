@@ -828,12 +828,14 @@ def ply_to_pcd(ply_file: str) -> None:
     array_to_pcd(positions, pcd_path, intensity=intensity, rgb=rgb)
 
 
-def sample_pcd(pcd_path: str, points: int, output_path: Optional[str] = None) -> None:
+def sample_pcd(
+    pcd_path: str, points: int = 500_000, output_path: Optional[str] = None
+) -> None:
     """Sample a point cloud to a given number of points.
 
     Args:
         pcd_path: The path to the point cloud.
-        points: The number of points to sample.
+        points: The number of points to sample. Defaults to ``500_000``.
         output_path: The path to save the sampled point cloud to. Defaults to :obj:`None`.
 
     Returns:
@@ -849,7 +851,7 @@ def sample_pcd(pcd_path: str, points: int, output_path: Optional[str] = None) ->
         logger.error("Please install open3d first: pip install open3d")
         raise e
 
-    if output_path is not None:
+    if output_path is None:
         output_path = output_path.replace(".pcd", "_sampled.pcd")
 
     pcd = o3d.io.read_point_cloud(pcd_path)
