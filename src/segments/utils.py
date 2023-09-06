@@ -815,7 +815,6 @@ def ply_to_pcd(ply_file: str) -> None:
                     ),
                     axis=-1,
                 )
-                / 255.0  # normalize to 0-1
             )
         except KeyError:
             rgb = None
