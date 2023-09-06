@@ -608,10 +608,10 @@ def show_polygons(
 
 
 def cuboid_to_segmentation(
-    pointcloud: np.ndarray,
+    pointcloud: npt.NDArray[np.float32],
     label_attributes: PointcloudCuboidLabelAttributes,
     ego_pose: Optional[EgoPose] = None,
-) -> np.ndarray:
+) -> npt.NDArray[np.uint32]:
     """Convert a cuboid label to an instance segmentation label.
 
     Args:
@@ -699,10 +699,10 @@ def cuboid_to_segmentation(
 
 
 def array_to_pcd(
-    positions: np.ndarray,
+    positions: npt.NDArray[np.float32],
     output_path: str,
-    intensity: Optional[np.ndarray] = None,
-    rgb: Optional[np.ndarray] = None,
+    intensity: Optional[npt.NDArray[np.float32]] = None,
+    rgb: Optional[npt.NDArray[np.uint8]] = None,
 ) -> None:
     """Convert a numpy array to a pcd file.
 
@@ -710,7 +710,7 @@ def array_to_pcd(
         positions: Array of xyz points (Nx3 shape).
         output_path: Path to write the pcd.
         intensity: Optional array of intensity values (Nx1 shape).
-        rgb: Optional array of rgb values (Nx3 shape).
+        rgb: Optional array of rgb values (Nx3 shape) where red, green and blue are values between 0 and 255.
 
     Returns:
         None
@@ -755,6 +755,7 @@ def array_to_pcd(
         assert (
             rgb.shape[1] == 3
         ), f"RGB must have shape (N, 3) but has shape {rgb.shape}"
+        rgb = rgb.astype(dtype) / 255.0 # map 0-255 to 0-1 (open3d expects rgb values between 0 and 1)
         pcd.point["colors"] = o3d.core.Tensor(rgb, dtype, device)
 
     o3d.t.io.write_point_cloud(
@@ -801,12 +802,7 @@ def ply_to_pcd(ply_file: str) -> None:
             intensity = None
 
     try:
-        rgb = (
-            np.stack(
-                (ply["vertex"]["r"], ply["vertex"]["g"], ply["vertex"]["b"]), axis=-1
-            )
-            / 255.0  # normalize to 0-1
-        )
+        rgb = np.stack((ply["vertex"]["r"], ply["vertex"]["g"], ply["vertex"]["b"]), axis=-1) # 0-255
 
     except KeyError:
         try:
@@ -865,8 +861,8 @@ def sample_pcd(
     )
 
 
-def encode_rgb(rgbs: List[RGB]) -> np.ndarray:
-    """Encode RGB values to a numpy array. R, G and B are 8 bit uints (0-255) and are cast to a single float32 rgb value.
+def encode_rgb(rgbs: List[RGB]) -> npt.NDArray[np.float32]:
+    """Encode RGB values to a numpy array. R, G and B are uint8 (0-255) and are cast to a single float32 rgb value.
 
     Args:
         rgbs: A list of RGB values.
