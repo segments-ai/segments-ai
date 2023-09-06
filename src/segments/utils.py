@@ -346,11 +346,11 @@ def load_pointcloud_from_url(
         save_filename: The filename to save to.
         s3_client: A boto3 S3 client, e.g. ``s3_client = boto3.client("s3")``. Needs to be provided if your point clouds are in a private S3 bucket. Defaults to :obj:`None`.
 
-    Raises:
-        :exc:`ImportError`: If open3d is not installed (to install run ``pip install open3d``).
-
     Returns:
         A pointcloud.
+
+    Raises:
+        :exc:`ImportError`: If open3d is not installed (to install run ``pip install open3d``).
     """
 
     try:
@@ -482,11 +482,11 @@ def show_polygons(
         seed: The seed used to generate random colors. Defaults to ``0``.
         output_path: The directory to save the plot to. Defaults to :obj:`None`.
 
-    Raises:
-        :exc:`ImportError`: If matplotlib is not installed.
-
     Returns:
         None
+
+    Raises:
+        :exc:`ImportError`: If matplotlib is not installed.
     """
 
     try:
@@ -630,6 +630,7 @@ def cuboid_to_segmentation(
     except ImportError as e:
         logger.error("Please install pyquaternion first: pip install pyquaternion")
         raise e
+
     try:
         import open3d as o3d
     except ImportError as e:
