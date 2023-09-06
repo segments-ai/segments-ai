@@ -828,7 +828,7 @@ def ply_to_pcd(ply_file: str) -> None:
     # prefer RGB over intensity (tiled point cloud does not support both)
     intensity = intensity if rgb is None else None
     array_to_pcd(positions, pcd_path, intensity=intensity, rgb=rgb)
-    
+
 
 def sample_pcd(
     pcd_path: str, points: int = 500_000, output_path: Optional[str] = None
@@ -879,3 +879,4 @@ def encode_rgb(rgbs: List[RGB]) -> np.ndarray:
         return np.float32((rgb[0] << 16) + (rgb[1] << 8) + rgb[2])
 
     return np.array([encode(rgb) for rgb in rgbs], dtype=np.float32)
+ 
