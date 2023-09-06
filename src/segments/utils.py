@@ -17,6 +17,7 @@ import numpy.typing as npt
 import requests
 from PIL import ExifTags, Image
 from segments.typing import (
+    RGB,
     EgoPose,
     ExportFormat,
     PointcloudCuboidLabelAttributes,
@@ -709,7 +710,7 @@ def array_to_pcd(
         positions: Array of xyz points (Nx3 shape).
         output_path: Path to write the pcd.
         intensity: Optional array of intensity values (Nx1 shape).
-        rgb: optional Array of rgb values (Nx3 shape).
+        rgb: Optional array of rgb values (Nx3 shape).
 
     Returns:
         None
@@ -827,3 +828,54 @@ def ply_to_pcd(ply_file: str) -> None:
     # prefer RGB over intensity (tiled point cloud does not support both)
     intensity = intensity if rgb is None else None
     array_to_pcd(positions, pcd_path, intensity=intensity, rgb=rgb)
+    
+
+def sample_pcd(
+    pcd_path: str, points: int = 500_000, output_path: Optional[str] = None
+) -> None:
+    """Sample a point cloud to a given number of points.
+
+    Args:
+        pcd_path: The path to the point cloud.
+        points: The number of points to sample. Defaults to ``500_000``.
+        output_path: The path to save the sampled point cloud to. Defaults to :obj:`None`.
+
+    Returns:
+        None
+
+    Raises:
+        :exc:`ImportError`: If open3d is not installed (to install run ``pip install open3d``).
+    """
+
+    try:
+        import open3d as o3d
+    except ImportError as e:
+        logger.error("Please install open3d first: pip install open3d")
+        raise e
+
+    if output_path is None:
+        output_path = output_path.replace(".pcd", "_sampled.pcd")
+
+    pcd = o3d.io.read_point_cloud(pcd_path)
+    # open3d expects a step size (not a number of points)
+    points_step_size = len(pcd.points) // points
+    pcd = pcd.uniform_down_sample(points_step_size)
+    o3d.io.write_point_cloud(
+        output_path, pcd, write_ascii=False, compressed=True, print_progress=True
+    )
+
+
+def encode_rgb(rgbs: List[RGB]) -> np.ndarray:
+    """Encode RGB values to a numpy array. R, G and B are 8 bit uints (0-255) and are cast to a single float32 rgb value.
+
+    Args:
+        rgbs: A list of RGB values.
+
+    Returns:
+        A numpy array of float32 rgb values.
+    """
+
+    def encode(rgb: RGB) -> np.float32:
+        return np.float32((rgb[0] << 16) + (rgb[1] << 8) + rgb[2])
+
+    return np.array([encode(rgb) for rgb in rgbs], dtype=np.float32)
