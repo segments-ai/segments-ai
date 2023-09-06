@@ -732,7 +732,7 @@ def array_to_pcd(
 
     assert (
         positions.shape[1] == 3
-    ), f"Positions must have shape (N, 3) but thas shape {positions.shape}"
+    ), f"Positions must have shape (N, 3) but has shape {positions.shape}"
 
     device = o3d.core.Device("CPU:0")
     dtype = o3d.core.float32
