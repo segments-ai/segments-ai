@@ -4,7 +4,8 @@ from typing import List
 #############
 # Constants #
 #############
-VERSION = "1.0.27"
+MAJOR, MINOR, PATCH = 1, 0, 27
+VERSION = f"{MAJOR}.{MINOR}.{PATCH}"
 
 
 ####################
