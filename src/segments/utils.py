@@ -755,7 +755,9 @@ def array_to_pcd(
         assert (
             rgb.shape[1] == 3
         ), f"RGB must have shape (N, 3) but has shape {rgb.shape}"
-        rgb = rgb.astype(np.float32) / 255.0 # map 0-255 to 0-1 (open3d expects rgb values between 0 and 1)
+        rgb = (
+            rgb.astype(np.float32) / 255.0
+        )  # map 0-255 to 0-1 (open3d expects rgb values between 0 and 1)
         pcd.point["colors"] = o3d.core.Tensor(rgb, dtype, device)
 
     o3d.t.io.write_point_cloud(
@@ -802,20 +804,16 @@ def ply_to_pcd(ply_file: str) -> None:
             intensity = None
 
     try:
-        rgb = np.stack((ply["vertex"]["r"], ply["vertex"]["g"], ply["vertex"]["b"]), axis=-1) # 0-255
-
+        rgb = np.stack(
+            (ply["vertex"]["r"], ply["vertex"]["g"], ply["vertex"]["b"]), axis=-1
+        )  # 0-255
     except KeyError:
         try:
-            rgb = (
-                np.stack(
-                    (
-                        ply["vertex"]["red"],
-                        ply["vertex"]["green"],
-                        ply["vertex"]["blue"],
-                    ),
-                    axis=-1,
-                )
-            )
+            rgb = np.stack(
+                (ply["vertex"]["red"], ply["vertex"]["green"], ply["vertex"]["blue"]),
+                axis=-1,
+            )  # 0-255
+
         except KeyError:
             rgb = None
 
@@ -874,4 +872,3 @@ def encode_rgb(rgbs: List[RGB]) -> npt.NDArray[np.float32]:
         return np.float32((rgb[0] << 16) + (rgb[1] << 8) + rgb[2])
 
     return np.array([encode(rgb) for rgb in rgbs], dtype=np.float32)
- 
