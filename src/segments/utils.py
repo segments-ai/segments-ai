@@ -17,6 +17,7 @@ import numpy.typing as npt
 import requests
 from PIL import ExifTags, Image
 from segments.typing import (
+    RGB,
     EgoPose,
     ExportFormat,
     PointcloudCuboidLabelAttributes,
@@ -862,3 +863,20 @@ def sample_pcd(
     o3d.io.write_point_cloud(
         output_path, pcd, write_ascii=False, compressed=True, print_progress=True
     )
+
+
+def encode_rgb(rgbs: List[RGB]) -> np.ndarray:
+    """Encode RGB values to a numpy array. R, G and B are 8 bit uints (0-255) and are cast to a single float32 rgb value.
+
+    Args:
+        rgbs: A list of RGB values.
+
+    Returns:
+        A numpy array of float32 rgb values.
+    """
+
+    def encode(rgb: RGB) -> np.float32:
+        return np.float32((rgb[0] << 16) + (rgb[1] << 8) + rgb[2])
+
+    return np.array([encode(rgb) for rgb in rgbs], dtype=np.float32)
+ 
