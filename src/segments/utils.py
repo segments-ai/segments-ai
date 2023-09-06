@@ -755,7 +755,7 @@ def array_to_pcd(
         assert (
             rgb.shape[1] == 3
         ), f"RGB must have shape (N, 3) but has shape {rgb.shape}"
-        rgb = rgb.astype(dtype) / 255.0 # map 0-255 to 0-1 (open3d expects rgb values between 0 and 1)
+        rgb = rgb.astype(np.float32) / 255.0 # map 0-255 to 0-1 (open3d expects rgb values between 0 and 1)
         pcd.point["colors"] = o3d.core.Tensor(rgb, dtype, device)
 
     o3d.t.io.write_point_cloud(
