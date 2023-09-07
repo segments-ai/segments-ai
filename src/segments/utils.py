@@ -699,10 +699,10 @@ def cuboid_to_segmentation(
 
 
 def array_to_pcd(
-    positions: npt.NDArray[np.float32],
+    positions: npt.NDArray,
     output_path: str,
-    intensity: Optional[npt.NDArray[np.float32]] = None,
-    rgb: Optional[npt.NDArray[np.uint8]] = None,
+    intensity: Optional[npt.NDArray] = None,
+    rgb: Optional[npt.NDArray] = None,
 ) -> None:
     """Convert a numpy array to a pcd file.
 
@@ -710,7 +710,7 @@ def array_to_pcd(
         positions: Array of xyz points (Nx3 shape).
         output_path: Path to write the pcd.
         intensity: Optional array of intensity values (Nx1 shape).
-        rgb: Optional array of rgb values (Nx3 shape) where red, green and blue are values between 0 and 255.
+        rgb: Optional array of rgb values (Nx3 shape) where red, green and blue are values between 0 and 255 or 0 and 1.
 
     Returns:
         None
@@ -734,6 +734,11 @@ def array_to_pcd(
         positions.shape[1] == 3
     ), f"Positions must have shape (N, 3) but has shape {positions.shape}"
 
+    # cast to float32
+    positions = positions.astype(np.float32)
+    intensity = intensity.astype(np.float32) if intensity is not None else None
+    rgb = rgb.astype(np.float32) if rgb is not None else None
+
     device = o3d.core.Device("CPU:0")
     dtype = o3d.core.float32
     pcd = o3d.t.geometry.PointCloud(device)
@@ -756,9 +761,8 @@ def array_to_pcd(
             rgb.shape[1] == 3
         ), f"RGB must have shape (N, 3) but has shape {rgb.shape}"
 
-        # check rgb encoding (float32, uint8, 0-1, 0-255)
-        rgb = rgb.astype(np.float32)
-        if np.max(rgb) > 1:  # 0-255
+        # check rgb encoding (0-255 or 0-1)
+        if np.max(rgb) > 1:
             rgb /= 255.0  # map 0-255 to 0-1 (open3d expects rgb values between 0 and 1)
 
         pcd.point["colors"] = o3d.core.Tensor(rgb, dtype, device)
