@@ -755,9 +755,12 @@ def array_to_pcd(
         assert (
             rgb.shape[1] == 3
         ), f"RGB must have shape (N, 3) but has shape {rgb.shape}"
-        rgb = (
-            rgb.astype(np.float32) / 255.0
-        )  # map 0-255 to 0-1 (open3d expects rgb values between 0 and 1)
+
+        # check rgb encoding (float32, uint8, 0-1, 0-255)
+        rgb = rgb.astype(np.float32)
+        if np.max(rgb) > 1:  # 0-255
+            rgb /= 255.0  # map 0-255 to 0-1 (open3d expects rgb values between 0 and 1)
+
         pcd.point["colors"] = o3d.core.Tensor(rgb, dtype, device)
 
     o3d.t.io.write_point_cloud(
@@ -856,19 +859,3 @@ def sample_pcd(
     o3d.io.write_point_cloud(
         output_path, pcd, write_ascii=False, compressed=True, print_progress=True
     )
-
-
-def encode_rgb(rgbs: List[RGB]) -> npt.NDArray[np.float32]:
-    """Encode RGB values to a numpy array. R, G and B are uint8 (0-255) and are cast to a single float32 rgb value.
-
-    Args:
-        rgbs: A list of RGB values.
-
-    Returns:
-        A numpy array of float32 rgb values.
-    """
-
-    def encode(rgb: RGB) -> np.float32:
-        return np.float32((rgb[0] << 16) + (rgb[1] << 8) + rgb[2])
-
-    return np.array([encode(rgb) for rgb in rgbs], dtype=np.float32)
