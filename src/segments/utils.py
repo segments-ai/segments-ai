@@ -699,10 +699,10 @@ def cuboid_to_segmentation(
 
 
 def array_to_pcd(
-    positions: npt.NDArray,
+    positions: npt.NDArray[np.float32],
     output_path: str,
-    intensity: Optional[npt.NDArray] = None,
-    rgb: Optional[npt.NDArray] = None,
+    intensity: Optional[npt.NDArray[np.float32]] = None,
+    rgb: Optional[npt.NDArray[np.float32]] = None,
 ) -> None:
     """Convert a numpy array to a pcd file.
 
