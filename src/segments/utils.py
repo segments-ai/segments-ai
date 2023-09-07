@@ -807,15 +807,17 @@ def ply_to_pcd(ply_file: str) -> None:
             intensity = None
 
     try:
+        # 0-255
         rgb = np.stack(
             (ply["vertex"]["r"], ply["vertex"]["g"], ply["vertex"]["b"]), axis=-1
-        )  # 0-255
+        )
     except KeyError:
         try:
+            # 0-255
             rgb = np.stack(
                 (ply["vertex"]["red"], ply["vertex"]["green"], ply["vertex"]["blue"]),
                 axis=-1,
-            )  # 0-255
+            )
 
         except KeyError:
             rgb = None
