@@ -17,7 +17,6 @@ import numpy.typing as npt
 import requests
 from PIL import ExifTags, Image
 from segments.typing import (
-    RGB,
     EgoPose,
     ExportFormat,
     PointcloudCuboidLabelAttributes,
