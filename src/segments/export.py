@@ -170,7 +170,6 @@ def get_color(id: int) -> RGB:
 def colorize(
     img: npt.NDArray[Any], colormap: Optional[ColorMap] = None
 ) -> npt.NDArray[Any]:
-
     indices = np.unique(img)
     indices = indices[indices != 0]
 
