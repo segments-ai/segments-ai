@@ -819,7 +819,6 @@ def ply_to_pcd(ply_file: str) -> None:
                 (ply["vertex"]["red"], ply["vertex"]["green"], ply["vertex"]["blue"]),
                 axis=-1,
             )
-
         except KeyError:
             rgb = None
 
