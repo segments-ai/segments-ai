@@ -50,11 +50,8 @@ COMPATIBLE_TASK_TYPES = {
         TaskType.SEGMENTATION_BITMAP_HIGHRES,
     },
     ExportFormat.YOLO: {
-        TaskType.SEGMENTATION_BITMAP,
-        TaskType.SEGMENTATION_BITMAP_HIGHRES,
         TaskType.VECTOR,
         TaskType.BBOXES,
-        TaskType.KEYPOINTS,
         TaskType.IMAGE_VECTOR_SEQUENCE,
     },
     ExportFormat.INSTANCE: {
