@@ -40,6 +40,44 @@ adapter = requests.adapters.HTTPAdapter(max_retries=3)
 session.mount("http://", adapter)
 session.mount("https://", adapter)
 logger = logging.getLogger(__name__)
+COMPATIBLE_TASK_TYPES = {
+    ExportFormat.COCO_PANOPTIC: {
+        TaskType.SEGMENTATION_BITMAP,
+        TaskType.SEGMENTATION_BITMAP_HIGHRES,
+    },
+    ExportFormat.COCO_INSTANCE: {
+        TaskType.SEGMENTATION_BITMAP,
+        TaskType.SEGMENTATION_BITMAP_HIGHRES,
+    },
+    ExportFormat.YOLO: {
+        TaskType.SEGMENTATION_BITMAP,
+        TaskType.SEGMENTATION_BITMAP_HIGHRES,
+        TaskType.VECTOR,
+        TaskType.BBOXES,
+        TaskType.KEYPOINTS,
+        TaskType.IMAGE_VECTOR_SEQUENCE,
+    },
+    ExportFormat.INSTANCE: {
+        TaskType.SEGMENTATION_BITMAP,
+        TaskType.SEGMENTATION_BITMAP_HIGHRES,
+    },
+    ExportFormat.INSTANCE_COLOR: {
+        TaskType.SEGMENTATION_BITMAP,
+        TaskType.SEGMENTATION_BITMAP_HIGHRES,
+    },
+    ExportFormat.SEMANTIC: {
+        TaskType.SEGMENTATION_BITMAP,
+        TaskType.SEGMENTATION_BITMAP_HIGHRES,
+    },
+    ExportFormat.SEMANTIC_COLOR: {
+        TaskType.SEGMENTATION_BITMAP,
+        TaskType.SEGMENTATION_BITMAP_HIGHRES,
+    },
+    ExportFormat.POLYGON: {
+        TaskType.SEGMENTATION_BITMAP,
+        TaskType.SEGMENTATION_BITMAP_HIGHRES,
+    },
+}
 
 
 def bitmap2file(
@@ -199,45 +237,6 @@ def export_dataset(
     except ImportError as e:
         logger.error("Please install scikit-image first: pip install scikit-image.")
         raise e
-
-    COMPATIBLE_TASK_TYPES = {
-        ExportFormat.COCO_PANOPTIC: {
-            TaskType.SEGMENTATION_BITMAP,
-            TaskType.SEGMENTATION_BITMAP_HIGHRES,
-        },
-        ExportFormat.COCO_INSTANCE: {
-            TaskType.SEGMENTATION_BITMAP,
-            TaskType.SEGMENTATION_BITMAP_HIGHRES,
-        },
-        ExportFormat.YOLO: {
-            TaskType.SEGMENTATION_BITMAP,
-            TaskType.SEGMENTATION_BITMAP_HIGHRES,
-            TaskType.VECTOR,
-            TaskType.BBOXES,
-            TaskType.KEYPOINTS,
-            TaskType.IMAGE_VECTOR_SEQUENCE,
-        },
-        ExportFormat.INSTANCE: {
-            TaskType.SEGMENTATION_BITMAP,
-            TaskType.SEGMENTATION_BITMAP_HIGHRES,
-        },
-        ExportFormat.INSTANCE_COLOR: {
-            TaskType.SEGMENTATION_BITMAP,
-            TaskType.SEGMENTATION_BITMAP_HIGHRES,
-        },
-        ExportFormat.SEMANTIC: {
-            TaskType.SEGMENTATION_BITMAP,
-            TaskType.SEGMENTATION_BITMAP_HIGHRES,
-        },
-        ExportFormat.SEMANTIC_COLOR: {
-            TaskType.SEGMENTATION_BITMAP,
-            TaskType.SEGMENTATION_BITMAP_HIGHRES,
-        },
-        ExportFormat.POLYGON: {
-            TaskType.SEGMENTATION_BITMAP,
-            TaskType.SEGMENTATION_BITMAP_HIGHRES,
-        },
-    }
 
     print("Exporting dataset. This may take a while...")
     if export_format == ExportFormat.COCO_PANOPTIC:
