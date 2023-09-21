@@ -732,7 +732,7 @@ class Dataset(BaseModel):
     cloned_from: Optional[str] = None
     description: str
     # data_type: Literal["IMAGE"]
-    category: str  # Category
+    category: Category
     public: bool
     owner: Owner
     created_at: str
