@@ -489,7 +489,7 @@ class Label(BaseModel):
     label_type: TaskType
     label_status: LabelStatus
     labelset: str
-    attributes: LabelAttributes
+    attributes: Optional[LabelAttributes] = None
     created_at: str
     created_by: str
     updated_at: str
@@ -732,7 +732,7 @@ class Dataset(BaseModel):
     cloned_from: Optional[str] = None
     description: str
     # data_type: Literal["IMAGE"]
-    category: str  # Category
+    category: Category
     public: bool
     owner: Owner
     created_at: str

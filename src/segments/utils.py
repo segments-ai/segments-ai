@@ -39,6 +39,41 @@ adapter = requests.adapters.HTTPAdapter(max_retries=3)
 session.mount("http://", adapter)
 session.mount("https://", adapter)
 logger = logging.getLogger(__name__)
+COMPATIBLE_TASK_TYPES = {
+    ExportFormat.COCO_PANOPTIC: {
+        TaskType.SEGMENTATION_BITMAP,
+        TaskType.SEGMENTATION_BITMAP_HIGHRES,
+    },
+    ExportFormat.COCO_INSTANCE: {
+        TaskType.SEGMENTATION_BITMAP,
+        TaskType.SEGMENTATION_BITMAP_HIGHRES,
+    },
+    ExportFormat.YOLO: {
+        TaskType.VECTOR,
+        TaskType.BBOXES,
+        TaskType.IMAGE_VECTOR_SEQUENCE,
+    },
+    ExportFormat.INSTANCE: {
+        TaskType.SEGMENTATION_BITMAP,
+        TaskType.SEGMENTATION_BITMAP_HIGHRES,
+    },
+    ExportFormat.INSTANCE_COLOR: {
+        TaskType.SEGMENTATION_BITMAP,
+        TaskType.SEGMENTATION_BITMAP_HIGHRES,
+    },
+    ExportFormat.SEMANTIC: {
+        TaskType.SEGMENTATION_BITMAP,
+        TaskType.SEGMENTATION_BITMAP_HIGHRES,
+    },
+    ExportFormat.SEMANTIC_COLOR: {
+        TaskType.SEGMENTATION_BITMAP,
+        TaskType.SEGMENTATION_BITMAP_HIGHRES,
+    },
+    ExportFormat.POLYGON: {
+        TaskType.SEGMENTATION_BITMAP,
+        TaskType.SEGMENTATION_BITMAP_HIGHRES,
+    },
+}
 
 
 def bitmap2file(
@@ -117,25 +152,25 @@ def export_dataset(
 ) -> Optional[Union[Tuple[str, Optional[str]], Optional[str]]]:
     """Export a dataset to a different format.
 
-    +------------------+----------------------------------------------------------------------------------------------------+
-    | Export format    | Supported dataset type                                                                             |
-    +==================+====================================================================================================+
-    | COCO panoptic    | ``segmentation-bitmap`` and ``segmentation-bitmap-highres``                                        |
-    +------------------+----------------------------------------------------------------------------------------------------+
-    | COCO instance    | ``segmentation-bitmap`` and ``segmentation-bitmap-highres``                                        |
-    +------------------+----------------------------------------------------------------------------------------------------+
-    | YOLO             | ``segmentation-bitmap``, ``segmentation-bitmap-highres``, ``vector``, ``bboxes`` and ``keypoints`` |
-    +------------------+----------------------------------------------------------------------------------------------------+
-    | Instance         | ``segmentation-bitmap`` and ``segmentation-bitmap-highres``                                        |
-    +------------------+----------------------------------------------------------------------------------------------------+
-    | Colored instance | ``segmentation-bitmap`` and ``segmentation-bitmap-highres``                                        |
-    +------------------+----------------------------------------------------------------------------------------------------+
-    | Semantic         | ``segmentation-bitmap`` and ``segmentation-bitmap-highres``                                        |
-    +------------------+----------------------------------------------------------------------------------------------------+
-    | Colored semantic | ``segmentation-bitmap`` and ``segmentation-bitmap-highres``                                        |
-    +------------------+----------------------------------------------------------------------------------------------------+
-    | Polygon          | ``segmentation-bitmap`` and ``segmentation-bitmap-highres``                                        |
-    +------------------+----------------------------------------------------------------------------------------------------+
+    +------------------+-------------------------------------------------------------+
+    | Export format    | Supported dataset type                                      |
+    +==================+=============================================================+
+    | COCO panoptic    | ``segmentation-bitmap`` and ``segmentation-bitmap-highres`` |                                                              
+    +------------------+-------------------------------------------------------------+
+    | COCO instance    | ``segmentation-bitmap`` and ``segmentation-bitmap-highres`` |                                                               
+    +------------------+-------------------------------------------------------------+
+    | YOLO             | ``vector``, ``bboxes`` and ``image-vector-sequence``        |
+    +------------------+-------------------------------------------------------------+
+    | Instance         | ``segmentation-bitmap`` and ``segmentation-bitmap-highres`` |                                                               
+    +------------------+-------------------------------------------------------------+
+    | Colored instance | ``segmentation-bitmap`` and ``segmentation-bitmap-highres`` |                                                               
+    +------------------+-------------------------------------------------------------+
+    | Semantic         | ``segmentation-bitmap`` and ``segmentation-bitmap-highres`` |                                                               
+    +------------------+-------------------------------------------------------------+
+    | Colored semantic | ``segmentation-bitmap`` and ``segmentation-bitmap-highres`` |                                                               
+    +------------------+-------------------------------------------------------------+
+    | Polygon          | ``segmentation-bitmap`` and ``segmentation-bitmap-highres`` |
+    +------------------+-------------------------------------------------------------+
 
     Example:
 
@@ -198,44 +233,6 @@ def export_dataset(
     except ImportError as e:
         logger.error("Please install scikit-image first: pip install scikit-image.")
         raise e
-
-    COMPATIBLE_TASK_TYPES = {
-        ExportFormat.COCO_PANOPTIC: {
-            TaskType.SEGMENTATION_BITMAP,
-            TaskType.SEGMENTATION_BITMAP_HIGHRES,
-        },
-        ExportFormat.COCO_INSTANCE: {
-            TaskType.SEGMENTATION_BITMAP,
-            TaskType.SEGMENTATION_BITMAP_HIGHRES,
-        },
-        ExportFormat.YOLO: {
-            TaskType.SEGMENTATION_BITMAP,
-            TaskType.SEGMENTATION_BITMAP_HIGHRES,
-            TaskType.VECTOR,
-            TaskType.BBOXES,
-            TaskType.KEYPOINTS,
-        },
-        ExportFormat.INSTANCE: {
-            TaskType.SEGMENTATION_BITMAP,
-            TaskType.SEGMENTATION_BITMAP_HIGHRES,
-        },
-        ExportFormat.INSTANCE_COLOR: {
-            TaskType.SEGMENTATION_BITMAP,
-            TaskType.SEGMENTATION_BITMAP_HIGHRES,
-        },
-        ExportFormat.SEMANTIC: {
-            TaskType.SEGMENTATION_BITMAP,
-            TaskType.SEGMENTATION_BITMAP_HIGHRES,
-        },
-        ExportFormat.SEMANTIC_COLOR: {
-            TaskType.SEGMENTATION_BITMAP,
-            TaskType.SEGMENTATION_BITMAP_HIGHRES,
-        },
-        ExportFormat.POLYGON: {
-            TaskType.SEGMENTATION_BITMAP,
-            TaskType.SEGMENTATION_BITMAP_HIGHRES,
-        },
-    }
 
     print("Exporting dataset. This may take a while...")
     if export_format == ExportFormat.COCO_PANOPTIC:
