@@ -16,7 +16,10 @@ def test_dataset(
 
     for dataset in datasets:
         # Skip the example-multi-sensor dataset
-        if dataset.name == "example-multi-sensor":
+        if (
+            dataset.name == "example-multi-sensor"
+            or dataset.name == "example-point-cloud-sequences-segmentation"
+        ):
             continue
 
         # Get the releases

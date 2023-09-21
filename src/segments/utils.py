@@ -17,7 +17,6 @@ import numpy.typing as npt
 import requests
 from PIL import ExifTags, Image
 from segments.typing import (
-    RGB,
     EgoPose,
     ExportFormat,
     PointcloudCuboidLabelAttributes,
@@ -605,10 +604,10 @@ def show_polygons(
 
 
 def cuboid_to_segmentation(
-    pointcloud: np.ndarray,
+    pointcloud: npt.NDArray[np.float32],
     label_attributes: PointcloudCuboidLabelAttributes,
     ego_pose: Optional[EgoPose] = None,
-) -> np.ndarray:
+) -> npt.NDArray[np.uint32]:
     """Convert a cuboid label to an instance segmentation label.
 
     Args:
@@ -696,10 +695,10 @@ def cuboid_to_segmentation(
 
 
 def array_to_pcd(
-    positions: np.ndarray,
+    positions: npt.NDArray[np.float32],
     output_path: str,
-    intensity: Optional[np.ndarray] = None,
-    rgb: Optional[np.ndarray] = None,
+    intensity: Optional[npt.NDArray[np.float32]] = None,
+    rgb: Optional[npt.NDArray[np.float32]] = None,
 ) -> None:
     """Convert a numpy array to a pcd file.
 
@@ -707,7 +706,7 @@ def array_to_pcd(
         positions: Array of xyz points (Nx3 shape).
         output_path: Path to write the pcd.
         intensity: Optional array of intensity values (Nx1 shape).
-        rgb: Optional array of rgb values (Nx3 shape).
+        rgb: Optional array of rgb values (Nx3 shape) where red, green and blue are values between 0 and 255 or 0 and 1.
 
     Returns:
         None
@@ -731,6 +730,11 @@ def array_to_pcd(
         positions.shape[1] == 3
     ), f"Positions must have shape (N, 3) but has shape {positions.shape}"
 
+    # cast to float32
+    positions = positions.astype(np.float32)
+    intensity = intensity.astype(np.float32) if intensity is not None else None
+    rgb = rgb.astype(np.float32) if rgb is not None else None
+
     device = o3d.core.Device("CPU:0")
     dtype = o3d.core.float32
     pcd = o3d.t.geometry.PointCloud(device)
@@ -752,6 +756,11 @@ def array_to_pcd(
         assert (
             rgb.shape[1] == 3
         ), f"RGB must have shape (N, 3) but has shape {rgb.shape}"
+
+        # check rgb encoding (0-255 or 0-1)
+        if np.max(rgb) > 1:
+            rgb /= 255.0  # map 0-255 to 0-1 (open3d expects rgb values between 0 and 1)
+
         pcd.point["colors"] = o3d.core.Tensor(rgb, dtype, device)
 
     o3d.t.io.write_point_cloud(
@@ -798,25 +807,14 @@ def ply_to_pcd(ply_file: str) -> None:
             intensity = None
 
     try:
-        rgb = (
-            np.stack(
-                (ply["vertex"]["r"], ply["vertex"]["g"], ply["vertex"]["b"]), axis=-1
-            )
-            / 255.0  # normalize to 0-1
+        rgb = np.stack(
+            (ply["vertex"]["r"], ply["vertex"]["g"], ply["vertex"]["b"]), axis=-1
         )
-
     except KeyError:
         try:
-            rgb = (
-                np.stack(
-                    (
-                        ply["vertex"]["red"],
-                        ply["vertex"]["green"],
-                        ply["vertex"]["blue"],
-                    ),
-                    axis=-1,
-                )
-                / 255.0  # normalize to 0-1
+            rgb = np.stack(
+                (ply["vertex"]["red"], ply["vertex"]["green"], ply["vertex"]["blue"]),
+                axis=-1,
             )
         except KeyError:
             rgb = None
@@ -860,19 +858,3 @@ def sample_pcd(
     o3d.io.write_point_cloud(
         output_path, pcd, write_ascii=False, compressed=True, print_progress=True
     )
-
-
-def encode_rgb(rgbs: List[RGB]) -> np.ndarray:
-    """Encode RGB values to a numpy array. R, G and B are 8 bit uints (0-255) and are cast to a single float32 rgb value.
-
-    Args:
-        rgbs: A list of RGB values.
-
-    Returns:
-        A numpy array of float32 rgb values.
-    """
-
-    def encode(rgb: RGB) -> np.float32:
-        return np.float32((rgb[0] << 16) + (rgb[1] << 8) + rgb[2])
-
-    return np.array([encode(rgb) for rgb in rgbs], dtype=np.float32)
