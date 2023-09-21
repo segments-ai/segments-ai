@@ -879,4 +879,3 @@ def encode_rgb(rgbs: List[RGB]) -> np.ndarray:
         return np.float32((rgb[0] << 16) + (rgb[1] << 8) + rgb[2])
 
     return np.array([encode(rgb) for rgb in rgbs], dtype=np.float32)
- 
