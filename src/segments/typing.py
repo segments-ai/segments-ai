@@ -489,7 +489,7 @@ class Label(BaseModel):
     label_type: TaskType
     label_status: LabelStatus
     labelset: str
-    attributes: LabelAttributes
+    attributes: Optional[LabelAttributes] = None
     created_at: str
     created_by: str
     updated_at: str
