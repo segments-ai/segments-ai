@@ -1,34 +1,14 @@
 {
   "editor.formatOnSave": true,
   "python.envFile": "${workspaceFolder}/.env",
-  "python.linting.enabled": true,
-
-  // Black
-  "python.formatting.provider": "black",
-
-  //  Flake8
-  "python.linting.flake8Enabled": true,
-
-  // Mypy
-  "python.linting.mypyEnabled": true,
-  // "python.analysis.typeCheckingMode": "basic",
-  "python.linting.mypyArgs": [
-    "--ignore-missing-imports",
-    "--follow-imports=silent",
-    "--show-column-numbers",
-    "--strict",
-    "--warn-redundant-casts"
-  ],
-
-  // isort
-  "isort.args": ["--profile", "black"],
+  "isort.args": ["--profile", "black"], // isort
   "[python]": {
     "editor.codeActionsOnSave": {
       "source.organizeImports": true
-    }
+    },
+    "editor.defaultFormatter": "ms-python.black-formatter" // black
   },
-
-  // Pytest
+  // pytest
   "python.testing.unittestArgs": ["-v", "-s", "./tests", "-p", "test_*.py"],
   "python.testing.pytestArgs": [
     ".",
