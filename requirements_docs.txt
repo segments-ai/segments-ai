@@ -1,4 +1,4 @@
-# Documentation
+# documentation
 sphinx==4.*
 furo==2022.*
 myst_parser==0.*
