@@ -1,8 +1,6 @@
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
 from __future__ import annotations
 
-# https://gist.github.com/benkehoe/066a73903e84576a8d6d911cfedc2df6
-import importlib.metadata as importlib_metadata
 import logging
 import os
 import urllib.parse
@@ -59,6 +57,13 @@ from segments.typing import (
 )
 from typing_extensions import Literal, get_args
 
+# https://gist.github.com/benkehoe/066a73903e84576a8d6d911cfedc2df6
+try:
+    # importlib.metadata is present in Python 3.8 and later
+    import importlib.metadata as importlib_metadata
+except ImportError:
+    # use the shim package importlib-metadata pre-3.8
+    import importlib_metadata as importlib_metadata
 try:
     # __package__ allows for the case where __name__ is "__main__"
     __version__ = importlib_metadata.version(__package__ or __name__)

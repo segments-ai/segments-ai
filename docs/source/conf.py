@@ -12,12 +12,17 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
-# https://gist.github.com/benkehoe/066a73903e84576a8d6d911cfedc2df6
-import importlib.metadata as importlib_metadata
 import os
 import sys
 from datetime import datetime
 
+# https://gist.github.com/benkehoe/066a73903e84576a8d6d911cfedc2df6
+try:
+    # importlib.metadata is present in Python 3.8 and later
+    import importlib.metadata as importlib_metadata
+except ImportError:
+    # use the shim package importlib-metadata pre-3.8
+    import importlib_metadata as importlib_metadata
 try:
     # __package__ allows for the case where __name__ is "__main__"
     __version__ = importlib_metadata.version(__package__ or __name__)

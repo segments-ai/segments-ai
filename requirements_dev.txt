@@ -1,5 +1,5 @@
 # Style
-flake8==6.*
+flake8==5.*
 
 # Code formatting
 black==22.*
