@@ -697,13 +697,13 @@ class Owner(BaseModel):
     email: Optional[str] = None
 
 
-class Statistics(BaseModel):
-    prelabeled_count: int
-    labeled_count: int
-    reviewed_count: int
-    rejected_count: int
-    skipped_count: int
-    samples_count: int
+# class Statistics(BaseModel):  # deprecated
+#     prelabeled_count: int
+#     labeled_count: int
+#     reviewed_count: int
+#     rejected_count: int
+#     skipped_count: int
+#     samples_count: int
 
 
 class Labelset(BaseModel):
@@ -724,6 +724,8 @@ class LabelStats(BaseModel):
     LABELED: Optional[int] = None
     UNLABELED: Optional[int] = None
     PRELABELED: Optional[int] = None
+    REVIEWED: Optional[int] = None
+    SKIPPED: Optional[int] = None
 
 
 class Dataset(BaseModel):

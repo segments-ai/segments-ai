@@ -333,10 +333,6 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 ```
 
 ```{eval-rst}
-.. autopydantic_model:: segments.typing.Statistics
-```
-
-```{eval-rst}
 .. autopydantic_model:: segments.typing.XYZ
 ```
 
