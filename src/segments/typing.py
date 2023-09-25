@@ -697,13 +697,13 @@ class Owner(BaseModel):
     email: Optional[str] = None
 
 
-class Statistics(BaseModel):
-    prelabeled_count: int
-    labeled_count: int
-    reviewed_count: int
-    rejected_count: int
-    skipped_count: int
-    samples_count: int
+# class Statistics(BaseModel):  # deprecated
+#     prelabeled_count: int
+#     labeled_count: int
+#     reviewed_count: int
+#     rejected_count: int
+#     skipped_count: int
+#     samples_count: int
 
 
 class Labelset(BaseModel):
