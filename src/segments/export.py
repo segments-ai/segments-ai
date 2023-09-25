@@ -849,6 +849,8 @@ def export_polygon(
         regions = regionprops(np.array(sample["segmentation_bitmap"], np.uint32))
         regions = {region.label: region for region in regions}
 
+        segmentation_bitmap = np.array(sample["segmentation_bitmap"], np.uint8)
+
         for instance in sample["annotations"]:
             category_id = instance["category_id"]
 
@@ -867,7 +869,7 @@ def export_polygon(
                 continue
 
             instance_mask = (
-                np.asarray(sample["segmentation_bitmap"], np.uint8) == instance["id"]
+                segmentation_bitmap == instance["id"]
             )
 
             # Allowed OpenCV data types: https://stackoverflow.com/questions/12785121/access-opencv-matrix-cv-32s-element
