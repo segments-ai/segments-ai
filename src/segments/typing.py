@@ -724,6 +724,8 @@ class LabelStats(BaseModel):
     LABELED: Optional[int] = None
     UNLABELED: Optional[int] = None
     PRELABELED: Optional[int] = None
+    REVIEWED: Optional[int] = None
+    SKIPPED: Optional[int] = None
 
 
 class Dataset(BaseModel):
