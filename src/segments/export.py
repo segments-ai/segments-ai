@@ -845,11 +845,11 @@ def export_polygon(
             }
         )
 
-        # https://scikit-image.org/docs/dev/api/skimage.measure.html#skimage.measure.regionprops
-        regions = regionprops(np.array(sample["segmentation_bitmap"], np.uint32))
-        regions = {region.label: region for region in regions}
-
         segmentation_bitmap = np.array(sample["segmentation_bitmap"], np.uint8)
+
+        # https://scikit-image.org/docs/dev/api/skimage.measure.html#skimage.measure.regionprops
+        regions = regionprops(segmentation_bitmap)
+        regions = {region.label: region for region in regions}
 
         for instance in sample["annotations"]:
             category_id = instance["category_id"]
