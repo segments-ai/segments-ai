@@ -699,6 +699,8 @@ def array_to_pcd(
     output_path: str,
     intensity: Optional[npt.NDArray[np.float32]] = None,
     rgb: Optional[npt.NDArray[np.float32]] = None,
+    compressed: bool = False,
+    write_ascii: bool = True,
 ) -> None:
     """Convert a numpy array to a pcd file.
 
@@ -707,6 +709,8 @@ def array_to_pcd(
         output_path: Path to write the pcd.
         intensity: Optional array of intensity values (Nx1 shape).
         rgb: Optional array of rgb values (Nx3 shape) where red, green and blue are values between 0 and 255 or 0 and 1.
+        compressed: If the pcd should be compressed. Defaults to :obj:`False`.
+        write_ascii: If the pcd should be written in ascii format. Defaults to :obj:`True`.
 
     Returns:
         None
@@ -764,15 +768,23 @@ def array_to_pcd(
         pcd.point["colors"] = o3d.core.Tensor(rgb, dtype, device)
 
     o3d.t.io.write_point_cloud(
-        output_path, pcd, compressed=True, write_ascii=False, print_progress=True
+        output_path,
+        pcd,
+        compressed=compressed,
+        write_ascii=write_ascii,
+        print_progress=True,
     )
 
 
-def ply_to_pcd(ply_file: str) -> None:
+def ply_to_pcd(
+    ply_file: str, compressed: bool = False, write_ascii: bool = True
+) -> None:
     """Convert a .ply file to a .pcd file.
 
     Args:
         ply_file: The path to the .ply file.
+        compressed: If the pcd should be compressed. Defaults to :obj:`False`.
+        write_ascii: If the pcd should be written in ascii format. Defaults to :obj:`True`.
 
     Returns:
         None
@@ -822,7 +834,14 @@ def ply_to_pcd(ply_file: str) -> None:
     pcd_path = ply_file.replace(".ply", ".pcd")
     # prefer RGB over intensity (tiled point cloud does not support both)
     intensity = intensity if rgb is None else None
-    array_to_pcd(positions, pcd_path, intensity=intensity, rgb=rgb)
+    array_to_pcd(
+        positions,
+        pcd_path,
+        intensity=intensity,
+        rgb=rgb,
+        compressed=compressed,
+        write_ascii=write_ascii,
+    )
 
 
 def sample_pcd(
