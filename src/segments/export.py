@@ -845,8 +845,10 @@ def export_polygon(
             }
         )
 
+        segmentation_bitmap = np.array(sample["segmentation_bitmap"], np.uint8)
+
         # https://scikit-image.org/docs/dev/api/skimage.measure.html#skimage.measure.regionprops
-        regions = regionprops(np.array(sample["segmentation_bitmap"], np.uint32))
+        regions = regionprops(segmentation_bitmap)
         regions = {region.label: region for region in regions}
 
         for instance in sample["annotations"]:
@@ -867,7 +869,7 @@ def export_polygon(
                 continue
 
             instance_mask = (
-                np.asarray(sample["segmentation_bitmap"], np.uint8) == instance["id"]
+                segmentation_bitmap == instance["id"]
             )
 
             # Allowed OpenCV data types: https://stackoverflow.com/questions/12785121/access-opencv-matrix-cv-32s-element
