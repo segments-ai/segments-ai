@@ -155,19 +155,19 @@ def export_dataset(
     +------------------+-------------------------------------------------------------+
     | Export format    | Supported dataset type                                      |
     +==================+=============================================================+
-    | COCO panoptic    | ``segmentation-bitmap`` and ``segmentation-bitmap-highres`` |                                                              
+    | COCO panoptic    | ``segmentation-bitmap`` and ``segmentation-bitmap-highres`` |
     +------------------+-------------------------------------------------------------+
-    | COCO instance    | ``segmentation-bitmap`` and ``segmentation-bitmap-highres`` |                                                               
+    | COCO instance    | ``segmentation-bitmap`` and ``segmentation-bitmap-highres`` |
     +------------------+-------------------------------------------------------------+
     | YOLO             | ``vector``, ``bboxes`` and ``image-vector-sequence``        |
     +------------------+-------------------------------------------------------------+
-    | Instance         | ``segmentation-bitmap`` and ``segmentation-bitmap-highres`` |                                                               
+    | Instance         | ``segmentation-bitmap`` and ``segmentation-bitmap-highres`` |
     +------------------+-------------------------------------------------------------+
-    | Colored instance | ``segmentation-bitmap`` and ``segmentation-bitmap-highres`` |                                                               
+    | Colored instance | ``segmentation-bitmap`` and ``segmentation-bitmap-highres`` |
     +------------------+-------------------------------------------------------------+
-    | Semantic         | ``segmentation-bitmap`` and ``segmentation-bitmap-highres`` |                                                               
+    | Semantic         | ``segmentation-bitmap`` and ``segmentation-bitmap-highres`` |
     +------------------+-------------------------------------------------------------+
-    | Colored semantic | ``segmentation-bitmap`` and ``segmentation-bitmap-highres`` |                                                               
+    | Colored semantic | ``segmentation-bitmap`` and ``segmentation-bitmap-highres`` |
     +------------------+-------------------------------------------------------------+
     | Polygon          | ``segmentation-bitmap`` and ``segmentation-bitmap-highres`` |
     +------------------+-------------------------------------------------------------+

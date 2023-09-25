@@ -722,7 +722,7 @@ class SegmentsClient:
     def update_dataset_collaborator(
         self, dataset_identifier: str, username: str, role: Role
     ) -> Collaborator:
-        """ "Update a dataset collaborator.
+        """Update a dataset collaborator.
 
         .. code-block:: python
 
@@ -1249,7 +1249,7 @@ class SegmentsClient:
         self,
         sample_uuid: str,
         labelset: str,
-        attributes: Union[Dict[str, Any], LabelAttributes],
+        attributes: Optional[Union[Dict[str, Any], LabelAttributes]] = None,
         label_status: LabelStatus = LabelStatus.PRELABELED,
         score: Optional[float] = None,
     ) -> Label:
@@ -1277,7 +1277,7 @@ class SegmentsClient:
         Args:
             sample_uuid: The sample uuid.
             labelset: The labelset this label belongs to.
-            attributes: The label attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/sample-and-label-types/label-types>`__.
+            attributes: The label attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/sample-and-label-types/label-types>`__. Defaults to :obj:`None`.
             label_status: The label status. Defaults to ``PRELABELED``.
             score: The label score. Defaults to :obj:`None`.
 
