@@ -388,7 +388,7 @@ class PointcloudSequenceSegmentationAnnotation(Annotation):
 
 class PointcloudSegmentationFrame(PointcloudSegmentationLabelAttributes):
     annotations: List[PointcloudSequenceSegmentationAnnotation]
-    point_annotations: Optional[List[int]] = None
+    point_annotations: List[int]
     timestamp: Optional[Union[str, int]] = None
     format_version: Optional[FormatVersion] = None
 
