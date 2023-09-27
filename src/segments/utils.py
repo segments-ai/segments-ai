@@ -16,17 +16,22 @@ import numpy as np
 import numpy.typing as npt
 import requests
 from PIL import ExifTags, Image
+from segments import SegmentsClient
 from segments.typing import (
+    XYZW,
     EgoPose,
     ExportFormat,
     PointcloudCuboidLabelAttributes,
+    PointcloudSequenceSampleAttributes,
     TaskType,
 )
+from sympy import Q
 
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
 # https://stackoverflow.com/questions/61384752/how-to-type-hint-with-an-optional-import
 if TYPE_CHECKING:
     import open3d as o3d
+    from pyquaternion import Quaternion
     from segments.dataset import SegmentsDataset
     from segments.typing import Release
 
@@ -877,3 +882,96 @@ def sample_pcd(
     o3d.io.write_point_cloud(
         output_path, pcd, write_ascii=False, compressed=True, print_progress=True
     )
+
+
+def find_camera_calibration(
+    client: SegmentsClient, dataset_identifier: str
+) -> Quaternion:
+    """Find camera extrinsics (rotation) by trying all 24 possibilities.
+
+    Args:
+        client: A Segments client.
+        dataset_identifier: The dataset identifier.
+
+    Returns:
+        A :class:`pyquaternion.Quaternion` representing the correct rotation.
+
+    Raises:
+        :exc:`ImportError`: If pyquaternion is not installed (to install run ``pip install pyquaternion``).
+        :exc:`ValueError`: If the dataset is not a pointcloud sequence dataset.
+        :exc:`ValueError`: If the user answers neither 'y(es)' nor 'n(o)' (case insensitive).
+    """
+
+    try:
+        from pyquaternion import Quaternion
+    except ImportError as e:
+        logger.error("Please install pyquaternion first: pip install pyquaternion")
+        raise e
+
+    # 6 options for x axis, 4 options for y axis and 1 option for z axis
+    X_AXIS_ROTATIONS = [
+        Quaternion(axis=[0, 0, 1], angle=0),
+        Quaternion(axis=[0, 0, 1], angle=np.pi / 2),
+        Quaternion(axis=[0, 0, 1], angle=np.pi),
+        Quaternion(axis=[0, 0, 1], angle=3 * np.pi / 2),
+        Quaternion(axis=[0, 1, 0], angle=np.pi / 2),
+        Quaternion(axis=[0, 1, 0], angle=3 * np.pi / 2),
+    ]
+    Y_AXIS_ROTATIONS = [
+        Quaternion(axis=[1, 0, 0], angle=0),
+        Quaternion(axis=[1, 0, 0], angle=np.pi / 2),
+        Quaternion(axis=[1, 0, 0], angle=np.pi),
+        Quaternion(axis=[1, 0, 0], angle=3 * np.pi / 2),
+    ]
+
+    cloned_dataset = client.clone_dataset(
+        dataset_identifier, f"{dataset_identifier.split('/')[-1]}_rotations"
+    )
+    samples = client.get_samples(dataset_identifier)
+    cloned_samples = client.get_samples(cloned_dataset.full_name)
+    if not isinstance(samples[0].attributes, PointcloudSequenceSampleAttributes):
+        raise ValueError(
+            "Brute force camera rotations only works for pointcloud sequence datasets. Reach out to support@segments.ai and arnaud@segments.ai if you are interested in this functionality for other dataset types."
+        )
+
+    for xi, x_rot in enumerate(X_AXIS_ROTATIONS):
+        for yi, y_rot in enumerate(Y_AXIS_ROTATIONS):
+            for sample, cloned_sample in zip(samples, cloned_samples):
+                for frame, cloned_frame in zip(
+                    sample.attributes.frames, cloned_sample.attributes.frames
+                ):
+                    for image, cloned_image in zip(frame.images, cloned_frame.images):
+                        rot = image.extrinsics.rotation
+                        rot_q = Quaternion(x=rot.qx, y=rot.qy, z=rot.qz, w=rot.qw)
+                        new_rot_q = rot_q * x_rot * y_rot
+                        new_rot = XYZW(
+                            qx=new_rot_q.x,
+                            qy=new_rot_q.y,
+                            qz=new_rot_q.z,
+                            qw=new_rot_q.w,
+                        )
+                        cloned_image.extrinsics.rotation = new_rot
+                client.update_sample(
+                    cloned_sample.uuid, attributes=cloned_sample.attributes
+                )
+
+            rotation_OK = input(
+                f"Image rotation in {dataset_identifier} OK (rotation {xi*len(X_AXIS_ROTATIONS) + (yi+1)}/{len(X_AXIS_ROTATIONS) * len(Y_AXIS_ROTATIONS)}? [y/n]"
+            )
+            if rotation_OK.lower() in ["y", "yes"]:
+                rotation_OK = True
+            elif rotation_OK.lower() in ["n", "no"]:
+                rotation_OK = False
+            else:
+                raise ValueError(
+                    f"Please enter 'y(es)' or 'n(o)' (case insensitive) not {rotation_OK}."
+                )
+
+            if rotation_OK:
+                break
+        if rotation_OK:
+            break
+
+    client.delete_dataset(cloned_dataset.full_name)
+
+    return x_rot * y_rot
