@@ -72,3 +72,9 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 ```{eval-rst}
 .. autofunction:: segments.utils.show_polygons
 ```
+
+### Try all camera rotations to find the best one
+
+```{eval-rst}
+.. autofunction:: segments.utils.find_camera_rotation
+```
