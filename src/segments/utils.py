@@ -25,7 +25,6 @@ from segments.typing import (
     PointcloudSequenceSampleAttributes,
     TaskType,
 )
-from sympy import Q
 
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
 # https://stackoverflow.com/questions/61384752/how-to-type-hint-with-an-optional-import
@@ -884,10 +883,8 @@ def sample_pcd(
     )
 
 
-def find_camera_calibration(
-    client: SegmentsClient, dataset_identifier: str
-) -> Quaternion:
-    """Find camera extrinsics (rotation) by trying all 24 possibilities.
+def find_camera_rotation(client: SegmentsClient, dataset_identifier: str) -> Quaternion:
+    """Find camera rotation by trying all 24 possibilities.
 
     Args:
         client: A Segments client.
@@ -900,6 +897,7 @@ def find_camera_calibration(
         :exc:`ImportError`: If pyquaternion is not installed (to install run ``pip install pyquaternion``).
         :exc:`ValueError`: If the dataset is not a pointcloud sequence dataset.
         :exc:`ValueError`: If the user answers neither 'y(es)' nor 'n(o)' (case insensitive).
+        :exc:`AlreadyExistsError`: If the cloned dataset already exists.
     """
 
     try:
@@ -923,9 +921,9 @@ def find_camera_calibration(
         Quaternion(axis=[1, 0, 0], angle=np.pi),
         Quaternion(axis=[1, 0, 0], angle=3 * np.pi / 2),
     ]
-
+    total_rotation_options = len(X_AXIS_ROTATIONS) * len(Y_AXIS_ROTATIONS)
     cloned_dataset = client.clone_dataset(
-        dataset_identifier, f"{dataset_identifier.split('/')[-1]}_rotations"
+        dataset_identifier, f"{dataset_identifier.split('/')[-1]}-find-camera-rotation"
     )
     samples = client.get_samples(dataset_identifier)
     cloned_samples = client.get_samples(cloned_dataset.full_name)
@@ -943,7 +941,7 @@ def find_camera_calibration(
                     for image, cloned_image in zip(frame.images, cloned_frame.images):
                         rot = image.extrinsics.rotation
                         rot_q = Quaternion(x=rot.qx, y=rot.qy, z=rot.qz, w=rot.qw)
-                        new_rot_q = rot_q * x_rot * y_rot
+                        new_rot_q = x_rot * y_rot * rot_q
                         new_rot = XYZW(
                             qx=new_rot_q.x,
                             qy=new_rot_q.y,
@@ -955,8 +953,9 @@ def find_camera_calibration(
                     cloned_sample.uuid, attributes=cloned_sample.attributes
                 )
 
+            current_rotation_option = xi * len(Y_AXIS_ROTATIONS) + yi + 1
             rotation_OK = input(
-                f"Image rotation in {dataset_identifier} OK (rotation {xi*len(X_AXIS_ROTATIONS) + (yi+1)}/{len(X_AXIS_ROTATIONS) * len(Y_AXIS_ROTATIONS)}? [y/n]"
+                f"Correct image rotation in {cloned_dataset.full_name} (rotation {current_rotation_option}/{total_rotation_options})? [y/n]"
             )
             if rotation_OK.lower() in ["y", "yes"]:
                 rotation_OK = True
