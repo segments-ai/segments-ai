@@ -16,6 +16,8 @@ class BaseModel(PydanticBaseModel):
         extra="ignore",
         # What happens with wrong field types. Use false in production and true in debug mode. https://pydantic-docs.helpmanual.io/usage/types/#arbitrary-types-allowed
         arbitrary_types_allowed=False,
+        # Whether to populate models with the `value` property of enums, rather than the raw enum.
+        use_enum_values=True,
     )
 
 
