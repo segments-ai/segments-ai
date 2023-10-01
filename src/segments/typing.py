@@ -12,11 +12,11 @@ from typing_extensions import Literal, TypedDict
 
 class BaseModel(PydanticBaseModel):
     model_config = ConfigDict(
-        # What happens with extra fields in dictionaries. Use ignore in production and allow in debug mode. https://pydantic-docs.helpmanual.io/usage/model_config/#change-behaviour-globally
+        # What happens with extra fields in dictionaries. Use ignore in production and allow in debug mode https://pydantic-docs.helpmanual.io/usage/model_config/#change-behaviour-globally
         extra="ignore",
-        # What happens with wrong field types. Use false in production and true in debug mode. https://pydantic-docs.helpmanual.io/usage/types/#arbitrary-types-allowed
+        # What happens with wrong field types. Use false in production and true in debug mode https://pydantic-docs.helpmanual.io/usage/types/#arbitrary-types-allowed
         arbitrary_types_allowed=False,
-        # Whether to populate models with the `value` property of enums, rather than the raw enum.
+        # Whether to populate models with the value property of enums, rather than the raw enum
         use_enum_values=True,
     )
 
@@ -168,9 +168,8 @@ ImageAttributes = Dict[str, Optional[Union[str, bool]]]
 # Release #
 ###########
 class URL(BaseModel):
-    url: Optional[
-        str
-    ] = None  # TODO Remove optional (e.g., the backend does not return an URL when adding a release).
+    # TODO Remove optional (the backend does not return an URL when adding a release)
+    url: Optional[str] = None
 
 
 class Release(BaseModel):
@@ -468,7 +467,6 @@ class TextLabelAttributes(BaseModel):
     format_version: Optional[FormatVersion] = None
 
 
-# Most specific type first
 # https://pydantic-docs.helpmanual.io/usage/types/#unions
 LabelAttributes = Union[
     ImageVectorLabelAttributes,
