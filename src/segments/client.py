@@ -141,6 +141,8 @@ def handle_exceptions(
                 raise SubscriptionError(message=text, cause=e)
             if "time-out" in text:
                 raise TimeoutError(message=text, cause=e)
+            if "invalid page" in text:
+                raise NotFoundError(message=text, cause=e)
             raise NetworkError(message=text, cause=e)
         except requests.exceptions.TooManyRedirects as e:
             # Tell the user their URL was bad and try a different one

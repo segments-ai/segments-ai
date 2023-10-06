@@ -47,7 +47,7 @@ class NetworkError(SegmentsError):
 
 
 class NotFoundError(NetworkError):
-    """Raised when the requested object is not found (e.g., because the name is misspelled)."""
+    """Raised when the requested object is not found (e.g., because the name is misspelled, the page index is incorrect, ...)."""
 
     pass
 
