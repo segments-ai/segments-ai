@@ -625,23 +625,21 @@ class Sample(BaseModel):
 ########################
 # Dataset and labelset #
 ########################
-class BaseUser(BaseModel):
+# https://docs.pydantic.dev/latest/concepts/postponed_annotations/#self-referencing-or-recursive-models
+class User(BaseModel):
     username: str
     created_at: str
     is_organization: bool
-
-
-class User(BaseUser):
     email: Optional[str] = None
     webhooks_enabled: Optional[bool] = None
     private_upload_count: Optional[int] = None
     public_upload_count: Optional[int] = None
     subscription: Optional[Subscription] = None
     is_trial_expired: Optional[bool] = None
-    organizations: Optional[List[BaseUser]] = None
+    organizations: Optional[List[User]] = None
     organization_created_by: Optional[str] = None
     organization_role: Optional[Role] = None
-    members: Optional[List[str]] = None
+    members: Optional[List[User]] = None
     insights_urls: Optional[Dict[str, str]] = None
 
 
