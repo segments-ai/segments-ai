@@ -620,6 +620,18 @@ class Sample(BaseModel):
 class User(BaseModel):
     username: str
     created_at: str
+    is_organization: bool
+    email: Optional[str] = None
+    webhooks_enabled: Optional[bool] = None
+    private_upload_count: Optional[int] = None
+    public_upload_count: Optional[int] = None
+    subscription: Optional[str] = None
+    is_trial_expired: Optional[bool] = None
+    organizations: Optional[List[str]] = None
+    organization_created_by: Optional[str] = None
+    organization_role: Optional[str] = None
+    members: Optional[List[str]] = None
+    insights_urls: Optional[Dict[str, str]] = None
 
 
 class Collaborator(BaseModel):

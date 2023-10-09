@@ -56,6 +56,7 @@ from segments.typing import (
     SampleAttributes,
     TaskAttributes,
     TaskType,
+    User,
 )
 from typing_extensions import Literal, get_args
 
@@ -270,6 +271,35 @@ class SegmentsClient:
         traceback: Optional[TracebackType],
     ) -> None:
         self.close()
+
+    ########
+    # User #
+    ########
+    def get_user(self, user: Optional[str] = None) -> User:
+        """Get a user.
+
+        .. code-block:: python
+
+            user = client.get_user()
+            print(user)
+
+        Args:
+            user: The username for which to get the information. Leave empty to get current user. Defaults to :obj:`None`.
+
+        Raises:
+            :exc:`~segments.exceptions.ValidationError`: If validation of the user fails.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the user is not found.
+            :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+        """
+
+        if user:
+            r = self._get(f"/users/{user}", model=User)
+        else:
+            r = self._get(f"/user", model=User)
+
+        return cast(User, r)
 
     ############
     # Datasets #
