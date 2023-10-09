@@ -156,11 +156,11 @@ class ExportFormat(str, Enum):
 
 
 class Subscription(str, Enum):
-    FREE = Field("FREE", description="Free plan")
-    STANDARD = Field("STANDARD", description="Standard plan")
-    ENTERPRISE = Field("ENTERPRISE", description="Enterprise plan")
-    ACADEMIC = Field("ACADEMIC", description="Academic plan")
-    TRIAL = Field("TRIAL", description="Free trial")
+    FREE = "FREE"
+    STANDARD = "STANDARD"
+    ENTERPRISE = "ENTERPRISE"
+    ACADEMIC = "ACADEMIC"
+    TRIAL = "TRIAL"
 
 
 RGB = Tuple[int, int, int]
