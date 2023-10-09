@@ -80,7 +80,7 @@ class TestUser(Test):
 
     def test_get_user_notfounderror(self) -> None:
         with self.assertRaises(NotFoundError):
-            wrong_username = "abcde"
+            wrong_username = "abcde" * 10
             self.client.get_user(wrong_username)
 
 
