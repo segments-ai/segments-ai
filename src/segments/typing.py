@@ -5,7 +5,7 @@ from enum import EnumMeta as BaseEnumMeta
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel as PydanticBaseModel
-from pydantic import ConfigDict, Field, field_validator
+from pydantic import ConfigDict, field_validator
 from segments.exceptions import ValidationError
 from typing_extensions import Literal, TypedDict
 
