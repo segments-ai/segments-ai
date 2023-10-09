@@ -5,7 +5,7 @@ from enum import EnumMeta as BaseEnumMeta
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel as PydanticBaseModel
-from pydantic import ConfigDict, field_validator
+from pydantic import ConfigDict, Field, field_validator
 from segments.exceptions import ValidationError
 from typing_extensions import Literal, TypedDict
 
@@ -153,6 +153,14 @@ class ExportFormat(str, Enum):
     SEMANTIC = "semantic"
     SEMANTIC_COLOR = "semantic-color"
     POLYGON = "polygon"
+
+
+class Subscription(str, Enum):
+    FREE = Field("FREE", description="Free plan")
+    STANDARD = Field("STANDARD", description="Standard plan")
+    ENTERPRISE = Field("ENTERPRISE", description="Enterprise plan")
+    ACADEMIC = Field("ACADEMIC", description="Academic plan")
+    TRIAL = Field("TRIAL", description="Free trial")
 
 
 RGB = Tuple[int, int, int]
@@ -617,19 +625,22 @@ class Sample(BaseModel):
 ########################
 # Dataset and labelset #
 ########################
-class User(BaseModel):
+class BaseUser(BaseModel):
     username: str
     created_at: str
     is_organization: bool
+
+
+class User(BaseUser):
     email: Optional[str] = None
     webhooks_enabled: Optional[bool] = None
     private_upload_count: Optional[int] = None
     public_upload_count: Optional[int] = None
-    subscription: Optional[str] = None
+    subscription: Optional[Subscription] = None
     is_trial_expired: Optional[bool] = None
-    organizations: Optional[List[str]] = None
+    organizations: Optional[List[BaseUser]] = None
     organization_created_by: Optional[str] = None
-    organization_role: Optional[str] = None
+    organization_role: Optional[Role] = None
     members: Optional[List[str]] = None
     insights_urls: Optional[Dict[str, str]] = None
 
