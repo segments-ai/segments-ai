@@ -158,8 +158,8 @@ class ExportFormat(str, Enum):
 RGB = Tuple[int, int, int]
 RGBA = Tuple[int, int, int, int]
 FormatVersion = Union[float, str]
-ObjectAttributes = Dict[str, Optional[Union[str, bool]]]
-ImageAttributes = Dict[str, Optional[Union[str, bool]]]
+ObjectAttributes = Dict[str, Optional[Union[str, bool, int]]]
+ImageAttributes = Dict[str, Optional[Union[str, bool, int]]]
 
 
 ###########
