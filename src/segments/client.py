@@ -297,7 +297,7 @@ class SegmentsClient:
         if user:
             r = self._get(f"/users/{user}", model=User)
         else:
-            r = self._get(f"/user", model=User)
+            r = self._get("/user", model=User)
 
         return cast(User, r)
 
