@@ -25,6 +25,7 @@ from segments.typing import (
     Release,
     Sample,
     TaskType,
+    User,
 )
 from typing_extensions import Final
 
@@ -57,6 +58,30 @@ class Test(unittest.TestCase):
 
     def tearDown(self) -> None:
         self.client.close()
+
+
+########
+# User #
+########
+class TestUser(Test):
+    def setUp(self) -> None:
+        super().setUp()
+
+    def tearDown(self) -> None:
+        super().tearDown()
+
+    def test_get_user(self) -> None:
+        # authenticated user
+        user = self.client.get_user()
+        self.assertIsInstance(user, User)
+        # other user
+        user = self.client.get_user(self.owner)
+        self.assertIsInstance(user, User)
+
+    def test_get_user_notfounderror(self) -> None:
+        with self.assertRaises(NotFoundError):
+            wrong_username = "abcde" * 10
+            self.client.get_user(wrong_username)
 
 
 ###########

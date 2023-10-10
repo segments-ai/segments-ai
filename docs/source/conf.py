@@ -34,8 +34,6 @@ VERSION = __version__
 # -----------------------------------------------------------------------------
 # Project information
 # -----------------------------------------------------------------------------
-
-
 project = "Segments.ai Python SDK"
 copyright = f"{datetime.today().year}, Segments.ai"
 author = "Segments.ai team"
@@ -46,7 +44,6 @@ release = VERSION
 # -----------------------------------------------------------------------------
 # General configuration
 # -----------------------------------------------------------------------------
-
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
@@ -121,7 +118,6 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # -----------------------------------------------------------------------------
 # Options for HTML output
 # -----------------------------------------------------------------------------
-
 # The theme to use for HTML and HTML Help pages. See the documentation for
 # a list of builtin themes.
 

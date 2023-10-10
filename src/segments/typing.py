@@ -157,6 +157,14 @@ class ExportFormat(str, Enum):
     POLYGON = "polygon"
 
 
+class Subscription(str, Enum):
+    FREE = "FREE"
+    STANDARD = "STANDARD"
+    ENTERPRISE = "ENTERPRISE"
+    ACADEMIC = "ACADEMIC"
+    TRIAL = "TRIAL"
+
+
 RGB = Tuple[int, int, int]
 RGBA = Tuple[int, int, int, int]
 FormatVersion = Union[float, str]
@@ -617,9 +625,22 @@ class Sample(BaseModel):
 ########################
 # Dataset and labelset #
 ########################
+# https://docs.pydantic.dev/latest/concepts/postponed_annotations/#self-referencing-or-recursive-models
 class User(BaseModel):
     username: str
     created_at: str
+    is_organization: bool
+    email: Optional[str] = None
+    webhooks_enabled: Optional[bool] = None
+    private_upload_count: Optional[int] = None
+    public_upload_count: Optional[int] = None
+    subscription: Optional[Subscription] = None
+    is_trial_expired: Optional[bool] = None
+    organizations: Optional[List[User]] = None
+    organization_created_by: Optional[str] = None
+    organization_role: Optional[Role] = None
+    members: Optional[List[User]] = None
+    insights_urls: Optional[Dict[str, str]] = None
 
 
 class Collaborator(BaseModel):
