@@ -57,6 +57,24 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 .. autofunction:: segments.utils.cuboid_to_segmentation
 ```
 
+### Turn a numpy array into a point cloud
+
+```{eval-rst}
+.. autofunction:: segments.utils.array_to_pcd
+```
+
+### Turn a ply file into a pcd file
+
+```{eval-rst}
+.. autofunction:: segments.utils.ply_to_pcd
+```
+
+## Turn a point cloud into a sampled point cloud
+
+```{eval-rst}
+.. autofunction:: segments.utils.sample_pcd
+```
+
 ## Export
 
 ### Export a dataset to a different format
