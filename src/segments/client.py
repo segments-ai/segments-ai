@@ -284,7 +284,7 @@ class SegmentsClient:
             print(user)
 
         Args:
-            user: The username for which to get the information. Leave empty to get current user. Defaults to :obj:`None`.
+            user: The username for which to get the user details. Leave empty to get the authenticated user. Defaults to :obj:`None`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the user fails.
