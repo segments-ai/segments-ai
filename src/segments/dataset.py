@@ -75,7 +75,7 @@ class SegmentsDataset:
         labelset: The labelset that should be loaded. Defaults to ``ground-truth``.
         filter_by: A list of label statuses to filter by. Defaults to :obj:`None`.
         filter_by_metadata: A dict of metadata key:value pairs to filter by. Filters are ANDed together. Defaults to :obj:`None`.
-        segments_dir: The directory where the data will be downloaded to for caching. Set to :obj:`None` to disable caching. Defaults to ``segments``.
+        segments_dir: The directory where the data will be downloaded to for caching. Set to :obj:`None` to disable caching. Defaults to ``segments``. Alternatively, you can set the ``SEGMENTS_DIR`` environment variable to change the default.
         preload: Whether the data should be pre-downloaded when the dataset is initialized. Ignored if ``segments_dir`` is :obj:`None`. Defaults to :obj:`True`.
         s3_client: A boto3 S3 client, e.g. ``s3_client = boto3.client("s3")``. Needs to be provided if your images are in a private S3 bucket. Defaults to :obj:`None`.
 
@@ -95,6 +95,10 @@ class SegmentsDataset:
         preload: bool = True,
         s3_client: Optional[Any] = None,
     ):
+        # check environment for SEGMENTS_DIR variable if `segments_dir` has default value
+        if segments_dir == "segments":
+            segments_dir = os.getenv("SEGMENTS_DIR", "segments")
+
         self.labelset = labelset
         if isinstance(filter_by, list):
             filter_by = [f.upper() for f in filter_by]
