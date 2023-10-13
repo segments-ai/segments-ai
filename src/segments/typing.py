@@ -67,7 +67,7 @@ class LabelStats(BaseModel):
     VERIFIED: Optional[int] = None
     UNLABELED: Optional[int] = None
     # extra
-    TOTAL: int
+    TOTAL: Optional[int] = None
 
 
 class TaskType(str, Enum):
