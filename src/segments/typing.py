@@ -70,7 +70,7 @@ class TaskType(str, Enum):
     POINTCLOUD_VECTOR = "pointcloud-vector"
     POINTCLOUD_VECTOR_SEQUENCE = "pointcloud-vector-sequence"
     # MULTISENSOR = "multisensor"
-    MULTISENSOR_SEQUENCE = "multisensor-sequence"
+    MULTISENSOR_SEQUENCE = "multisensor-sequence"  # combination of pointcloud-cuboid-sequence and image-vector-sequence
     TEXT_NAMED_ENTITIES = "text-named-entities"
     TEXT_SPAN_CATEGORIZATION = "text-span-categorization"
     EMPTY = ""
