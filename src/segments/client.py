@@ -414,8 +414,6 @@ class SegmentsClient:
         +--------------------------------------------+---------------------------------------+
         | Image vector labels (sequence)             | ``image-vector-sequence``             |
         +--------------------------------------------+---------------------------------------+
-        | Image keypoint labels                      | ``keypoints``                         |
-        +--------------------------------------------+---------------------------------------+
         | Point cloud cuboid labels                  | ``pointcloud-cuboid``                 |
         +--------------------------------------------+---------------------------------------+
         | Point cloud cuboid labels (sequence)       | ``pointcloud-cuboid-sequence``        |
