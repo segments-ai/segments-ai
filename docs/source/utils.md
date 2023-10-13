@@ -69,7 +69,7 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 .. autofunction:: segments.utils.ply_to_pcd
 ```
 
-## Turn a point cloud into a sampled point cloud
+### Turn a point cloud into a sampled point cloud
 
 ```{eval-rst}
 .. autofunction:: segments.utils.sample_pcd
