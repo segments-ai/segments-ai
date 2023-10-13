@@ -144,6 +144,11 @@ def handle_exceptions(
                 raise TimeoutError(message=text, cause=e)
             if "invalid page" in text:
                 raise NotFoundError(message=text, cause=e)
+            if "502 Server Error: Bad Gateway" in text:
+                raise NetworkError(
+                    message="502 Server Error. Decrease the `per_page` argument if you called `get_samples`.",
+                    cause=e,
+                )
             raise NetworkError(message=text, cause=e)
         except requests.exceptions.TooManyRedirects as e:
             # Tell the user their URL was bad and try a different one
