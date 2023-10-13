@@ -51,8 +51,23 @@ class LabelStatus(str, Enum):
     REJECTED = "REJECTED"
     PRELABELED = "PRELABELED"
     SKIPPED = "SKIPPED"
-    UNLABELED = "UNLABELED"
     VERIFIED = "VERIFIED"
+    UNLABELED = "UNLABELED"
+
+
+# keep in sync with LabelStatus
+class LabelStats(BaseModel):
+    REVIEWED: Optional[int] = None
+    REVIEWING_IN_PROGRESS: Optional[int] = None
+    LABELED: Optional[int] = None
+    LABELING_IN_PROGRESS: Optional[int] = None
+    REJECTED: Optional[int] = None
+    PRELABELED: Optional[int] = None
+    SKIPPED: Optional[int] = None
+    VERIFIED: Optional[int] = None
+    UNLABELED: Optional[int] = None
+    # extra
+    TOTAL: Optional[int] = None
 
 
 class TaskType(str, Enum):
@@ -738,15 +753,6 @@ class Labelset(BaseModel):
     # statistics: Optional[Statistics]
     created_at: Optional[str] = None
     # stats: Optional[Dict[str, Any]]
-
-
-class LabelStats(BaseModel):
-    TOTAL: Optional[int] = None
-    LABELED: Optional[int] = None
-    UNLABELED: Optional[int] = None
-    PRELABELED: Optional[int] = None
-    REVIEWED: Optional[int] = None
-    SKIPPED: Optional[int] = None
 
 
 class Dataset(BaseModel):
