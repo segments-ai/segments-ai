@@ -58,10 +58,10 @@ class LabelStatus(str, Enum):
 class TaskType(str, Enum):
     SEGMENTATION_BITMAP = "segmentation-bitmap"
     SEGMENTATION_BITMAP_HIGHRES = "segmentation-bitmap-highres"
-    IMAGE_VECTOR_SEQUENCE = "image-vector-sequence"
     IMAGE_SEGMENTATION_SEQUENCE = "image-segmentation-sequence"
     BBOXES = "bboxes"
     VECTOR = "vector"
+    IMAGE_VECTOR_SEQUENCE = "image-vector-sequence"
     KEYPOINTS = "keypoints"
     POINTCLOUD_CUBOID = "pointcloud-cuboid"
     POINTCLOUD_CUBOID_SEQUENCE = "pointcloud-cuboid-sequence"
@@ -69,8 +69,8 @@ class TaskType(str, Enum):
     POINTCLOUD_SEGMENTATION_SEQUENCE = "pointcloud-segmentation-sequence"
     POINTCLOUD_VECTOR = "pointcloud-vector"
     POINTCLOUD_VECTOR_SEQUENCE = "pointcloud-vector-sequence"
-    MULTISENSOR = "multisensor"
-    MULTISENSOR_SEQUENCE = "multisensor-sequence"
+    # MULTISENSOR = "multisensor"
+    MULTISENSOR_SEQUENCE = "multisensor-sequence"  # combination of pointcloud-cuboid-sequence and image-vector-sequence
     TEXT_NAMED_ENTITIES = "text-named-entities"
     TEXT_SPAN_CATEGORIZATION = "text-span-categorization"
     EMPTY = ""

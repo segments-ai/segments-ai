@@ -399,27 +399,39 @@ class SegmentsClient:
             dataset = client.add_dataset(dataset_name, description, task_type)
             print(dataset)
 
-        +-------------------------------------------+---------------------------------------+
-        | Task type                                 | Value                                 |
-        +===========================================+=======================================+
-        | Image segmentation labels (bitmap)        | ``segmentation-bitmap``               |
-        +-------------------------------------------+---------------------------------------+
-        | Image bounding box labels                 | ``bboxes``                            |
-        +-------------------------------------------+---------------------------------------+
-        | Image vector labels                       | ``vector``                            |
-        +-------------------------------------------+---------------------------------------+
-        | Pointcloud cuboid labels                  | ``pointcloud-cuboid``                 |
-        +-------------------------------------------+---------------------------------------+
-        | Pointcloud cuboid labels (sequence)       | ``pointcloud-cuboid-sequence``        |
-        +-------------------------------------------+---------------------------------------+
-        | Pointcloud segmentation labels            | ``pointcloud-segmentation``           |
-        +-------------------------------------------+---------------------------------------+
-        | Pointcloud segmentation labels (sequence) | ``pointcloud-segmentation-sequence``  |
-        +-------------------------------------------+---------------------------------------+
-        | Text named entity labels                  | ``text-named-entities``               |
-        +-------------------------------------------+---------------------------------------+
-        | Text span categorization labels           | ``text-span-categorization``          |
-        +-------------------------------------------+---------------------------------------+
+        +--------------------------------------------+---------------------------------------+
+        | Task type                                  | Value                                 |
+        +============================================+=======================================+
+        | Image segmentation labels (bitmap)         | ``segmentation-bitmap``               |
+        +--------------------------------------------+---------------------------------------+
+        | Image segmentation labels (bitmap)         | ``segmentation-bitmap-highres``       |
+        +--------------------------------------------+---------------------------------------+
+        | Image segmentation labels (sequence)       | ``image-segmentation-sequence``       |
+        +--------------------------------------------+---------------------------------------+
+        | Image bounding box labels                  | ``bboxes``                            |
+        +--------------------------------------------+---------------------------------------+
+        | Image vector labels                        | ``vector``                            |
+        +--------------------------------------------+---------------------------------------+
+        | Image vector labels (sequence)             | ``image-vector-sequence``             |
+        +--------------------------------------------+---------------------------------------+
+        | Point cloud cuboid labels                  | ``pointcloud-cuboid``                 |
+        +--------------------------------------------+---------------------------------------+
+        | Point cloud cuboid labels (sequence)       | ``pointcloud-cuboid-sequence``        |
+        +--------------------------------------------+---------------------------------------+
+        | Point cloud segmentation labels            | ``pointcloud-segmentation``           |
+        +--------------------------------------------+---------------------------------------+
+        | Point cloud segmentation labels (sequence) | ``pointcloud-segmentation-sequence``  |
+        +--------------------------------------------+---------------------------------------+
+        | Point cloud vector labels                  | ``pointcloud-vector``                 |
+        +--------------------------------------------+---------------------------------------+
+        | Point cloud vector labels (sequence)       | ``pointcloud-vector-sequence``        |
+        +--------------------------------------------+---------------------------------------+
+        | Multisensor labels (sequence)              | ``multisensor-sequence``              |
+        +--------------------------------------------+---------------------------------------+
+        | Text named entity labels                   | ``text-named-entities``               |
+        +--------------------------------------------+---------------------------------------+
+        | Text span categorization labels            | ``text-span-categorization``          |
+        +--------------------------------------------+---------------------------------------+
 
         Args:
             name: The dataset name. Example: ``flowers``.
