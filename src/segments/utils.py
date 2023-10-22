@@ -17,6 +17,7 @@ import numpy.typing as npt
 import requests
 from PIL import ExifTags, Image
 from segments import SegmentsClient
+from segments.exceptions import AlreadyExistsError
 from segments.typing import (
     XYZW,
     EgoPose,
@@ -897,6 +898,7 @@ def find_camera_rotation(client: SegmentsClient, dataset_identifier: str) -> Qua
         :exc:`ImportError`: If pyquaternion is not installed (to install run ``pip install pyquaternion``).
         :exc:`ValueError`: If the dataset is not a pointcloud sequence dataset.
         :exc:`ValueError`: If the user answers neither 'y(es)' nor 'n(o)' (case insensitive).
+        :exc:`ValueError`: If the correct rotation is not found.
         :exc:`AlreadyExistsError`: If the cloned dataset already exists.
     """
 
@@ -921,10 +923,21 @@ def find_camera_rotation(client: SegmentsClient, dataset_identifier: str) -> Qua
         Quaternion(axis=[1, 0, 0], angle=np.pi),
         Quaternion(axis=[1, 0, 0], angle=3 * np.pi / 2),
     ]
-    total_rotation_options = len(X_AXIS_ROTATIONS) * len(Y_AXIS_ROTATIONS)
-    cloned_dataset = client.clone_dataset(
-        dataset_identifier, f"{dataset_identifier.split('/')[-1]}-find-camera-rotation"
+    # inverse rotation is possible
+    total_rotation_options = len(X_AXIS_ROTATIONS) * len(Y_AXIS_ROTATIONS) * 2
+
+    # clone dataset
+    cloned_dataset_owner, cloned_dataset_name = (
+        dataset_identifier.split("/")[0],
+        f"{dataset_identifier.split('/')[-1]}-find-camera-rotation",
     )
+    try:
+        cloned_dataset = client.clone_dataset(dataset_identifier, cloned_dataset_name)
+    except AlreadyExistsError:
+        client.delete_dataset(f"{cloned_dataset_owner}/{cloned_dataset_name}")
+        cloned_dataset = client.clone_dataset(dataset_identifier, cloned_dataset_name)
+
+    # get (cloned) samples
     samples = client.get_samples(dataset_identifier)
     cloned_samples = client.get_samples(cloned_dataset.full_name)
     if not isinstance(samples[0].attributes, PointcloudSequenceSampleAttributes):
@@ -932,45 +945,50 @@ def find_camera_rotation(client: SegmentsClient, dataset_identifier: str) -> Qua
             "Brute force camera rotations only works for pointcloud sequence datasets. Reach out to support@segments.ai and arnaud@segments.ai if you are interested in this functionality for other dataset types."
         )
 
+    # rotate images
     for xi, x_rot in enumerate(X_AXIS_ROTATIONS):
         for yi, y_rot in enumerate(Y_AXIS_ROTATIONS):
-            for sample, cloned_sample in zip(samples, cloned_samples):
-                for frame, cloned_frame in zip(
-                    sample.attributes.frames, cloned_sample.attributes.frames
-                ):
-                    for image, cloned_image in zip(frame.images, cloned_frame.images):
-                        rot = image.extrinsics.rotation
-                        rot_q = Quaternion(x=rot.qx, y=rot.qy, z=rot.qz, w=rot.qw)
-                        new_rot_q = x_rot * y_rot * rot_q
-                        new_rot = XYZW(
-                            qx=new_rot_q.x,
-                            qy=new_rot_q.y,
-                            qz=new_rot_q.z,
-                            qw=new_rot_q.w,
-                        )
-                        cloned_image.extrinsics.rotation = new_rot
-                client.update_sample(
-                    cloned_sample.uuid, attributes=cloned_sample.attributes
+            for invert in [False, True]:
+                for sample, cloned_sample in zip(samples, cloned_samples):
+                    for frame, cloned_frame in zip(
+                        sample.attributes.frames, cloned_sample.attributes.frames
+                    ):
+                        for image, cloned_image in zip(
+                            frame.images, cloned_frame.images
+                        ):
+                            if not image.extrinsics or not image.extrinsics.rotation:
+                                continue
+
+                            rot = image.extrinsics.rotation
+                            rot_q = Quaternion(x=rot.qx, y=rot.qy, z=rot.qz, w=rot.qw)
+
+                            if invert:
+                                rot_q = rot_q.inverse
+
+                            new_rot_q = x_rot * y_rot * rot_q
+                            new_rot = XYZW(
+                                qx=new_rot_q.x,
+                                qy=new_rot_q.y,
+                                qz=new_rot_q.z,
+                                qw=new_rot_q.w,
+                            )
+                            cloned_image.extrinsics.rotation = new_rot
+                    client.update_sample(
+                        cloned_sample.uuid, attributes=cloned_sample.attributes
+                    )
+
+                offset, y_offset, x_offset = 1, 2, 2 * len(Y_AXIS_ROTATIONS)
+                rotation_option = xi * x_offset + yi * y_offset + invert + offset
+
+                rotation_OK = input(
+                    f"Correct image rotation in {cloned_dataset.full_name} (rotation {rotation_option}/{total_rotation_options})? [y/n]"
                 )
+                if rotation_OK.lower() in ["y", "yes"]:
+                    client.delete_dataset(cloned_dataset.full_name)
+                    return (x_rot * y_rot).inverse if invert else x_rot * y_rot
+                elif rotation_OK.lower() not in ["n", "no"]:
+                    raise ValueError(
+                        f"Please enter 'y(es)' or 'n(o)' (case insensitive) not {rotation_OK}."
+                    )
 
-            current_rotation_option = xi * len(Y_AXIS_ROTATIONS) + yi + 1
-            rotation_OK = input(
-                f"Correct image rotation in {cloned_dataset.full_name} (rotation {current_rotation_option}/{total_rotation_options})? [y/n]"
-            )
-            if rotation_OK.lower() in ["y", "yes"]:
-                rotation_OK = True
-            elif rotation_OK.lower() in ["n", "no"]:
-                rotation_OK = False
-            else:
-                raise ValueError(
-                    f"Please enter 'y(es)' or 'n(o)' (case insensitive) not {rotation_OK}."
-                )
-
-            if rotation_OK:
-                break
-        if rotation_OK:
-            break
-
-    client.delete_dataset(cloned_dataset.full_name)
-
-    return x_rot * y_rot
+    raise ValueError("Correct rotation not found.")
