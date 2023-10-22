@@ -775,6 +775,7 @@ class Dataset(BaseModel):
     task_type: TaskType
     # task_readme: str
     label_stats: LabelStats
+    labeling_inactivity_timeout_seconds: Optional[int] = None
     samples_count: Optional[Union[str, int]] = None
     collaborators_count: Optional[int] = None
     task_attributes: Optional[TaskAttributes] = None
