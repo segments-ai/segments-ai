@@ -341,15 +341,15 @@ def load_image_from_url(
 def load_pointcloud_from_url(
     url: str, save_filename: Optional[str] = None, s3_client: Optional[Any] = None
 ) -> o3d.geometry.PointCloud:
-    """Load a pointcloud from url.
+    """Load a point cloud from a url.
 
     Args:
-        url: The pointcloud url.
+        url: The point cloud url.
         save_filename: The filename to save to.
         s3_client: A boto3 S3 client, e.g. ``s3_client = boto3.client("s3")``. Needs to be provided if your point clouds are in a private S3 bucket. Defaults to :obj:`None`.
 
     Returns:
-        A pointcloud.
+        A point cloud.
 
     Raises:
         :exc:`ImportError`: If open3d is not installed (to install run ``pip install open3d``).
@@ -616,7 +616,7 @@ def cuboid_to_segmentation(
     """Convert a cuboid label to an instance segmentation label.
 
     Args:
-        pointcloud: A pointcloud of size Nx3.
+        pointcloud: A point cloud of size Nx3.
         label_attributes: A cuboid label from a single frame interface or one frame from a sequence interface.
 
     Returns:
@@ -885,7 +885,7 @@ def sample_pcd(
 
 
 def find_camera_rotation(client: SegmentsClient, dataset_identifier: str) -> Quaternion:
-    """Find camera rotation by trying all 24 possibilities.
+    """Find the correct camera rotation by trying all possibilities.
 
     Args:
         client: A Segments client.
@@ -896,7 +896,7 @@ def find_camera_rotation(client: SegmentsClient, dataset_identifier: str) -> Qua
 
     Raises:
         :exc:`ImportError`: If pyquaternion is not installed (to install run ``pip install pyquaternion``).
-        :exc:`ValueError`: If the dataset is not a pointcloud sequence dataset.
+        :exc:`ValueError`: If the dataset is not a point cloud sequence dataset.
         :exc:`ValueError`: If the user answers neither 'y(es)' nor 'n(o)' (case insensitive).
         :exc:`ValueError`: If the correct rotation is not found.
         :exc:`AlreadyExistsError`: If the cloned dataset already exists.
@@ -942,7 +942,7 @@ def find_camera_rotation(client: SegmentsClient, dataset_identifier: str) -> Qua
     cloned_samples = client.get_samples(cloned_dataset.full_name)
     if not isinstance(samples[0].attributes, PointcloudSequenceSampleAttributes):
         raise ValueError(
-            "Brute force camera rotations only works for pointcloud sequence datasets. Reach out to support@segments.ai and arnaud@segments.ai if you are interested in this functionality for other dataset types."
+            "Brute force camera rotations only works for point cloud sequence datasets. Reach out to support@segments.ai and arnaud@segments.ai if you are interested in this functionality for other dataset types."
         )
 
     # rotate images
