@@ -384,6 +384,7 @@ class SegmentsClient:
         public: bool = False,
         readme: str = "",
         metadata: Optional[Dict[str, Any]] = None,
+        labeling_inactivity_timeout_seconds: int = 300,
         enable_skip_labeling: bool = True,
         enable_skip_reviewing: bool = False,
         enable_ratings: bool = False,
@@ -447,6 +448,7 @@ class SegmentsClient:
             public: The dataset visibility. Defaults to :obj:`False`.
             readme: The dataset readme. Defaults to ``''``.
             metadata: Any dataset metadata. Example: ``{'day': 'sunday', 'robot_id': 3}``.
+            labeling_inactivity_timeout_seconds: The number of seconds after which a user is considered inactive during labeling. Only impacts label timing metrics. Defaults to ``300``.
             enable_skip_labeling: Enable the skip button in the labeling workflow. Defaults to :obj:`True`.
             enable_skip_reviewing: Enable the skip button in the reviewing workflow. Defaults to :obj:`False`.
             enable_ratings: Enable star-ratings for labeled images. Defaults to :obj:`False`.
@@ -491,6 +493,7 @@ class SegmentsClient:
             "category": category,
             "public": public,
             "readme": readme,
+            "labeling_inactivity_timeout_seconds": labeling_inactivity_timeout_seconds,
             "enable_skip_labeling": enable_skip_labeling,
             "enable_skip_reviewing": enable_skip_reviewing,
             "enable_ratings": enable_ratings,
@@ -525,6 +528,7 @@ class SegmentsClient:
         public: Optional[bool] = None,
         readme: Optional[str] = None,
         metadata: Optional[Dict[str, Any]] = None,
+        labeling_inactivity_timeout_seconds: Optional[int] = None,
         enable_skip_labeling: Optional[bool] = None,
         enable_skip_reviewing: Optional[bool] = None,
         enable_ratings: Optional[bool] = None,
@@ -552,6 +556,7 @@ class SegmentsClient:
             public: The dataset visibility. Defaults to :obj:`None`.
             readme: The dataset readme. Defaults to :obj:`None`.
             metadata: Any dataset metadata. Example: ``{'day': 'sunday', 'robot_id': 3}``.
+            labeling_inactivity_timeout_seconds: The number of seconds after which a user is considered inactive during labeling. Only impacts label timing metrics. Defaults to :obj:`None`.
             enable_skip_labeling: Enable the skip button in the labeling workflow. Defaults to :obj:`None`.
             enable_skip_reviewing: Enable the skip button in the reviewing workflow. Defaults to :obj:`None`.
             enable_ratings: Enable star-ratings for labeled images. Defaults to :obj:`None`.
@@ -595,6 +600,9 @@ class SegmentsClient:
 
         if metadata:
             payload["metadata"] = metadata
+
+        if labeling_inactivity_timeout_seconds:
+            payload["labeling_inactivity_timeout_seconds"] = labeling_inactivity_timeout_seconds
 
         if enable_skip_labeling:
             payload["enable_skip_labeling"] = enable_skip_labeling
