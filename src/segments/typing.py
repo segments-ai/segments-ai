@@ -133,8 +133,11 @@ class CameraDistortionModel(str, Enum):
 
 class PCDType(str, Enum):
     PCD = "pcd"
+    BINARY_XYZI = "binary-xyzi"
     KITTI = "kitti"
+    BINARY_XYZIR = "binary-xyzir"
     NUSCENES = "nuscenes"
+    PLY = "ply"
 
 
 class ReleaseStatus(str, Enum):
