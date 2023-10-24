@@ -50,6 +50,8 @@ COMPATIBLE_TASK_TYPES = {
         TaskType.SEGMENTATION_BITMAP_HIGHRES,
     },
     ExportFormat.COCO_INSTANCE: {
+        TaskType.VECTOR,
+        TaskType.BBOXES,
         TaskType.SEGMENTATION_BITMAP,
         TaskType.SEGMENTATION_BITMAP_HIGHRES,
     },
@@ -251,7 +253,7 @@ def export_dataset(
     elif export_format == ExportFormat.COCO_INSTANCE:
         if dataset.task_type not in COMPATIBLE_TASK_TYPES[export_format]:
             raise ValueError(
-                "Only datasets of type 'segmentation-bitmap' and 'segmentation-bitmap-highres' can be exported to this format."
+                "Only datasets of type 'segmentation-bitmap', 'segmentation-bitmap-highres', 'vector', 'bboxes' and 'keypoints' can be exported to this format."
             )
         from .export import export_coco_instance
 
@@ -259,7 +261,7 @@ def export_dataset(
     elif export_format == ExportFormat.YOLO:
         if dataset.task_type not in COMPATIBLE_TASK_TYPES[export_format]:
             raise ValueError(
-                'Only datasets of type "segmentation-bitmap", "segmentation-bitmap-highres", "vector", "bboxes" and "keypoints" can be exported to this format.'
+                'Only datasets of type "vector", "bboxes" and "image-vector-sequence" can be exported to this format.'
             )
         from .export import export_yolo
 
