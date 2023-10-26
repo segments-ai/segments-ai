@@ -111,7 +111,7 @@ def handle_exceptions(
                     message = r_json.get("detail", "")
                     if "throttled" in message:
                         raise APILimitError(message)
-                if model:
+                if model is not None:
                     m = TypeAdapter(model).validate_python(r_json)
                     return m
             return r
@@ -303,7 +303,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        if user:
+        if user is not None:
             r = self._get(f"/users/{user}", model=User)
         else:
             r = self._get("/user", model=User)
@@ -343,7 +343,7 @@ class SegmentsClient:
         # pagination
         query_string = f"?per_page={per_page}&page={page}"
 
-        if user:
+        if user is not None:
             r = self._get(f"/users/{user}/datasets/{query_string}", model=List[Dataset])
         else:
             r = self._get(f"/user/datasets/{query_string}", model=List[Dataset])
@@ -576,58 +576,60 @@ class SegmentsClient:
 
         payload: Dict[str, Any] = {}
 
-        if description:
+        if description is not None:
             payload["description"] = description
 
-        if task_type:
+        if task_type is not None:
             payload["task_type"] = task_type
 
-        if task_attributes:
+        if task_attributes is not None:
             payload["task_attributes"] = (
                 task_attributes.model_dump()
                 if type(task_attributes) is TaskAttributes
                 else task_attributes
             )
 
-        if category:
+        if category is not None:
             payload["category"] = category
 
-        if public:
+        if public is not None:
             payload["public"] = public
 
-        if readme:
+        if readme is not None:
             payload["readme"] = readme
 
-        if metadata:
+        if metadata is not None:
             payload["metadata"] = metadata
 
-        if labeling_inactivity_timeout_seconds:
-            payload["labeling_inactivity_timeout_seconds"] = labeling_inactivity_timeout_seconds
+        if labeling_inactivity_timeout_seconds is not None:
+            payload[
+                "labeling_inactivity_timeout_seconds"
+            ] = labeling_inactivity_timeout_seconds
 
-        if enable_skip_labeling:
+        if enable_skip_labeling is not None:
             payload["enable_skip_labeling"] = enable_skip_labeling
 
-        if enable_skip_reviewing:
+        if enable_skip_reviewing is not None:
             payload["enable_skip_reviewing"] = enable_skip_reviewing
 
-        if enable_ratings:
+        if enable_ratings is not None:
             payload["enable_ratings"] = enable_ratings
 
-        if enable_interpolation:
+        if enable_interpolation is not None:
             payload["enable_interpolation"] = enable_interpolation
 
-        if enable_same_dimensions_track_constraint:
+        if enable_same_dimensions_track_constraint is not None:
             payload[
                 "enable_same_dimensions_track_constraint"
             ] = enable_same_dimensions_track_constraint
 
-        if enable_save_button:
+        if enable_save_button is not None:
             payload["enable_save_button"] = enable_save_button
 
-        if enable_label_status_verified:
+        if enable_label_status_verified is not None:
             payload["enable_label_status_verified"] = enable_label_status_verified
 
-        if enable_3d_cuboid_rotation:
+        if enable_3d_cuboid_rotation is not None:
             payload["enable_3d_cuboid_rotation"] = enable_3d_cuboid_rotation
 
         r = self._patch(f"/datasets/{dataset_identifier}/", data=payload, model=Dataset)
@@ -699,13 +701,13 @@ class SegmentsClient:
 
         payload: Dict[str, Any] = {"name": new_name}
 
-        if new_task_type:
+        if new_task_type is not None:
             payload["task_type"] = new_task_type
 
-        if new_public:
+        if new_public is not None:
             payload["public"] = new_public
 
-        if organization:
+        if organization is not None:
             payload["owner"] = organization
 
         r = self._post(
@@ -802,7 +804,11 @@ class SegmentsClient:
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
-        payload = {"role": role}
+        payload: Dict[str, Any] = {}
+
+        if role is not None:
+            payload["role"] = role
+
         r = self._patch(
             f"/datasets/{dataset_identifier}/collaborators/{username}",
             data=payload,
@@ -881,17 +887,17 @@ class SegmentsClient:
         query_string = f"?per_page={per_page}&page={page}"
 
         # filter by name
-        if name:
+        if name is not None:
             query_string += f"&name__contains={name}"
 
         # filter by metadata
-        if metadata:
+        if metadata is not None:
             if isinstance(metadata, str):
                 metadata = [metadata]
             query_string += f"&filters={','.join(metadata)}"
 
         # filter by label status
-        if label_status:
+        if label_status is not None:
             if isinstance(label_status, str):
                 label_status = [label_status]
             assert isinstance(label_status, list)
@@ -950,7 +956,7 @@ class SegmentsClient:
 
         query_string = f"/samples/{uuid}/"
 
-        if labelset:
+        if labelset is not None:
             query_string += f"?labelset={labelset}"
 
         if include_signed_url:
@@ -1033,19 +1039,19 @@ class SegmentsClient:
             "attributes": attributes,
         }
 
-        if metadata:
+        if metadata is not None:
             payload["metadata"] = metadata
 
-        if priority:
+        if priority is not None:
             payload["priority"] = priority
 
-        if assigned_labeler:
+        if assigned_labeler is not None:
             payload["assigned_labeler"] = assigned_labeler
 
-        if assigned_reviewer:
+        if assigned_reviewer is not None:
             payload["assigned_reviewer"] = assigned_reviewer
 
-        if embedding:
+        if embedding is not None:
             payload["embedding"] = embedding
 
         r = self._post(
@@ -1150,29 +1156,29 @@ class SegmentsClient:
 
         payload: Dict[str, Any] = {}
 
-        if name:
+        if name is not None:
             payload["name"] = name
 
-        if attributes:
+        if attributes is not None:
             payload["attributes"] = (
                 attributes.model_dump()
                 if type(attributes) in get_args(SampleAttributes)
                 else attributes
             )
 
-        if metadata:
+        if metadata is not None:
             payload["metadata"] = metadata
 
-        if priority:
+        if priority is not None:
             payload["priority"] = priority
 
-        if assigned_labeler:
+        if assigned_labeler is not None:
             payload["assigned_labeler"] = assigned_labeler
 
-        if assigned_reviewer:
+        if assigned_reviewer is not None:
             payload["assigned_reviewer"] = assigned_reviewer
 
-        if embedding:
+        if embedding is not None:
             payload["embedding"] = embedding
 
         r = self._patch(f"/samples/{uuid}/", data=payload, model=Sample)
@@ -1297,7 +1303,7 @@ class SegmentsClient:
             "attributes": attributes,
         }
 
-        if score:
+        if score is not None:
             payload["score"] = score
 
         r = self._put(f"/labels/{sample_uuid}/{labelset}/", data=payload, model=Label)
@@ -1309,7 +1315,7 @@ class SegmentsClient:
         sample_uuid: str,
         labelset: str,
         attributes: Optional[Union[Dict[str, Any], LabelAttributes]] = None,
-        label_status: LabelStatus = LabelStatus.PRELABELED,
+        label_status: Optional[LabelStatus] = None,
         score: Optional[float] = None,
     ) -> Label:
         """Update a label.
@@ -1337,7 +1343,7 @@ class SegmentsClient:
             sample_uuid: The sample uuid.
             labelset: The labelset this label belongs to.
             attributes: The label attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/sample-and-label-types/label-types>`__. Defaults to :obj:`None`.
-            label_status: The label status. Defaults to ``PRELABELED``.
+            label_status: The label status. Defaults to :obj:`None`.
             score: The label score. Defaults to :obj:`None`.
 
         Raises:
@@ -1350,17 +1356,17 @@ class SegmentsClient:
 
         payload: Dict[str, Any] = {}
 
-        if attributes:
+        if attributes is not None:
             payload["attributes"] = (
                 attributes.model_dump()
                 if type(attributes) in get_args(LabelAttributes)
                 else attributes
             )
 
-        if label_status:
+        if label_status is not None:
             payload["label_status"] = label_status
 
-        if score:
+        if score is not None:
             payload["score"] = score
 
         r = self._patch(f"/labels/{sample_uuid}/{labelset}/", data=payload, model=Label)
@@ -1600,10 +1606,10 @@ class SegmentsClient:
 
         payload: Dict[str, Any] = {}
 
-        if description:
+        if description is not None:
             payload["description"] = description
 
-        if status:
+        if status is not None:
             payload["status"] = status
 
         r = self._patch(f"/issues/{uuid}/", data=payload, model=Issue)
