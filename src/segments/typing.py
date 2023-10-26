@@ -634,7 +634,6 @@ class Sample(BaseModel):
     assigned_reviewer: Optional[str] = None
     comments: Optional[List[str]] = None
     priority: float
-    has_embedding: Optional[bool] = None
     label: Optional[Label] = None
     issues: Optional[List[Issue]] = None
     dataset_full_name: Optional[str] = None
@@ -790,7 +789,6 @@ class Dataset(BaseModel):
     noncollaborator_can_review: Optional[bool] = None
     insights_urls: Optional[Dict[str, str]] = None
     # tasks: Optional[List[Dict[str, Any]]]
-    embeddings_enabled: Optional[bool] = None
 
     @field_validator("category")
     @classmethod

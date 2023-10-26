@@ -319,7 +319,6 @@ class TestSample(Test):
     def test_add_update_delete_sample(self) -> None:
         metadata = {"weather": "sunny", "camera_id": 3}
         priority = 0
-        # embedding = np.zeros(100).tolist()
         name = "Test sample"
         attributes_dict: Dict[str, Dict[str, Any]] = {
             "image": {"image": {"url": "url"}},
@@ -400,7 +399,7 @@ class TestSample(Test):
                     name,
                     attributes,
                     metadata,
-                    priority,  # embedding
+                    priority,
                 )
                 self.assertIsInstance(sample, Sample)
                 sample = self.client.update_sample(
@@ -408,7 +407,7 @@ class TestSample(Test):
                     name,
                     attributes,
                     metadata,
-                    priority,  # embedding
+                    priority,
                 )
                 self.assertIsInstance(sample, Sample)
             finally:

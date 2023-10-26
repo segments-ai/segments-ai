@@ -975,7 +975,6 @@ class SegmentsClient:
         priority: float = 0,
         assigned_labeler: Optional[str] = None,
         assigned_reviewer: Optional[str] = None,
-        embedding: Optional[Union[npt.NDArray[Any], List[float]]] = None,
     ) -> Sample:
         """Add a sample to a dataset.
 
@@ -1011,7 +1010,6 @@ class SegmentsClient:
             priority: Priority in the labeling queue. Samples with higher values will be labeled first. Defaults to ``0``.
             assigned_labeler: The username of the user who should label this sample. Leave empty to not assign a specific labeler. Defaults to :obj:`None`.
             assigned_reviewer: The username of the user who should review this sample. Leave empty to not assign a specific reviewer. Defaults to :obj:`None`.
-            embedding: Embedding of this sample represented by an array of floats.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the sample attributes fails.
@@ -1051,9 +1049,6 @@ class SegmentsClient:
         if assigned_reviewer is not None:
             payload["assigned_reviewer"] = assigned_reviewer
 
-        if embedding is not None:
-            payload["embedding"] = embedding
-
         r = self._post(
             f"/datasets/{dataset_identifier}/samples/",
             data=payload,
@@ -1070,7 +1065,7 @@ class SegmentsClient:
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
-            samples: A list of dicts with required ``name``, ``attributes`` fields and optional ``metadata``, ``priority``, ``embedding`` fields. See :meth:`.add_sample` for details.
+            samples: A list of dicts with required ``name``, ``attributes`` fields and optional ``metadata``, ``priority`` fields. See :meth:`.add_sample` for details.
 
         Raises:
             :exc:`KeyError`: If 'name' or 'attributes' is not in a sample dict.
@@ -1120,7 +1115,6 @@ class SegmentsClient:
         priority: Optional[float] = None,
         assigned_labeler: Optional[str] = None,
         assigned_reviewer: Optional[str] = None,
-        embedding: Optional[Union[npt.NDArray[Any], List[float]]] = None,
     ) -> Sample:
         """Update a sample.
 
@@ -1144,7 +1138,6 @@ class SegmentsClient:
             priority: Priority in the labeling queue. Samples with higher values will be labeled first.
             assigned_labeler: The username of the user who should label this sample. Leave empty to not assign a specific labeler.
             assigned_reviewer: The username of the user who should review this sample. Leave empty to not assign a specific reviewer.
-            embedding: Embedding of this sample represented by list of floats.
 
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -1177,9 +1170,6 @@ class SegmentsClient:
 
         if assigned_reviewer is not None:
             payload["assigned_reviewer"] = assigned_reviewer
-
-        if embedding is not None:
-            payload["embedding"] = embedding
 
         r = self._patch(f"/samples/{uuid}/", data=payload, model=Sample)
         # logger.info(f"Updated {uuid}")
