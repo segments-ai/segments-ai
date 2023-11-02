@@ -21,7 +21,6 @@ from typing import (
     cast,
 )
 
-import numpy.typing as npt
 import pydantic
 import requests
 from pydantic import TypeAdapter
