@@ -474,7 +474,7 @@ class SegmentsClient:
                 "categories": [{"id": 1, "name": "object"}],
             }
 
-        if type(task_attributes) is TaskAttributes:
+        if isinstance(task_attributes, TaskAttributes):
             task_attributes = task_attributes.model_dump()
         else:
             try:
@@ -583,7 +583,7 @@ class SegmentsClient:
             payload["task_type"] = task_type
 
         if task_attributes is not None:
-            if type(task_attributes) is TaskAttributes:
+            if isinstance(task_attributes, TaskAttributes):
                 task_attributes = task_attributes.model_dump()
             else:
                 try:
@@ -1030,7 +1030,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        if type(attributes) in get_args(SampleAttributes):
+        if any(isinstance(attributes, Type) for Type in get_args(SampleAttributes)):
             attributes = attributes.model_dump()
         else:
             try:
@@ -1091,7 +1091,7 @@ class SegmentsClient:
         """
 
         for sample in samples:
-            if type(sample) is Sample:
+            if isinstance(sample, Sample):
                 sample = sample.model_dump()
             else:
                 if "name" not in sample or "attributes" not in sample:
@@ -1166,7 +1166,7 @@ class SegmentsClient:
             payload["name"] = name
 
         if attributes is not None:
-            if type(attributes) in get_args(SampleAttributes):
+            if any(isinstance(attributes, Type) for Type in get_args(SampleAttributes)):
                 attributes = attributes.model_dump()
             else:
                 try:
@@ -1300,7 +1300,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        if type(attributes) in get_args(LabelAttributes):
+        if any(isinstance(attributes, Type) for Type in get_args(LabelAttributes)):
             attributes = attributes.model_dump()
         else:
             try:
@@ -1370,7 +1370,7 @@ class SegmentsClient:
         payload: Dict[str, Any] = {}
 
         if attributes is not None:
-            if type(attributes) in get_args(LabelAttributes):
+            if any(isinstance(attributes, Type) for Type in get_args(LabelAttributes)):
                 attributes = attributes.model_dump()
             else:
                 try:
