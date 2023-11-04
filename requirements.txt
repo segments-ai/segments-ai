@@ -6,6 +6,6 @@ tqdm==4.*
 
 # type hints
 typing_extensions==4.*
-pydantic==2.3.* # bug in 2.4.0
+pydantic[email]==2.3.* # bug in 2.4.0
 types-Pillow==10.*
 types-requests==2.*

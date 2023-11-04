@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from enum import Enum as BaseEnum
 from enum import EnumMeta as BaseEnumMeta
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import  Any, Dict, List, Optional, Tuple, Union
 
-from pydantic import UUID4, ConfigDict, EmailStr, PastDatetime, field_validator
+from pydantic import UUID4, ConfigDict, EmailStr, AwareDatetime, field_validator
 from pydantic import BaseModel as PydanticBaseModel
 from segments.exceptions import ValidationError
 from typing_extensions import Literal, TypedDict
@@ -206,7 +206,7 @@ class Release(BaseModel):
     attributes: URL
     status: ReleaseStatus
     # status_info: str
-    created_at: PastDatetime
+    created_at: AwareDatetime
     samples_count: int
 
 
@@ -214,7 +214,7 @@ class Release(BaseModel):
 # Issue #
 #########
 class IssueComment(BaseModel):
-    created_at: PastDatetime
+    created_at: AwareDatetime
     created_by: str
     text: str
 
@@ -222,8 +222,8 @@ class IssueComment(BaseModel):
 class Issue(BaseModel):
     uuid: UUID4
     description: str
-    created_at: PastDatetime
-    updated_at: PastDatetime
+    created_at: AwareDatetime
+    updated_at: AwareDatetime
     created_by: str
     updated_by: str
     comments: List[IssueComment]
@@ -260,7 +260,7 @@ class File(BaseModel):
     uuid: UUID4
     filename: str
     url: str
-    created_at: PastDatetime
+    created_at: AwareDatetime
     presignedPostFields: PresignedPostFields
 
 
@@ -516,9 +516,9 @@ class Label(BaseModel):
     label_status: LabelStatus
     labelset: str
     attributes: Optional[LabelAttributes] = None
-    created_at: PastDatetime
+    created_at: AwareDatetime
     created_by: str
-    updated_at: PastDatetime
+    updated_at: AwareDatetime
     score: Optional[float] = None
     rating: Optional[float] = None
     reviewed_at: Optional[str] = None
@@ -628,7 +628,7 @@ class Sample(BaseModel):
     name: str
     attributes: SampleAttributes
     metadata: Dict[str, Any]
-    created_at: PastDatetime
+    created_at: AwareDatetime
     created_by: str
     assigned_labeler: Optional[str] = None
     assigned_reviewer: Optional[str] = None
@@ -646,7 +646,7 @@ class Sample(BaseModel):
 # https://docs.pydantic.dev/latest/concepts/postponed_annotations/#self-referencing-or-recursive-models
 class User(BaseModel):
     username: str
-    created_at: PastDatetime
+    created_at: AwareDatetime
     is_organization: bool
     email: Optional[str] = None
     webhooks_enabled: Optional[bool] = None
@@ -734,7 +734,7 @@ class TaskAttributes(BaseModel):
 
 class Owner(BaseModel):
     username: str
-    created_at: PastDatetime
+    created_at: AwareDatetime
     email: Optional[EmailStr] = None
 
 
@@ -769,7 +769,7 @@ class Dataset(BaseModel):
     category: Category
     public: bool
     owner: Owner
-    created_at: PastDatetime
+    created_at: AwareDatetime
     enable_ratings: bool
     enable_skip_labeling: bool
     enable_skip_reviewing: bool
