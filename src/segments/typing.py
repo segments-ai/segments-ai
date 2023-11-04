@@ -4,8 +4,8 @@ from enum import Enum as BaseEnum
 from enum import EnumMeta as BaseEnumMeta
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+from pydantic import UUID4, ConfigDict, EmailStr, PastDatetime, field_validator
 from pydantic import BaseModel as PydanticBaseModel
-from pydantic import ConfigDict, field_validator
 from segments.exceptions import ValidationError
 from typing_extensions import Literal, TypedDict
 
@@ -199,14 +199,14 @@ class URL(BaseModel):
 
 
 class Release(BaseModel):
-    uuid: str
+    uuid: UUID4
     name: str
     description: str
     release_type: Literal["JSON"]
     attributes: URL
     status: ReleaseStatus
     # status_info: str
-    created_at: str
+    created_at: PastDatetime
     samples_count: int
 
 
@@ -214,21 +214,21 @@ class Release(BaseModel):
 # Issue #
 #########
 class IssueComment(BaseModel):
-    created_at: str
+    created_at: PastDatetime
     created_by: str
     text: str
 
 
 class Issue(BaseModel):
-    uuid: str
+    uuid: UUID4
     description: str
-    created_at: str
-    updated_at: str
+    created_at: PastDatetime
+    updated_at: PastDatetime
     created_by: str
     updated_by: str
     comments: List[IssueComment]
     status: IssueStatus
-    sample_uuid: str
+    sample_uuid: UUID4
     sample_name: str
 
 
@@ -257,10 +257,10 @@ class PresignedPostFields(BaseModel):
 
 
 class File(BaseModel):
-    uuid: str
+    uuid: UUID4
     filename: str
     url: str
-    created_at: str
+    created_at: PastDatetime
     presignedPostFields: PresignedPostFields
 
 
@@ -511,14 +511,14 @@ LabelAttributes = Union[
 
 
 class Label(BaseModel):
-    sample_uuid: str
+    sample_uuid: UUID4
     label_type: TaskType
     label_status: LabelStatus
     labelset: str
     attributes: Optional[LabelAttributes] = None
-    created_at: str
+    created_at: PastDatetime
     created_by: str
-    updated_at: str
+    updated_at: PastDatetime
     score: Optional[float] = None
     rating: Optional[float] = None
     reviewed_at: Optional[str] = None
@@ -624,11 +624,11 @@ SampleAttributes = Union[
 
 
 class Sample(BaseModel):
-    uuid: str
+    uuid: UUID4
     name: str
     attributes: SampleAttributes
     metadata: Dict[str, Any]
-    created_at: str
+    created_at: PastDatetime
     created_by: str
     assigned_labeler: Optional[str] = None
     assigned_reviewer: Optional[str] = None
@@ -646,7 +646,7 @@ class Sample(BaseModel):
 # https://docs.pydantic.dev/latest/concepts/postponed_annotations/#self-referencing-or-recursive-models
 class User(BaseModel):
     username: str
-    created_at: str
+    created_at: PastDatetime
     is_organization: bool
     email: Optional[str] = None
     webhooks_enabled: Optional[bool] = None
@@ -676,7 +676,7 @@ class SelectTaskAttribute(BaseModel):
 
 class TextTaskAttribute(BaseModel):
     name: str
-    input_type: Literal[InputType.TEXT] = None
+    input_type: Literal[InputType.TEXT]
     default_value: Optional[str] = None
     is_mandatory: Optional[bool] = None
 
@@ -720,6 +720,7 @@ class TaskAttributeCategory(BaseModel):
     has_instances: Optional[bool] = None
     attributes: Optional[List[TaskAttribute]] = None
     dimensions: Optional[XYZ] = None
+
     model_config = ConfigDict(extra="allow")
 
 
@@ -727,13 +728,14 @@ class TaskAttributes(BaseModel):
     format_version: Optional[FormatVersion] = None
     categories: Optional[List[TaskAttributeCategory]] = None
     image_attributes: Optional[List[TaskAttribute]] = None
+
     model_config = ConfigDict(extra="allow")
 
 
 class Owner(BaseModel):
     username: str
-    created_at: str
-    email: Optional[str] = None
+    created_at: PastDatetime
+    email: Optional[EmailStr] = None
 
 
 # class Statistics(BaseModel):  # deprecated
@@ -748,7 +750,7 @@ class Owner(BaseModel):
 class Labelset(BaseModel):
     name: str
     description: str
-    # uuid: Optional[str]
+    # uuid: Optional[UUID4]
     # readme: Optional[str]
     # task_type: Optional[TaskType]
     # attributes: Optional[Union[str, TaskAttributes]]
@@ -767,7 +769,7 @@ class Dataset(BaseModel):
     category: Category
     public: bool
     owner: Owner
-    created_at: str
+    created_at: PastDatetime
     enable_ratings: bool
     enable_skip_labeling: bool
     enable_skip_reviewing: bool
@@ -810,4 +812,5 @@ class SegmentsDatasetCategory(BaseModel):
     name: str
     color: Optional[Union[RGB, RGBA]] = None
     attributes: Optional[List[Any]] = None
+
     model_config = ConfigDict(populate_by_name=True, extra="allow")
