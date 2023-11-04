@@ -648,7 +648,7 @@ class User(BaseModel):
     username: str
     created_at: AwareDatetime
     is_organization: bool
-    email: Optional[str] = None
+    email: Optional[EmailStr] = None
     webhooks_enabled: Optional[bool] = None
     private_upload_count: Optional[int] = None
     public_upload_count: Optional[int] = None
