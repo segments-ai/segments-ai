@@ -24,7 +24,7 @@ from typing import (
 import numpy.typing as npt
 import pydantic
 import requests
-from pydantic import TypeAdapter
+from pydantic import UUID4, TypeAdapter
 from segments.exceptions import (
     AlreadyExistsError,
     APILimitError,
@@ -929,7 +929,7 @@ class SegmentsClient:
 
     def get_sample(
         self,
-        uuid: str,
+        uuid: Union[UUID4, str],
         labelset: Optional[str] = None,
         include_signed_url: bool = False,
     ) -> Sample:
@@ -1113,7 +1113,7 @@ class SegmentsClient:
 
     def update_sample(
         self,
-        uuid: str,
+        uuid: Union[UUID4, str],
         name: Optional[str] = None,
         attributes: Optional[Union[Dict[str, Any], SampleAttributes]] = None,
         metadata: Optional[Dict[str, Any]] = None,
@@ -1186,7 +1186,7 @@ class SegmentsClient:
 
         return cast(Sample, r)
 
-    def delete_sample(self, uuid: str) -> None:
+    def delete_sample(self, uuid: Union[UUID4, str]) -> None:
         """Delete a sample.
 
         .. code-block:: python
@@ -1209,7 +1209,7 @@ class SegmentsClient:
     ##########
     # Labels #
     ##########
-    def get_label(self, sample_uuid: str, labelset: str = "ground-truth") -> Label:
+    def get_label(self, sample_uuid: Union[UUID4, str], labelset: str = "ground-truth") -> Label:
         """Get a label.
 
         Note:
@@ -1239,7 +1239,7 @@ class SegmentsClient:
 
     def add_label(
         self,
-        sample_uuid: str,
+        sample_uuid: Union[UUID4, str],
         labelset: str,
         attributes: Union[Dict[str, Any], LabelAttributes],
         label_status: LabelStatus = LabelStatus.PRELABELED,
@@ -1312,7 +1312,7 @@ class SegmentsClient:
 
     def update_label(
         self,
-        sample_uuid: str,
+        sample_uuid: Union[UUID4, str],
         labelset: str,
         attributes: Optional[Union[Dict[str, Any], LabelAttributes]] = None,
         label_status: Optional[LabelStatus] = None,
@@ -1373,7 +1373,7 @@ class SegmentsClient:
 
         return cast(Label, r)
 
-    def delete_label(self, sample_uuid: str, labelset: str) -> None:
+    def delete_label(self, sample_uuid: Union[UUID4, str], labelset: str) -> None:
         """Delete a label.
 
         .. code-block:: python
@@ -1541,7 +1541,7 @@ class SegmentsClient:
 
     def add_issue(
         self,
-        sample_uuid: str,
+        sample_uuid: Union[UUID4, str],
         description: str,
         status: IssueStatus = IssueStatus.OPEN,
     ) -> Issue:
@@ -1578,7 +1578,7 @@ class SegmentsClient:
 
     def update_issue(
         self,
-        uuid: str,
+        uuid: Union[UUID4, str],
         description: Optional[str] = None,
         status: Optional[IssueStatus] = None,
     ) -> Issue:
@@ -1616,7 +1616,7 @@ class SegmentsClient:
 
         return cast(Issue, r)
 
-    def delete_issue(self, uuid: str) -> None:
+    def delete_issue(self, uuid: Union[UUID4, str]) -> None:
         """Delete an issue.
 
         .. code-block:: python
