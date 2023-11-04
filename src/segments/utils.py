@@ -752,8 +752,8 @@ def array_to_pcd(
     pcd.point["positions"] = o3d.core.Tensor(positions, dtype, device)
 
     if intensity is not None:
-        assert len(intensity) == len(
-            positions
+        assert (
+            len(intensity) == len(positions)
         ), f"Intensity must have same length as positions but intensity has shape {intensity.shape} and positions has shape {positions.shape}"
         assert (
             len(intensity.shape) == 2 and intensity.shape[1] == 1
@@ -761,8 +761,8 @@ def array_to_pcd(
         pcd.point["intensity"] = o3d.core.Tensor(intensity, dtype, device)
 
     if rgb is not None:
-        assert len(rgb) == len(
-            positions
+        assert (
+            len(rgb) == len(positions)
         ), f"RGB must have same length as positions but RGB has shape {rgb.shape} and positions has shape {positions.shape}"
         assert (
             rgb.shape[1] == 3

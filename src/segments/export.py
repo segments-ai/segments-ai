@@ -377,7 +377,7 @@ def export_coco_instance(
         "info": info,
         "categories": [category.model_dump() for category in categories],
         "images": images,
-        "annotations": annotations
+        "annotations": annotations,
         # "segment_info": [] # Only in Panoptic annotations
     }
 

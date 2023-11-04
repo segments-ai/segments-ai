@@ -1,14 +1,17 @@
 {
-  "editor.formatOnSave": true,
   "python.envFile": "${workspaceFolder}/.env",
-  "isort.args": ["--profile", "black"], // isort
+  "editor.formatOnSave": true,
+
+  // ruff
   "[python]": {
     "editor.codeActionsOnSave": {
+      "source.fixAll": true,
       "source.organizeImports": true
     },
-    "editor.defaultFormatter": "ms-python.black-formatter" // black
+    "editor.defaultFormatter": "charliermarsh.ruff"
   },
-  // pytest
+
+  // unittest and pytest
   "python.testing.unittestArgs": ["-v", "-s", "./tests", "-p", "test_*.py"],
   "python.testing.pytestArgs": [
     ".",
