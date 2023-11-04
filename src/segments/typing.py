@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from enum import Enum as BaseEnum
 from enum import EnumMeta as BaseEnumMeta
-from typing import  Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import UUID4, ConfigDict, EmailStr, AwareDatetime, field_validator
 from pydantic import BaseModel as PydanticBaseModel
