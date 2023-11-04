@@ -32,5 +32,5 @@ def test_dataset(
                 assert isinstance(category, SegmentsDatasetCategory)
 
             # Iterate over samples
-            for sample in dataset:
+            for sample in segments_dataset:
                 assert isinstance(sample, dict)
