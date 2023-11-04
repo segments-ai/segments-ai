@@ -1,6 +1,7 @@
 from distutils.core import setup
 from typing import List
 
+
 #############
 # Constants #
 #############
