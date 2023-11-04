@@ -26,7 +26,8 @@ no_implicit_reexport = true
 
 # ruff
 [tool.ruff]
-line-length = 88
+line-length = 119 # huggingface default
 
 [tool.ruff.isort]
 known-third-party = ["segments"]
+lines-after-imports = 2 # huggingface default
