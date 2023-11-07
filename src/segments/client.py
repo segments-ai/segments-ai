@@ -38,6 +38,7 @@ from segments.exceptions import (
     ValidationError,
 )
 from segments.typing import (
+    strictConfig,
     AWSFields,
     Category,
     Collaborator,
@@ -476,7 +477,7 @@ class SegmentsClient:
 
         if type(task_attributes) is dict:
             try:
-                TaskAttributes.model_validate(task_attributes)
+                TypeAdapter(TaskAttributes, config=strictConfig).model_validate(task_attributes)
             except pydantic.ValidationError as e:
                 logger.error(
                     "Did you use the right task attributes? Please refer to the online documentation: https://docs.segments.ai/reference/categories-and-task-attributes#object-attribute-format.",
@@ -1025,7 +1026,7 @@ class SegmentsClient:
 
         if type(attributes) is dict:
             try:
-                TypeAdapter(SampleAttributes).validate_python(attributes)
+                TypeAdapter(SampleAttributes, config=strictConfig).validate_python(attributes)
             except pydantic.ValidationError as e:
                 logger.error(
                     "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
@@ -1092,7 +1093,7 @@ class SegmentsClient:
                     )
 
                 try:
-                    TypeAdapter(SampleAttributes).validate_python(sample["attributes"])
+                    TypeAdapter(SampleAttributes, config=strictConfig).validate_python(sample["attributes"])
                 except pydantic.ValidationError as e:
                     logger.error(
                         "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
@@ -1289,7 +1290,7 @@ class SegmentsClient:
 
         if type(attributes) is dict:
             try:
-                TypeAdapter(LabelAttributes).validate_python(attributes)
+                TypeAdapter(LabelAttributes, config=strictConfig).validate_python(attributes)
             except pydantic.ValidationError as e:
                 logger.error(
                     "Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.",
@@ -1357,11 +1358,16 @@ class SegmentsClient:
         payload: Dict[str, Any] = {}
 
         if attributes is not None:
-            payload["attributes"] = (
-                attributes.model_dump()
-                if type(attributes) in get_args(LabelAttributes)
-                else attributes
-            )
+            if type(attributes) is dict:
+                try:
+                    TypeAdapter(LabelAttributes, config=strictConfig).validate_python(attributes)
+                except pydantic.ValidationError as e:
+                    logger.error(
+                        "Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.",
+                    )
+                    raise ValidationError(message=str(e), cause=e)
+            elif type(attributes) in get_args(LabelAttributes):
+                attributes = attributes.model_dump()
 
         if label_status is not None:
             payload["label_status"] = label_status

@@ -20,6 +20,11 @@ class BaseModel(PydanticBaseModel):
         use_enum_values=True,
     )
 
+# used when you add and update data
+strictConfig = ConfigDict(
+    extra="forbid"
+)
+
 
 class EnumMeta(BaseEnumMeta):
     # https://stackoverflow.com/questions/43634618/how-do-i-test-if-int-value-exists-in-python-enum-without-using-try-catch
