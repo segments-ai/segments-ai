@@ -757,7 +757,7 @@ def array_to_pcd(
         ), f"Intensity must have same length as positions but intensity has shape {intensity.shape} and positions has shape {positions.shape}"
         assert (
             len(intensity.shape) == 2 and intensity.shape[1] == 1
-        ), f"Intensity must have shape (N,) but has shape {intensity.shape}"
+        ), f"Intensity must have shape (N, 1) but has shape {intensity.shape}"
         pcd.point["intensity"] = o3d.core.Tensor(intensity, dtype, device)
 
     if rgb is not None:
