@@ -385,7 +385,7 @@ class TestSample(Test):
 
         # check if image test sample already exists, if so delete it
         samples = self.client.get_samples(f"{self.owner}/{self.datasets[0]}")
-        if len(samples) == 6:
+        if any(sample.name == "Test sample" for sample in samples):
             sample = next(filter(lambda sample: sample.name == "Test sample", samples))
             self.client.delete_sample(sample.uuid)
 
