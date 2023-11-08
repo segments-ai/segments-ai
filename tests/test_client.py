@@ -319,7 +319,6 @@ class TestSample(Test):
     def test_add_update_delete_sample(self) -> None:
         metadata = {"weather": "sunny", "camera_id": 3}
         priority = 0
-        # embedding = np.zeros(100).tolist()
         name = "Test sample"
         attributes_dict: Dict[str, Dict[str, Any]] = {
             "image": {"image": {"url": "url"}},
@@ -383,11 +382,12 @@ class TestSample(Test):
             ]
         }
 
-        # check if image test sample already exists, if so delete it
-        samples = self.client.get_samples(f"{self.owner}/{self.datasets[0]}")
-        if any(sample.name == "Test sample" for sample in samples):
-            sample = next(filter(lambda sample: sample.name == "Test sample", samples))
-            self.client.delete_sample(sample.uuid)
+        # check if test sample already exists, if so delete it
+        for dataset in self.datasets:
+            samples = self.client.get_samples(f"{self.owner}/{dataset}")
+            if any(sample.name == "Test sample" for sample in samples):
+                sample = next(sample for sample in samples if sample.name == "Test sample")
+                self.client.delete_sample(sample.uuid)
 
         for sample_attribute_type, dataset in zip(
             self.sample_attribute_types, self.datasets
@@ -400,7 +400,7 @@ class TestSample(Test):
                     name,
                     attributes,
                     metadata,
-                    priority,  # embedding
+                    priority,
                 )
                 self.assertIsInstance(sample, Sample)
                 sample = self.client.update_sample(
@@ -408,10 +408,11 @@ class TestSample(Test):
                     name,
                     attributes,
                     metadata,
-                    priority,  # embedding
+                    priority,  
                 )
                 self.assertIsInstance(sample, Sample)
             finally:
+                time.sleep(self.TIME_INTERVAL)
                 self.client.delete_sample(sample.uuid)
 
             # Bulk endpoint
