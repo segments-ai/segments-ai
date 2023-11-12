@@ -909,11 +909,8 @@ class SegmentsClient:
             )
 
         # sorting
-        sort_dict = {"name": "name", "created": "created_at", "priority": "priority"}
-        if sort != "name":
-            direction_str = "" if direction == "asc" else "-"
-            sort_str = sort_dict[sort]
-            query_string += f"&sort={direction_str}{sort_str}"
+        direction_str = "" if direction == "asc" else "-"
+        query_string += f"&sort={direction_str}{sort}"
 
         r = self._get(f"/datasets/{dataset_identifier}/samples/{query_string}")
         results = r.json()
