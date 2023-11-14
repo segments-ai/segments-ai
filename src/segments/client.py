@@ -1030,7 +1030,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        if any(isinstance(attributes, Type) for Type in get_args(SampleAttributes)):
+        if isinstance(attributes, get_args(SampleAttributes)):
             attributes = attributes.model_dump()
         else:
             try:
@@ -1166,7 +1166,7 @@ class SegmentsClient:
             payload["name"] = name
 
         if attributes is not None:
-            if any(isinstance(attributes, Type) for Type in get_args(SampleAttributes)):
+            if isinstance(attributes, get_args(SampleAttributes)):
                 attributes = attributes.model_dump()
             else:
                 try:
@@ -1300,7 +1300,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        if any(isinstance(attributes, Type) for Type in get_args(LabelAttributes)):
+        if isinstance(attributes, get_args(LabelAttributes)):
             attributes = attributes.model_dump()
         else:
             try:
@@ -1370,7 +1370,7 @@ class SegmentsClient:
         payload: Dict[str, Any] = {}
 
         if attributes is not None:
-            if any(isinstance(attributes, Type) for Type in get_args(LabelAttributes)):
+            if isinstance(attributes, get_args(LabelAttributes)):
                 attributes = attributes.model_dump()
             else:
                 try:
