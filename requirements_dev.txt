@@ -1,6 +1,5 @@
 # code formatting
 flynt==1.*
-pre-commit==2.*
 ruff==0.*
 
 # type checking
