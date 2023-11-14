@@ -124,7 +124,7 @@ class SegmentsDataset:
             self.release = json.loads(content.content)
         self.release_file = release_file
 
-        self.dataset_identifier = "{}_{}".format(self.release["dataset"]["owner"], self.release["dataset"]["name"])
+        self.dataset_identifier = f"{self.release['dataset']['owner']}_{self.release['dataset']['name']}"
 
         self.image_dir = (
             None if segments_dir is None else os.path.join(segments_dir, self.dataset_identifier, self.release["name"])

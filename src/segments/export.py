@@ -368,7 +368,7 @@ def export_coco_instance(dataset: SegmentsDataset, export_folder: str) -> Tuple[
 
     file_name = os.path.join(
         export_folder,
-        "export_coco-instance_{}_{}.json".format(dataset.dataset_identifier, dataset.release["name"]),
+        f"export_coco-instance_{dataset.dataset_identifier}_{dataset.release['name']}.json",
     )
     with open(file_name, "w") as f:
         json.dump(json_data, f)
@@ -537,7 +537,7 @@ def export_coco_panoptic(dataset: SegmentsDataset, export_folder: str) -> Tuple[
     # WRITE JSON TO FILE
     file_name = os.path.join(
         export_folder,
-        "export_coco-panoptic_{}_{}.json".format(dataset.dataset_identifier, dataset.release["name"]),
+        f"export_coco-panoptic_{dataset.dataset_identifier}_{dataset.release['name']}.json",
     )
     with open(file_name, "w") as f:
         json.dump(json_data, f)
