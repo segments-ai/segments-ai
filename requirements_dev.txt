@@ -1,9 +1,4 @@
-# style
-flake8==6.*
-
 # code formatting
-black>=22.3.0 # https://stackoverflow.com/questions/71673404/importerror-cannot-import-name-unicodefun-from-click
-isort==5.*
 flynt==1.*
 pre-commit==2.*
 
