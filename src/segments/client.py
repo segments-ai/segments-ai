@@ -711,7 +711,7 @@ class SegmentsClient:
 
         if organization is not None:
             payload["owner"] = organization
-            
+
         payload["clone_labels"] = clone_labels
 
         r = self._post(
