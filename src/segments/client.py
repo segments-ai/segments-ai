@@ -476,14 +476,18 @@ class SegmentsClient:
 
         if type(task_attributes) is dict:
             try:
-                task_attributes = TaskAttributes.model_validate(task_attributes).model_dump(mode="json", exclude_unset=True)
+                task_attributes = TaskAttributes.model_validate(
+                    task_attributes
+                ).model_dump(mode="json", exclude_unset=True)
             except pydantic.ValidationError as e:
                 logger.error(
                     "Did you use the right task attributes? Please refer to the online documentation: https://docs.segments.ai/reference/categories-and-task-attributes#object-attribute-format.",
                 )
                 raise ValidationError(message=str(e), cause=e)
         elif type(task_attributes) is TaskAttributes:
-            task_attributes = task_attributes.model_dump(mode="json", exclude_unset=True)
+            task_attributes = task_attributes.model_dump(
+                mode="json", exclude_unset=True
+            )
 
         payload: Dict[str, Any] = {
             "name": name,
@@ -1025,7 +1029,11 @@ class SegmentsClient:
 
         if type(attributes) is dict:
             try:
-                attributes = TypeAdapter(SampleAttributes).validate_python(attributes).model_dump(mode="json", exclude_unset=True)
+                attributes = (
+                    TypeAdapter(SampleAttributes)
+                    .validate_python(attributes)
+                    .model_dump(mode="json", exclude_unset=True)
+                )
             except pydantic.ValidationError as e:
                 logger.error(
                     "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
@@ -1092,7 +1100,11 @@ class SegmentsClient:
                     )
 
                 try:
-                    sample = TypeAdapter(SampleAttributes).validate_python(sample["attributes"]).model_dump(mode="json", exclude_unset=True)
+                    sample = (
+                        TypeAdapter(SampleAttributes)
+                        .validate_python(sample["attributes"])
+                        .model_dump(mode="json", exclude_unset=True)
+                    )
                 except pydantic.ValidationError as e:
                     logger.error(
                         "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
@@ -1289,7 +1301,11 @@ class SegmentsClient:
 
         if type(attributes) is dict:
             try:
-                attributes = TypeAdapter(LabelAttributes).validate_python(attributes).model_dump(mode="json", exclude_unset=True)
+                attributes = (
+                    TypeAdapter(LabelAttributes)
+                    .validate_python(attributes)
+                    .model_dump(mode="json", exclude_unset=True)
+                )
             except pydantic.ValidationError as e:
                 logger.error(
                     "Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.",

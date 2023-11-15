@@ -386,7 +386,9 @@ class TestSample(Test):
         for dataset in self.datasets:
             samples = self.client.get_samples(f"{self.owner}/{dataset}")
             if any(sample.name == "Test sample" for sample in samples):
-                sample = next(sample for sample in samples if sample.name == "Test sample")
+                sample = next(
+                    sample for sample in samples if sample.name == "Test sample"
+                )
                 self.client.delete_sample(sample.uuid)
 
         for sample_attribute_type, dataset in zip(
@@ -408,7 +410,7 @@ class TestSample(Test):
                     name,
                     attributes,
                     metadata,
-                    priority,  
+                    priority,
                 )
                 self.assertIsInstance(sample, Sample)
             finally:
