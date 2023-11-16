@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 import logging
 import os
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 import numpy.typing as npt
@@ -83,7 +83,7 @@ class IdGenerator:
     """
 
     def __init__(self, categories: dict[int, SegmentsDatasetCategory]):
-        self.taken_colors: Set[RGB] = set()
+        self.taken_colors: set[RGB] = set()
         self.taken_colors.add((0, 0, 0))
         self.categories = categories
         for category in self.categories.values():
