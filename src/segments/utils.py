@@ -156,7 +156,7 @@ def export_dataset(
     export_format: ExportFormat = ExportFormat.COCO_PANOPTIC,
     id_increment: int = 0,
     **kwargs: Any,
-) -> Optional[Union[Tuple[str, Optional[str]], Optional[str]]]:
+) -> Optional[Union[tuple[str, Optional[str]], Optional[str]]]:
     """Export a dataset to a different format.
 
     +------------------+-------------------------------------------------------------+
@@ -507,10 +507,10 @@ def show_polygons(
                 return cast(str, image["file_name"])
         raise KeyError("Cannot find the image id. Please provide a valid id.")
 
-    def get_random_color() -> Tuple[float, float, float]:
+    def get_random_color() -> tuple[float, float, float]:
         return (random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1))
 
-    def normalize(color: list[int]) -> Tuple[float, float, float]:
+    def normalize(color: list[int]) -> tuple[float, float, float]:
         """Transform a color from 0-255 range to 0-1 range and from a list to a tuple, e.g., [255, 0, 123] to (1, 0, 0.5)."""
         return (color[0] / 255, color[1] / 255, color[2] / 255)
 

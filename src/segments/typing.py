@@ -183,8 +183,8 @@ class Subscription(str, Enum):
     TRIAL = "TRIAL"
 
 
-RGB = Tuple[int, int, int]
-RGBA = Tuple[int, int, int, int]
+RGB = tuple[int, int, int]
+RGBA = tuple[int, int, int, int]
 FormatVersion = Union[float, str]
 ObjectAttributes = dict[str, Optional[Union[str, bool, int]]]
 ImageAttributes = dict[str, Optional[Union[str, bool, int]]]

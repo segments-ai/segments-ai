@@ -227,7 +227,7 @@ class SegmentsDataset:
 
     def _load_image_from_cache(
         self, sample: dict[str, Any]
-    ) -> Tuple[Optional[Image.Image], str]:
+    ) -> tuple[Optional[Image.Image], str]:
         sample_name = os.path.splitext(sample["name"])[0]
         image_url = sample["attributes"]["image"]["url"]
         image_url_parsed = urlparse(image_url)

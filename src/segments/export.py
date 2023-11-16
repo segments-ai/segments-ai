@@ -23,8 +23,8 @@ if TYPE_CHECKING:
 #############
 # Variables #
 #############
-RGB = Tuple[int, int, int]
-RGBA = Tuple[int, int, int, int]
+RGB = tuple[int, int, int]
+RGBA = tuple[int, int, int, int]
 ColorMap = Union[list[RGBA], list[RGB]]
 logger = logging.getLogger(__name__)
 COLORMAP: ColorMap = [
@@ -116,7 +116,7 @@ class IdGenerator:
         color = self.get_color(cat_id)
         return rgb2id(color)
 
-    def get_id_and_color(self, cat_id: int) -> Tuple[int, RGB]:
+    def get_id_and_color(self, cat_id: int) -> tuple[int, RGB]:
         color = self.get_color(cat_id)
         return rgb2id(color), color
 
@@ -186,7 +186,7 @@ def colorize(
     return colored_img
 
 
-def get_bbox(binary_mask: npt.NDArray[Any]) -> Union[Tuple[int, int, int, int], bool]:
+def get_bbox(binary_mask: npt.NDArray[Any]) -> Union[tuple[int, int, int, int], bool]:
     """Returns the bounding box of the binary mask (if one is found, otherwise returns False)
 
     Args:
@@ -199,7 +199,7 @@ def get_bbox(binary_mask: npt.NDArray[Any]) -> Union[Tuple[int, int, int, int], 
     regions = regionprops(np.uint8(binary_mask))
     if len(regions) == 1:
         bbox = regions[0].bbox
-        return cast(Tuple[int, int, int, int], bbox)
+        return cast(tuple[int, int, int, int], bbox)
 
     return False
 
@@ -209,7 +209,7 @@ def get_bbox(binary_mask: npt.NDArray[Any]) -> Union[Tuple[int, int, int, int], 
 ##################
 def export_coco_instance(
     dataset: SegmentsDataset, export_folder: str
-) -> Tuple[str, Optional[str]]:
+) -> tuple[str, Optional[str]]:
     """Export a Segments dataset as a coco instance.
 
     Args:
@@ -396,7 +396,7 @@ def export_coco_instance(
 
 def export_coco_panoptic(
     dataset: SegmentsDataset, export_folder: str
-) -> Tuple[str, Optional[str]]:
+) -> tuple[str, Optional[str]]:
     """Export a Segments dataset in COCO panoptic format.
 
     Args:
@@ -800,7 +800,7 @@ def export_yolo(
 
 def export_polygon(
     dataset: SegmentsDataset, export_folder: str
-) -> Tuple[str, Optional[str]]:
+) -> tuple[str, Optional[str]]:
     """Export a Segments dataset as polygons (i.e., contours).
 
     Args:
