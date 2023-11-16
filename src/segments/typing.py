@@ -7,7 +7,7 @@ from typing import Any
 from pydantic import BaseModel as PydanticBaseModel
 from pydantic import ConfigDict, field_validator
 from segments.exceptions import ValidationError
-from typing_extensions import Literal, TypedDict
+from typing_extensions import Literal, TypedDict, TypeAlias
 
 
 class BaseModel(PydanticBaseModel):
@@ -183,11 +183,11 @@ class Subscription(str, Enum):
     TRIAL = "TRIAL"
 
 
-RGB = tuple[int, int, int]
-RGBA = tuple[int, int, int, int]
-FormatVersion = float | str
-ObjectAttributes = dict[str, str | bool | int | None]
-ImageAttributes = dict[str, str | bool | int | None]
+RGB: TypeAlias = "tuple[int, int, int]"
+RGBA: TypeAlias = "tuple[int, int, int, int]"
+FormatVersion: TypeAlias = "float | str"
+ObjectAttributes: TypeAlias = "dict[str, str | bool | int | None]"
+ImageAttributes: TypeAlias = "dict[str, str | bool | int | None]"
 
 
 ###########
@@ -370,7 +370,6 @@ class BrownConradyDistortionCoefficients(BaseModel):
 class Distortion(BaseModel):
     model: CameraDistortionModel
     coefficients: FisheyeDistortionCoefficients | BrownConradyDistortionCoefficients
-    
 
 
 # Point cloud cuboid
@@ -473,8 +472,8 @@ class MultiSensorImageSequenceVectorLabelAttributes(BaseModel):
 
 class MultiSensorLabelAttributes(BaseModel):
     sensors: list[
-            MultiSensorPointcloudSequenceCuboidLabelAttributes |
-            MultiSensorImageSequenceVectorLabelAttributes
+        MultiSensorPointcloudSequenceCuboidLabelAttributes
+        | MultiSensorImageSequenceVectorLabelAttributes
     ]
 
 
@@ -491,18 +490,7 @@ class TextLabelAttributes(BaseModel):
 
 
 # https://pydantic-docs.helpmanual.io/usage/types/#unions
-LabelAttributes = ImageVectorLabelAttributes |
-    ImageSegmentationLabelAttributes |
-    ImageSequenceVectorLabelAttributes |
-    ImageSequenceSegmentationLabelAttributes |
-    PointcloudCuboidLabelAttributes |
-    PointcloudVectorLabelAttributes |
-    PointcloudSegmentationLabelAttributes |
-    PointcloudSequenceCuboidLabelAttributes |
-    PointcloudSequenceVectorLabelAttributes |
-    PointcloudSequenceSegmentationLabelAttributes |
-    MultiSensorLabelAttributes |
-    TextLabelAttributes 
+LabelAttributes: TypeAlias = "ImageVectorLabelAttributes | ImageSegmentationLabelAttributes | ImageSequenceVectorLabelAttributes | ImageSequenceSegmentationLabelAttributes | PointcloudCuboidLabelAttributes | PointcloudVectorLabelAttributes | PointcloudSegmentationLabelAttributes |PointcloudSequenceCuboidLabelAttributes | PointcloudSequenceVectorLabelAttributes | PointcloudSequenceSegmentationLabelAttributes | MultiSensorLabelAttributes | TextLabelAttributes"
 
 
 class Label(BaseModel):
@@ -596,8 +584,8 @@ class MultiSensorImageSequenceSampleAttributes(BaseModel):
 
 class MultiSensorSampleAttributes(BaseModel):
     sensors: list[
-            MultiSensorPointcloudSequenceSampleAttributes |
-            MultiSensorImageSequenceSampleAttributes
+        MultiSensorPointcloudSequenceSampleAttributes
+        | MultiSensorImageSequenceSampleAttributes
     ]
 
 
@@ -606,12 +594,7 @@ class TextSampleAttributes(BaseModel):
     text: str
 
 
-SampleAttributes = ImageSampleAttributes |
-    ImageSequenceSampleAttributes |
-    PointcloudSampleAttributes |
-    PointcloudSequenceSampleAttributes |
-    MultiSensorSampleAttributes |
-    TextSampleAttributes 
+SampleAttributes: TypeAlias = "ImageSampleAttributes | ImageSequenceSampleAttributes | PointcloudSampleAttributes | PointcloudSequenceSampleAttributes | MultiSensorSampleAttributes | TextSampleAttributes "
 
 
 class Sample(BaseModel):
@@ -623,11 +606,11 @@ class Sample(BaseModel):
     created_by: str
     assigned_labeler: str | None = None
     assigned_reviewer: str | None = None
-    comments: list[str]|None = None
+    comments: list[str] | None = None
     priority: float
     has_embedding: bool | None = None
-    label: Label|None = None
-    issues: list[Issue]|None = None
+    label: Label | None = None
+    issues: list[Issue] | None = None
     dataset_full_name: str | None = None
 
 
@@ -645,10 +628,10 @@ class User(BaseModel):
     public_upload_count: int | None = None
     subscription: Subscription | None = None
     is_trial_expired: bool | None = None
-    organizations: list[User]|None = None
+    organizations: list[User] | None = None
     organization_created_by: str | None = None
-    organization_role: Role|None = None
-    members: list[User]|None = None
+    organization_role: Role | None = None
+    members: list[User] | None = None
     insights_urls: dict[str, str] | None = None
 
 
@@ -696,26 +679,23 @@ class CheckboxTaskAttribute(BaseModel):
     default_value: bool | None = None
 
 
-TaskAttribute = SelectTaskAttribute |
-    TextTaskAttribute |
-    NumberTaskAttribute |
-    CheckboxTaskAttribute
+TaskAttribute: TypeAlias = "SelectTaskAttribute | TextTaskAttribute | NumberTaskAttribute | CheckboxTaskAttribute"
 
 
 class TaskAttributeCategory(BaseModel):
     name: str
     id: int
-    color: RGB| RGBA|None = None
+    color: RGB | RGBA | None = None
     has_instances: bool | None = None
-    attributes: list[TaskAttribute]|None = None
+    attributes: list[TaskAttribute] | None = None
     dimensions: XYZ | None = None
     model_config = ConfigDict(extra="allow")
 
 
 class TaskAttributes(BaseModel):
     format_version: FormatVersion | None = None
-    categories: list[TaskAttributeCategory]|None = None
-    image_attributes: list[TaskAttribute]|None = None
+    categories: list[TaskAttributeCategory] | None = None
+    image_attributes: list[TaskAttribute] | None = None
     model_config = ConfigDict(extra="allow")
 
 

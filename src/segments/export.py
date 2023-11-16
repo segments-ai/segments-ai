@@ -5,6 +5,7 @@ import json
 import logging
 import os
 from typing import TYPE_CHECKING, Any, cast
+from typing_extensions import TypeAlias
 
 import numpy as np
 import numpy.typing as npt
@@ -23,9 +24,9 @@ if TYPE_CHECKING:
 #############
 # Variables #
 #############
-RGB = tuple[int, int, int]
-RGBA = tuple[int, int, int, int]
-ColorMap = list[RGBA] | list[RGB]
+RGB: TypeAlias = "tuple[int, int, int]"
+RGBA: TypeAlias = "tuple[int, int, int, int]"
+ColorMap: TypeAlias = "list[RGBA] | list[RGB]"
 logger = logging.getLogger(__name__)
 COLORMAP: ColorMap = [
     (0, 113, 188, 255),
@@ -198,8 +199,8 @@ def get_bbox(binary_mask: npt.NDArray[Any]) -> tuple[int, int, int, int] | bool:
 
     regions = regionprops(np.uint8(binary_mask))
     if len(regions) == 1:
-        bbox = regions[0].bbox
-        return cast(tuple[int, int, int, int], bbox)
+        bbox: tuple[int, int, int, int] = regions[0].bbox
+        return bbox
 
     return False
 
@@ -396,7 +397,7 @@ def export_coco_instance(
 
 def export_coco_panoptic(
     dataset: SegmentsDataset, export_folder: str
-) -> tuple[str, str|None]:
+) -> tuple[str, str | None]:
     """Export a Segments dataset in COCO panoptic format.
 
     Args:

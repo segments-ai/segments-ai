@@ -1110,7 +1110,7 @@ class SegmentsClient:
         self,
         uuid: str,
         name: str | None = None,
-        attributes: dict[str, Any] | SampleAttributes |  None = None,
+        attributes: dict[str, Any] | SampleAttributes | None = None,
         metadata: dict[str, Any] | None = None,
         priority: float | None = None,
         assigned_labeler: str | None = None,
