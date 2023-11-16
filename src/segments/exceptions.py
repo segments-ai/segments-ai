@@ -1,10 +1,10 @@
-from typing import Optional
+from __future__ import annotations
 
 
 class SegmentsError(Exception):
     """Base class for exceptions."""
 
-    def __init__(self, message: str, cause: Optional[Exception] = None):
+    def __init__(self, message: str, cause: Exception | None = None):
         """
         Args:
             message: An informative message about the exception.

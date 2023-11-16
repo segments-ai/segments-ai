@@ -9,7 +9,7 @@ import re
 from collections import defaultdict
 from io import BytesIO
 from tempfile import NamedTemporaryFile
-from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, Mapping, cast
 from urllib.parse import urlparse
 
 import numpy as np
@@ -123,10 +123,10 @@ def bitmap2file(
 
 
 def get_semantic_bitmap(
-    instance_bitmap: Optional[npt.NDArray[np.uint32]] = None,
-    annotations: Optional[dict[str, Any]] = None,
+    instance_bitmap: npt.NDArray[np.uint32] | None = None,
+    annotations: dict[str, Any] | None = None,
     id_increment: int = 0,
-) -> Optional[npt.NDArray[np.uint32]]:
+) -> npt.NDArray[np.uint32] | None:
     """Convert an instance bitmap and annotations dict into a segmentation bitmap.
 
     Args:
@@ -156,7 +156,7 @@ def export_dataset(
     export_format: ExportFormat = ExportFormat.COCO_PANOPTIC,
     id_increment: int = 0,
     **kwargs: Any,
-) -> Optional[Union[tuple[str, Optional[str]], Optional[str]]]:
+) -> tuple[str, str | None] | str | None:
     """Export a dataset to a different format.
 
     +------------------+-------------------------------------------------------------+
@@ -297,7 +297,7 @@ def export_dataset(
 
 
 def load_image_from_url(
-    url: str, save_filename: Optional[str] = None, s3_client: Optional[Any] = None
+    url: str, save_filename: str | None = None, s3_client: Any | None = None
 ) -> Image.Image:
     """Load an image from url.
 
@@ -341,7 +341,7 @@ def load_image_from_url(
 
 
 def load_pointcloud_from_url(
-    url: str, save_filename: Optional[str] = None, s3_client: Optional[Any] = None
+    url: str, save_filename: str | None = None, s3_client: Any | None = None
 ) -> o3d.geometry.PointCloud:
     """Load a point cloud from a url.
 
@@ -397,7 +397,7 @@ def load_pointcloud_from_url(
 
 
 def load_label_bitmap_from_url(
-    url: str, save_filename: Optional[str] = None
+    url: str, save_filename: str | None = None
 ) -> npt.NDArray[np.uint32]:
     """Load a label bitmap from url.
 
@@ -475,7 +475,7 @@ def show_polygons(
     image_id: int,
     exported_polygons_path: str,
     seed: int = 0,
-    output_path: Optional[str] = None,
+    output_path: str | None = None,
 ) -> None:
     """Show the exported contours of a segmented image (i.e., resulting from :func:`.export_dataset` with polygon export format).
 
@@ -613,7 +613,7 @@ def show_polygons(
 def cuboid_to_segmentation(
     pointcloud: npt.NDArray[np.float32],
     label_attributes: PointcloudCuboidLabelAttributes,
-    ego_pose: Optional[EgoPose] = None,
+    ego_pose: EgoPose | None = None,
 ) -> npt.NDArray[np.uint32]:
     """Convert a cuboid label to an instance segmentation label.
 
@@ -704,8 +704,8 @@ def cuboid_to_segmentation(
 def array_to_pcd(
     positions: npt.NDArray[np.float32],
     output_path: str,
-    intensity: Optional[npt.NDArray[np.float32]] = None,
-    rgb: Optional[npt.NDArray[np.float32]] = None,
+    intensity: npt.NDArray[np.float32] | None = None,
+    rgb: npt.NDArray[np.float32] | None = None,
     compressed: bool = False,
     write_ascii: bool = True,
 ) -> None:
@@ -852,7 +852,7 @@ def ply_to_pcd(
 
 
 def sample_pcd(
-    pcd_path: str, points: int = 500_000, output_path: Optional[str] = None
+    pcd_path: str, points: int = 500_000, output_path: str | None = None
 ) -> None:
     """Sample a point cloud to a given number of points.
 

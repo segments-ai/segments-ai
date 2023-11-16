@@ -4,7 +4,7 @@ import json
 import logging
 import os
 from multiprocessing.pool import ThreadPool
-from typing import Any, Dict, Optional, Tuple, Union, cast
+from typing import Any, cast
 from urllib.parse import urlparse
 
 import numpy as np
@@ -87,13 +87,13 @@ class SegmentsDataset:
     # https://stackoverflow.com/questions/682504/what-is-a-clean-pythonic-way-to-have-multiple-constructors-in-python
     def __init__(
         self,
-        release_file: Union[str, Release],
+        release_file: Release | str,
         labelset: str = "ground-truth",
-        filter_by: Optional[Union[LabelStatus, list[LabelStatus]]] = None,
-        filter_by_metadata: Optional[dict[str, str]] = None,
+        filter_by: LabelStatus | list[LabelStatus] | None = None,
+        filter_by_metadata: dict[str, str] | None = None,
         segments_dir: str = "segments",
         preload: bool = True,
-        s3_client: Optional[Any] = None,
+        s3_client: Any | None = None,
     ):
         # check environment for SEGMENTS_DIR variable if `segments_dir` has default value
         if segments_dir == "segments":
@@ -227,7 +227,7 @@ class SegmentsDataset:
 
     def _load_image_from_cache(
         self, sample: dict[str, Any]
-    ) -> tuple[Optional[Image.Image], str]:
+    ) -> tuple[Image.Image|None, str]:
         sample_name = os.path.splitext(sample["name"])[0]
         image_url = sample["attributes"]["image"]["url"]
         image_url_parsed = urlparse(image_url)
@@ -261,7 +261,7 @@ class SegmentsDataset:
 
     def _load_segmentation_bitmap_from_cache(
         self, sample: dict[str, Any], labelset: str
-    ) -> Union[npt.NDArray[np.uint32], Image.Image]:
+    ) -> npt.NDArray[np.uint32] | Image.Image:
         sample_name = os.path.splitext(sample["name"])[0]
         label = sample["labels"][labelset]
         segmentation_bitmap_url = label["attributes"]["segmentation_bitmap"]["url"]

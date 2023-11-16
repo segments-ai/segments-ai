@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 #############
 RGB = tuple[int, int, int]
 RGBA = tuple[int, int, int, int]
-ColorMap = Union[list[RGBA], list[RGB]]
+ColorMap = list[RGBA] | list[RGB]
 logger = logging.getLogger(__name__)
 COLORMAP: ColorMap = [
     (0, 113, 188, 255),
@@ -121,7 +121,7 @@ class IdGenerator:
         return rgb2id(color), color
 
 
-def rgb2id(color: Union[npt.NDArray[Any], RGB]) -> Union[npt.NDArray[Any], int]:
+def rgb2id(color: npt.NDArray[Any] | RGB) -> npt.NDArray[Any] | int:
     """Convert rgb to an id.
 
     Args:
@@ -138,7 +138,7 @@ def rgb2id(color: Union[npt.NDArray[Any], RGB]) -> Union[npt.NDArray[Any], int]:
     return int(color[0] + 256 * color[1] + 256 * 256 * color[2])
 
 
-def id2rgb(id_map: npt.NDArray[Any]) -> Union[npt.NDArray[Any], RGB]:
+def id2rgb(id_map: npt.NDArray[Any]) -> npt.NDArray[Any] | RGB:
     """Convert a color id to an rgb.
 
     Args:
@@ -168,7 +168,7 @@ def get_color(id: int) -> RGB:
 
 
 def colorize(
-    img: npt.NDArray[Any], colormap: Optional[ColorMap] = None
+    img: npt.NDArray[Any], colormap: ColorMap | None = None
 ) -> npt.NDArray[Any]:
     indices = np.unique(img)
     indices = indices[indices != 0]
@@ -186,7 +186,7 @@ def colorize(
     return colored_img
 
 
-def get_bbox(binary_mask: npt.NDArray[Any]) -> Union[tuple[int, int, int, int], bool]:
+def get_bbox(binary_mask: npt.NDArray[Any]) -> tuple[int, int, int, int] | bool:
     """Returns the bounding box of the binary mask (if one is found, otherwise returns False)
 
     Args:
@@ -209,7 +209,7 @@ def get_bbox(binary_mask: npt.NDArray[Any]) -> Union[tuple[int, int, int, int], 
 ##################
 def export_coco_instance(
     dataset: SegmentsDataset, export_folder: str
-) -> tuple[str, Optional[str]]:
+) -> tuple[str, str | None]:
     """Export a Segments dataset as a coco instance.
 
     Args:
@@ -396,7 +396,7 @@ def export_coco_instance(
 
 def export_coco_panoptic(
     dataset: SegmentsDataset, export_folder: str
-) -> tuple[str, Optional[str]]:
+) -> tuple[str, str|None]:
     """Export a Segments dataset in COCO panoptic format.
 
     Args:
@@ -578,7 +578,7 @@ def export_image(
     export_folder: str,
     export_format: str,
     id_increment: int,
-) -> Optional[str]:
+) -> str | None:
     """Export a Segments dataset as images.
 
     Args:
@@ -682,9 +682,9 @@ def export_image(
 def export_yolo(
     dataset: SegmentsDataset,
     export_folder: str,
-    image_width: Optional[float] = None,
-    image_height: Optional[float] = None,
-) -> Optional[str]:
+    image_width: float | None = None,
+    image_height: float | None = None,
+) -> str | None:
     """Export a Segments dataset in YOLO format.
 
     Args:
@@ -800,7 +800,7 @@ def export_yolo(
 
 def export_polygon(
     dataset: SegmentsDataset, export_folder: str
-) -> tuple[str, Optional[str]]:
+) -> tuple[str, str | None]:
     """Export a Segments dataset as polygons (i.e., contours).
 
     Args:

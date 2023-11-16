@@ -1,7 +1,7 @@
 from __future__ import annotations
 import json
 import os
-from typing import Iterable, Optional, cast
+from typing import Iterable, cast
 
 import pytest
 from segments.client import SegmentsClient
@@ -13,7 +13,7 @@ def API_KEY() -> str:
 
 
 @pytest.fixture
-def API_URL() -> Optional[str]:
+def API_URL() -> str | None:
     return os.getenv("SEGMENTS_API_URL")
 
 
@@ -23,7 +23,7 @@ def owner() -> str:
 
 
 @pytest.fixture
-def client(API_KEY: str, API_URL: Optional[str]) -> Iterable[SegmentsClient]:
+def client(API_KEY: str, API_URL: str | None) -> Iterable[SegmentsClient]:
     client = (
         SegmentsClient(api_key=API_KEY, api_url=API_URL)
         if API_URL

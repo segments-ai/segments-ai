@@ -11,13 +11,9 @@ from typing import (
     Any,
     BinaryIO,
     Callable,
-    Dict,
-    List,
-    Optional,
     TextIO,
     Type,
     TypeVar,
-    Union,
     cast,
 )
 
@@ -80,7 +76,7 @@ VERSION = __version__
 # Error handling: https://stackoverflow.com/questions/16511337/correct-way-to-try-except-using-python-requests-module
 def handle_exceptions(
     f: Callable[..., requests.Response]
-) -> Callable[..., Union[requests.Response, T]]:
+) -> Callable[..., requests.Response | T]:
     """Catch exceptions and throw Segments exceptions.
 
     Args:
@@ -98,9 +94,9 @@ def handle_exceptions(
 
     def throw_segments_exception(
         *args: Any,
-        model: Optional[Type[T]] = None,
+        model: Type[T] | None = None,
         **kwargs: Any,
-    ) -> Union[requests.Response, T]:
+    ) -> requests.Response | T:
         try:
             r = f(*args, **kwargs)
             r.raise_for_status()
@@ -202,7 +198,7 @@ class SegmentsClient:
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
+        api_key: str | None = None,
         api_url: str = "https://api.segments.ai/",
     ):
         if api_key is None:
@@ -275,16 +271,16 @@ class SegmentsClient:
 
     def __exit__(
         self,
-        exc_type: Optional[Type[BaseException]],
-        exc_value: Optional[BaseException],
-        traceback: Optional[TracebackType],
+        exc_type: Type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
     ) -> None:
         self.close()
 
     ########
     # User #
     ########
-    def get_user(self, user: Optional[str] = None) -> User:
+    def get_user(self, user: str | None = None) -> User:
         """Get a user.
 
         .. code-block:: python
@@ -315,7 +311,7 @@ class SegmentsClient:
     ############
     def get_datasets(
         self,
-        user: Optional[str] = None,
+        user: str | None = None,
         per_page: int = 1000,
         page: int = 1,
     ) -> list[Dataset]:
@@ -379,11 +375,11 @@ class SegmentsClient:
         name: str,
         description: str = "",
         task_type: TaskType = TaskType.SEGMENTATION_BITMAP,
-        task_attributes: Optional[Union[dict[str, Any], TaskAttributes]] = None,
+        task_attributes: TaskAttributes | dict[str, Any] | None = None,
         category: Category = Category.OTHER,
         public: bool = False,
         readme: str = "",
-        metadata: Optional[dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
         labeling_inactivity_timeout_seconds: int = 300,
         enable_skip_labeling: bool = True,
         enable_skip_reviewing: bool = False,
@@ -393,7 +389,7 @@ class SegmentsClient:
         enable_save_button: bool = False,
         enable_label_status_verified: bool = False,
         enable_3d_cuboid_rotation: bool = False,
-        organization: Optional[str] = None,
+        organization: str | None = None,
     ) -> Dataset:
         """Add a dataset.
 
@@ -521,22 +517,22 @@ class SegmentsClient:
     def update_dataset(
         self,
         dataset_identifier: str,
-        description: Optional[str] = None,
-        task_type: Optional[TaskType] = None,
-        task_attributes: Optional[Union[dict[str, Any], TaskAttributes]] = None,
-        category: Optional[Category] = None,
-        public: Optional[bool] = None,
-        readme: Optional[str] = None,
-        metadata: Optional[dict[str, Any]] = None,
-        labeling_inactivity_timeout_seconds: Optional[int] = None,
-        enable_skip_labeling: Optional[bool] = None,
-        enable_skip_reviewing: Optional[bool] = None,
-        enable_ratings: Optional[bool] = None,
-        enable_interpolation: Optional[bool] = None,
-        enable_same_dimensions_track_constraint: Optional[bool] = None,
-        enable_save_button: Optional[bool] = None,
-        enable_label_status_verified: Optional[bool] = None,
-        enable_3d_cuboid_rotation: Optional[bool] = None,
+        description: str | None = None,
+        task_type: TaskType | None = None,
+        task_attributes: dict[str, Any] | TaskAttributes | None = None,
+        category: Category | None = None,
+        public: bool | None = None,
+        readme: str | None = None,
+        metadata: dict[str, Any] | None = None,
+        labeling_inactivity_timeout_seconds: int | None = None,
+        enable_skip_labeling: bool | None = None,
+        enable_skip_reviewing: bool | None = None,
+        enable_ratings: bool | None = None,
+        enable_interpolation: bool | None = None,
+        enable_same_dimensions_track_constraint: bool | None = None,
+        enable_save_button: bool | None = None,
+        enable_label_status_verified: bool | None = None,
+        enable_3d_cuboid_rotation: bool | None = None,
     ) -> Dataset:
         """Update a dataset.
 
@@ -660,10 +656,10 @@ class SegmentsClient:
     def clone_dataset(
         self,
         dataset_identifier: str,
-        new_name: Optional[str] = None,
-        new_task_type: Optional[TaskType] = None,
-        new_public: Optional[bool] = None,
-        organization: Optional[str] = None,
+        new_name: str | None = None,
+        new_task_type: TaskType | None = None,
+        new_public: bool | None = None,
+        organization: str | None = None,
     ) -> Dataset:
         """Clone a dataset.
 
@@ -848,9 +844,9 @@ class SegmentsClient:
     def get_samples(
         self,
         dataset_identifier: str,
-        name: Optional[str] = None,
-        label_status: Optional[Union[LabelStatus, list[LabelStatus]]] = None,
-        metadata: Optional[Union[str, list[str]]] = None,
+        name: str | None = None,
+        label_status: LabelStatus | list[LabelStatus] | None = None,
+        metadata: str | list[str] | None = None,
         sort: Literal[
             "name", "created", "priority", "updated_at", "gt_label__updated_at"
         ] = "name",
@@ -929,7 +925,7 @@ class SegmentsClient:
     def get_sample(
         self,
         uuid: str,
-        labelset: Optional[str] = None,
+        labelset: str | None = None,
         include_signed_url: bool = False,
     ) -> Sample:
         """Get a sample.
@@ -969,12 +965,12 @@ class SegmentsClient:
         self,
         dataset_identifier: str,
         name: str,
-        attributes: Union[dict[str, Any], SampleAttributes],
-        metadata: Optional[dict[str, Any]] = None,
+        attributes: dict[str, Any] | SampleAttributes,
+        metadata: dict[str, Any] | None = None,
         priority: float = 0,
-        assigned_labeler: Optional[str] = None,
-        assigned_reviewer: Optional[str] = None,
-        embedding: Optional[Union[npt.NDArray[Any], list[float]]] = None,
+        assigned_labeler: str | None = None,
+        assigned_reviewer: str | None = None,
+        embedding: npt.NDArray[Any] | list[float] | None = None,
     ) -> Sample:
         """Add a sample to a dataset.
 
@@ -1063,7 +1059,7 @@ class SegmentsClient:
         return cast(Sample, r)
 
     def add_samples(
-        self, dataset_identifier: str, samples: list[Union[dict[str, Any], Sample]]
+        self, dataset_identifier: str, samples: list[Sample | dict[str, Any]]
     ) -> list[Sample]:
         """Add samples to a dataset in bulk. When attempting to add samples which already exist, no error is thrown but the existing samples are returned without changes.
 
@@ -1113,13 +1109,13 @@ class SegmentsClient:
     def update_sample(
         self,
         uuid: str,
-        name: Optional[str] = None,
-        attributes: Optional[Union[dict[str, Any], SampleAttributes]] = None,
-        metadata: Optional[dict[str, Any]] = None,
-        priority: Optional[float] = None,
-        assigned_labeler: Optional[str] = None,
-        assigned_reviewer: Optional[str] = None,
-        embedding: Optional[Union[npt.NDArray[Any], list[float]]] = None,
+        name: str | None = None,
+        attributes: dict[str, Any] | SampleAttributes |  None = None,
+        metadata: dict[str, Any] | None = None,
+        priority: float | None = None,
+        assigned_labeler: str | None = None,
+        assigned_reviewer: str | None = None,
+        embedding: npt.NDArray[Any] | list[float] | None = None,
     ) -> Sample:
         """Update a sample.
 
@@ -1240,9 +1236,9 @@ class SegmentsClient:
         self,
         sample_uuid: str,
         labelset: str,
-        attributes: Union[dict[str, Any], LabelAttributes],
+        attributes: dict[str, Any] | LabelAttributes,
         label_status: LabelStatus = LabelStatus.PRELABELED,
-        score: Optional[float] = None,
+        score: float | None = None,
     ) -> Label:
         """Add a label to a sample.
 
@@ -1313,9 +1309,9 @@ class SegmentsClient:
         self,
         sample_uuid: str,
         labelset: str,
-        attributes: Optional[Union[dict[str, Any], LabelAttributes]] = None,
-        label_status: Optional[LabelStatus] = None,
-        score: Optional[float] = None,
+        attributes: dict[str, Any] | LabelAttributes | None = None,
+        label_status: LabelStatus | None = None,
+        score: float | None = None,
     ) -> Label:
         """Update a label.
 
@@ -1578,8 +1574,8 @@ class SegmentsClient:
     def update_issue(
         self,
         uuid: str,
-        description: Optional[str] = None,
-        status: Optional[IssueStatus] = None,
+        description: str | None = None,
+        status: IssueStatus | None = None,
     ) -> Issue:
         """Add an issue to a sample.
 
@@ -1751,7 +1747,7 @@ class SegmentsClient:
     # Assets #
     ##########
     def upload_asset(
-        self, file: Union[TextIO, BinaryIO], filename: str = "label.png"
+        self, file: TextIO | BinaryIO, filename: str = "label.png"
     ) -> File:
         """Upload an asset.
 
@@ -1798,7 +1794,7 @@ class SegmentsClient:
         self,
         endpoint: str,
         auth: bool = True,
-        model: Optional[T] = None,
+        model: T | None = None,
     ) -> requests.Response:
         """Send a GET request.
 
@@ -1826,9 +1822,9 @@ class SegmentsClient:
     def _post(
         self,
         endpoint: str,
-        data: Optional[dict[str, Any]] = None,
+        data: dict[str, Any] | None = None,
         auth: bool = True,
-        model: Optional[T] = None,
+        model: T | None = None,
     ) -> requests.Response:
         """Send a POST request.
 
@@ -1858,9 +1854,9 @@ class SegmentsClient:
     def _put(
         self,
         endpoint: str,
-        data: Optional[dict[str, Any]] = None,
+        data: dict[str, Any] | None = None,
         auth: bool = True,
-        model: Optional[T] = None,
+        model: T | None = None,
     ) -> requests.Response:
         """Send a PUT request.
 
@@ -1890,9 +1886,9 @@ class SegmentsClient:
     def _patch(
         self,
         endpoint: str,
-        data: Optional[dict[str, Any]] = None,
+        data: dict[str, Any] | None = None,
         auth: bool = True,
-        model: Optional[T] = None,
+        model: T | None = None,
     ) -> requests.Response:
         """Send a PATCH request.
 
@@ -1922,9 +1918,9 @@ class SegmentsClient:
     def _delete(
         self,
         endpoint: str,
-        data: Optional[dict[str, Any]] = None,
+        data: dict[str, Any] | None = None,
         auth: bool = True,
-        model: Optional[T] = None,
+        model: T | None = None,
     ) -> requests.Response:
         """Send a DELETE request.
 
@@ -1959,7 +1955,7 @@ class SegmentsClient:
 
     @handle_exceptions
     def _upload_to_aws(
-        self, file: Union[TextIO, BinaryIO], url: str, aws_fields: AWSFields
+        self, file: TextIO | BinaryIO, url: str, aws_fields: AWSFields
     ) -> requests.Response:
         """Upload file to AWS.
 

@@ -5,7 +5,7 @@ import logging
 import os
 import tempfile
 from string import Template
-from typing import TYPE_CHECKING, Any, Dict, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import requests
 from PIL import Image

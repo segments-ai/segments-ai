@@ -4,7 +4,7 @@ import json
 import os
 import time
 import unittest
-from typing import Any, Dict, cast
+from typing import Any, cast
 
 from segments.client import SegmentsClient
 from segments.exceptions import (
