@@ -111,7 +111,7 @@ class TestDataset(Test):
             self.client.get_dataset(wrong_dataset_identifier)
 
     def test_add_update_delete_dataset(self) -> None:
-        arguments: Dict[str, Any] = {
+        arguments: dict[str, Any] = {
             "name": "add_dataset",
             "description": "Test add_update_delete_dataset.",
             "task_type": "vector",
@@ -321,7 +321,7 @@ class TestSample(Test):
         priority = 0
         # embedding = np.zeros(100).tolist()
         name = "Test sample"
-        attributes_dict: Dict[str, Dict[str, Any]] = {
+        attributes_dict: dict[str, dict[str, Any]] = {
             "image": {"image": {"url": "url"}},
             "image-sequence": {
                 "frames": [{"image": {"url": "url"}}, {"image": {"url": ""}}]
@@ -488,7 +488,7 @@ class TestLabel(Test):
             "weather": "sunny",
             "isRaining": True,
         }
-        label_attributes: Dict[str, Dict[str, Any]] = {
+        label_attributes: dict[str, dict[str, Any]] = {
             "image-segmentation": {
                 "format_version": "0.1",
                 "annotations": [
@@ -1026,7 +1026,7 @@ class TestException(Test):
 
     def test_add_label_validationerror(self) -> None:
         labelset = "ground-truth"
-        wrong_attributes: Dict[str, Any] = {"wrong_key": "abcde"}
+        wrong_attributes: dict[str, Any] = {"wrong_key": "abcde"}
         for sample_uuid in self.sample_uuids:
             with self.assertRaises(ValidationError):
                 self.client.add_label(sample_uuid, labelset, wrong_attributes)

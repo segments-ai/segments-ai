@@ -124,7 +124,7 @@ def bitmap2file(
 
 def get_semantic_bitmap(
     instance_bitmap: Optional[npt.NDArray[np.uint32]] = None,
-    annotations: Optional[Dict[str, Any]] = None,
+    annotations: Optional[dict[str, Any]] = None,
     id_increment: int = 0,
 ) -> Optional[npt.NDArray[np.uint32]]:
     """Convert an instance bitmap and annotations dict into a segmentation bitmap.
@@ -501,7 +501,7 @@ def show_polygons(
         logger.error("Please install matplotlib first: pip install matplotlib.")
         raise e
 
-    def find_image_name(images: list[Dict[str, Any]], image_id: int) -> str:
+    def find_image_name(images: list[dict[str, Any]], image_id: int) -> str:
         for image in images:
             if image["id"] == image_id:
                 return cast(str, image["file_name"])

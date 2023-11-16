@@ -90,7 +90,7 @@ class SegmentsDataset:
         release_file: Union[str, Release],
         labelset: str = "ground-truth",
         filter_by: Optional[Union[LabelStatus, list[LabelStatus]]] = None,
-        filter_by_metadata: Optional[Dict[str, str]] = None,
+        filter_by_metadata: Optional[dict[str, str]] = None,
         segments_dir: str = "segments",
         preload: bool = True,
         s3_client: Optional[Any] = None,
@@ -226,7 +226,7 @@ class SegmentsDataset:
         print(f"Initialized dataset with {num_samples} images.")
 
     def _load_image_from_cache(
-        self, sample: Dict[str, Any]
+        self, sample: dict[str, Any]
     ) -> Tuple[Optional[Image.Image], str]:
         sample_name = os.path.splitext(sample["name"])[0]
         image_url = sample["attributes"]["image"]["url"]
@@ -260,7 +260,7 @@ class SegmentsDataset:
         return image, image_filename_rel
 
     def _load_segmentation_bitmap_from_cache(
-        self, sample: Dict[str, Any], labelset: str
+        self, sample: dict[str, Any], labelset: str
     ) -> Union[npt.NDArray[np.uint32], Image.Image]:
         sample_name = os.path.splitext(sample["name"])[0]
         label = sample["labels"][labelset]
@@ -298,8 +298,8 @@ class SegmentsDataset:
     def __len__(self) -> int:
         return len(self.samples)
 
-    def __getitem__(self, index: int) -> Dict[str, Any]:
-        sample: Dict[str, Any] = self.samples[index]
+    def __getitem__(self, index: int) -> dict[str, Any]:
+        sample: dict[str, Any] = self.samples[index]
 
         if self.task_type in [
             "pointcloud-segmentation",

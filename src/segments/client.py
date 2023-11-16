@@ -379,11 +379,11 @@ class SegmentsClient:
         name: str,
         description: str = "",
         task_type: TaskType = TaskType.SEGMENTATION_BITMAP,
-        task_attributes: Optional[Union[Dict[str, Any], TaskAttributes]] = None,
+        task_attributes: Optional[Union[dict[str, Any], TaskAttributes]] = None,
         category: Category = Category.OTHER,
         public: bool = False,
         readme: str = "",
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: Optional[dict[str, Any]] = None,
         labeling_inactivity_timeout_seconds: int = 300,
         enable_skip_labeling: bool = True,
         enable_skip_reviewing: bool = False,
@@ -485,7 +485,7 @@ class SegmentsClient:
         elif type(task_attributes) is TaskAttributes:
             task_attributes = task_attributes.model_dump()
 
-        payload: Dict[str, Any] = {
+        payload: dict[str, Any] = {
             "name": name,
             "description": description,
             "task_type": task_type,
@@ -523,11 +523,11 @@ class SegmentsClient:
         dataset_identifier: str,
         description: Optional[str] = None,
         task_type: Optional[TaskType] = None,
-        task_attributes: Optional[Union[Dict[str, Any], TaskAttributes]] = None,
+        task_attributes: Optional[Union[dict[str, Any], TaskAttributes]] = None,
         category: Optional[Category] = None,
         public: Optional[bool] = None,
         readme: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: Optional[dict[str, Any]] = None,
         labeling_inactivity_timeout_seconds: Optional[int] = None,
         enable_skip_labeling: Optional[bool] = None,
         enable_skip_reviewing: Optional[bool] = None,
@@ -574,7 +574,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
 
         if description is not None:
             payload["description"] = description
@@ -699,7 +699,7 @@ class SegmentsClient:
             old_name = dataset_identifier.split("/")[-1]
             new_name = f"{old_name}-clone"
 
-        payload: Dict[str, Any] = {"name": new_name}
+        payload: dict[str, Any] = {"name": new_name}
 
         if new_task_type is not None:
             payload["task_type"] = new_task_type
@@ -804,7 +804,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
 
         if role is not None:
             payload["role"] = role
@@ -969,8 +969,8 @@ class SegmentsClient:
         self,
         dataset_identifier: str,
         name: str,
-        attributes: Union[Dict[str, Any], SampleAttributes],
-        metadata: Optional[Dict[str, Any]] = None,
+        attributes: Union[dict[str, Any], SampleAttributes],
+        metadata: Optional[dict[str, Any]] = None,
         priority: float = 0,
         assigned_labeler: Optional[str] = None,
         assigned_reviewer: Optional[str] = None,
@@ -1033,7 +1033,7 @@ class SegmentsClient:
         elif type(attributes) in get_args(SampleAttributes):
             attributes = attributes.model_dump()
 
-        payload: Dict[str, Any] = {
+        payload: dict[str, Any] = {
             "name": name,
             "attributes": attributes,
         }
@@ -1063,7 +1063,7 @@ class SegmentsClient:
         return cast(Sample, r)
 
     def add_samples(
-        self, dataset_identifier: str, samples: list[Union[Dict[str, Any], Sample]]
+        self, dataset_identifier: str, samples: list[Union[dict[str, Any], Sample]]
     ) -> list[Sample]:
         """Add samples to a dataset in bulk. When attempting to add samples which already exist, no error is thrown but the existing samples are returned without changes.
 
@@ -1114,8 +1114,8 @@ class SegmentsClient:
         self,
         uuid: str,
         name: Optional[str] = None,
-        attributes: Optional[Union[Dict[str, Any], SampleAttributes]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        attributes: Optional[Union[dict[str, Any], SampleAttributes]] = None,
+        metadata: Optional[dict[str, Any]] = None,
         priority: Optional[float] = None,
         assigned_labeler: Optional[str] = None,
         assigned_reviewer: Optional[str] = None,
@@ -1153,7 +1153,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
 
         if name is not None:
             payload["name"] = name
@@ -1240,7 +1240,7 @@ class SegmentsClient:
         self,
         sample_uuid: str,
         labelset: str,
-        attributes: Union[Dict[str, Any], LabelAttributes],
+        attributes: Union[dict[str, Any], LabelAttributes],
         label_status: LabelStatus = LabelStatus.PRELABELED,
         score: Optional[float] = None,
     ) -> Label:
@@ -1297,7 +1297,7 @@ class SegmentsClient:
         elif type(attributes) in get_args(LabelAttributes):
             attributes = attributes.model_dump()
 
-        payload: Dict[str, Any] = {
+        payload: dict[str, Any] = {
             "label_status": label_status,
             "attributes": attributes,
         }
@@ -1313,7 +1313,7 @@ class SegmentsClient:
         self,
         sample_uuid: str,
         labelset: str,
-        attributes: Optional[Union[Dict[str, Any], LabelAttributes]] = None,
+        attributes: Optional[Union[dict[str, Any], LabelAttributes]] = None,
         label_status: Optional[LabelStatus] = None,
         score: Optional[float] = None,
     ) -> Label:
@@ -1353,7 +1353,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
 
         if attributes is not None:
             payload["attributes"] = (
@@ -1566,7 +1566,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        payload: Dict[str, Any] = {
+        payload: dict[str, Any] = {
             "description": description,
             "status": status,
         }
@@ -1603,7 +1603,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
 
         if description is not None:
             payload["description"] = description
@@ -1826,7 +1826,7 @@ class SegmentsClient:
     def _post(
         self,
         endpoint: str,
-        data: Optional[Dict[str, Any]] = None,
+        data: Optional[dict[str, Any]] = None,
         auth: bool = True,
         model: Optional[T] = None,
     ) -> requests.Response:
@@ -1858,7 +1858,7 @@ class SegmentsClient:
     def _put(
         self,
         endpoint: str,
-        data: Optional[Dict[str, Any]] = None,
+        data: Optional[dict[str, Any]] = None,
         auth: bool = True,
         model: Optional[T] = None,
     ) -> requests.Response:
@@ -1890,7 +1890,7 @@ class SegmentsClient:
     def _patch(
         self,
         endpoint: str,
-        data: Optional[Dict[str, Any]] = None,
+        data: Optional[dict[str, Any]] = None,
         auth: bool = True,
         model: Optional[T] = None,
     ) -> requests.Response:
@@ -1922,7 +1922,7 @@ class SegmentsClient:
     def _delete(
         self,
         endpoint: str,
-        data: Optional[Dict[str, Any]] = None,
+        data: Optional[dict[str, Any]] = None,
         auth: bool = True,
         model: Optional[T] = None,
     ) -> requests.Response:
@@ -1950,7 +1950,7 @@ class SegmentsClient:
 
         return r
 
-    def _get_headers(self, auth: bool = True) -> Dict[str, str]:
+    def _get_headers(self, auth: bool = True) -> dict[str, str]:
         """Get the authorization header with the API key."""
         headers = {"X-source": "python-sdk"}
         if auth and self.api_key:

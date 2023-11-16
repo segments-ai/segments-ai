@@ -186,8 +186,8 @@ class Subscription(str, Enum):
 RGB = Tuple[int, int, int]
 RGBA = Tuple[int, int, int, int]
 FormatVersion = Union[float, str]
-ObjectAttributes = Dict[str, Optional[Union[str, bool, int]]]
-ImageAttributes = Dict[str, Optional[Union[str, bool, int]]]
+ObjectAttributes = dict[str, Optional[Union[str, bool, int]]]
+ImageAttributes = dict[str, Optional[Union[str, bool, int]]]
 
 
 ###########
@@ -627,7 +627,7 @@ class Sample(BaseModel):
     uuid: str
     name: str
     attributes: SampleAttributes
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
     created_at: str
     created_by: str
     assigned_labeler: Optional[str] = None
@@ -658,7 +658,7 @@ class User(BaseModel):
     organization_created_by: Optional[str] = None
     organization_role: Optional[Role] = None
     members: Optional[list[User]] = None
-    insights_urls: Optional[Dict[str, str]] = None
+    insights_urls: Optional[dict[str, str]] = None
 
 
 class Collaborator(BaseModel):
@@ -755,7 +755,7 @@ class Labelset(BaseModel):
     is_groundtruth: Optional[bool] = None
     # statistics: Optional[Statistics]
     created_at: Optional[str] = None
-    # stats: Optional[Dict[str, Any]]
+    # stats: Optional[dict[str, Any]]
 
 
 class Dataset(BaseModel):
@@ -785,11 +785,11 @@ class Dataset(BaseModel):
     labelsets: Optional[list[Labelset]] = None
     role: Optional[str] = None
     readme: Optional[str] = None
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
     noncollaborator_can_label: Optional[bool] = None
     noncollaborator_can_review: Optional[bool] = None
-    insights_urls: Optional[Dict[str, str]] = None
-    # tasks: Optional[list[Dict[str, Any]]]
+    insights_urls: Optional[dict[str, str]] = None
+    # tasks: Optional[list[dict[str, Any]]]
     embeddings_enabled: Optional[bool] = None
 
     @field_validator("category")

@@ -82,7 +82,7 @@ class IdGenerator:
     ``isthing`` and ``color``
     """
 
-    def __init__(self, categories: Dict[int, SegmentsDatasetCategory]):
+    def __init__(self, categories: dict[int, SegmentsDatasetCategory]):
         self.taken_colors: Set[RGB] = set()
         self.taken_colors.add((0, 0, 0))
         self.categories = categories
@@ -434,7 +434,7 @@ def export_coco_panoptic(
             )
         )
 
-    categories_dict: Dict[int, SegmentsDatasetCategory] = {
+    categories_dict: dict[int, SegmentsDatasetCategory] = {
         category.id: category for category in categories
     }
     id_generator = IdGenerator(categories_dict)
