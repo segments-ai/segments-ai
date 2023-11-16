@@ -4,7 +4,7 @@ import json
 import logging
 import os
 from multiprocessing.pool import ThreadPool
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Dict, Optional, Tuple, Union, cast
 from urllib.parse import urlparse
 
 import numpy as np
@@ -89,7 +89,7 @@ class SegmentsDataset:
         self,
         release_file: Union[str, Release],
         labelset: str = "ground-truth",
-        filter_by: Optional[Union[LabelStatus, List[LabelStatus]]] = None,
+        filter_by: Optional[Union[LabelStatus, list[LabelStatus]]] = None,
         filter_by_metadata: Optional[Dict[str, str]] = None,
         segments_dir: str = "segments",
         preload: bool = True,
@@ -286,8 +286,8 @@ class SegmentsDataset:
             return load_label_bitmap_from_url(segmentation_bitmap_url)
 
     @property
-    def categories(self) -> List[SegmentsDatasetCategory]:
-        return TypeAdapter(List[SegmentsDatasetCategory]).validate_python(
+    def categories(self) -> list[SegmentsDatasetCategory]:
+        return TypeAdapter(list[SegmentsDatasetCategory]).validate_python(
             self.release["dataset"]["task_attributes"]["categories"],
         )
         # categories = {}

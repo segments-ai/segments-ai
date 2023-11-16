@@ -1,4 +1,4 @@
-from typing import List
+from __future__ import annotations
 
 from segments.client import SegmentsClient
 from segments.dataset import SegmentsDataset
@@ -8,7 +8,7 @@ from segments.typing import SegmentsDatasetCategory
 def test_dataset(
     client: SegmentsClient,
     owner: str,
-    datasets: List[str],
+    datasets: list[str],
     ARTIFACTS_DIR: str,
 ) -> None:
     # Get the datasets

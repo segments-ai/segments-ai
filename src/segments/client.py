@@ -318,7 +318,7 @@ class SegmentsClient:
         user: Optional[str] = None,
         per_page: int = 1000,
         page: int = 1,
-    ) -> List[Dataset]:
+    ) -> list[Dataset]:
         """Get a list of datasets.
 
         .. code-block:: python
@@ -344,11 +344,11 @@ class SegmentsClient:
         query_string = f"?per_page={per_page}&page={page}"
 
         if user is not None:
-            r = self._get(f"/users/{user}/datasets/{query_string}", model=List[Dataset])
+            r = self._get(f"/users/{user}/datasets/{query_string}", model=list[Dataset])
         else:
-            r = self._get(f"/user/datasets/{query_string}", model=List[Dataset])
+            r = self._get(f"/user/datasets/{query_string}", model=list[Dataset])
 
-        return cast(List[Dataset], r)
+        return cast(list[Dataset], r)
 
     def get_dataset(self, dataset_identifier: str) -> Dataset:
         """Get a dataset.
@@ -849,15 +849,15 @@ class SegmentsClient:
         self,
         dataset_identifier: str,
         name: Optional[str] = None,
-        label_status: Optional[Union[LabelStatus, List[LabelStatus]]] = None,
-        metadata: Optional[Union[str, List[str]]] = None,
+        label_status: Optional[Union[LabelStatus, list[LabelStatus]]] = None,
+        metadata: Optional[Union[str, list[str]]] = None,
         sort: Literal[
             "name", "created", "priority", "updated_at", "gt_label__updated_at"
         ] = "name",
         direction: Literal["asc", "desc"] = "asc",
         per_page: int = 1000,
         page: int = 1,
-    ) -> List[Sample]:
+    ) -> list[Sample]:
         """Get the samples in a dataset.
 
         .. code-block:: python
@@ -920,11 +920,11 @@ class SegmentsClient:
             result.pop("label", None)
 
         try:
-            results = TypeAdapter(List[Sample]).validate_python(results)
+            results = TypeAdapter(list[Sample]).validate_python(results)
         except pydantic.ValidationError as e:
             raise ValidationError(message=str(e), cause=e)
 
-        return cast(List[Sample], results)
+        return cast(list[Sample], results)
 
     def get_sample(
         self,
@@ -974,7 +974,7 @@ class SegmentsClient:
         priority: float = 0,
         assigned_labeler: Optional[str] = None,
         assigned_reviewer: Optional[str] = None,
-        embedding: Optional[Union[npt.NDArray[Any], List[float]]] = None,
+        embedding: Optional[Union[npt.NDArray[Any], list[float]]] = None,
     ) -> Sample:
         """Add a sample to a dataset.
 
@@ -1063,8 +1063,8 @@ class SegmentsClient:
         return cast(Sample, r)
 
     def add_samples(
-        self, dataset_identifier: str, samples: List[Union[Dict[str, Any], Sample]]
-    ) -> List[Sample]:
+        self, dataset_identifier: str, samples: list[Union[Dict[str, Any], Sample]]
+    ) -> list[Sample]:
         """Add samples to a dataset in bulk. When attempting to add samples which already exist, no error is thrown but the existing samples are returned without changes.
 
         Args:
@@ -1105,10 +1105,10 @@ class SegmentsClient:
         r = self._post(
             f"/datasets/{dataset_identifier}/samples_bulk/",
             data=payload,
-            model=List[Sample],
+            model=list[Sample],
         )
 
-        return cast(List[Sample], r)
+        return cast(list[Sample], r)
 
     def update_sample(
         self,
@@ -1119,7 +1119,7 @@ class SegmentsClient:
         priority: Optional[float] = None,
         assigned_labeler: Optional[str] = None,
         assigned_reviewer: Optional[str] = None,
-        embedding: Optional[Union[npt.NDArray[Any], List[float]]] = None,
+        embedding: Optional[Union[npt.NDArray[Any], list[float]]] = None,
     ) -> Sample:
         """Update a sample.
 
@@ -1397,7 +1397,7 @@ class SegmentsClient:
     #############
     # Labelsets #
     #############
-    def get_labelsets(self, dataset_identifier: str) -> List[Labelset]:
+    def get_labelsets(self, dataset_identifier: str) -> list[Labelset]:
         """Get the labelsets in a dataset.
 
         .. code-block:: python
@@ -1419,10 +1419,10 @@ class SegmentsClient:
         """
 
         r = self._get(
-            f"/datasets/{dataset_identifier}/labelsets/", model=List[Labelset]
+            f"/datasets/{dataset_identifier}/labelsets/", model=list[Labelset]
         )
 
-        return cast(List[Labelset], r)
+        return cast(list[Labelset], r)
 
     def get_labelset(self, dataset_identifier: str, name: str) -> Labelset:
         """Get a labelset.
@@ -1514,7 +1514,7 @@ class SegmentsClient:
     ##########
     # Issues #
     ##########
-    def get_issues(self, dataset_identifier: str) -> List[Issue]:
+    def get_issues(self, dataset_identifier: str) -> list[Issue]:
         """Get all issues for a dataset.
 
         .. code-block:: python
@@ -1534,9 +1534,9 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        r = self._get(f"/datasets/{dataset_identifier}/issues/", model=List[Issue])
+        r = self._get(f"/datasets/{dataset_identifier}/issues/", model=list[Issue])
 
-        return cast(List[Issue], r)
+        return cast(list[Issue], r)
 
     def add_issue(
         self,
@@ -1638,7 +1638,7 @@ class SegmentsClient:
     ############
     # Releases #
     ############
-    def get_releases(self, dataset_identifier: str) -> List[Release]:
+    def get_releases(self, dataset_identifier: str) -> list[Release]:
         """Get the releases in a dataset.
 
         .. code-block:: python
@@ -1659,9 +1659,9 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        r = self._get(f"/datasets/{dataset_identifier}/releases/", model=List[Release])
+        r = self._get(f"/datasets/{dataset_identifier}/releases/", model=list[Release])
 
-        return cast(List[Release], r)
+        return cast(list[Release], r)
 
     def get_release(self, dataset_identifier: str, name: str) -> Release:
         """Get a release.

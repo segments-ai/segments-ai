@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 #############
 RGB = Tuple[int, int, int]
 RGBA = Tuple[int, int, int, int]
-ColorMap = Union[List[RGBA], List[RGB]]
+ColorMap = Union[list[RGBA], list[RGB]]
 logger = logging.getLogger(__name__)
 COLORMAP: ColorMap = [
     (0, 113, 188, 255),
@@ -418,7 +418,7 @@ def export_coco_panoptic(
     }
 
     # CATEGORIES
-    categories: List[SegmentsDatasetCategory] = []
+    categories: list[SegmentsDatasetCategory] = []
     for i, category in enumerate(dataset.categories):
         color = category.color[:3] if category.color else get_color(i)
         isthing = (

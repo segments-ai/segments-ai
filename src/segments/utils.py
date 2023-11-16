@@ -501,7 +501,7 @@ def show_polygons(
         logger.error("Please install matplotlib first: pip install matplotlib.")
         raise e
 
-    def find_image_name(images: List[Dict[str, Any]], image_id: int) -> str:
+    def find_image_name(images: list[Dict[str, Any]], image_id: int) -> str:
         for image in images:
             if image["id"] == image_id:
                 return cast(str, image["file_name"])
@@ -510,7 +510,7 @@ def show_polygons(
     def get_random_color() -> Tuple[float, float, float]:
         return (random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1))
 
-    def normalize(color: List[int]) -> Tuple[float, float, float]:
+    def normalize(color: list[int]) -> Tuple[float, float, float]:
         """Transform a color from 0-255 range to 0-1 range and from a list to a tuple, e.g., [255, 0, 123] to (1, 0, 0.5)."""
         return (color[0] / 255, color[1] / 255, color[2] / 255)
 

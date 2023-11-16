@@ -1,6 +1,7 @@
+from __future__ import annotations
 import json
 import os
-from typing import Iterable, List, Optional, cast
+from typing import Iterable, Optional, cast
 
 import pytest
 from segments.client import SegmentsClient
@@ -33,33 +34,33 @@ def client(API_KEY: str, API_URL: Optional[str]) -> Iterable[SegmentsClient]:
 
 
 @pytest.fixture
-def datasets() -> List[str]:
+def datasets() -> list[str]:
     datasets_str = cast(str, os.getenv("DATASETS"))
-    datasets = cast(List[str], json.loads(datasets_str))
+    datasets = cast(list[str], json.loads(datasets_str))
     return datasets
 
 
 @pytest.fixture
-def sample_uuids() -> List[str]:
+def sample_uuids() -> list[str]:
     """First sample uuid for each dataset."""
     sample_uuids_str = cast(str, os.getenv("SAMPLE_UUIDS"))
-    sample_uuids = cast(List[str], json.loads(sample_uuids_str))
+    sample_uuids = cast(list[str], json.loads(sample_uuids_str))
     return sample_uuids
 
 
 @pytest.fixture
-def sample_attribute_types() -> List[str]:
+def sample_attribute_types() -> list[str]:
     """Sample attribute type of the datasets."""
     sample_attribute_types_str = cast(str, os.getenv("SAMPLE_ATTRIBUTE_TYPES"))
-    sample_attribute_types = cast(List[str], json.loads(sample_attribute_types_str))
+    sample_attribute_types = cast(list[str], json.loads(sample_attribute_types_str))
     return sample_attribute_types
 
 
 @pytest.fixture
-def label_attribute_types() -> List[str]:
+def label_attribute_types() -> list[str]:
     """Label attribute type of the datasets."""
     label_attribute_types_str = cast(str, os.getenv("LABEL_ATTRIBUTE_TYPES"))
-    label_attribute_types = cast(List[str], json.loads(label_attribute_types_str))
+    label_attribute_types = cast(list[str], json.loads(label_attribute_types_str))
     return label_attribute_types
 
 

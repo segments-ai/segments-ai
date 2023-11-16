@@ -1,4 +1,4 @@
-from typing import List
+from __future__ import annotations
 
 import pytest
 from segments.client import SegmentsClient
@@ -9,7 +9,7 @@ from segments.utils import export_dataset
 def test_export_dataset(
     client: SegmentsClient,
     owner: str,
-    datasets: List[str],
+    datasets: list[str],
     ARTIFACTS_DIR: str,
 ) -> None:
     # Get the dataset
