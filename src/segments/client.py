@@ -645,6 +645,7 @@ class SegmentsClient:
         new_task_type: Optional[TaskType] = None,
         new_public: Optional[bool] = None,
         organization: Optional[str] = None,
+        clone_labels: bool = False,
     ) -> Dataset:
         """Clone a dataset.
 
@@ -667,6 +668,7 @@ class SegmentsClient:
             new_task_type: The task type for the clone. Defaults to the task type of the original dataset.
             new_public: The visibility for the clone. Defaults to the visibility of the original dataset.
             organization: The username of the organization for which this dataset should be created. None will create a dataset for the current user. Defaults to :obj:`None`.
+            clone_labels: Whether to clone the labels of the original dataset. Defaults to :obj:`False`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
@@ -691,7 +693,11 @@ class SegmentsClient:
         if organization is not None:
             payload["owner"] = organization
 
-        r = self._post(f"/datasets/{dataset_identifier}/clone/", data=payload, model=Dataset)
+        payload["clone_labels"] = clone_labels
+
+        r = self._post(
+            f"/datasets/{dataset_identifier}/clone/", data=payload, model=Dataset
+        )
 
         return cast(Dataset, r)
 
