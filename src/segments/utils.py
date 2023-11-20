@@ -698,7 +698,7 @@ def array_to_pcd(
     Raises:
         :exc:`ImportError`: If open3d is not installed (to install run ``pip install open3d``).
         :exc:`AssertionError`: If the positions array does not have shape (N, 3).
-        :exc:`AssertionError`: If the intensity array does not have shape (N, 1).
+        :exc:`AssertionError`: If the intensity array does not have shape (N, 1) or (N,).
         :exc:`AssertionError`: If the rgb array does not have shape (N, 3).
         :exc:`AssertionError`: If the intensity array does not have the same length as the positions array.
         :exc:`AssertionError`: If the rgb array does not have the same length as the positions array.
@@ -721,21 +721,20 @@ def array_to_pcd(
     dtype = o3d.core.float32
     pcd = o3d.t.geometry.PointCloud(device)
     pcd.point["positions"] = o3d.core.Tensor(positions, dtype, device)
+    N = positions.shape[0]
 
     if intensity is not None:
-        assert (
-            len(intensity) == len(positions)
-        ), f"Intensity must have same length as positions but intensity has shape {intensity.shape} and positions has shape {positions.shape}"
-        assert (
-            len(intensity.shape) == 2 and intensity.shape[1] == 1
-        ), f"Intensity must have shape (N, 1) but has shape {intensity.shape}"
+        assert intensity.shape in (
+            (N, 1),
+            (N,),
+        ), f"Intensity must have shape ({N}, 1) or ({N},) but has shape {intensity.shape}"
+        if len(intensity.shape) == 1:
+            intensity = intensity.reshape(-1, 1)
+
         pcd.point["intensity"] = o3d.core.Tensor(intensity, dtype, device)
 
     if rgb is not None:
-        assert (
-            len(rgb) == len(positions)
-        ), f"RGB must have same length as positions but RGB has shape {rgb.shape} and positions has shape {positions.shape}"
-        assert rgb.shape[1] == 3, f"RGB must have shape (N, 3) but has shape {rgb.shape}"
+        assert rgb.shape == (N, 3), f"RGB must have shape ({N}, 3) but has shape {rgb.shape}"
 
         # check rgb encoding (0-255 or 0-1)
         if np.max(rgb) > 1:
