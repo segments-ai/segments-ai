@@ -18,6 +18,7 @@ import os
 import sys
 from datetime import datetime
 
+
 try:
     # __package__ allows for the case where __name__ is "__main__"
     __version__ = importlib_metadata.version(__package__ or __name__)
@@ -78,7 +79,7 @@ autodoc_typehints_description_target = "documented"
 intersphinx_mapping = {
     #     "python": ("https://docs.python.org/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
-    "PIL": ("https://pillow.readthedocs.io/en/stable/", None)
+    "PIL": ("https://pillow.readthedocs.io/en/stable/", None),
     #     "pydantic": ("https://prompt-build--pydantic-docs.netlify.app/", None),
     #     "requests": ("https://docs.python-requests.org/en/stable/", None),
 }
