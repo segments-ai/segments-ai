@@ -576,7 +576,7 @@ class SegmentsClient:
                 task_attributes = task_attributes.model_dump(mode="json", exclude_unset=True)
             else:
                 try:
-                    task_attributes = TaskAttributes.model_validate(task_attributes).model_dump_json(
+                    task_attributes = TaskAttributes.model_validate(task_attributes).model_dump(
                         mode="json", exclude_unset=True
                     )
                 except pydantic.ValidationError as e:
