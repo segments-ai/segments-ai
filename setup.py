@@ -1,10 +1,11 @@
 from distutils.core import setup
 from typing import List
 
+
 #############
 # Constants #
 #############
-MAJOR, MINOR, PATCH = 1, 4, 1
+MAJOR, MINOR, PATCH = 1, 4, 3
 VERSION = f"{MAJOR}.{MINOR}.{PATCH}"
 
 
