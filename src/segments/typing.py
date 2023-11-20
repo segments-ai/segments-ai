@@ -516,10 +516,19 @@ class Label(BaseModel):
     attributes: Optional[LabelAttributes] = None
     created_at: str
     created_by: str
-    updated_at: str
+    updated_at: Optional[str] = None
+    labeled_by: Optional[str] = None
     score: Optional[float] = None
     rating: Optional[float] = None
     reviewed_at: Optional[str] = None
+    reviewed_by: Optional[str] = None
+
+
+class LabelInfo(BaseModel):
+    score: Optional[float] = None
+    label_status: LabelStatus
+    updated_at: Optional[str] = None
+    labeled_by: Optional[str] = None
     reviewed_by: Optional[str] = None
 
 
@@ -621,7 +630,7 @@ SampleAttributes = Union[
 ]
 
 
-class Sample(BaseModel):
+class BaseSample(BaseModel):
     uuid: str
     name: str
     attributes: SampleAttributes
@@ -632,9 +641,16 @@ class Sample(BaseModel):
     assigned_reviewer: Optional[str] = None
     comments: Optional[List[str]] = None
     priority: float
-    label: Optional[Label] = None
     issues: Optional[List[Issue]] = None
     dataset_full_name: Optional[str] = None
+
+
+class Sample(BaseSample):
+    label: Optional[Label] = None
+
+
+class SampleWithLabelInfo(BaseSample):
+    label: Optional[LabelInfo] = None
 
 
 ########################

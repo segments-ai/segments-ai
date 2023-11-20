@@ -53,6 +53,7 @@ from segments.typing import (
     Role,
     Sample,
     SampleAttributes,
+    SampleWithLabelInfo,
     TaskAttributes,
     TaskType,
     User,
@@ -844,7 +845,7 @@ class SegmentsClient:
         direction: Literal["asc", "desc"] = "asc",
         per_page: int = 1000,
         page: int = 1,
-    ) -> List[Sample]:
+    ) -> List[SampleWithLabelInfo]:
         """Get the samples in a dataset.
 
         .. code-block:: python
@@ -900,16 +901,12 @@ class SegmentsClient:
         r = self._get(f"/datasets/{dataset_identifier}/samples/{query_string}")
         results = r.json()
 
-        # TODO
-        for result in results:
-            result.pop("label", None)
-
         try:
-            results = TypeAdapter(List[Sample]).validate_python(results)
+            results = TypeAdapter(List[SampleWithLabelInfo]).validate_python(results)
         except pydantic.ValidationError as e:
             raise ValidationError(message=str(e), cause=e)
 
-        return cast(List[Sample], results)
+        return cast(List[SampleWithLabelInfo], results)
 
     def get_sample(
         self,
