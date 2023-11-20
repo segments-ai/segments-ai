@@ -465,20 +465,18 @@ class SegmentsClient:
                 "categories": [{"id": 1, "name": "object"}],
             }
 
-        if isinstance(task_attributes, dict):
+        if isinstance(task_attributes, TaskAttributes):
+            task_attributes = task_attributes.model_dump(mode="json", exclude_unset=True)
+        else:
             try:
-                task_attributes = TaskAttributes.model_validate(
-                    task_attributes
-                ).model_dump(mode="json", exclude_unset=True)
+                task_attributes = TaskAttributes.model_validate(task_attributes).model_dump(
+                    mode="json", exclude_unset=True
+                )
             except pydantic.ValidationError as e:
                 logger.error(
                     "Did you use the right task attributes? Please refer to the online documentation: https://docs.segments.ai/reference/categories-and-task-attributes#object-attribute-format.",
                 )
                 raise ValidationError(message=str(e), cause=e)
-        elif type(task_attributes) is TaskAttributes:
-            task_attributes = task_attributes.model_dump(
-                mode="json", exclude_unset=True
-            )
 
         payload: Dict[str, Any] = {
             "name": name,
@@ -574,11 +572,20 @@ class SegmentsClient:
             payload["task_type"] = task_type
 
         if task_attributes is not None:
-            payload["task_attributes"] = (
-                task_attributes.model_dump(mode="json", exclude_unset=True)
-                if type(task_attributes) is TaskAttributes
-                else task_attributes
-            )
+            if isinstance(task_attributes, TaskAttributes):
+                task_attributes = task_attributes.model_dump(mode="json", exclude_unset=True)
+            else:
+                try:
+                    task_attributes = TaskAttributes.model_validate(task_attributes).model_dump(
+                        mode="json", exclude_unset=True
+                    )
+                except pydantic.ValidationError as e:
+                    logger.error(
+                        "Did you use the right task attributes? Please refer to the online documentation: https://docs.segments.ai/reference/categories-and-task-attributes#object-attribute-format.",
+                    )
+                    raise ValidationError(message=str(e), cause=e)
+
+            payload["task_attributes"] = task_attributes
 
         if category is not None:
             payload["category"] = category
@@ -701,9 +708,7 @@ class SegmentsClient:
 
         payload["clone_labels"] = clone_labels
 
-        r = self._post(
-            f"/datasets/{dataset_identifier}/clone/", data=payload, model=Dataset
-        )
+        r = self._post(f"/datasets/{dataset_identifier}/clone/", data=payload, model=Dataset)
 
         return cast(Dataset, r)
 
@@ -836,9 +841,7 @@ class SegmentsClient:
         name: Optional[str] = None,
         label_status: Optional[Union[LabelStatus, List[LabelStatus]]] = None,
         metadata: Optional[Union[str, List[str]]] = None,
-        sort: Literal[
-            "name", "created", "priority", "updated_at", "gt_label__updated_at"
-        ] = "name",
+        sort: Literal["name", "created", "priority", "updated_at", "gt_label__updated_at"] = "name",
         direction: Literal["asc", "desc"] = "asc",
         per_page: int = 1000,
         page: int = 1,
@@ -1005,7 +1008,9 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        if isinstance(attributes, dict):
+        if isinstance(attributes, get_args(SampleAttributes)):
+            attributes = attributes.model_dump(mode="json", exclude_unset=True)
+        else:
             try:
                 attributes = (
                     TypeAdapter(SampleAttributes)
@@ -1017,8 +1022,6 @@ class SegmentsClient:
                     "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
                 )
                 raise ValidationError(message=str(e), cause=e)
-        elif type(attributes) in get_args(SampleAttributes):
-            attributes = attributes.model_dump(mode="json", exclude_unset=True)
 
         payload: Dict[str, Any] = {
             "name": name,
@@ -1067,25 +1070,20 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        # Check the input
         for sample in samples:
-            if isinstance(sample, dict):
+            if isinstance(sample, Sample):
+                sample = sample.model_dump(mode="json", exclude_unset=True)
+            else:
                 if "name" not in sample or "attributes" not in sample:
                     raise KeyError(f"Please add a name and attributes to your sample: {sample}")
 
                 try:
-                    sample = (
-                        TypeAdapter(SampleAttributes)
-                        .validate_python(sample["attributes"])
-                        .model_dump(mode="json", exclude_unset=True)
-                    )
+                    sample = TypeAdapter(Sample).validate_python(sample).model_dump(mode="json", exclude_unset=True)
                 except pydantic.ValidationError as e:
                     logger.error(
                         "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
                     )
                     raise ValidationError(message=str(e), cause=e)
-            elif type(sample) is Sample:
-                sample = sample.model_dump(mode="json", exclude_unset=True)
 
         payload = samples
 
@@ -1134,7 +1132,7 @@ class SegmentsClient:
 
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
-            :exc:`~segments.exceptions.ValidationError`: If validation of the samples fails.
+            :exc:`~segments.exceptions.ValidationError`: If validation of the sample fails.
             :exc:`~segments.exceptions.NotFoundError`: If the sample is not found.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
@@ -1146,11 +1144,22 @@ class SegmentsClient:
             payload["name"] = name
 
         if attributes is not None:
-            payload["attributes"] = (
-                attributes.model_dump(mode="json", exclude_unset=True)
-                if type(attributes) in get_args(SampleAttributes)
-                else attributes
-            )
+            if isinstance(attributes, get_args(SampleAttributes)):
+                attributes = attributes.model_dump(mode="json", exclude_unset=True)
+            else:
+                try:
+                    attributes = (
+                        TypeAdapter(SampleAttributes)
+                        .validate_python(attributes)
+                        .model_dump(mode="json", exclude_unset=True)
+                    )
+                except pydantic.ValidationError as e:
+                    logger.error(
+                        "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
+                    )
+                    raise ValidationError(message=str(e), cause=e)
+
+            payload["attributes"] = attributes
 
         if metadata is not None:
             payload["metadata"] = metadata
@@ -1273,7 +1282,9 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        if isinstance(attributes, dict):
+        if isinstance(attributes, get_args(LabelAttributes)):
+            attributes = attributes.model_dump(mode="json", exclude_unset=True)
+        else:
             try:
                 attributes = (
                     TypeAdapter(LabelAttributes)
@@ -1285,8 +1296,6 @@ class SegmentsClient:
                     "Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.",
                 )
                 raise ValidationError(message=str(e), cause=e)
-        elif type(attributes) in get_args(LabelAttributes):
-            attributes = attributes.model_dump(mode="json", exclude_unset=True)
 
         payload: Dict[str, Any] = {
             "label_status": label_status,
@@ -1347,11 +1356,22 @@ class SegmentsClient:
         payload: Dict[str, Any] = {}
 
         if attributes is not None:
-            payload["attributes"] = (
-                attributes.model_dump(mode="json", exclude_unset=True)
-                if type(attributes) in get_args(LabelAttributes)
-                else attributes
-            )
+            if isinstance(attributes, get_args(LabelAttributes)):
+                attributes = attributes.model_dump(mode="json", exclude_unset=True)
+            else:
+                try:
+                    attributes = (
+                        TypeAdapter(LabelAttributes)
+                        .validate_python(attributes)
+                        .model_dump(mode="json", exclude_unset=True)
+                    )
+                except pydantic.ValidationError as e:
+                    logger.error(
+                        "Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.",
+                    )
+                    raise ValidationError(message=str(e), cause=e)
+
+            payload["attributes"] = attributes
 
         if label_status is not None:
             payload["label_status"] = label_status
@@ -1461,6 +1481,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
+
         payload = {
             "name": name,
             "description": description,
