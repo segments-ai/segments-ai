@@ -467,14 +467,18 @@ class SegmentsClient:
 
         if isinstance(task_attributes, dict):
             try:
-                TaskAttributes.model_validate(task_attributes)
+                task_attributes = TaskAttributes.model_validate(
+                    task_attributes
+                ).model_dump(mode="json", exclude_unset=True)
             except pydantic.ValidationError as e:
                 logger.error(
                     "Did you use the right task attributes? Please refer to the online documentation: https://docs.segments.ai/reference/categories-and-task-attributes#object-attribute-format.",
                 )
                 raise ValidationError(message=str(e), cause=e)
         elif type(task_attributes) is TaskAttributes:
-            task_attributes = task_attributes.model_dump()
+            task_attributes = task_attributes.model_dump(
+                mode="json", exclude_unset=True
+            )
 
         payload: Dict[str, Any] = {
             "name": name,
@@ -571,7 +575,9 @@ class SegmentsClient:
 
         if task_attributes is not None:
             payload["task_attributes"] = (
-                task_attributes.model_dump() if type(task_attributes) is TaskAttributes else task_attributes
+                task_attributes.model_dump(mode="json", exclude_unset=True)
+                if type(task_attributes) is TaskAttributes
+                else task_attributes
             )
 
         if category is not None:
@@ -1001,14 +1007,18 @@ class SegmentsClient:
 
         if isinstance(attributes, dict):
             try:
-                TypeAdapter(SampleAttributes).validate_python(attributes)
+                attributes = (
+                    TypeAdapter(SampleAttributes)
+                    .validate_python(attributes)
+                    .model_dump(mode="json", exclude_unset=True)
+                )
             except pydantic.ValidationError as e:
                 logger.error(
                     "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
                 )
                 raise ValidationError(message=str(e), cause=e)
         elif type(attributes) in get_args(SampleAttributes):
-            attributes = attributes.model_dump()
+            attributes = attributes.model_dump(mode="json", exclude_unset=True)
 
         payload: Dict[str, Any] = {
             "name": name,
@@ -1064,14 +1074,18 @@ class SegmentsClient:
                     raise KeyError(f"Please add a name and attributes to your sample: {sample}")
 
                 try:
-                    TypeAdapter(SampleAttributes).validate_python(sample["attributes"])
+                    sample = (
+                        TypeAdapter(SampleAttributes)
+                        .validate_python(sample["attributes"])
+                        .model_dump(mode="json", exclude_unset=True)
+                    )
                 except pydantic.ValidationError as e:
                     logger.error(
                         "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
                     )
                     raise ValidationError(message=str(e), cause=e)
             elif type(sample) is Sample:
-                sample = sample.model_dump()
+                sample = sample.model_dump(mode="json", exclude_unset=True)
 
         payload = samples
 
@@ -1133,7 +1147,9 @@ class SegmentsClient:
 
         if attributes is not None:
             payload["attributes"] = (
-                attributes.model_dump() if type(attributes) in get_args(SampleAttributes) else attributes
+                attributes.model_dump(mode="json", exclude_unset=True)
+                if type(attributes) in get_args(SampleAttributes)
+                else attributes
             )
 
         if metadata is not None:
@@ -1259,14 +1275,18 @@ class SegmentsClient:
 
         if isinstance(attributes, dict):
             try:
-                TypeAdapter(LabelAttributes).validate_python(attributes)
+                attributes = (
+                    TypeAdapter(LabelAttributes)
+                    .validate_python(attributes)
+                    .model_dump(mode="json", exclude_unset=True)
+                )
             except pydantic.ValidationError as e:
                 logger.error(
                     "Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.",
                 )
                 raise ValidationError(message=str(e), cause=e)
         elif type(attributes) in get_args(LabelAttributes):
-            attributes = attributes.model_dump()
+            attributes = attributes.model_dump(mode="json", exclude_unset=True)
 
         payload: Dict[str, Any] = {
             "label_status": label_status,
@@ -1328,7 +1348,9 @@ class SegmentsClient:
 
         if attributes is not None:
             payload["attributes"] = (
-                attributes.model_dump() if type(attributes) in get_args(LabelAttributes) else attributes
+                attributes.model_dump(mode="json", exclude_unset=True)
+                if type(attributes) in get_args(LabelAttributes)
+                else attributes
             )
 
         if label_status is not None:
