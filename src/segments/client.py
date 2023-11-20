@@ -1357,10 +1357,14 @@ class SegmentsClient:
 
         if attributes is not None:
             if isinstance(attributes, get_args(LabelAttributes)):
-                attributes = attributes.model_dump()
+                attributes = attributes.model_dump(mode="json", exclude_unset=True)
             else:
                 try:
-                    TypeAdapter(LabelAttributes).validate_python(attributes)
+                    attributes = (
+                        TypeAdapter(LabelAttributes)
+                        .validate_python(attributes)
+                        .model_dump(mode="json", exclude_unset=True)
+                    )
                 except pydantic.ValidationError as e:
                     logger.error(
                         "Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.",
