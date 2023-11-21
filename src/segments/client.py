@@ -1072,7 +1072,11 @@ class SegmentsClient:
                     raise KeyError(f"Please add a name and attributes to your sample: {sample}")
 
                 try:
-                    sample = TypeAdapter(Sample).validate_python(sample).model_dump(mode="json", exclude_unset=True)
+                    sample["attributes"] = (
+                        TypeAdapter(SampleAttributes)
+                        .validate_python(sample["attributes"])
+                        .model_dump(mode="json", exclude_unset=True)
+                    )
                 except pydantic.ValidationError as e:
                     logger.error(
                         "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
