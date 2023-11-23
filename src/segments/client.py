@@ -896,8 +896,6 @@ class SegmentsClient:
                 label_status = [label_status]
             assert isinstance(label_status, list)
             # label_status = [status.upper() for status in label_status]
-            if labelset is None:
-                query_string += "&labelset=ground-truth"
             query_string += f"&label_status={','.join(label_status)}"
 
         # sorting
