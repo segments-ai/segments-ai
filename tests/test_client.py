@@ -274,9 +274,12 @@ class TestSample(Test):
         metadata = None
         sort: Final = "created"
         direction: Final = "desc"
+        labelset = "ground-truth"
         for dataset in self.datasets:
             dataset_identifier = f"{self.owner}/{dataset}"
-            samples = self.client.get_samples(dataset_identifier, name, label_status, metadata, sort, direction)
+            samples = self.client.get_samples(
+                dataset_identifier, labelset, name, label_status, metadata, sort, direction
+            )
             for sample in samples:
                 self.assertIsInstance(sample, Sample)
 
@@ -364,9 +367,7 @@ class TestSample(Test):
         for dataset in self.datasets:
             samples = self.client.get_samples(f"{self.owner}/{dataset}")
             if any(sample.name == "Test sample" for sample in samples):
-                sample = next(
-                    sample for sample in samples if sample.name == "Test sample"
-                )
+                sample = next(sample for sample in samples if sample.name == "Test sample")
                 self.client.delete_sample(sample.uuid)
 
         for sample_attribute_type, dataset in zip(self.sample_attribute_types, self.datasets):
