@@ -516,8 +516,7 @@ class Label(BaseModel):
     attributes: Optional[LabelAttributes] = None
     created_at: str
     created_by: str
-    updated_at: Optional[str] = None
-    labeled_by: Optional[str] = None
+    updated_at: str
     score: Optional[float] = None
     rating: Optional[float] = None
     reviewed_at: Optional[str] = None
@@ -528,7 +527,7 @@ class LabelSummary(BaseModel):
     score: Optional[float] = None
     label_status: LabelStatus
     updated_at: Optional[str] = None
-    labeled_by: Optional[str] = None
+    created_by: Optional[str] = None
     reviewed_by: Optional[str] = None
 
 
