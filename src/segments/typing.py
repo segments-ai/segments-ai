@@ -525,6 +525,14 @@ class Label(BaseModel):
     reviewed_by: Optional[str] = None
 
 
+class LabelSummary(BaseModel):
+    score: Optional[float] = None
+    label_status: LabelStatus
+    updated_at: Optional[str] = None
+    created_by: Optional[str] = None
+    reviewed_by: Optional[str] = None
+
+
 ##########
 # Sample #
 ##########
@@ -634,7 +642,7 @@ class Sample(BaseModel):
     assigned_reviewer: Optional[str] = None
     comments: Optional[List[str]] = None
     priority: float
-    label: Optional[Label] = None
+    label: Optional[Union[Label, LabelSummary]] = None
     issues: Optional[List[Issue]] = None
     dataset_full_name: Optional[str] = None
 

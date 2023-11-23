@@ -900,10 +900,6 @@ class SegmentsClient:
         r = self._get(f"/datasets/{dataset_identifier}/samples/{query_string}")
         results = r.json()
 
-        # TODO
-        for result in results:
-            result.pop("label", None)
-
         try:
             results = TypeAdapter(List[Sample]).validate_python(results)
         except pydantic.ValidationError as e:
