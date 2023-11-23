@@ -270,11 +270,11 @@ class TestSample(Test):
 
     def test_get_samples(self) -> None:
         name = None
-        label_status = None
+        label_status = LabelStatus.UNLABELED
         metadata = None
         sort: Final = "created"
         direction: Final = "desc"
-        labelset = "ground-truth"
+        labelset = None  # "ground-truth"
         for dataset in self.datasets:
             dataset_identifier = f"{self.owner}/{dataset}"
             samples = self.client.get_samples(
