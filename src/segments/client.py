@@ -837,6 +837,7 @@ class SegmentsClient:
     def get_samples(
         self,
         dataset_identifier: str,
+        labelset: Optional[str] = None,
         name: Optional[str] = None,
         label_status: Optional[Union[LabelStatus, List[LabelStatus]]] = None,
         metadata: Optional[Union[str, List[str]]] = None,
@@ -856,6 +857,7 @@ class SegmentsClient:
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+            labelset: If defined, this additionally returns for each sample a label summary for the given labelset. Defaults to :obj:`None`.
             name: Name to filter by. Defaults to :obj:`None` (no filtering).
             label_status: Sequence of label statuses to filter by. Defaults to :obj:`None` (no filtering).
             metadata: Sequence of 'key:value' metadata attributes to filter by. Defaults to :obj:`None` (no filtering).
@@ -875,6 +877,9 @@ class SegmentsClient:
         # pagination
         query_string = f"?per_page={per_page}&page={page}"
 
+        if labelset is not None:
+            query_string += f"&labelset={labelset}"
+
         # filter by name
         if name is not None:
             query_string += f"&name__contains={name}"
@@ -891,7 +896,7 @@ class SegmentsClient:
                 label_status = [label_status]
             assert isinstance(label_status, list)
             # label_status = [status.upper() for status in label_status]
-            query_string += f"&labelset=ground-truth&label_status={','.join(label_status)}"
+            query_string += f"&label_status={','.join(label_status)}"
 
         # sorting
         direction_str = "" if direction == "asc" else "-"
