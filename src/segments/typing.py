@@ -578,6 +578,7 @@ class CalibratedImage(URL):
     extrinsics: Optional[CameraExtrinsics] = None
     distortion: Optional[Distortion] = None
     camera_convention: CameraConvention = CameraConvention.OPEN_GL
+    name: Optional[str] = None
 
 
 class PointcloudSampleAttributes(BaseModel):
