@@ -501,7 +501,7 @@ class SegmentsClient:
         dataset_identifier: str,
         description: str | None = None,
         task_type: TaskType | None = None,
-        task_attributes: dict[str, Any] | TaskAttributes | None = None,
+        task_attributes: TaskAttributes | dict[str, Any] | None = None,
         category: Category | None = None,
         public: bool | None = None,
         readme: str | None = None,
@@ -1032,7 +1032,7 @@ class SegmentsClient:
 
         return cast(Sample, r)
 
-    def add_samples(self, dataset_identifier: str, samples: list[dict[str, Any] | Sample]) -> list[Sample]:
+    def add_samples(self, dataset_identifier: str, samples: list[Sample | dict[str, Any]]) -> list[Sample]:
         """Add samples to a dataset in bulk. When attempting to add samples which already exist, no error is thrown but the existing samples are returned without changes.
 
         Args:
@@ -1215,7 +1215,7 @@ class SegmentsClient:
         self,
         sample_uuid: str,
         labelset: str,
-        attributes: dict[str, Any] | LabelAttributes,
+        attributes: LabelAttributes | dict[str, Any],
         label_status: LabelStatus = LabelStatus.PRELABELED,
         score: float | None = None,
     ) -> Label:
