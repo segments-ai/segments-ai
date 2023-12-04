@@ -779,4 +779,6 @@ class SegmentsDatasetCategory(BaseModel):
     name: str
     color: RGB | RGBA | None = None
     attributes: list[Any] | None = None
+    isthing: bool | None = None
+    has_instances: bool | None = None
     model_config = ConfigDict(populate_by_name=True, extra="allow")

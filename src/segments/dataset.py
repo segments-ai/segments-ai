@@ -126,9 +126,7 @@ class SegmentsDataset:
 
         self.dataset_identifier = f"{self.release['dataset']['owner']}_{self.release['dataset']['name']}"
 
-        self.image_dir = (
-            None if segments_dir is None else os.path.join(segments_dir, self.dataset_identifier, self.release["name"])
-        )
+        self.image_dir = os.path.join(segments_dir, self.dataset_identifier, self.release["name"])
 
         # First some checks
         if self.labelset not in [labelset["name"] for labelset in self.release["dataset"]["labelsets"]]:
@@ -244,7 +242,7 @@ class SegmentsDataset:
 
     def _load_segmentation_bitmap_from_cache(
         self, sample: dict[str, Any], labelset: str
-    ) -> npt.NDArray[np.uint32] | Image.Image:
+    ) -> npt.NDArray[np.uint32] | Image.Image | None:
         sample_name = os.path.splitext(sample["name"])[0]
         label = sample["labels"][labelset]
         segmentation_bitmap_url = label["attributes"]["segmentation_bitmap"]["url"]

@@ -643,10 +643,11 @@ class SegmentsClient:
     def clone_dataset(
         self,
         dataset_identifier: str,
-        new_name: Optional[str] = None,
-        new_task_type: Optional[TaskType] = None,
-        new_public: Optional[bool] = None,
-        organization: Optional[str] = None,
+        new_name: str | None = None,
+        new_task_type: TaskType | None = None,
+        new_public: bool | None = None,
+        organization: str | None = None,
+        clone_labels: bool = False,
     ) -> Dataset:
         """Clone a dataset.
 
@@ -762,7 +763,9 @@ class SegmentsClient:
 
         return cast(Collaborator, r)
 
-    def update_dataset_collaborator(self, dataset_identifier: str, username: str, role: Role) -> Collaborator:
+    def update_dataset_collaborator(
+        self, dataset_identifier: str, username: str, role: Role = Role.LABELER
+    ) -> Collaborator:
         """Update a dataset collaborator.
 
         .. code-block:: python
@@ -786,8 +789,7 @@ class SegmentsClient:
         """
         payload: dict[str, Any] = {}
 
-        if role is not None:
-            payload["role"] = role
+        payload["role"] = role
 
         r = self._patch(
             f"/datasets/{dataset_identifier}/collaborators/{username}",
@@ -826,9 +828,10 @@ class SegmentsClient:
     def get_samples(
         self,
         dataset_identifier: str,
-        name: Optional[str] = None,
-        label_status: Optional[Union[LabelStatus, List[LabelStatus]]] = None,
-        metadata: Optional[Union[str, List[str]]] = None,
+        labelset: str | None = None,
+        name: str | None = None,
+        label_status: LabelStatus | list[LabelStatus] | None = None,
+        metadata: str | list[str] | None = None,
         sort: Literal["name", "created", "priority", "updated_at", "gt_label__updated_at"] = "name",
         direction: Literal["asc", "desc"] = "asc",
         per_page: int = 1000,
@@ -898,7 +901,7 @@ class SegmentsClient:
         except pydantic.ValidationError as e:
             raise ValidationError(message=str(e), cause=e)
 
-        return cast(list[Sample], results)
+        return results
 
     def get_sample(
         self,
@@ -943,12 +946,11 @@ class SegmentsClient:
         self,
         dataset_identifier: str,
         name: str,
-        attributes: dict[str, Any] | SampleAttributes,
+        attributes: SampleAttributes | dict[str, Any],
         metadata: dict[str, Any] | None = None,
         priority: float = 0,
-        assigned_labeler: Optional[str] = None,
-        assigned_reviewer: Optional[str] = None,
-        embedding: Optional[Union[npt.NDArray[Any], List[float]]] = None,
+        assigned_labeler: str | None = None,
+        assigned_reviewer: str | None = None,
     ) -> Sample:
         """Add a sample to a dataset.
 
@@ -1010,16 +1012,10 @@ class SegmentsClient:
                 )
                 raise ValidationError(message=str(e), cause=e)
 
-        payload: dict[str, Any] = {
-            "name": name,
-            "attributes": attributes,
-        }
+        payload: dict[str, Any] = {"name": name, "attributes": attributes, "priority": priority}
 
         if metadata is not None:
             payload["metadata"] = metadata
-
-        if priority is not None:
-            payload["priority"] = priority
 
         if assigned_labeler is not None:
             payload["assigned_labeler"] = assigned_labeler
@@ -1036,7 +1032,7 @@ class SegmentsClient:
 
         return cast(Sample, r)
 
-    def add_samples(self, dataset_identifier: str, samples: List[Union[Dict[str, Any], Sample]]) -> List[Sample]:
+    def add_samples(self, dataset_identifier: str, samples: list[dict[str, Any] | Sample]) -> list[Sample]:
         """Add samples to a dataset in bulk. When attempting to add samples which already exist, no error is thrown but the existing samples are returned without changes.
 
         Args:
@@ -1086,13 +1082,12 @@ class SegmentsClient:
     def update_sample(
         self,
         uuid: str,
-        name: Optional[str] = None,
-        attributes: Optional[Union[Dict[str, Any], SampleAttributes]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
-        priority: Optional[float] = None,
-        assigned_labeler: Optional[str] = None,
-        assigned_reviewer: Optional[str] = None,
-        embedding: Optional[Union[npt.NDArray[Any], List[float]]] = None,
+        name: str | None = None,
+        attributes: SampleAttributes | dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
+        priority: float | None = None,
+        assigned_labeler: str | None = None,
+        assigned_reviewer: str | None = None,
     ) -> Sample:
         """Update a sample.
 
@@ -1297,7 +1292,7 @@ class SegmentsClient:
         self,
         sample_uuid: str,
         labelset: str,
-        attributes: dict[str, Any] | LabelAttributes | None = None,
+        attributes: LabelAttributes | dict[str, Any] | None = None,
         label_status: LabelStatus | None = None,
         score: float | None = None,
     ) -> Label:
@@ -1413,7 +1408,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        r = self._get(f"/datasets/{dataset_identifier}/labelsets/", model=List[Labelset])
+        r = self._get(f"/datasets/{dataset_identifier}/labelsets/", model=list[Labelset])
 
         return cast(list[Labelset], r)
 
@@ -1738,7 +1733,7 @@ class SegmentsClient:
     ##########
     # Assets #
     ##########
-    def upload_asset(self, file: Union[TextIO, BinaryIO], filename: str = "label.png") -> File:
+    def upload_asset(self, file: TextIO | BinaryIO, filename: str = "label.png") -> File:
         """Upload an asset.
 
         .. code-block:: python
@@ -1828,7 +1823,7 @@ class SegmentsClient:
 
         r = self.api_session.post(
             urllib.parse.urljoin(self.api_url, endpoint),
-            json=data,  # data=data
+            json=data,
             headers=headers,
         )
 
@@ -1860,7 +1855,7 @@ class SegmentsClient:
 
         r = self.api_session.put(
             urllib.parse.urljoin(self.api_url, endpoint),
-            json=data,  # data=data
+            json=data,
             headers=headers,
         )
 
@@ -1892,7 +1887,7 @@ class SegmentsClient:
 
         r = self.api_session.patch(
             urllib.parse.urljoin(self.api_url, endpoint),
-            json=data,  # data=data
+            json=data,
             headers=headers,
         )
 
@@ -1924,7 +1919,7 @@ class SegmentsClient:
 
         r = self.api_session.delete(
             urllib.parse.urljoin(self.api_url, endpoint),
-            json=data,  # data=data
+            json=data,
             headers=headers,
         )
 
@@ -1938,7 +1933,7 @@ class SegmentsClient:
         return headers
 
     @handle_exceptions
-    def _upload_to_aws(self, file: Union[TextIO, BinaryIO], url: str, aws_fields: AWSFields) -> requests.Response:
+    def _upload_to_aws(self, file: TextIO | BinaryIO, url: str, aws_fields: AWSFields) -> requests.Response:
         """Upload file to AWS.
 
         Args:
