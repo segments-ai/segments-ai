@@ -20,6 +20,7 @@ from segments.utils import (
 )
 from tqdm import tqdm
 
+
 #############
 # Variables #
 #############
@@ -123,22 +124,14 @@ class SegmentsDataset:
             self.release = json.loads(content.content)
         self.release_file = release_file
 
-        self.dataset_identifier = "{}_{}".format(
-            self.release["dataset"]["owner"], self.release["dataset"]["name"]
-        )
+        self.dataset_identifier = f"{self.release['dataset']['owner']}_{self.release['dataset']['name']}"
 
         self.image_dir = (
-            None
-            if segments_dir is None
-            else os.path.join(
-                segments_dir, self.dataset_identifier, self.release["name"]
-            )
+            None if segments_dir is None else os.path.join(segments_dir, self.dataset_identifier, self.release["name"])
         )
 
         # First some checks
-        if self.labelset not in [
-            labelset["name"] for labelset in self.release["dataset"]["labelsets"]
-        ]:
+        if self.labelset not in [labelset["name"] for labelset in self.release["dataset"]["labelsets"]]:
             raise ValueError(f"There is no labelset with name '{self.labelset}'.")
 
         self.task_type = self.release["dataset"]["task_type"]
@@ -162,11 +155,7 @@ class SegmentsDataset:
         print("Initializing dataset...")
 
         # Setup cache
-        if (
-            self.caching_enabled
-            and self.image_dir
-            and not os.path.exists(self.image_dir)
-        ):
+        if self.caching_enabled and self.image_dir and not os.path.exists(self.image_dir):
             os.makedirs(self.image_dir)
 
         # Load and filter the samples
@@ -225,9 +214,7 @@ class SegmentsDataset:
 
         print(f"Initialized dataset with {num_samples} images.")
 
-    def _load_image_from_cache(
-        self, sample: dict[str, Any]
-    ) -> tuple[Image.Image | None, str]:
+    def _load_image_from_cache(self, sample: dict[str, Any]) -> tuple[Image.Image | None, str]:
         sample_name = os.path.splitext(sample["name"])[0]
         image_url = sample["attributes"]["image"]["url"]
         image_url_parsed = urlparse(image_url)
@@ -241,17 +228,13 @@ class SegmentsDataset:
             if self.caching_enabled:
                 image_filename = os.path.join(self.image_dir, image_filename_rel)
                 if not os.path.exists(image_filename):
-                    image = load_image_from_url(
-                        image_url, image_filename, self.s3_client
-                    )
+                    image = load_image_from_url(image_url, image_filename, self.s3_client)
                 else:
                     try:
                         image = Image.open(image_filename)
                     except UnidentifiedImageError:
                         image = None
-                        logger.error(
-                            f"Something went wrong loading image: {image_filename}"
-                        )
+                        logger.error(f"Something went wrong loading image: {image_filename}")
             else:
                 image = load_image_from_url(image_url, self.s3_client)
 
@@ -277,9 +260,7 @@ class SegmentsDataset:
                 f"{sample_name}_label_{labelset}{url_extension}",
             )
             if not os.path.exists(segmentation_bitmap_filename):
-                return load_label_bitmap_from_url(
-                    segmentation_bitmap_url, segmentation_bitmap_filename
-                )
+                return load_label_bitmap_from_url(segmentation_bitmap_url, segmentation_bitmap_filename)
             else:
                 return Image.open(segmentation_bitmap_filename)
         else:
@@ -313,9 +294,7 @@ class SegmentsDataset:
         try:
             image, image_filename = self._load_image_from_cache(sample)
         except (KeyError, TypeError):
-            logger.error(
-                f"Something went wrong loading sample {sample['name']}: {sample}"
-            )
+            logger.error(f"Something went wrong loading sample {sample['name']}: {sample}")
 
         item = {
             "uuid": sample["uuid"],
@@ -326,16 +305,11 @@ class SegmentsDataset:
         }
 
         # Segmentation bitmap
-        if (
-            self.task_type == "segmentation-bitmap"
-            or self.task_type == "segmentation-bitmap-highres"
-        ):
+        if self.task_type == "segmentation-bitmap" or self.task_type == "segmentation-bitmap-highres":
             # Load the label
             try:
                 label = sample["labels"][self.labelset]
-                segmentation_bitmap = self._load_segmentation_bitmap_from_cache(
-                    sample, self.labelset
-                )
+                segmentation_bitmap = self._load_segmentation_bitmap_from_cache(sample, self.labelset)
                 attributes = label["attributes"]
                 annotations = attributes["annotations"]
                 item.update(
@@ -355,11 +329,7 @@ class SegmentsDataset:
                 )
 
         # Vector labels
-        elif (
-            self.task_type == "vector"
-            or self.task_type == "bboxes"
-            or self.task_type == "keypoints"
-        ):
+        elif self.task_type == "vector" or self.task_type == "bboxes" or self.task_type == "keypoints":
             try:
                 label = sample["labels"][self.labelset]
                 attributes = label["attributes"]

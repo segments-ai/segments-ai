@@ -17,7 +17,6 @@ from typing import (
     cast,
 )
 
-import numpy.typing as npt
 import pydantic
 import requests
 from pydantic import TypeAdapter
@@ -56,6 +55,7 @@ from segments.typing import (
 )
 from typing_extensions import Literal, get_args
 
+
 try:
     # __package__ allows for the case where __name__ is "__main__"
     __version__ = importlib_metadata.version(__package__ or __name__)
@@ -74,9 +74,7 @@ VERSION = __version__
 # Helper functions #
 ####################
 # Error handling: https://stackoverflow.com/questions/16511337/correct-way-to-try-except-using-python-requests-module
-def handle_exceptions(
-    f: Callable[..., requests.Response]
-) -> Callable[..., requests.Response | T]:
+def handle_exceptions(f: Callable[..., requests.Response]) -> Callable[..., requests.Response | T]:
     """Catch exceptions and throw Segments exceptions.
 
     Args:
@@ -121,10 +119,7 @@ def handle_exceptions(
                 raise NotFoundError(message=text, cause=e)
             if "already exists" in text or "already have" in text:
                 raise AlreadyExistsError(message=text, cause=e)
-            if (
-                "cannot be added as collaborator" in text
-                or "is already a collaborator" in text
-            ):
+            if "cannot be added as collaborator" in text or "is already a collaborator" in text:
                 raise CollaboratorError(message=text, cause=e)
             if "authentication credentials were not provided" in text:
                 raise AuthenticationError(message=text, cause=e)
@@ -230,17 +225,12 @@ class SegmentsClient:
             if r.status_code == 200:
                 logger.info("Initialized successfully.")
         except NetworkError as e:
-            if (
-                cast(requests.exceptions.RequestException, e.cause).response.status_code
-                == 426
-            ):
+            if cast(requests.exceptions.RequestException, e.cause).response.status_code == 426:
                 logger.warning(
                     "There's a new version available. Please upgrade by running 'pip install --upgrade segments-ai'"
                 )
             else:
-                raise AuthenticationError(
-                    message="Something went wrong. Did you use the right API key?"
-                )
+                raise AuthenticationError(message="Something went wrong. Did you use the right API key?")
 
     # https://stackoverflow.com/questions/48160728/resourcewarning-unclosed-socket-in-python-3-unit-test
     def close(self) -> None:
@@ -470,16 +460,18 @@ class SegmentsClient:
                 "categories": [{"id": 1, "name": "object"}],
             }
 
-        if type(task_attributes) is dict:
+        if isinstance(task_attributes, TaskAttributes):
+            task_attributes = task_attributes.model_dump(mode="json", exclude_unset=True)
+        else:
             try:
-                TaskAttributes.model_validate(task_attributes)
+                task_attributes = TaskAttributes.model_validate(task_attributes).model_dump(
+                    mode="json", exclude_unset=True
+                )
             except pydantic.ValidationError as e:
                 logger.error(
                     "Did you use the right task attributes? Please refer to the online documentation: https://docs.segments.ai/reference/categories-and-task-attributes#object-attribute-format.",
                 )
                 raise ValidationError(message=str(e), cause=e)
-        elif type(task_attributes) is TaskAttributes:
-            task_attributes = task_attributes.model_dump()
 
         payload: dict[str, Any] = {
             "name": name,
@@ -504,11 +496,7 @@ class SegmentsClient:
         if metadata:
             payload["metadata"] = metadata
 
-        endpoint = (
-            f"/organizations/{organization}/datasets/"
-            if organization is not None
-            else "/user/datasets/"
-        )
+        endpoint = f"/organizations/{organization}/datasets/" if organization is not None else "/user/datasets/"
 
         r = self._post(endpoint, data=payload, model=Dataset)
 
@@ -579,11 +567,20 @@ class SegmentsClient:
             payload["task_type"] = task_type
 
         if task_attributes is not None:
-            payload["task_attributes"] = (
-                task_attributes.model_dump()
-                if type(task_attributes) is TaskAttributes
-                else task_attributes
-            )
+            if isinstance(task_attributes, TaskAttributes):
+                task_attributes = task_attributes.model_dump(mode="json", exclude_unset=True)
+            else:
+                try:
+                    task_attributes = TaskAttributes.model_validate(task_attributes).model_dump(
+                        mode="json", exclude_unset=True
+                    )
+                except pydantic.ValidationError as e:
+                    logger.error(
+                        "Did you use the right task attributes? Please refer to the online documentation: https://docs.segments.ai/reference/categories-and-task-attributes#object-attribute-format.",
+                    )
+                    raise ValidationError(message=str(e), cause=e)
+
+            payload["task_attributes"] = task_attributes
 
         if category is not None:
             payload["category"] = category
@@ -598,9 +595,7 @@ class SegmentsClient:
             payload["metadata"] = metadata
 
         if labeling_inactivity_timeout_seconds is not None:
-            payload[
-                "labeling_inactivity_timeout_seconds"
-            ] = labeling_inactivity_timeout_seconds
+            payload["labeling_inactivity_timeout_seconds"] = labeling_inactivity_timeout_seconds
 
         if enable_skip_labeling is not None:
             payload["enable_skip_labeling"] = enable_skip_labeling
@@ -615,9 +610,7 @@ class SegmentsClient:
             payload["enable_interpolation"] = enable_interpolation
 
         if enable_same_dimensions_track_constraint is not None:
-            payload[
-                "enable_same_dimensions_track_constraint"
-            ] = enable_same_dimensions_track_constraint
+            payload["enable_same_dimensions_track_constraint"] = enable_same_dimensions_track_constraint
 
         if enable_save_button is not None:
             payload["enable_save_button"] = enable_save_button
@@ -656,10 +649,10 @@ class SegmentsClient:
     def clone_dataset(
         self,
         dataset_identifier: str,
-        new_name: str | None = None,
-        new_task_type: TaskType | None = None,
-        new_public: bool | None = None,
-        organization: str | None = None,
+        new_name: Optional[str] = None,
+        new_task_type: Optional[TaskType] = None,
+        new_public: Optional[bool] = None,
+        organization: Optional[str] = None,
     ) -> Dataset:
         """Clone a dataset.
 
@@ -682,6 +675,7 @@ class SegmentsClient:
             new_task_type: The task type for the clone. Defaults to the task type of the original dataset.
             new_public: The visibility for the clone. Defaults to the visibility of the original dataset.
             organization: The username of the organization for which this dataset should be created. None will create a dataset for the current user. Defaults to :obj:`None`.
+            clone_labels: Whether to clone the labels of the original dataset. Defaults to :obj:`False`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
@@ -706,18 +700,16 @@ class SegmentsClient:
         if organization is not None:
             payload["owner"] = organization
 
-        r = self._post(
-            f"/datasets/{dataset_identifier}/clone/", data=payload, model=Dataset
-        )
+        payload["clone_labels"] = clone_labels
+
+        r = self._post(f"/datasets/{dataset_identifier}/clone/", data=payload, model=Dataset)
 
         return cast(Dataset, r)
 
     #################
     # Collaborators #
     #################
-    def get_dataset_collaborator(
-        self, dataset_identifier: str, username: str
-    ) -> Collaborator:
+    def get_dataset_collaborator(self, dataset_identifier: str, username: str) -> Collaborator:
         """Get a dataset collaborator.
 
         .. code-block:: python
@@ -776,9 +768,7 @@ class SegmentsClient:
 
         return cast(Collaborator, r)
 
-    def update_dataset_collaborator(
-        self, dataset_identifier: str, username: str, role: Role
-    ) -> Collaborator:
+    def update_dataset_collaborator(self, dataset_identifier: str, username: str, role: Role) -> Collaborator:
         """Update a dataset collaborator.
 
         .. code-block:: python
@@ -813,9 +803,7 @@ class SegmentsClient:
 
         return cast(Collaborator, r)
 
-    def delete_dataset_collaborator(
-        self, dataset_identifier: str, username: str
-    ) -> None:
+    def delete_dataset_collaborator(self, dataset_identifier: str, username: str) -> None:
         """Delete a dataset collaborator.
 
         .. code-block:: python
@@ -844,12 +832,10 @@ class SegmentsClient:
     def get_samples(
         self,
         dataset_identifier: str,
-        name: str | None = None,
-        label_status: LabelStatus | list[LabelStatus] | None = None,
-        metadata: str | list[str] | None = None,
-        sort: Literal[
-            "name", "created", "priority", "updated_at", "gt_label__updated_at"
-        ] = "name",
+        name: Optional[str] = None,
+        label_status: Optional[Union[LabelStatus, List[LabelStatus]]] = None,
+        metadata: Optional[Union[str, List[str]]] = None,
+        sort: Literal["name", "created", "priority", "updated_at", "gt_label__updated_at"] = "name",
         direction: Literal["asc", "desc"] = "asc",
         per_page: int = 1000,
         page: int = 1,
@@ -865,6 +851,7 @@ class SegmentsClient:
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+            labelset: If defined, this additionally returns for each sample a label summary for the given labelset. Defaults to :obj:`None`.
             name: Name to filter by. Defaults to :obj:`None` (no filtering).
             label_status: Sequence of label statuses to filter by. Defaults to :obj:`None` (no filtering).
             metadata: Sequence of 'key:value' metadata attributes to filter by. Defaults to :obj:`None` (no filtering).
@@ -884,6 +871,9 @@ class SegmentsClient:
         # pagination
         query_string = f"?per_page={per_page}&page={page}"
 
+        if labelset is not None:
+            query_string += f"&labelset={labelset}"
+
         # filter by name
         if name is not None:
             query_string += f"&name__contains={name}"
@@ -900,9 +890,7 @@ class SegmentsClient:
                 label_status = [label_status]
             assert isinstance(label_status, list)
             # label_status = [status.upper() for status in label_status]
-            query_string += "&labelset=ground-truth&label_status={}".format(
-                ",".join(label_status)
-            )
+            query_string += f"&label_status={','.join(label_status)}"
 
         # sorting
         direction_str = "" if direction == "asc" else "-"
@@ -910,10 +898,6 @@ class SegmentsClient:
 
         r = self._get(f"/datasets/{dataset_identifier}/samples/{query_string}")
         results = r.json()
-
-        # TODO
-        for result in results:
-            result.pop("label", None)
 
         try:
             results = TypeAdapter(list[Sample]).validate_python(results)
@@ -968,9 +952,9 @@ class SegmentsClient:
         attributes: dict[str, Any] | SampleAttributes,
         metadata: dict[str, Any] | None = None,
         priority: float = 0,
-        assigned_labeler: str | None = None,
-        assigned_reviewer: str | None = None,
-        embedding: npt.NDArray[Any] | list[float] | None = None,
+        assigned_labeler: Optional[str] = None,
+        assigned_reviewer: Optional[str] = None,
+        embedding: Optional[Union[npt.NDArray[Any], List[float]]] = None,
     ) -> Sample:
         """Add a sample to a dataset.
 
@@ -1006,7 +990,6 @@ class SegmentsClient:
             priority: Priority in the labeling queue. Samples with higher values will be labeled first. Defaults to ``0``.
             assigned_labeler: The username of the user who should label this sample. Leave empty to not assign a specific labeler. Defaults to :obj:`None`.
             assigned_reviewer: The username of the user who should review this sample. Leave empty to not assign a specific reviewer. Defaults to :obj:`None`.
-            embedding: Embedding of this sample represented by an array of floats.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the sample attributes fails.
@@ -1018,16 +1001,20 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        if type(attributes) is dict:
+        if isinstance(attributes, get_args(SampleAttributes)):
+            attributes = attributes.model_dump(mode="json", exclude_unset=True)
+        else:
             try:
-                TypeAdapter(SampleAttributes).validate_python(attributes)
+                attributes = (
+                    TypeAdapter(SampleAttributes)
+                    .validate_python(attributes)
+                    .model_dump(mode="json", exclude_unset=True)
+                )
             except pydantic.ValidationError as e:
                 logger.error(
                     "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
                 )
                 raise ValidationError(message=str(e), cause=e)
-        elif type(attributes) in get_args(SampleAttributes):
-            attributes = attributes.model_dump()
 
         payload: dict[str, Any] = {
             "name": name,
@@ -1046,9 +1033,6 @@ class SegmentsClient:
         if assigned_reviewer is not None:
             payload["assigned_reviewer"] = assigned_reviewer
 
-        if embedding is not None:
-            payload["embedding"] = embedding
-
         r = self._post(
             f"/datasets/{dataset_identifier}/samples/",
             data=payload,
@@ -1058,14 +1042,12 @@ class SegmentsClient:
 
         return cast(Sample, r)
 
-    def add_samples(
-        self, dataset_identifier: str, samples: list[Sample | dict[str, Any]]
-    ) -> list[Sample]:
+    def add_samples(self, dataset_identifier: str, samples: List[Union[Dict[str, Any], Sample]]) -> List[Sample]:
         """Add samples to a dataset in bulk. When attempting to add samples which already exist, no error is thrown but the existing samples are returned without changes.
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
-            samples: A list of dicts with required ``name``, ``attributes`` fields and optional ``metadata``, ``priority``, ``embedding`` fields. See :meth:`.add_sample` for details.
+            samples: A list of dicts with required ``name``, ``attributes`` fields and optional ``metadata``, ``priority`` fields. See :meth:`.add_sample` for details.
 
         Raises:
             :exc:`KeyError`: If 'name' or 'attributes' is not in a sample dict.
@@ -1078,23 +1060,24 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        # Check the input
         for sample in samples:
-            if type(sample) is dict:
+            if isinstance(sample, Sample):
+                sample = sample.model_dump(mode="json", exclude_unset=True)
+            else:
                 if "name" not in sample or "attributes" not in sample:
-                    raise KeyError(
-                        f"Please add a name and attributes to your sample: {sample}"
-                    )
+                    raise KeyError(f"Please add a name and attributes to your sample: {sample}")
 
                 try:
-                    TypeAdapter(SampleAttributes).validate_python(sample["attributes"])
+                    sample["attributes"] = (
+                        TypeAdapter(SampleAttributes)
+                        .validate_python(sample["attributes"])
+                        .model_dump(mode="json", exclude_unset=True)
+                    )
                 except pydantic.ValidationError as e:
                     logger.error(
                         "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
                     )
                     raise ValidationError(message=str(e), cause=e)
-            elif type(sample) is Sample:
-                sample = sample.model_dump()
 
         payload = samples
 
@@ -1109,13 +1092,13 @@ class SegmentsClient:
     def update_sample(
         self,
         uuid: str,
-        name: str | None = None,
-        attributes: dict[str, Any] | SampleAttributes | None = None,
-        metadata: dict[str, Any] | None = None,
-        priority: float | None = None,
-        assigned_labeler: str | None = None,
-        assigned_reviewer: str | None = None,
-        embedding: npt.NDArray[Any] | list[float] | None = None,
+        name: Optional[str] = None,
+        attributes: Optional[Union[Dict[str, Any], SampleAttributes]] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+        priority: Optional[float] = None,
+        assigned_labeler: Optional[str] = None,
+        assigned_reviewer: Optional[str] = None,
+        embedding: Optional[Union[npt.NDArray[Any], List[float]]] = None,
     ) -> Sample:
         """Update a sample.
 
@@ -1139,11 +1122,10 @@ class SegmentsClient:
             priority: Priority in the labeling queue. Samples with higher values will be labeled first.
             assigned_labeler: The username of the user who should label this sample. Leave empty to not assign a specific labeler.
             assigned_reviewer: The username of the user who should review this sample. Leave empty to not assign a specific reviewer.
-            embedding: Embedding of this sample represented by list of floats.
 
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
-            :exc:`~segments.exceptions.ValidationError`: If validation of the samples fails.
+            :exc:`~segments.exceptions.ValidationError`: If validation of the sample fails.
             :exc:`~segments.exceptions.NotFoundError`: If the sample is not found.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
@@ -1155,11 +1137,22 @@ class SegmentsClient:
             payload["name"] = name
 
         if attributes is not None:
-            payload["attributes"] = (
-                attributes.model_dump()
-                if type(attributes) in get_args(SampleAttributes)
-                else attributes
-            )
+            if isinstance(attributes, get_args(SampleAttributes)):
+                attributes = attributes.model_dump(mode="json", exclude_unset=True)
+            else:
+                try:
+                    attributes = (
+                        TypeAdapter(SampleAttributes)
+                        .validate_python(attributes)
+                        .model_dump(mode="json", exclude_unset=True)
+                    )
+                except pydantic.ValidationError as e:
+                    logger.error(
+                        "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
+                    )
+                    raise ValidationError(message=str(e), cause=e)
+
+            payload["attributes"] = attributes
 
         if metadata is not None:
             payload["metadata"] = metadata
@@ -1172,9 +1165,6 @@ class SegmentsClient:
 
         if assigned_reviewer is not None:
             payload["assigned_reviewer"] = assigned_reviewer
-
-        if embedding is not None:
-            payload["embedding"] = embedding
 
         r = self._patch(f"/samples/{uuid}/", data=payload, model=Sample)
         # logger.info(f"Updated {uuid}")
@@ -1282,16 +1272,20 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        if type(attributes) is dict:
+        if isinstance(attributes, get_args(LabelAttributes)):
+            attributes = attributes.model_dump(mode="json", exclude_unset=True)
+        else:
             try:
-                TypeAdapter(LabelAttributes).validate_python(attributes)
+                attributes = (
+                    TypeAdapter(LabelAttributes)
+                    .validate_python(attributes)
+                    .model_dump(mode="json", exclude_unset=True)
+                )
             except pydantic.ValidationError as e:
                 logger.error(
                     "Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.",
                 )
                 raise ValidationError(message=str(e), cause=e)
-        elif type(attributes) in get_args(LabelAttributes):
-            attributes = attributes.model_dump()
 
         payload: dict[str, Any] = {
             "label_status": label_status,
@@ -1352,11 +1346,22 @@ class SegmentsClient:
         payload: dict[str, Any] = {}
 
         if attributes is not None:
-            payload["attributes"] = (
-                attributes.model_dump()
-                if type(attributes) in get_args(LabelAttributes)
-                else attributes
-            )
+            if isinstance(attributes, get_args(LabelAttributes)):
+                attributes = attributes.model_dump(mode="json", exclude_unset=True)
+            else:
+                try:
+                    attributes = (
+                        TypeAdapter(LabelAttributes)
+                        .validate_python(attributes)
+                        .model_dump(mode="json", exclude_unset=True)
+                    )
+                except pydantic.ValidationError as e:
+                    logger.error(
+                        "Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.",
+                    )
+                    raise ValidationError(message=str(e), cause=e)
+
+            payload["attributes"] = attributes
 
         if label_status is not None:
             payload["label_status"] = label_status
@@ -1414,9 +1419,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        r = self._get(
-            f"/datasets/{dataset_identifier}/labelsets/", model=list[Labelset]
-        )
+        r = self._get(f"/datasets/{dataset_identifier}/labelsets/", model=List[Labelset])
 
         return cast(list[Labelset], r)
 
@@ -1442,15 +1445,11 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        r = self._get(
-            f"/datasets/{dataset_identifier}/labelsets/{name}/", model=Labelset
-        )
+        r = self._get(f"/datasets/{dataset_identifier}/labelsets/{name}/", model=Labelset)
 
         return cast(Labelset, r)
 
-    def add_labelset(
-        self, dataset_identifier: str, name: str, description: str = ""
-    ) -> Labelset:
+    def add_labelset(self, dataset_identifier: str, name: str, description: str = "") -> Labelset:
         """Add a labelset to a dataset.
 
         .. code-block:: python
@@ -1472,6 +1471,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
+
         payload = {
             "name": name,
             "description": description,
@@ -1685,9 +1685,7 @@ class SegmentsClient:
 
         return cast(Release, r)
 
-    def add_release(
-        self, dataset_identifier: str, name: str, description: str = ""
-    ) -> Release:
+    def add_release(self, dataset_identifier: str, name: str, description: str = "") -> Release:
         """Add a release to a dataset.
 
         .. code-block:: python
@@ -1746,9 +1744,7 @@ class SegmentsClient:
     ##########
     # Assets #
     ##########
-    def upload_asset(
-        self, file: TextIO | BinaryIO, filename: str = "label.png"
-    ) -> File:
+    def upload_asset(self, file: Union[TextIO, BinaryIO], filename: str = "label.png") -> File:
         """Upload an asset.
 
         .. code-block:: python
@@ -1772,12 +1768,8 @@ class SegmentsClient:
         """
 
         r = self._post("/assets/", data={"filename": filename})
-        presigned_post_fields = PresignedPostFields.model_validate(
-            r.json()["presignedPostFields"]
-        )
-        self._upload_to_aws(
-            file, presigned_post_fields.url, presigned_post_fields.fields
-        )
+        presigned_post_fields = PresignedPostFields.model_validate(r.json()["presignedPostFields"])
+        self._upload_to_aws(file, presigned_post_fields.url, presigned_post_fields.fields)
 
         try:
             f = File.model_validate(r.json())
@@ -1812,9 +1804,7 @@ class SegmentsClient:
 
         headers = self._get_headers(auth)
 
-        r = self.api_session.get(
-            urllib.parse.urljoin(self.api_url, endpoint), headers=headers
-        )
+        r = self.api_session.get(urllib.parse.urljoin(self.api_url, endpoint), headers=headers)
 
         return r
 
@@ -1954,9 +1944,7 @@ class SegmentsClient:
         return headers
 
     @handle_exceptions
-    def _upload_to_aws(
-        self, file: TextIO | BinaryIO, url: str, aws_fields: AWSFields
-    ) -> requests.Response:
+    def _upload_to_aws(self, file: Union[TextIO, BinaryIO], url: str, aws_fields: AWSFields) -> requests.Response:
         """Upload file to AWS.
 
         Args:

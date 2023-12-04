@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import json
 import os
 from typing import Iterable
@@ -27,11 +28,7 @@ def owner() -> str:
 
 @fixture
 def client(API_KEY: str, API_URL: str | None) -> Iterable[SegmentsClient]:
-    client = (
-        SegmentsClient(api_key=API_KEY, api_url=API_URL)
-        if API_URL
-        else SegmentsClient(api_key=API_KEY)
-    )
+    client = SegmentsClient(api_key=API_KEY, api_url=API_URL) if API_URL else SegmentsClient(api_key=API_KEY)
     yield client
     client.close()
 

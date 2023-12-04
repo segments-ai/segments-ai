@@ -22,7 +22,9 @@ from segments.typing import (
     Issue,
     Label,
     Labelset,
+    LabelStatus,
     Release,
+    Role,
     Sample,
     TaskType,
     User,
@@ -38,22 +40,14 @@ class Test(unittest.TestCase):
         API_KEY = os.getenv("SEGMENTS_API_KEY")
         API_URL = os.getenv("SEGMENTS_API_URL")
         self.owner = cast(str, os.getenv("DATASET_OWNER"))
-        self.client = (
-            SegmentsClient(api_key=API_KEY, api_url=API_URL)
-            if API_URL
-            else SegmentsClient(api_key=API_KEY)
-        )
+        self.client = SegmentsClient(api_key=API_KEY, api_url=API_URL) if API_URL else SegmentsClient(api_key=API_KEY)
         self.datasets = json.loads(cast(str, os.getenv("DATASETS")))
         # First sample uuid
         self.sample_uuids = json.loads(cast(str, os.getenv("SAMPLE_UUIDS")))
         # Sample attribute type of the datasets
-        self.sample_attribute_types = json.loads(
-            cast(str, os.getenv("SAMPLE_ATTRIBUTE_TYPES"))
-        )
+        self.sample_attribute_types = json.loads(cast(str, os.getenv("SAMPLE_ATTRIBUTE_TYPES")))
         # Label attribute type of the datasets
-        self.label_attribute_types = json.loads(
-            cast(str, os.getenv("LABEL_ATTRIBUTE_TYPES"))
-        )
+        self.label_attribute_types = json.loads(cast(str, os.getenv("LABEL_ATTRIBUTE_TYPES")))
         self.TIME_INTERVAL = 0.2  # Wait for API call to complete
 
     def tearDown(self) -> None:
@@ -194,9 +188,7 @@ class TestDataset(Test):
         name = "example-images-segmentation"
         dataset_identifier = f"{self.owner}/{name}"
         try:
-            clone = self.client.clone_dataset(
-                dataset_identifier, organization=self.owner
-            )
+            clone = self.client.clone_dataset(dataset_identifier, organization=self.owner)
 
             self.assertIsInstance(clone, Dataset)
             self.assertEqual(clone.name, "example-images-segmentation-clone")
@@ -212,7 +204,7 @@ class TestDataset(Test):
         dataset_identifier = f"{self.owner}/example-images-vector"
 
         new_name = "example-images-vector-clone"
-        new_task_type: TaskType = "vector"
+        new_task_type = TaskType.VECTOR
 
         try:
             clone = self.client.clone_dataset(
@@ -233,25 +225,19 @@ class TestDataset(Test):
 
     def test_get_add_update_delete_dataset_collaborator(self) -> None:
         username = "admin-arnaud"
-        role: Final = "admin"
-        new_role: Final = "reviewer"
+        role = Role.ADMIN
+        new_role = Role.REVIEWER
         for dataset in self.datasets:
             dataset_identifier = f"{self.owner}/{dataset}"
             try:
                 # Add collaborator
-                collaborator = self.client.add_dataset_collaborator(
-                    dataset_identifier, username, role
-                )
+                collaborator = self.client.add_dataset_collaborator(dataset_identifier, username, role)
                 self.assertIsInstance(collaborator, Collaborator)
                 # Get collaborator
-                collaborator = self.client.get_dataset_collaborator(
-                    dataset_identifier, username
-                )
+                collaborator = self.client.get_dataset_collaborator(dataset_identifier, username)
                 self.assertIsInstance(collaborator, Collaborator)
                 # Update collaborator
-                collaborator = self.client.update_dataset_collaborator(
-                    dataset_identifier, username, new_role
-                )
+                collaborator = self.client.update_dataset_collaborator(dataset_identifier, username, new_role)
                 self.assertIsInstance(collaborator, Collaborator)
             except AlreadyExistsError:
                 pass
@@ -264,16 +250,12 @@ class TestDataset(Test):
         with self.assertRaises(NotFoundError):
             wrong_dataset_identifier = "abcde"
             wrong_username = "abcde"
-            self.client.delete_dataset_collaborator(
-                wrong_dataset_identifier, wrong_username
-            )
+            self.client.delete_dataset_collaborator(wrong_dataset_identifier, wrong_username)
         # Right dataset identifier and wrong username
         with self.assertRaises(NotFoundError):
             right_dataset_identifier = f"{self.owner}/{self.datasets[0]}"
             wrong_username = "abcde"
-            self.client.delete_dataset_collaborator(
-                right_dataset_identifier, wrong_username
-            )
+            self.client.delete_dataset_collaborator(right_dataset_identifier, wrong_username)
 
 
 ##########
@@ -288,14 +270,15 @@ class TestSample(Test):
 
     def test_get_samples(self) -> None:
         name = None
-        label_status = None
+        label_status = LabelStatus.UNLABELED
         metadata = None
         sort: Final = "created"
         direction: Final = "desc"
+        labelset = None  # "ground-truth"
         for dataset in self.datasets:
             dataset_identifier = f"{self.owner}/{dataset}"
             samples = self.client.get_samples(
-                dataset_identifier, name, label_status, metadata, sort, direction
+                dataset_identifier, labelset, name, label_status, metadata, sort, direction
             )
             for sample in samples:
                 self.assertIsInstance(sample, Sample)
@@ -319,13 +302,10 @@ class TestSample(Test):
     def test_add_update_delete_sample(self) -> None:
         metadata = {"weather": "sunny", "camera_id": 3}
         priority = 0
-        # embedding = np.zeros(100).tolist()
         name = "Test sample"
         attributes_dict: dict[str, dict[str, Any]] = {
             "image": {"image": {"url": "url"}},
-            "image-sequence": {
-                "frames": [{"image": {"url": "url"}}, {"image": {"url": ""}}]
-            },
+            "image-sequence": {"frames": [{"image": {"url": "url"}}, {"image": {"url": ""}}]},
             "pointcloud": {
                 "pcd": {"url": "url", "type": "kitti"},
                 "ego_pose": {
@@ -383,15 +363,14 @@ class TestSample(Test):
             ]
         }
 
-        # check if image test sample already exists, if so delete it
-        samples = self.client.get_samples(f"{self.owner}/{self.datasets[0]}")
-        if len(samples) == 6:
-            sample = next(filter(lambda sample: sample.name == "Test sample", samples))
-            self.client.delete_sample(sample.uuid)
+        # check if test sample already exists, if so delete it
+        for dataset in self.datasets:
+            samples = self.client.get_samples(f"{self.owner}/{dataset}")
+            if any(sample.name == "Test sample" for sample in samples):
+                sample = next(sample for sample in samples if sample.name == "Test sample")
+                self.client.delete_sample(sample.uuid)
 
-        for sample_attribute_type, dataset in zip(
-            self.sample_attribute_types, self.datasets
-        ):
+        for sample_attribute_type, dataset in zip(self.sample_attribute_types, self.datasets):
             dataset_identifier = f"{self.owner}/{dataset}"
             attributes = attributes_dict[sample_attribute_type]
             try:
@@ -400,7 +379,7 @@ class TestSample(Test):
                     name,
                     attributes,
                     metadata,
-                    priority,  # embedding
+                    priority,
                 )
                 self.assertIsInstance(sample, Sample)
                 sample = self.client.update_sample(
@@ -408,20 +387,21 @@ class TestSample(Test):
                     name,
                     attributes,
                     metadata,
-                    priority,  # embedding
+                    priority,
                 )
                 self.assertIsInstance(sample, Sample)
             finally:
+                time.sleep(self.TIME_INTERVAL)
                 self.client.delete_sample(sample.uuid)
 
             # Bulk endpoint
             returned_samples = None
             try:
-                samples = [
+                bulk_samples = [
                     {"name": f"sample_{1}", "attributes": attributes},
                     {"name": f"sample_{2}", "attributes": attributes},
                 ]
-                returned_samples = self.client.add_samples(dataset_identifier, samples)
+                returned_samples = self.client.add_samples(dataset_identifier, bulk_samples)
             except AlreadyExistsError:
                 pass
             finally:
@@ -746,22 +726,16 @@ class TestLabel(Test):
             ]
         }
         labelset = "ground-truth"
-        label_status: Final = "PRELABELED"
+        label_status = LabelStatus.PRELABELED
         score = 1
-        for sample_uuid, label_attribute_type in zip(
-            self.sample_uuids, self.label_attribute_types
-        ):
+        for sample_uuid, label_attribute_type in zip(self.sample_uuids, self.label_attribute_types):
             attributes = label_attributes[label_attribute_type]
             try:
                 # Add
-                label = self.client.add_label(
-                    sample_uuid, labelset, attributes, label_status, score
-                )
+                label = self.client.add_label(sample_uuid, labelset, attributes, label_status, score)
                 self.assertIsInstance(label, Label)
                 # Update
-                label = self.client.update_label(
-                    sample_uuid, labelset, attributes, label_status, score
-                )
+                label = self.client.update_label(sample_uuid, labelset, attributes, label_status, score)
                 self.assertIsInstance(label, Label)
                 # Get
                 label = self.client.get_label(sample_uuid, labelset)
@@ -870,9 +844,7 @@ class TestLabelset(Test):
             dataset_identifier = f"{self.owner}/{dataset}"
             try:
                 # Add labelset
-                labelset = self.client.add_labelset(
-                    dataset_identifier, name, description
-                )
+                labelset = self.client.add_labelset(dataset_identifier, name, description)
                 self.assertIsInstance(labelset, Labelset)
             except AlreadyExistsError:
                 pass

@@ -8,7 +8,6 @@ from segments.typing import SegmentsDatasetCategory
 def test_dataset(
     client: SegmentsClient,
     owner: str,
-    datasets: list[str],
     ARTIFACTS_DIR: str,
 ) -> None:
     # Get the datasets
@@ -16,10 +15,7 @@ def test_dataset(
 
     for dataset in datasets:
         # Skip the example-multi-sensor dataset
-        if (
-            dataset.name == "example-multi-sensor"
-            or dataset.name == "example-point-cloud-sequences-segmentation"
-        ):
+        if dataset.name == "example-multi-sensor" or dataset.name == "example-point-cloud-sequences-segmentation":
             continue
 
         # Get the releases
@@ -29,14 +25,14 @@ def test_dataset(
         for release in releases:
             # Get the dataset
             release = client.get_release(dataset_identifier, release.name)
-            dataset = SegmentsDataset(release, segments_dir=f"{ARTIFACTS_DIR}/segments")
+            segments_dataset = SegmentsDataset(release, segments_dir=f"{ARTIFACTS_DIR}/segments")
 
             # Load the categories
-            categories = dataset.categories
+            categories = segments_dataset.categories
             assert isinstance(categories, list)
             for category in categories:
                 assert isinstance(category, SegmentsDatasetCategory)
 
             # Iterate over samples
-            for sample in dataset:
+            for sample in segments_dataset:
                 assert isinstance(sample, dict)

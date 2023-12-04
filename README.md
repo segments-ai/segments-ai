@@ -4,19 +4,19 @@
     <br>
 <p>
 <p align="center">
-    <a href="https://github.com/segments-ai/segments-ai/LICENSE">
+    <a href="https://github.com/segments-ai/segments-ai/LICENSE" style="text-decoration: none">
         <img alt="GitHub" src="https://img.shields.io/github/license/segments-ai/segments-ai.svg?color=blue">
     </a>
-    <!-- <a href="https://github.com/segments-ai/segments-ai/actions">
+    <a href="https://github.com/segments-ai/segments-ai/releases" style="text-decoration: none">
+        <img alt="GitHub release" src="https://img.shields.io/github/release/segments-ai/segments-ai.svg">
+    </a>
+    <!-- <a href="https://github.com/segments-ai/segments-ai/actions" style="text-decoration: none">
         <img alt="Tests" src="https://github.com/segments-ai/segments-ai/actions/workflows/tests.yml/badge.svg">
     </a> -->
-    <a href="https://segments-python-sdk.readthedocs.io/en/latest/?badge=latest">
+    <a href="https://segments-python-sdk.readthedocs.io/en/latest/?badge=latest" style="text-decoration: none">
         <img alt="Documentation" src="https://readthedocs.org/projects/segments-python-sdk/badge/?version=latest">
     </a>
-    <!-- <a href="https://github.com/segments-ai/segments-ai/releases">
-        <img alt="GitHub release" src="https://img.shields.io/github/release/segments-ai/segments-ai.svg">
-    </a> -->
-    <a href="https://github.com/segments-ai/segments-ai/releases">
+    <a href="https://github.com/segments-ai/segments-ai/releases" style="text-decoration: none">
         <img alt="Downloads" src="https://img.shields.io/pypi/dm/segments-ai">
     </a>
 </p>

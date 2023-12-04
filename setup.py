@@ -1,10 +1,11 @@
 from __future__ import annotations
 from distutils.core import setup
 
+
 #############
 # Constants #
 #############
-MAJOR, MINOR, PATCH = 1, 4, 3
+MAJOR, MINOR, PATCH = 1, 5, 1
 VERSION = f"{MAJOR}.{MINOR}.{PATCH}"
 
 

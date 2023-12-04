@@ -7,7 +7,7 @@ from typing import Any
 from pydantic import BaseModel as PydanticBaseModel
 from pydantic import ConfigDict, field_validator
 from segments.exceptions import ValidationError
-from typing_extensions import Literal, TypedDict, TypeAlias
+from typing_extensions import Literal, TypeAlias, TypedDict
 
 
 class BaseModel(PydanticBaseModel):
@@ -24,9 +24,7 @@ class BaseModel(PydanticBaseModel):
 class EnumMeta(BaseEnumMeta):
     # https://stackoverflow.com/questions/43634618/how-do-i-test-if-int-value-exists-in-python-enum-without-using-try-catch
     def __contains__(self, item):
-        return isinstance(item, self) or item in {
-            v.value for v in self.__members__.values()
-        }
+        return isinstance(item, self) or item in {v.value for v in self.__members__.values()}
 
     # https://stackoverflow.com/questions/29503339/how-to-get-all-values-from-python-enum-class
     def __str__(self):
@@ -85,7 +83,9 @@ class TaskType(str, Enum):
     POINTCLOUD_VECTOR = "pointcloud-vector"
     POINTCLOUD_VECTOR_SEQUENCE = "pointcloud-vector-sequence"
     # MULTISENSOR = "multisensor"
-    MULTISENSOR_SEQUENCE = "multisensor-sequence"  # combination of pointcloud-cuboid-sequence and image-vector-sequence
+    MULTISENSOR_SEQUENCE = (
+        "multisensor-sequence"  # combination of pointcloud-cuboid-sequence and image-vector-sequence
+    )
     TEXT_NAMED_ENTITIES = "text-named-entities"
     TEXT_SPAN_CATEGORIZATION = "text-span-categorization"
     EMPTY = ""
@@ -461,20 +461,19 @@ class PointcloudSequenceVectorLabelAttributes(BaseModel):
 class MultiSensorPointcloudSequenceCuboidLabelAttributes(BaseModel):
     name: str
     task_type: Literal[TaskType.POINTCLOUD_CUBOID_SEQUENCE]
-    attributes: PointcloudSequenceCuboidLabelAttributes
+    # TODO remove list and replace with `Optional[PointcloudSequenceCuboidLabelAttributes] = None`
+    attributes: PointcloudSequenceCuboidLabelAttributes | list
 
 
 class MultiSensorImageSequenceVectorLabelAttributes(BaseModel):
     name: str
     task_type: Literal[TaskType.IMAGE_VECTOR_SEQUENCE]
-    attributes: ImageSequenceVectorLabelAttributes
+    # TODO remove list and replace with `Optional[ImageSequenceVectorLabelAttributes] = None`
+    attributes: ImageSequenceVectorLabelAttributes | list
 
 
 class MultiSensorLabelAttributes(BaseModel):
-    sensors: list[
-        MultiSensorPointcloudSequenceCuboidLabelAttributes
-        | MultiSensorImageSequenceVectorLabelAttributes
-    ]
+    sensors: list[MultiSensorPointcloudSequenceCuboidLabelAttributes | MultiSensorImageSequenceVectorLabelAttributes]
 
 
 # Text
@@ -505,6 +504,14 @@ class Label(BaseModel):
     score: float | None = None
     rating: float | None = None
     reviewed_at: str | None = None
+    reviewed_by: str | None = None
+
+
+class LabelSummary(BaseModel):
+    score: float | None = None
+    label_status: LabelStatus
+    updated_at: str | None = None
+    created_by: str | None = None
     reviewed_by: str | None = None
 
 
@@ -583,10 +590,7 @@ class MultiSensorImageSequenceSampleAttributes(BaseModel):
 
 
 class MultiSensorSampleAttributes(BaseModel):
-    sensors: list[
-        MultiSensorPointcloudSequenceSampleAttributes
-        | MultiSensorImageSequenceSampleAttributes
-    ]
+    sensors: list[MultiSensorPointcloudSequenceSampleAttributes | MultiSensorImageSequenceSampleAttributes]
 
 
 # Text
@@ -608,8 +612,7 @@ class Sample(BaseModel):
     assigned_reviewer: str | None = None
     comments: list[str] | None = None
     priority: float
-    has_embedding: bool | None = None
-    label: Label | None = None
+    label: Label | LabelSummary | None = None
     issues: list[Issue] | None = None
     dataset_full_name: str | None = None
 
@@ -759,15 +762,12 @@ class Dataset(BaseModel):
     noncollaborator_can_review: bool | None = None
     insights_urls: dict[str, str] | None = None
     # tasks: list[dict[str, Any]] | None
-    embeddings_enabled: bool | None = None
 
     @field_validator("category")
     @classmethod
     def check_category(cls, category: str) -> str:
         if category not in Category and "custom-" not in category:
-            raise ValidationError(
-                f"The category should be one of {Category}, but is {category}."
-            )
+            raise ValidationError(f"The category should be one of {Category}, but is {category}.")
         return category
 
 

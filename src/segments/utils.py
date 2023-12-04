@@ -27,6 +27,7 @@ from segments.typing import (
     TaskType,
 )
 
+
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
 # https://stackoverflow.com/questions/61384752/how-to-type-hint-with-an-optional-import
 if TYPE_CHECKING:
@@ -296,9 +297,7 @@ def export_dataset(
         raise ValueError("Please choose a valid export_format.")
 
 
-def load_image_from_url(
-    url: str, save_filename: str | None = None, s3_client: Any | None = None
-) -> Image.Image:
+def load_image_from_url(url: str, save_filename: str | None = None, s3_client: Any | None = None) -> Image.Image:
     """Load an image from url.
 
     Args:
@@ -311,9 +310,7 @@ def load_image_from_url(
     """
     if s3_client is not None:
         url_parsed = urlparse(url)
-        regex = re.search(
-            r"(.+).(s3|s3-accelerate).(.+).amazonaws.com", url_parsed.netloc
-        )
+        regex = re.search(r"(.+).(s3|s3-accelerate).(.+).amazonaws.com", url_parsed.netloc)
         if regex:
             bucket = regex.group(1)
 
@@ -323,9 +320,7 @@ def load_image_from_url(
                 # region_name = regex.group(2)
                 key = url_parsed.path.lstrip("/")
 
-                file_byte_string = s3_client.get_object(Bucket=bucket, Key=key)[
-                    "Body"
-                ].read()
+                file_byte_string = s3_client.get_object(Bucket=bucket, Key=key)["Body"].read()
                 image = Image.open(BytesIO(file_byte_string))
     else:
         image = Image.open(BytesIO(session.get(url).content))
@@ -372,9 +367,7 @@ def load_pointcloud_from_url(
 
     if s3_client is not None:
         url_parsed = urlparse(url)
-        regex = re.search(
-            r"(.+).(s3|s3-accelerate).(.+).amazonaws.com", url_parsed.netloc
-        )
+        regex = re.search(r"(.+).(s3|s3-accelerate).(.+).amazonaws.com", url_parsed.netloc)
         if regex:
             bucket = regex.group(1)
 
@@ -382,9 +375,7 @@ def load_pointcloud_from_url(
                 pointcloud = load_pointcloud_from_parsed_url(url)
             else:
                 key = url_parsed.path.lstrip("/")
-                file_byte_string = s3_client.get_object(Bucket=bucket, Key=key)[
-                    "Body"
-                ].read()
+                file_byte_string = s3_client.get_object(Bucket=bucket, Key=key)["Body"].read()
                 with NamedTemporaryFile(suffix=".pcd") as f:
                     f.write(file_byte_string)
                     pointcloud = o3d.io.read_point_cloud(f.name)
@@ -396,9 +387,7 @@ def load_pointcloud_from_url(
     return pointcloud
 
 
-def load_label_bitmap_from_url(
-    url: str, save_filename: str | None = None
-) -> npt.NDArray[np.uint32]:
+def load_label_bitmap_from_url(url: str, save_filename: str | None = None) -> npt.NDArray[np.uint32]:
     """Load a label bitmap from url.
 
     Args:
@@ -533,9 +522,7 @@ def show_polygons(
 
     # {category id: polygons}
     annotations = defaultdict(list)
-    filtered_annotations = filter(
-        lambda dictionary: dictionary["image_id"] == image_id, polygons["annotations"]
-    )
+    filtered_annotations = filter(lambda dictionary: dictionary["image_id"] == image_id, polygons["annotations"])
     for annotation in filtered_annotations:
         annotations[annotation["category_id"]].extend(annotation["polygons"])
 
@@ -546,9 +533,7 @@ def show_polygons(
         if annotations[category_id]
     }
 
-    fig, (ax1, ax2, ax3) = plt.subplots(
-        nrows=1, ncols=3, sharex=True, sharey=True, figsize=(25, 10)
-    )
+    fig, (ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=3, sharex=True, sharey=True, figsize=(25, 10))
 
     used_category_names = set()
     for category_name, (
@@ -560,9 +545,7 @@ def show_polygons(
                 xy=np.asarray(p).reshape(-1, 2),
                 facecolor=color,
                 edgecolor=color,
-                label=category_name
-                if category_name not in used_category_names
-                else None,
+                label=category_name if category_name not in used_category_names else None,
                 closed=True,
                 alpha=0.5,
             )
@@ -602,9 +585,7 @@ def show_polygons(
     fig.legend()
 
     if output_path:
-        path = os.path.join(
-            output_path, f"exported_polygons_from_image_id_{image_id:04d}"
-        )
+        path = os.path.join(output_path, f"exported_polygons_from_image_id_{image_id:04d}")
         plt.savefig(path, bbox_inches="tight")
 
     plt.show()
@@ -648,12 +629,8 @@ def cuboid_to_segmentation(
     # create cuboids
     cuboids = {}
     for annotation in label_attributes.annotations:
-        center = np.array(
-            [annotation.position.x, annotation.position.y, annotation.position.z]
-        )
-        extent = np.array(
-            [annotation.dimensions.x, annotation.dimensions.y, annotation.dimensions.z]
-        )
+        center = np.array([annotation.position.x, annotation.position.y, annotation.position.z])
+        extent = np.array([annotation.dimensions.x, annotation.dimensions.y, annotation.dimensions.z])
         if annotation.rotation:
             rotation = o3d.geometry.get_rotation_matrix_from_quaternion(
                 np.array(
@@ -669,9 +646,7 @@ def cuboid_to_segmentation(
             rotation = o3d.geometry.get_rotation_matrix_from_xyz((0, 0, annotation.yaw))
 
         # create cuboid
-        cuboid = o3d.geometry.OrientedBoundingBox(
-            center=center, extent=extent, R=rotation
-        )
+        cuboid = o3d.geometry.OrientedBoundingBox(center=center, extent=extent, R=rotation)
 
         cuboids[annotation.id] = cuboid
 
@@ -682,9 +657,7 @@ def cuboid_to_segmentation(
             transformation[:3, 3] = np.array([pos.x, pos.y, pos.z])
         if ego_pose and ego_pose.heading:
             rot = ego_pose.heading
-            rotq = Quaternion(
-                x=rot.qx, y=rot.qy, z=rot.qz, w=rot.qw
-            ).inverse.transformation_matrix
+            rotq = Quaternion(x=rot.qx, y=rot.qy, z=rot.qz, w=rot.qw).inverse.transformation_matrix
             transformation[:3, :3] = rotq[:3, :3]
         # tranform = rotate + translate (bug: transform not defined for OrientedBoundingBox)
         cuboid.translate(-transformation[:3, 3])
@@ -725,7 +698,7 @@ def array_to_pcd(
     Raises:
         :exc:`ImportError`: If open3d is not installed (to install run ``pip install open3d``).
         :exc:`AssertionError`: If the positions array does not have shape (N, 3).
-        :exc:`AssertionError`: If the intensity array does not have shape (N, 1).
+        :exc:`AssertionError`: If the intensity array does not have shape (N, 1) or (N,).
         :exc:`AssertionError`: If the rgb array does not have shape (N, 3).
         :exc:`AssertionError`: If the intensity array does not have the same length as the positions array.
         :exc:`AssertionError`: If the rgb array does not have the same length as the positions array.
@@ -737,9 +710,7 @@ def array_to_pcd(
         logger.error("Please install open3d first: pip install open3d")
         raise e
 
-    assert (
-        positions.shape[1] == 3
-    ), f"Positions must have shape (N, 3) but has shape {positions.shape}"
+    assert positions.shape[1] == 3, f"Positions must have shape (N, 3) but has shape {positions.shape}"
 
     # cast to float32
     positions = positions.astype(np.float32)
@@ -750,23 +721,20 @@ def array_to_pcd(
     dtype = o3d.core.float32
     pcd = o3d.t.geometry.PointCloud(device)
     pcd.point["positions"] = o3d.core.Tensor(positions, dtype, device)
+    N = positions.shape[0]
 
     if intensity is not None:
-        assert len(intensity) == len(
-            positions
-        ), f"Intensity must have same length as positions but intensity has shape {intensity.shape} and positions has shape {positions.shape}"
-        assert (
-            len(intensity.shape) == 2 and intensity.shape[1] == 1
-        ), f"Intensity must have shape (N, 1) but has shape {intensity.shape}"
+        assert intensity.shape in (
+            (N, 1),
+            (N,),
+        ), f"Intensity must have shape ({N}, 1) or ({N},) but has shape {intensity.shape}"
+        if len(intensity.shape) == 1:
+            intensity = intensity.reshape(-1, 1)
+
         pcd.point["intensity"] = o3d.core.Tensor(intensity, dtype, device)
 
     if rgb is not None:
-        assert len(rgb) == len(
-            positions
-        ), f"RGB must have same length as positions but RGB has shape {rgb.shape} and positions has shape {positions.shape}"
-        assert (
-            rgb.shape[1] == 3
-        ), f"RGB must have shape (N, 3) but has shape {rgb.shape}"
+        assert rgb.shape == (N, 3), f"RGB must have shape ({N}, 3) but has shape {rgb.shape}"
 
         # check rgb encoding (0-255 or 0-1)
         if np.max(rgb) > 1:
@@ -783,9 +751,7 @@ def array_to_pcd(
     )
 
 
-def ply_to_pcd(
-    ply_file: str, compressed: bool = False, write_ascii: bool = True
-) -> None:
+def ply_to_pcd(ply_file: str, compressed: bool = False, write_ascii: bool = True) -> None:
     """Convert a .ply file to a .pcd file.
 
     Args:
@@ -811,9 +777,7 @@ def ply_to_pcd(
         ply = PlyData.read(f)
 
     try:
-        positions = np.stack(
-            (ply["vertex"]["x"], ply["vertex"]["y"], ply["vertex"]["z"]), axis=-1
-        )
+        positions = np.stack((ply["vertex"]["x"], ply["vertex"]["y"], ply["vertex"]["z"]), axis=-1)
     except KeyError:
         raise KeyError("Could not find the positions in the ply file.")
 
@@ -826,9 +790,7 @@ def ply_to_pcd(
             intensity = None
 
     try:
-        rgb = np.stack(
-            (ply["vertex"]["r"], ply["vertex"]["g"], ply["vertex"]["b"]), axis=-1
-        )
+        rgb = np.stack((ply["vertex"]["r"], ply["vertex"]["g"], ply["vertex"]["b"]), axis=-1)
     except KeyError:
         try:
             rgb = np.stack(
@@ -851,9 +813,7 @@ def ply_to_pcd(
     )
 
 
-def sample_pcd(
-    pcd_path: str, points: int = 500_000, output_path: str | None = None
-) -> None:
+def sample_pcd(pcd_path: str, points: int = 500_000, output_path: str | None = None) -> None:
     """Sample a point cloud to a given number of points.
 
     Args:
@@ -881,9 +841,7 @@ def sample_pcd(
     # open3d expects a step size (not a number of points)
     points_step_size = len(pcd.points) // points
     pcd = pcd.uniform_down_sample(points_step_size)
-    o3d.io.write_point_cloud(
-        output_path, pcd, write_ascii=False, compressed=True, print_progress=True
-    )
+    o3d.io.write_point_cloud(output_path, pcd, write_ascii=False, compressed=True, print_progress=True)
 
 
 def find_camera_rotation(client: SegmentsClient, dataset_identifier: str) -> Quaternion:
@@ -952,12 +910,8 @@ def find_camera_rotation(client: SegmentsClient, dataset_identifier: str) -> Qua
         for yi, y_rot in enumerate(Y_AXIS_ROTATIONS):
             for invert in [False, True]:
                 for sample, cloned_sample in zip(samples, cloned_samples):
-                    for frame, cloned_frame in zip(
-                        sample.attributes.frames, cloned_sample.attributes.frames
-                    ):
-                        for image, cloned_image in zip(
-                            frame.images, cloned_frame.images
-                        ):
+                    for frame, cloned_frame in zip(sample.attributes.frames, cloned_sample.attributes.frames):
+                        for image, cloned_image in zip(frame.images, cloned_frame.images):
                             if not image.extrinsics or not image.extrinsics.rotation:
                                 continue
 
@@ -975,9 +929,7 @@ def find_camera_rotation(client: SegmentsClient, dataset_identifier: str) -> Qua
                                 qw=new_rot_q.w,
                             )
                             cloned_image.extrinsics.rotation = new_rot
-                    client.update_sample(
-                        cloned_sample.uuid, attributes=cloned_sample.attributes
-                    )
+                    client.update_sample(cloned_sample.uuid, attributes=cloned_sample.attributes)
 
                 offset, y_offset, x_offset = 1, 2, 2 * len(Y_AXIS_ROTATIONS)
                 rotation_option = xi * x_offset + yi * y_offset + invert + offset
@@ -989,8 +941,6 @@ def find_camera_rotation(client: SegmentsClient, dataset_identifier: str) -> Qua
                     client.delete_dataset(cloned_dataset.full_name)
                     return (x_rot * y_rot).inverse if invert else x_rot * y_rot
                 elif rotation_OK.lower() not in ["n", "no"]:
-                    raise ValueError(
-                        f"Please enter 'y(es)' or 'n(o)' (case insensitive) not {rotation_OK}."
-                    )
+                    raise ValueError(f"Please enter 'y(es)' or 'n(o)' (case insensitive) not {rotation_OK}.")
 
     raise ValueError("Correct rotation not found.")
