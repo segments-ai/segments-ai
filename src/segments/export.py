@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 import logging
 import os
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 import numpy.typing as npt
@@ -14,6 +14,7 @@ from segments.utils import get_semantic_bitmap
 from skimage import img_as_ubyte
 from skimage.measure import regionprops
 from tqdm import tqdm
+from typing_extensions import TypeAlias
 
 
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
@@ -24,9 +25,9 @@ if TYPE_CHECKING:
 #############
 # Variables #
 #############
-RGB = Tuple[int, int, int]
-RGBA = Tuple[int, int, int, int]
-ColorMap = Union[List[RGBA], List[RGB]]
+RGB: TypeAlias = "tuple[int, int, int]"
+RGBA: TypeAlias = "tuple[int, int, int, int]"
+ColorMap: TypeAlias = "list[RGBA] | list[RGB]"
 logger = logging.getLogger(__name__)
 COLORMAP: ColorMap = [
     (0, 113, 188, 255),
@@ -83,8 +84,8 @@ class IdGenerator:
     ``isthing`` and ``color``
     """
 
-    def __init__(self, categories: Dict[int, SegmentsDatasetCategory]):
-        self.taken_colors: Set[RGB] = set()
+    def __init__(self, categories: dict[int, SegmentsDatasetCategory]):
+        self.taken_colors: set[RGB] = set()
         self.taken_colors.add((0, 0, 0))
         self.categories = categories
         for category in self.categories.values():
@@ -115,12 +116,12 @@ class IdGenerator:
         color = self.get_color(cat_id)
         return rgb2id(color)
 
-    def get_id_and_color(self, cat_id: int) -> Tuple[int, RGB]:
+    def get_id_and_color(self, cat_id: int) -> tuple[int, RGB]:
         color = self.get_color(cat_id)
         return rgb2id(color), color
 
 
-def rgb2id(color: Union[npt.NDArray[Any], RGB]) -> Union[npt.NDArray[Any], int]:
+def rgb2id(color: npt.NDArray[Any] | RGB) -> npt.NDArray[Any] | int:
     """Convert rgb to an id.
 
     Args:
@@ -137,7 +138,7 @@ def rgb2id(color: Union[npt.NDArray[Any], RGB]) -> Union[npt.NDArray[Any], int]:
     return int(color[0] + 256 * color[1] + 256 * 256 * color[2])
 
 
-def id2rgb(id_map: npt.NDArray[Any]) -> Union[npt.NDArray[Any], RGB]:
+def id2rgb(id_map: npt.NDArray[Any]) -> npt.NDArray[Any] | RGB:
     """Convert a color id to an rgb.
 
     Args:
@@ -166,7 +167,7 @@ def get_color(id: int) -> RGB:
     return COLORMAP[id][0:3]
 
 
-def colorize(img: npt.NDArray[Any], colormap: Optional[ColorMap] = None) -> npt.NDArray[Any]:
+def colorize(img: npt.NDArray[Any], colormap: ColorMap | None = None) -> npt.NDArray[Any]:
     indices = np.unique(img)
     indices = indices[indices != 0]
 
@@ -183,7 +184,7 @@ def colorize(img: npt.NDArray[Any], colormap: Optional[ColorMap] = None) -> npt.
     return colored_img
 
 
-def get_bbox(binary_mask: npt.NDArray[Any]) -> Union[Tuple[int, int, int, int], bool]:
+def get_bbox(binary_mask: npt.NDArray[Any]) -> tuple[int, int, int, int] | bool:
     """Returns the bounding box of the binary mask (if one is found, otherwise returns False)
 
     Args:
@@ -195,8 +196,8 @@ def get_bbox(binary_mask: npt.NDArray[Any]) -> Union[Tuple[int, int, int, int], 
 
     regions = regionprops(np.uint8(binary_mask))
     if len(regions) == 1:
-        bbox = regions[0].bbox
-        return cast(Tuple[int, int, int, int], bbox)
+        bbox: tuple[int, int, int, int] = regions[0].bbox
+        return bbox
 
     return False
 
@@ -204,7 +205,7 @@ def get_bbox(binary_mask: npt.NDArray[Any]) -> Union[Tuple[int, int, int, int], 
 ##################
 # Export methods #
 ##################
-def export_coco_instance(dataset: SegmentsDataset, export_folder: str) -> Tuple[str, Optional[str]]:
+def export_coco_instance(dataset: SegmentsDataset, export_folder: str) -> tuple[str, str | None]:
     """Export a Segments dataset as a coco instance.
 
     Args:
@@ -377,7 +378,7 @@ def export_coco_instance(dataset: SegmentsDataset, export_folder: str) -> Tuple[
     return file_name, dataset.image_dir
 
 
-def export_coco_panoptic(dataset: SegmentsDataset, export_folder: str) -> Tuple[str, Optional[str]]:
+def export_coco_panoptic(dataset: SegmentsDataset, export_folder: str) -> tuple[str, str | None]:
     """Export a Segments dataset in COCO panoptic format.
 
     Args:
@@ -399,7 +400,7 @@ def export_coco_panoptic(dataset: SegmentsDataset, export_folder: str) -> Tuple[
     }
 
     # CATEGORIES
-    categories: List[SegmentsDatasetCategory] = []
+    categories: list[SegmentsDatasetCategory] = []
     for i, category in enumerate(dataset.categories):
         color = category.color[:3] if category.color else get_color(i)
         isthing = int(category.has_instances) if hasattr(category, "has_instances") else 0
@@ -413,7 +414,7 @@ def export_coco_panoptic(dataset: SegmentsDataset, export_folder: str) -> Tuple[
             )
         )
 
-    categories_dict: Dict[int, SegmentsDatasetCategory] = {category.id: category for category in categories}
+    categories_dict: dict[int, SegmentsDatasetCategory] = {category.id: category for category in categories}
     id_generator = IdGenerator(categories_dict)
 
     # IMAGES AND ANNOTATIONS
@@ -551,7 +552,7 @@ def export_image(
     export_folder: str,
     export_format: str,
     id_increment: int,
-) -> Optional[str]:
+) -> str | None:
     """Export a Segments dataset as images.
 
     Args:
@@ -647,9 +648,9 @@ def export_image(
 def export_yolo(
     dataset: SegmentsDataset,
     export_folder: str,
-    image_width: Optional[float] = None,
-    image_height: Optional[float] = None,
-) -> Optional[str]:
+    image_width: float | None = None,
+    image_height: float | None = None,
+) -> str | None:
     """Export a Segments dataset in YOLO format.
 
     Args:
@@ -747,7 +748,7 @@ def export_yolo(
     return dataset.image_dir
 
 
-def export_polygon(dataset: SegmentsDataset, export_folder: str) -> Tuple[str, Optional[str]]:
+def export_polygon(dataset: SegmentsDataset, export_folder: str) -> tuple[str, str | None]:
     """Export a Segments dataset as polygons (i.e., contours).
 
     Args:

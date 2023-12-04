@@ -11,13 +11,9 @@ from typing import (
     Any,
     BinaryIO,
     Callable,
-    Dict,
-    List,
-    Optional,
     TextIO,
     Type,
     TypeVar,
-    Union,
     cast,
 )
 
@@ -60,25 +56,19 @@ from segments.typing import (
 from typing_extensions import Literal, get_args
 
 
-try:
-    # __package__ allows for the case where __name__ is "__main__"
-    __version__ = importlib_metadata.version(__package__ or __name__)
-except importlib_metadata.PackageNotFoundError:
-    __version__ = "0.0.0"
-
 ################################
 # Constants and type variables #
 ################################
 logger = logging.getLogger(__name__)
 T = TypeVar("T")
-VERSION = __version__
+VERSION = importlib_metadata.version(__package__ or __name__)
 
 
 ####################
 # Helper functions #
 ####################
 # Error handling: https://stackoverflow.com/questions/16511337/correct-way-to-try-except-using-python-requests-module
-def handle_exceptions(f: Callable[..., requests.Response]) -> Callable[..., Union[requests.Response, T]]:
+def handle_exceptions(f: Callable[..., requests.Response]) -> Callable[..., requests.Response | T]:
     """Catch exceptions and throw Segments exceptions.
 
     Args:
@@ -96,9 +86,9 @@ def handle_exceptions(f: Callable[..., requests.Response]) -> Callable[..., Unio
 
     def throw_segments_exception(
         *args: Any,
-        model: Optional[Type[T]] = None,
+        model: Type[T] | None = None,
         **kwargs: Any,
-    ) -> Union[requests.Response, T]:
+    ) -> requests.Response | T:
         try:
             r = f(*args, **kwargs)
             r.raise_for_status()
@@ -197,7 +187,7 @@ class SegmentsClient:
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
+        api_key: str | None = None,
         api_url: str = "https://api.segments.ai/",
     ):
         if api_key is None:
@@ -265,16 +255,16 @@ class SegmentsClient:
 
     def __exit__(
         self,
-        exc_type: Optional[Type[BaseException]],
-        exc_value: Optional[BaseException],
-        traceback: Optional[TracebackType],
+        exc_type: Type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
     ) -> None:
         self.close()
 
     ########
     # User #
     ########
-    def get_user(self, user: Optional[str] = None) -> User:
+    def get_user(self, user: str | None = None) -> User:
         """Get a user.
 
         .. code-block:: python
@@ -305,10 +295,10 @@ class SegmentsClient:
     ############
     def get_datasets(
         self,
-        user: Optional[str] = None,
+        user: str | None = None,
         per_page: int = 1000,
         page: int = 1,
-    ) -> List[Dataset]:
+    ) -> list[Dataset]:
         """Get a list of datasets.
 
         .. code-block:: python
@@ -334,11 +324,11 @@ class SegmentsClient:
         query_string = f"?per_page={per_page}&page={page}"
 
         if user is not None:
-            r = self._get(f"/users/{user}/datasets/{query_string}", model=List[Dataset])
+            r = self._get(f"/users/{user}/datasets/{query_string}", model=list[Dataset])
         else:
-            r = self._get(f"/user/datasets/{query_string}", model=List[Dataset])
+            r = self._get(f"/user/datasets/{query_string}", model=list[Dataset])
 
-        return cast(List[Dataset], r)
+        return cast(list[Dataset], r)
 
     def get_dataset(self, dataset_identifier: str) -> Dataset:
         """Get a dataset.
@@ -369,11 +359,11 @@ class SegmentsClient:
         name: str,
         description: str = "",
         task_type: TaskType = TaskType.SEGMENTATION_BITMAP,
-        task_attributes: Optional[Union[Dict[str, Any], TaskAttributes]] = None,
+        task_attributes: TaskAttributes | dict[str, Any] | None = None,
         category: Category = Category.OTHER,
         public: bool = False,
         readme: str = "",
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
         labeling_inactivity_timeout_seconds: int = 300,
         enable_skip_labeling: bool = True,
         enable_skip_reviewing: bool = False,
@@ -383,7 +373,7 @@ class SegmentsClient:
         enable_save_button: bool = False,
         enable_label_status_verified: bool = False,
         enable_3d_cuboid_rotation: bool = False,
-        organization: Optional[str] = None,
+        organization: str | None = None,
     ) -> Dataset:
         """Add a dataset.
 
@@ -477,7 +467,7 @@ class SegmentsClient:
                 )
                 raise ValidationError(message=str(e), cause=e)
 
-        payload: Dict[str, Any] = {
+        payload: dict[str, Any] = {
             "name": name,
             "description": description,
             "task_type": task_type,
@@ -509,22 +499,22 @@ class SegmentsClient:
     def update_dataset(
         self,
         dataset_identifier: str,
-        description: Optional[str] = None,
-        task_type: Optional[TaskType] = None,
-        task_attributes: Optional[Union[Dict[str, Any], TaskAttributes]] = None,
-        category: Optional[Category] = None,
-        public: Optional[bool] = None,
-        readme: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None,
-        labeling_inactivity_timeout_seconds: Optional[int] = None,
-        enable_skip_labeling: Optional[bool] = None,
-        enable_skip_reviewing: Optional[bool] = None,
-        enable_ratings: Optional[bool] = None,
-        enable_interpolation: Optional[bool] = None,
-        enable_same_dimensions_track_constraint: Optional[bool] = None,
-        enable_save_button: Optional[bool] = None,
-        enable_label_status_verified: Optional[bool] = None,
-        enable_3d_cuboid_rotation: Optional[bool] = None,
+        description: str | None = None,
+        task_type: TaskType | None = None,
+        task_attributes: TaskAttributes | dict[str, Any] | None = None,
+        category: Category | None = None,
+        public: bool | None = None,
+        readme: str | None = None,
+        metadata: dict[str, Any] | None = None,
+        labeling_inactivity_timeout_seconds: int | None = None,
+        enable_skip_labeling: bool | None = None,
+        enable_skip_reviewing: bool | None = None,
+        enable_ratings: bool | None = None,
+        enable_interpolation: bool | None = None,
+        enable_same_dimensions_track_constraint: bool | None = None,
+        enable_save_button: bool | None = None,
+        enable_label_status_verified: bool | None = None,
+        enable_3d_cuboid_rotation: bool | None = None,
     ) -> Dataset:
         """Update a dataset.
 
@@ -562,7 +552,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
 
         if description is not None:
             payload["description"] = description
@@ -653,10 +643,10 @@ class SegmentsClient:
     def clone_dataset(
         self,
         dataset_identifier: str,
-        new_name: Optional[str] = None,
-        new_task_type: Optional[TaskType] = None,
-        new_public: Optional[bool] = None,
-        organization: Optional[str] = None,
+        new_name: str | None = None,
+        new_task_type: TaskType | None = None,
+        new_public: bool | None = None,
+        organization: str | None = None,
         clone_labels: bool = False,
     ) -> Dataset:
         """Clone a dataset.
@@ -694,7 +684,7 @@ class SegmentsClient:
             old_name = dataset_identifier.split("/")[-1]
             new_name = f"{old_name}-clone"
 
-        payload: Dict[str, Any] = {"name": new_name}
+        payload: dict[str, Any] = {"name": new_name}
 
         if new_task_type is not None:
             payload["task_type"] = new_task_type
@@ -773,7 +763,9 @@ class SegmentsClient:
 
         return cast(Collaborator, r)
 
-    def update_dataset_collaborator(self, dataset_identifier: str, username: str, role: Role) -> Collaborator:
+    def update_dataset_collaborator(
+        self, dataset_identifier: str, username: str, role: Role = Role.LABELER
+    ) -> Collaborator:
         """Update a dataset collaborator.
 
         .. code-block:: python
@@ -795,10 +787,9 @@ class SegmentsClient:
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
 
-        if role is not None:
-            payload["role"] = role
+        payload["role"] = role
 
         r = self._patch(
             f"/datasets/{dataset_identifier}/collaborators/{username}",
@@ -837,15 +828,15 @@ class SegmentsClient:
     def get_samples(
         self,
         dataset_identifier: str,
-        labelset: Optional[str] = None,
-        name: Optional[str] = None,
-        label_status: Optional[Union[LabelStatus, List[LabelStatus]]] = None,
-        metadata: Optional[Union[str, List[str]]] = None,
+        labelset: str | None = None,
+        name: str | None = None,
+        label_status: LabelStatus | list[LabelStatus] | None = None,
+        metadata: str | list[str] | None = None,
         sort: Literal["name", "created", "priority", "updated_at", "gt_label__updated_at"] = "name",
         direction: Literal["asc", "desc"] = "asc",
         per_page: int = 1000,
         page: int = 1,
-    ) -> List[Sample]:
+    ) -> list[Sample]:
         """Get the samples in a dataset.
 
         .. code-block:: python
@@ -906,16 +897,16 @@ class SegmentsClient:
         results = r.json()
 
         try:
-            results = TypeAdapter(List[Sample]).validate_python(results)
+            results = TypeAdapter(list[Sample]).validate_python(results)
         except pydantic.ValidationError as e:
             raise ValidationError(message=str(e), cause=e)
 
-        return cast(List[Sample], results)
+        return results
 
     def get_sample(
         self,
         uuid: str,
-        labelset: Optional[str] = None,
+        labelset: str | None = None,
         include_signed_url: bool = False,
     ) -> Sample:
         """Get a sample.
@@ -955,11 +946,11 @@ class SegmentsClient:
         self,
         dataset_identifier: str,
         name: str,
-        attributes: Union[Dict[str, Any], SampleAttributes],
-        metadata: Optional[Dict[str, Any]] = None,
+        attributes: SampleAttributes | dict[str, Any],
+        metadata: dict[str, Any] | None = None,
         priority: float = 0,
-        assigned_labeler: Optional[str] = None,
-        assigned_reviewer: Optional[str] = None,
+        assigned_labeler: str | None = None,
+        assigned_reviewer: str | None = None,
     ) -> Sample:
         """Add a sample to a dataset.
 
@@ -1021,16 +1012,10 @@ class SegmentsClient:
                 )
                 raise ValidationError(message=str(e), cause=e)
 
-        payload: Dict[str, Any] = {
-            "name": name,
-            "attributes": attributes,
-        }
+        payload: dict[str, Any] = {"name": name, "attributes": attributes, "priority": priority}
 
         if metadata is not None:
             payload["metadata"] = metadata
-
-        if priority is not None:
-            payload["priority"] = priority
 
         if assigned_labeler is not None:
             payload["assigned_labeler"] = assigned_labeler
@@ -1047,7 +1032,7 @@ class SegmentsClient:
 
         return cast(Sample, r)
 
-    def add_samples(self, dataset_identifier: str, samples: List[Union[Dict[str, Any], Sample]]) -> List[Sample]:
+    def add_samples(self, dataset_identifier: str, samples: list[Sample | dict[str, Any]]) -> list[Sample]:
         """Add samples to a dataset in bulk. When attempting to add samples which already exist, no error is thrown but the existing samples are returned without changes.
 
         Args:
@@ -1089,20 +1074,20 @@ class SegmentsClient:
         r = self._post(
             f"/datasets/{dataset_identifier}/samples_bulk/",
             data=payload,
-            model=List[Sample],
+            model=list[Sample],
         )
 
-        return cast(List[Sample], r)
+        return cast(list[Sample], r)
 
     def update_sample(
         self,
         uuid: str,
-        name: Optional[str] = None,
-        attributes: Optional[Union[Dict[str, Any], SampleAttributes]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
-        priority: Optional[float] = None,
-        assigned_labeler: Optional[str] = None,
-        assigned_reviewer: Optional[str] = None,
+        name: str | None = None,
+        attributes: SampleAttributes | dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
+        priority: float | None = None,
+        assigned_labeler: str | None = None,
+        assigned_reviewer: str | None = None,
     ) -> Sample:
         """Update a sample.
 
@@ -1135,7 +1120,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
 
         if name is not None:
             payload["name"] = name
@@ -1230,9 +1215,9 @@ class SegmentsClient:
         self,
         sample_uuid: str,
         labelset: str,
-        attributes: Union[Dict[str, Any], LabelAttributes],
+        attributes: LabelAttributes | dict[str, Any],
         label_status: LabelStatus = LabelStatus.PRELABELED,
-        score: Optional[float] = None,
+        score: float | None = None,
     ) -> Label:
         """Add a label to a sample.
 
@@ -1291,7 +1276,7 @@ class SegmentsClient:
                 )
                 raise ValidationError(message=str(e), cause=e)
 
-        payload: Dict[str, Any] = {
+        payload: dict[str, Any] = {
             "label_status": label_status,
             "attributes": attributes,
         }
@@ -1307,9 +1292,9 @@ class SegmentsClient:
         self,
         sample_uuid: str,
         labelset: str,
-        attributes: Optional[Union[Dict[str, Any], LabelAttributes]] = None,
-        label_status: Optional[LabelStatus] = None,
-        score: Optional[float] = None,
+        attributes: LabelAttributes | dict[str, Any] | None = None,
+        label_status: LabelStatus | None = None,
+        score: float | None = None,
     ) -> Label:
         """Update a label.
 
@@ -1347,7 +1332,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
 
         if attributes is not None:
             if isinstance(attributes, get_args(LabelAttributes)):
@@ -1402,7 +1387,7 @@ class SegmentsClient:
     #############
     # Labelsets #
     #############
-    def get_labelsets(self, dataset_identifier: str) -> List[Labelset]:
+    def get_labelsets(self, dataset_identifier: str) -> list[Labelset]:
         """Get the labelsets in a dataset.
 
         .. code-block:: python
@@ -1423,9 +1408,9 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        r = self._get(f"/datasets/{dataset_identifier}/labelsets/", model=List[Labelset])
+        r = self._get(f"/datasets/{dataset_identifier}/labelsets/", model=list[Labelset])
 
-        return cast(List[Labelset], r)
+        return cast(list[Labelset], r)
 
     def get_labelset(self, dataset_identifier: str, name: str) -> Labelset:
         """Get a labelset.
@@ -1514,7 +1499,7 @@ class SegmentsClient:
     ##########
     # Issues #
     ##########
-    def get_issues(self, dataset_identifier: str) -> List[Issue]:
+    def get_issues(self, dataset_identifier: str) -> list[Issue]:
         """Get all issues for a dataset.
 
         .. code-block:: python
@@ -1534,9 +1519,9 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        r = self._get(f"/datasets/{dataset_identifier}/issues/", model=List[Issue])
+        r = self._get(f"/datasets/{dataset_identifier}/issues/", model=list[Issue])
 
-        return cast(List[Issue], r)
+        return cast(list[Issue], r)
 
     def add_issue(
         self,
@@ -1566,7 +1551,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        payload: Dict[str, Any] = {
+        payload: dict[str, Any] = {
             "description": description,
             "status": status,
         }
@@ -1578,8 +1563,8 @@ class SegmentsClient:
     def update_issue(
         self,
         uuid: str,
-        description: Optional[str] = None,
-        status: Optional[IssueStatus] = None,
+        description: str | None = None,
+        status: IssueStatus | None = None,
     ) -> Issue:
         """Add an issue to a sample.
 
@@ -1603,7 +1588,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
 
         if description is not None:
             payload["description"] = description
@@ -1638,7 +1623,7 @@ class SegmentsClient:
     ############
     # Releases #
     ############
-    def get_releases(self, dataset_identifier: str) -> List[Release]:
+    def get_releases(self, dataset_identifier: str) -> list[Release]:
         """Get the releases in a dataset.
 
         .. code-block:: python
@@ -1659,9 +1644,9 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        r = self._get(f"/datasets/{dataset_identifier}/releases/", model=List[Release])
+        r = self._get(f"/datasets/{dataset_identifier}/releases/", model=list[Release])
 
-        return cast(List[Release], r)
+        return cast(list[Release], r)
 
     def get_release(self, dataset_identifier: str, name: str) -> Release:
         """Get a release.
@@ -1748,7 +1733,7 @@ class SegmentsClient:
     ##########
     # Assets #
     ##########
-    def upload_asset(self, file: Union[TextIO, BinaryIO], filename: str = "label.png") -> File:
+    def upload_asset(self, file: TextIO | BinaryIO, filename: str = "label.png") -> File:
         """Upload an asset.
 
         .. code-block:: python
@@ -1790,7 +1775,7 @@ class SegmentsClient:
         self,
         endpoint: str,
         auth: bool = True,
-        model: Optional[T] = None,
+        model: T | None = None,
     ) -> requests.Response:
         """Send a GET request.
 
@@ -1816,9 +1801,9 @@ class SegmentsClient:
     def _post(
         self,
         endpoint: str,
-        data: Optional[Dict[str, Any]] = None,
+        data: dict[str, Any] | None = None,
         auth: bool = True,
-        model: Optional[T] = None,
+        model: T | None = None,
     ) -> requests.Response:
         """Send a POST request.
 
@@ -1838,7 +1823,7 @@ class SegmentsClient:
 
         r = self.api_session.post(
             urllib.parse.urljoin(self.api_url, endpoint),
-            json=data,  # data=data
+            json=data,
             headers=headers,
         )
 
@@ -1848,9 +1833,9 @@ class SegmentsClient:
     def _put(
         self,
         endpoint: str,
-        data: Optional[Dict[str, Any]] = None,
+        data: dict[str, Any] | None = None,
         auth: bool = True,
-        model: Optional[T] = None,
+        model: T | None = None,
     ) -> requests.Response:
         """Send a PUT request.
 
@@ -1870,7 +1855,7 @@ class SegmentsClient:
 
         r = self.api_session.put(
             urllib.parse.urljoin(self.api_url, endpoint),
-            json=data,  # data=data
+            json=data,
             headers=headers,
         )
 
@@ -1880,9 +1865,9 @@ class SegmentsClient:
     def _patch(
         self,
         endpoint: str,
-        data: Optional[Dict[str, Any]] = None,
+        data: dict[str, Any] | None = None,
         auth: bool = True,
-        model: Optional[T] = None,
+        model: T | None = None,
     ) -> requests.Response:
         """Send a PATCH request.
 
@@ -1902,7 +1887,7 @@ class SegmentsClient:
 
         r = self.api_session.patch(
             urllib.parse.urljoin(self.api_url, endpoint),
-            json=data,  # data=data
+            json=data,
             headers=headers,
         )
 
@@ -1912,9 +1897,9 @@ class SegmentsClient:
     def _delete(
         self,
         endpoint: str,
-        data: Optional[Dict[str, Any]] = None,
+        data: dict[str, Any] | None = None,
         auth: bool = True,
-        model: Optional[T] = None,
+        model: T | None = None,
     ) -> requests.Response:
         """Send a DELETE request.
 
@@ -1934,13 +1919,13 @@ class SegmentsClient:
 
         r = self.api_session.delete(
             urllib.parse.urljoin(self.api_url, endpoint),
-            json=data,  # data=data
+            json=data,
             headers=headers,
         )
 
         return r
 
-    def _get_headers(self, auth: bool = True) -> Dict[str, str]:
+    def _get_headers(self, auth: bool = True) -> dict[str, str]:
         """Get the authorization header with the API key."""
         headers = {"X-source": "python-sdk"}
         if auth and self.api_key:
@@ -1948,7 +1933,7 @@ class SegmentsClient:
         return headers
 
     @handle_exceptions
-    def _upload_to_aws(self, file: Union[TextIO, BinaryIO], url: str, aws_fields: AWSFields) -> requests.Response:
+    def _upload_to_aws(self, file: TextIO | BinaryIO, url: str, aws_fields: AWSFields) -> requests.Response:
         """Upload file to AWS.
 
         Args:

@@ -1,5 +1,5 @@
+from __future__ import annotations
 from distutils.core import setup
-from typing import List
 
 
 #############
@@ -13,7 +13,7 @@ VERSION = f"{MAJOR}.{MINOR}.{PATCH}"
 # Helper functions #
 ####################
 # https://github.com/allenai/python-package-template
-def read_requirements(filename: str) -> List[str]:
+def read_requirements(filename: str) -> list[str]:
     with open(filename) as requirements_file:
         import re
 

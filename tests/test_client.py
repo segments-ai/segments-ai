@@ -4,7 +4,7 @@ import json
 import os
 import time
 import unittest
-from typing import Any, Dict, cast
+from typing import Any, cast
 
 from segments.client import SegmentsClient
 from segments.exceptions import (
@@ -105,7 +105,7 @@ class TestDataset(Test):
             self.client.get_dataset(wrong_dataset_identifier)
 
     def test_add_update_delete_dataset(self) -> None:
-        arguments: Dict[str, Any] = {
+        arguments: dict[str, Any] = {
             "name": "add_dataset",
             "description": "Test add_update_delete_dataset.",
             "task_type": "vector",
@@ -303,7 +303,7 @@ class TestSample(Test):
         metadata = {"weather": "sunny", "camera_id": 3}
         priority = 0
         name = "Test sample"
-        attributes_dict: Dict[str, Dict[str, Any]] = {
+        attributes_dict: dict[str, dict[str, Any]] = {
             "image": {"image": {"url": "url"}},
             "image-sequence": {"frames": [{"image": {"url": "url"}}, {"image": {"url": ""}}]},
             "pointcloud": {
@@ -468,7 +468,7 @@ class TestLabel(Test):
             "weather": "sunny",
             "isRaining": True,
         }
-        label_attributes: Dict[str, Dict[str, Any]] = {
+        label_attributes: dict[str, dict[str, Any]] = {
             "image-segmentation": {
                 "format_version": "0.1",
                 "annotations": [
@@ -998,7 +998,7 @@ class TestException(Test):
 
     def test_add_label_validationerror(self) -> None:
         labelset = "ground-truth"
-        wrong_attributes: Dict[str, Any] = {"wrong_key": "abcde"}
+        wrong_attributes: dict[str, Any] = {"wrong_key": "abcde"}
         for sample_uuid in self.sample_uuids:
             with self.assertRaises(ValidationError):
                 self.client.add_label(sample_uuid, labelset, wrong_attributes)

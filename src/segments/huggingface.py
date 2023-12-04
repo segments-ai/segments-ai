@@ -5,7 +5,7 @@ import logging
 import os
 import tempfile
 from string import Template
-from typing import TYPE_CHECKING, Any, Dict, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import requests
 from PIL import Image
@@ -71,7 +71,7 @@ def push_to_hub(self: datasets.Dataset, repo_id: str, *args: Any, **kwargs: Any)
 datasets.Dataset.push_to_hub = push_to_hub
 
 
-def get_taxonomy_table(taxonomy: Dict[str, Any]) -> str:
+def get_taxonomy_table(taxonomy: dict[str, Any]) -> str:
     markdown_table = ""
     for category in taxonomy["categories"]:
         id_ = category["id"]
@@ -179,7 +179,7 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
         except (KeyError, TypeError):
             pass
 
-        data_row: Dict[str, Any] = {}
+        data_row: dict[str, Any] = {}
 
         # Name
         data_row["name"] = sample["name"]
@@ -227,7 +227,7 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
             data_row["label"] = label
 
         except (KeyError, TypeError):
-            error_label: Dict[str, Any] = {"annotations": []}
+            error_label: dict[str, Any] = {"annotations": []}
             if task_type in ["segmentation-bitmap", "segmentation-bitmap-highres"]:
                 error_label["segmentation_bitmap"] = {"url": None}
             data_row["label"] = error_label
@@ -235,7 +235,7 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
         data_rows.append(data_row)
 
     # Now transform to column format
-    dataset_dict: Dict[str, Any] = {key: [] for key in features.keys()}
+    dataset_dict: dict[str, Any] = {key: [] for key in features.keys()}
     for data_row in data_rows:
         for key in dataset_dict.keys():
             dataset_dict[key].append(data_row[key])
@@ -257,14 +257,14 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
         and download_images
     ):
 
-        def download_image(data_row: Dict[str, Any]) -> Dict[str, Any]:
+        def download_image(data_row: dict[str, Any]) -> dict[str, Any]:
             try:
                 data_row["image"] = load_image_from_url(data_row["image.url"])
             except Exception:
                 data_row["image"] = None
             return data_row
 
-        def download_segmentation_bitmap(data_row: Dict[str, Any]) -> Dict[str, Any]:
+        def download_segmentation_bitmap(data_row: dict[str, Any]) -> dict[str, Any]:
             try:
                 segmentation_bitmap = load_label_bitmap_from_url(data_row["label.segmentation_bitmap.url"])
                 data_row["label.segmentation_bitmap"] = Image.fromarray(segmentation_bitmap)

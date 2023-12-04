@@ -4,7 +4,7 @@ import json
 import logging
 import os
 from multiprocessing.pool import ThreadPool
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, cast
 from urllib.parse import urlparse
 
 import numpy as np
@@ -88,13 +88,13 @@ class SegmentsDataset:
     # https://stackoverflow.com/questions/682504/what-is-a-clean-pythonic-way-to-have-multiple-constructors-in-python
     def __init__(
         self,
-        release_file: Union[str, Release],
+        release_file: Release | str,
         labelset: str = "ground-truth",
-        filter_by: Optional[Union[LabelStatus, List[LabelStatus]]] = None,
-        filter_by_metadata: Optional[Dict[str, str]] = None,
+        filter_by: LabelStatus | list[LabelStatus] | None = None,
+        filter_by_metadata: dict[str, str] | None = None,
         segments_dir: str = "segments",
         preload: bool = True,
-        s3_client: Optional[Any] = None,
+        s3_client: Any | None = None,
     ):
         # check environment for SEGMENTS_DIR variable if `segments_dir` has default value
         if segments_dir == "segments":
@@ -126,9 +126,7 @@ class SegmentsDataset:
 
         self.dataset_identifier = f"{self.release['dataset']['owner']}_{self.release['dataset']['name']}"
 
-        self.image_dir = (
-            None if segments_dir is None else os.path.join(segments_dir, self.dataset_identifier, self.release["name"])
-        )
+        self.image_dir = os.path.join(segments_dir, self.dataset_identifier, self.release["name"])
 
         # First some checks
         if self.labelset not in [labelset["name"] for labelset in self.release["dataset"]["labelsets"]]:
@@ -214,7 +212,7 @@ class SegmentsDataset:
 
         print(f"Initialized dataset with {num_samples} images.")
 
-    def _load_image_from_cache(self, sample: Dict[str, Any]) -> Tuple[Optional[Image.Image], str]:
+    def _load_image_from_cache(self, sample: dict[str, Any]) -> tuple[Image.Image | None, str]:
         sample_name = os.path.splitext(sample["name"])[0]
         image_url = sample["attributes"]["image"]["url"]
         image_url_parsed = urlparse(image_url)
@@ -243,8 +241,8 @@ class SegmentsDataset:
         return image, image_filename_rel
 
     def _load_segmentation_bitmap_from_cache(
-        self, sample: Dict[str, Any], labelset: str
-    ) -> Union[npt.NDArray[np.uint32], Image.Image]:
+        self, sample: dict[str, Any], labelset: str
+    ) -> npt.NDArray[np.uint32] | Image.Image | None:
         sample_name = os.path.splitext(sample["name"])[0]
         label = sample["labels"][labelset]
         segmentation_bitmap_url = label["attributes"]["segmentation_bitmap"]["url"]
@@ -267,8 +265,8 @@ class SegmentsDataset:
             return load_label_bitmap_from_url(segmentation_bitmap_url)
 
     @property
-    def categories(self) -> List[SegmentsDatasetCategory]:
-        return TypeAdapter(List[SegmentsDatasetCategory]).validate_python(
+    def categories(self) -> list[SegmentsDatasetCategory]:
+        return TypeAdapter(list[SegmentsDatasetCategory]).validate_python(
             self.release["dataset"]["task_attributes"]["categories"],
         )
         # categories = {}
@@ -279,8 +277,8 @@ class SegmentsDataset:
     def __len__(self) -> int:
         return len(self.samples)
 
-    def __getitem__(self, index: int) -> Dict[str, Any]:
-        sample: Dict[str, Any] = self.samples[index]
+    def __getitem__(self, index: int) -> dict[str, Any]:
+        sample: dict[str, Any] = self.samples[index]
 
         if self.task_type in [
             "pointcloud-segmentation",

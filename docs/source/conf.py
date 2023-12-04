@@ -19,18 +19,12 @@ import sys
 from datetime import datetime
 
 
-try:
-    # __package__ allows for the case where __name__ is "__main__"
-    __version__ = importlib_metadata.version(__package__ or __name__)
-except importlib_metadata.PackageNotFoundError:
-    __version__ = "0.0.0"
-
 sys.path.insert(0, os.path.abspath(os.path.join("..", "..", "src")))
 
 # -----------------------------------------------------------------------------
 # Constants
 # -----------------------------------------------------------------------------
-VERSION = __version__
+VERSION = importlib_metadata.version(__package__ or __name__)
 
 # -----------------------------------------------------------------------------
 # Project information

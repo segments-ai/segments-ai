@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from segments.client import SegmentsClient
 from segments.dataset import SegmentsDataset
 from segments.typing import SegmentsDatasetCategory

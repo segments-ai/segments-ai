@@ -9,7 +9,7 @@ import re
 from collections import defaultdict
 from io import BytesIO
 from tempfile import NamedTemporaryFile
-from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, Mapping, cast
 from urllib.parse import urlparse
 
 import numpy as np
@@ -124,10 +124,10 @@ def bitmap2file(
 
 
 def get_semantic_bitmap(
-    instance_bitmap: Optional[npt.NDArray[np.uint32]] = None,
-    annotations: Optional[Dict[str, Any]] = None,
+    instance_bitmap: npt.NDArray[np.uint32] | None = None,
+    annotations: dict[str, Any] | None = None,
     id_increment: int = 0,
-) -> Optional[npt.NDArray[np.uint32]]:
+) -> npt.NDArray[np.uint32] | None:
     """Convert an instance bitmap and annotations dict into a segmentation bitmap.
 
     Args:
@@ -157,7 +157,7 @@ def export_dataset(
     export_format: ExportFormat = ExportFormat.COCO_PANOPTIC,
     id_increment: int = 0,
     **kwargs: Any,
-) -> Optional[Union[Tuple[str, Optional[str]], Optional[str]]]:
+) -> tuple[str, str | None] | str | None:
     """Export a dataset to a different format.
 
     +------------------+-------------------------------------------------------------+
@@ -297,7 +297,7 @@ def export_dataset(
         raise ValueError("Please choose a valid export_format.")
 
 
-def load_image_from_url(url: str, save_filename: Optional[str] = None, s3_client: Optional[Any] = None) -> Image.Image:
+def load_image_from_url(url: str, save_filename: str | None = None, s3_client: Any | None = None) -> Image.Image:
     """Load an image from url.
 
     Args:
@@ -336,7 +336,7 @@ def load_image_from_url(url: str, save_filename: Optional[str] = None, s3_client
 
 
 def load_pointcloud_from_url(
-    url: str, save_filename: Optional[str] = None, s3_client: Optional[Any] = None
+    url: str, save_filename: str | None = None, s3_client: Any | None = None
 ) -> o3d.geometry.PointCloud:
     """Load a point cloud from a url.
 
@@ -387,7 +387,7 @@ def load_pointcloud_from_url(
     return pointcloud
 
 
-def load_label_bitmap_from_url(url: str, save_filename: Optional[str] = None) -> npt.NDArray[np.uint32]:
+def load_label_bitmap_from_url(url: str, save_filename: str | None = None) -> npt.NDArray[np.uint32]:
     """Load a label bitmap from url.
 
     Args:
@@ -464,7 +464,7 @@ def show_polygons(
     image_id: int,
     exported_polygons_path: str,
     seed: int = 0,
-    output_path: Optional[str] = None,
+    output_path: str | None = None,
 ) -> None:
     """Show the exported contours of a segmented image (i.e., resulting from :func:`.export_dataset` with polygon export format).
 
@@ -490,16 +490,16 @@ def show_polygons(
         logger.error("Please install matplotlib first: pip install matplotlib.")
         raise e
 
-    def find_image_name(images: List[Dict[str, Any]], image_id: int) -> str:
+    def find_image_name(images: list[dict[str, Any]], image_id: int) -> str:
         for image in images:
             if image["id"] == image_id:
                 return cast(str, image["file_name"])
         raise KeyError("Cannot find the image id. Please provide a valid id.")
 
-    def get_random_color() -> Tuple[float, float, float]:
+    def get_random_color() -> tuple[float, float, float]:
         return (random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1))
 
-    def normalize(color: List[int]) -> Tuple[float, float, float]:
+    def normalize(color: list[int]) -> tuple[float, float, float]:
         """Transform a color from 0-255 range to 0-1 range and from a list to a tuple, e.g., [255, 0, 123] to (1, 0, 0.5)."""
         return (color[0] / 255, color[1] / 255, color[2] / 255)
 
@@ -594,7 +594,7 @@ def show_polygons(
 def cuboid_to_segmentation(
     pointcloud: npt.NDArray[np.float32],
     label_attributes: PointcloudCuboidLabelAttributes,
-    ego_pose: Optional[EgoPose] = None,
+    ego_pose: EgoPose | None = None,
 ) -> npt.NDArray[np.uint32]:
     """Convert a cuboid label to an instance segmentation label.
 
@@ -677,8 +677,8 @@ def cuboid_to_segmentation(
 def array_to_pcd(
     positions: npt.NDArray[np.float32],
     output_path: str,
-    intensity: Optional[npt.NDArray[np.float32]] = None,
-    rgb: Optional[npt.NDArray[np.float32]] = None,
+    intensity: npt.NDArray[np.float32] | None = None,
+    rgb: npt.NDArray[np.float32] | None = None,
     compressed: bool = False,
     write_ascii: bool = True,
 ) -> None:
@@ -813,7 +813,7 @@ def ply_to_pcd(ply_file: str, compressed: bool = False, write_ascii: bool = True
     )
 
 
-def sample_pcd(pcd_path: str, points: int = 500_000, output_path: Optional[str] = None) -> None:
+def sample_pcd(pcd_path: str, points: int = 500_000, output_path: str | None = None) -> None:
     """Sample a point cloud to a given number of points.
 
     Args:

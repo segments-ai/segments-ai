@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from enum import Enum as BaseEnum
 from enum import EnumMeta as BaseEnumMeta
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 from pydantic import BaseModel as PydanticBaseModel
 from pydantic import ConfigDict, field_validator
 from segments.exceptions import ValidationError
-from typing_extensions import Literal, TypedDict
+from typing_extensions import Literal, TypeAlias, TypedDict
 
 
 class BaseModel(PydanticBaseModel):
@@ -55,17 +55,17 @@ class LabelStatus(str, Enum):
 
 # keep in sync with LabelStatus
 class LabelStats(BaseModel):
-    REVIEWED: Optional[int] = None
-    REVIEWING_IN_PROGRESS: Optional[int] = None
-    LABELED: Optional[int] = None
-    LABELING_IN_PROGRESS: Optional[int] = None
-    REJECTED: Optional[int] = None
-    PRELABELED: Optional[int] = None
-    SKIPPED: Optional[int] = None
-    VERIFIED: Optional[int] = None
-    UNLABELED: Optional[int] = None
+    REVIEWED: int | None = None
+    REVIEWING_IN_PROGRESS: int | None = None
+    LABELED: int | None = None
+    LABELING_IN_PROGRESS: int | None = None
+    REJECTED: int | None = None
+    PRELABELED: int | None = None
+    SKIPPED: int | None = None
+    VERIFIED: int | None = None
+    UNLABELED: int | None = None
     # extra
-    TOTAL: Optional[int] = None
+    TOTAL: int | None = None
 
 
 class TaskType(str, Enum):
@@ -183,11 +183,11 @@ class Subscription(str, Enum):
     TRIAL = "TRIAL"
 
 
-RGB = Tuple[int, int, int]
-RGBA = Tuple[int, int, int, int]
-FormatVersion = Union[float, str]
-ObjectAttributes = Dict[str, Optional[Union[str, bool, int]]]
-ImageAttributes = Dict[str, Optional[Union[str, bool, int]]]
+RGB: TypeAlias = "tuple[int, int, int]"
+RGBA: TypeAlias = "tuple[int, int, int, int]"
+FormatVersion: TypeAlias = "float | str"
+ObjectAttributes: TypeAlias = "dict[str, str | bool | int | None]"
+ImageAttributes: TypeAlias = "dict[str, str | bool | int | None]"
 
 
 ###########
@@ -195,7 +195,7 @@ ImageAttributes = Dict[str, Optional[Union[str, bool, int]]]
 ###########
 class URL(BaseModel):
     # TODO Remove optional (the backend does not return an URL when adding a release)
-    url: Optional[str] = None
+    url: str | None = None
 
 
 class Release(BaseModel):
@@ -226,7 +226,7 @@ class Issue(BaseModel):
     updated_at: str
     created_by: str
     updated_by: str
-    comments: List[IssueComment]
+    comments: list[IssueComment]
     status: IssueStatus
     sample_uuid: str
     sample_name: str
@@ -270,15 +270,15 @@ class File(BaseModel):
 class Annotation(BaseModel):
     id: int
     category_id: int
-    attributes: Optional[ObjectAttributes] = None
+    attributes: ObjectAttributes | None = None
 
 
 # Image segmentation
 class ImageSegmentationLabelAttributes(BaseModel):
-    annotations: List[Annotation]
+    annotations: list[Annotation]
     segmentation_bitmap: URL
-    image_attributes: Optional[ImageAttributes] = None
-    format_version: Optional[FormatVersion] = None
+    image_attributes: ImageAttributes | None = None
+    format_version: FormatVersion | None = None
 
 
 # Image vector
@@ -286,15 +286,15 @@ class ImageSegmentationLabelAttributes(BaseModel):
 class ImageVectorAnnotation(BaseModel):
     id: int
     category_id: int
-    points: List[List[float]]
+    points: list[list[float]]
     type: ImageVectorAnnotationType
-    attributes: Optional[ObjectAttributes] = None
+    attributes: ObjectAttributes | None = None
 
 
 class ImageVectorLabelAttributes(BaseModel):
-    annotations: List[ImageVectorAnnotation]
-    format_version: Optional[FormatVersion] = None
-    image_attributes: Optional[ImageAttributes] = None
+    annotations: list[ImageVectorAnnotation]
+    format_version: FormatVersion | None = None
+    image_attributes: ImageAttributes | None = None
 
 
 # Image sequence segmentation
@@ -304,14 +304,14 @@ class ImageSequenceSegmentationAnnotation(Annotation):
 
 
 class ImageSequenceSegmentationFrame(ImageSegmentationLabelAttributes):
-    annotations: List[ImageSequenceSegmentationAnnotation]
-    timestamp: Optional[Union[str, int]]
-    format_version: Optional[FormatVersion]
+    annotations: list[ImageSequenceSegmentationAnnotation]
+    timestamp: str | int | None
+    format_version: FormatVersion | None
 
 
 class ImageSequenceSegmentationLabelAttributes(BaseModel):
-    frames: List[ImageSequenceSegmentationFrame]
-    format_version: Optional[FormatVersion]
+    frames: list[ImageSequenceSegmentationFrame]
+    format_version: FormatVersion | None
 
 
 # Image sequence vector
@@ -321,22 +321,22 @@ class ImageSequenceVectorAnnotation(ImageVectorAnnotation):
 
 
 class ImageVectorFrame(ImageVectorLabelAttributes):
-    annotations: List[ImageSequenceVectorAnnotation]
-    timestamp: Optional[Union[str, int]] = None
-    format_version: Optional[FormatVersion] = None
-    image_attributes: Optional[ImageAttributes] = None
+    annotations: list[ImageSequenceVectorAnnotation]
+    timestamp: str | int | None = None
+    format_version: FormatVersion | None = None
+    image_attributes: ImageAttributes | None = None
 
 
 class ImageSequenceVectorLabelAttributes(BaseModel):
-    frames: List[ImageVectorFrame]
-    format_version: Optional[FormatVersion] = None
+    frames: list[ImageVectorFrame]
+    format_version: FormatVersion | None = None
 
 
 # Point cloud segmentation
 class PointcloudSegmentationLabelAttributes(BaseModel):
-    annotations: List[Annotation]
-    point_annotations: List[int]
-    format_version: Optional[FormatVersion] = None
+    annotations: list[Annotation]
+    point_annotations: list[int]
+    format_version: FormatVersion | None = None
 
 
 class XYZ(BaseModel):
@@ -369,7 +369,7 @@ class BrownConradyDistortionCoefficients(BaseModel):
 
 class Distortion(BaseModel):
     model: CameraDistortionModel
-    coefficients: Union[FisheyeDistortionCoefficients, BrownConradyDistortionCoefficients]
+    coefficients: FisheyeDistortionCoefficients | BrownConradyDistortionCoefficients
 
 
 # Point cloud cuboid
@@ -380,47 +380,47 @@ class PointcloudCuboidAnnotation(BaseModel):
     position: XYZ
     dimensions: XYZ
     yaw: float
-    rotation: Optional[XYZW] = None
+    rotation: XYZW | None = None
     type: PointcloudCuboidAnnotationType
-    attributes: Optional[ObjectAttributes] = None
+    attributes: ObjectAttributes | None = None
 
 
 class PointcloudCuboidLabelAttributes(BaseModel):
-    annotations: List[PointcloudCuboidAnnotation]
-    format_version: Optional[FormatVersion] = None
+    annotations: list[PointcloudCuboidAnnotation]
+    format_version: FormatVersion | None = None
 
 
 # Point cloud vector
 class PointcloudVectorAnnotation(BaseModel):
     id: int
     category_id: int
-    points: List[List[float]]
+    points: list[list[float]]
     type: PointcloudVectorAnnotationType
-    attributes: Optional[ObjectAttributes] = None
+    attributes: ObjectAttributes | None = None
 
 
 class PointcloudVectorLabelAttributes(BaseModel):
-    annotations: List[PointcloudVectorAnnotation]
-    format_version: Optional[FormatVersion] = None
+    annotations: list[PointcloudVectorAnnotation]
+    format_version: FormatVersion | None = None
 
 
 # Point cloud sequence segmentation
 class PointcloudSequenceSegmentationAnnotation(Annotation):
     track_id: int
     is_keyframe: bool = False
-    attributes: Optional[ObjectAttributes] = None
+    attributes: ObjectAttributes | None = None
 
 
 class PointcloudSegmentationFrame(PointcloudSegmentationLabelAttributes):
-    annotations: List[PointcloudSequenceSegmentationAnnotation]
-    point_annotations: List[int]
-    timestamp: Optional[Union[str, int]] = None
-    format_version: Optional[FormatVersion] = None
+    annotations: list[PointcloudSequenceSegmentationAnnotation]
+    point_annotations: list[int]
+    timestamp: str | int | None = None
+    format_version: FormatVersion | None = None
 
 
 class PointcloudSequenceSegmentationLabelAttributes(BaseModel):
-    frames: List[PointcloudSegmentationFrame]
-    format_version: Optional[FormatVersion] = None
+    frames: list[PointcloudSegmentationFrame]
+    format_version: FormatVersion | None = None
 
 
 # Point cloud sequence cuboid
@@ -430,14 +430,14 @@ class PointcloudSequenceCuboidAnnotation(PointcloudCuboidAnnotation):
 
 
 class PointcloudSequenceCuboidFrame(PointcloudCuboidLabelAttributes):
-    annotations: List[PointcloudSequenceCuboidAnnotation]
-    timestamp: Optional[Union[str, int]] = None
-    format_version: Optional[FormatVersion] = None
+    annotations: list[PointcloudSequenceCuboidAnnotation]
+    timestamp: str | int | None = None
+    format_version: FormatVersion | None = None
 
 
 class PointcloudSequenceCuboidLabelAttributes(BaseModel):
-    frames: List[PointcloudSequenceCuboidFrame]
-    format_version: Optional[FormatVersion] = None
+    frames: list[PointcloudSequenceCuboidFrame]
+    format_version: FormatVersion | None = None
 
 
 # Point cloud sequence vector
@@ -447,14 +447,14 @@ class PointcloudSequenceVectorAnnotation(PointcloudVectorAnnotation):
 
 
 class PointcloudSequenceVectorFrame(PointcloudVectorLabelAttributes):
-    annotations: List[PointcloudSequenceVectorAnnotation]
-    format_version: Optional[FormatVersion] = None
-    timestamp: Optional[Union[str, int]] = None
+    annotations: list[PointcloudSequenceVectorAnnotation]
+    format_version: FormatVersion | None = None
+    timestamp: str | int | None = None
 
 
 class PointcloudSequenceVectorLabelAttributes(BaseModel):
-    frames: List[PointcloudSequenceVectorFrame]
-    format_version: Optional[FormatVersion] = None
+    frames: list[PointcloudSequenceVectorFrame]
+    format_version: FormatVersion | None = None
 
 
 # Multi-sensor
@@ -462,23 +462,18 @@ class MultiSensorPointcloudSequenceCuboidLabelAttributes(BaseModel):
     name: str
     task_type: Literal[TaskType.POINTCLOUD_CUBOID_SEQUENCE]
     # TODO remove list and replace with `Optional[PointcloudSequenceCuboidLabelAttributes] = None`
-    attributes: Union[PointcloudSequenceCuboidLabelAttributes, List]
+    attributes: PointcloudSequenceCuboidLabelAttributes | list
 
 
 class MultiSensorImageSequenceVectorLabelAttributes(BaseModel):
     name: str
     task_type: Literal[TaskType.IMAGE_VECTOR_SEQUENCE]
     # TODO remove list and replace with `Optional[ImageSequenceVectorLabelAttributes] = None`
-    attributes: Union[ImageSequenceVectorLabelAttributes, List]
+    attributes: ImageSequenceVectorLabelAttributes | list
 
 
 class MultiSensorLabelAttributes(BaseModel):
-    sensors: List[
-        Union[
-            MultiSensorPointcloudSequenceCuboidLabelAttributes,
-            MultiSensorImageSequenceVectorLabelAttributes,
-        ],
-    ]
+    sensors: list[MultiSensorPointcloudSequenceCuboidLabelAttributes | MultiSensorImageSequenceVectorLabelAttributes]
 
 
 # Text
@@ -489,25 +484,12 @@ class TextAnnotation(BaseModel):
 
 
 class TextLabelAttributes(BaseModel):
-    annotations: List[TextAnnotation]
-    format_version: Optional[FormatVersion] = None
+    annotations: list[TextAnnotation]
+    format_version: FormatVersion | None = None
 
 
 # https://pydantic-docs.helpmanual.io/usage/types/#unions
-LabelAttributes = Union[
-    ImageVectorLabelAttributes,
-    ImageSegmentationLabelAttributes,
-    ImageSequenceVectorLabelAttributes,
-    ImageSequenceSegmentationLabelAttributes,
-    PointcloudCuboidLabelAttributes,
-    PointcloudVectorLabelAttributes,
-    PointcloudSegmentationLabelAttributes,
-    PointcloudSequenceCuboidLabelAttributes,
-    PointcloudSequenceVectorLabelAttributes,
-    PointcloudSequenceSegmentationLabelAttributes,
-    MultiSensorLabelAttributes,
-    TextLabelAttributes,
-]
+LabelAttributes: TypeAlias = "ImageVectorLabelAttributes | ImageSegmentationLabelAttributes | ImageSequenceVectorLabelAttributes | ImageSequenceSegmentationLabelAttributes | PointcloudCuboidLabelAttributes | PointcloudVectorLabelAttributes | PointcloudSegmentationLabelAttributes |PointcloudSequenceCuboidLabelAttributes | PointcloudSequenceVectorLabelAttributes | PointcloudSequenceSegmentationLabelAttributes | MultiSensorLabelAttributes | TextLabelAttributes"
 
 
 class Label(BaseModel):
@@ -515,22 +497,22 @@ class Label(BaseModel):
     label_type: TaskType
     label_status: LabelStatus
     labelset: str
-    attributes: Optional[LabelAttributes] = None
+    attributes: LabelAttributes | None = None
     created_at: str
     created_by: str
     updated_at: str
-    score: Optional[float] = None
-    rating: Optional[float] = None
-    reviewed_at: Optional[str] = None
-    reviewed_by: Optional[str] = None
+    score: float | None = None
+    rating: float | None = None
+    reviewed_at: str | None = None
+    reviewed_by: str | None = None
 
 
 class LabelSummary(BaseModel):
-    score: Optional[float] = None
+    score: float | None = None
     label_status: LabelStatus
-    updated_at: Optional[str] = None
-    created_by: Optional[str] = None
-    reviewed_by: Optional[str] = None
+    updated_at: str | None = None
+    created_by: str | None = None
+    reviewed_by: str | None = None
 
 
 ##########
@@ -543,17 +525,17 @@ class ImageSampleAttributes(BaseModel):
 
 # Image sequence
 class ImageFrame(ImageSampleAttributes):
-    name: Optional[str] = None
+    name: str | None = None
 
 
 class ImageSequenceSampleAttributes(BaseModel):
-    frames: List[ImageFrame]
+    frames: list[ImageFrame]
 
 
 # Point cloud
 class PCD(BaseModel):
     url: str
-    signed_url: Optional[str] = None
+    signed_url: str | None = None
     type: PCDType
 
 
@@ -563,7 +545,7 @@ class EgoPose(BaseModel):
 
 
 class CameraIntrinsics(BaseModel):
-    intrinsic_matrix: List[List[float]]
+    intrinsic_matrix: list[list[float]]
 
 
 class CameraExtrinsics(BaseModel):
@@ -572,26 +554,26 @@ class CameraExtrinsics(BaseModel):
 
 
 class CalibratedImage(URL):
-    row: Optional[int] = None
-    col: Optional[int] = None
-    intrinsics: Optional[CameraIntrinsics] = None
-    extrinsics: Optional[CameraExtrinsics] = None
-    distortion: Optional[Distortion] = None
+    row: int | None = None
+    col: int | None = None
+    intrinsics: CameraIntrinsics | None = None
+    extrinsics: CameraExtrinsics | None = None
+    distortion: Distortion | None = None
     camera_convention: CameraConvention = CameraConvention.OPEN_GL
 
 
 class PointcloudSampleAttributes(BaseModel):
     pcd: PCD
-    images: Optional[List[CalibratedImage]] = None
-    ego_pose: Optional[EgoPose] = None
-    default_z: Optional[float] = None
-    name: Optional[str] = None
-    timestamp: Optional[Union[str, int]] = None
+    images: list[CalibratedImage] | None = None
+    ego_pose: EgoPose | None = None
+    default_z: float | None = None
+    name: str | None = None
+    timestamp: str | int | None = None
 
 
 # Point cloud sequence
 class PointcloudSequenceSampleAttributes(BaseModel):
-    frames: List[PointcloudSampleAttributes]
+    frames: list[PointcloudSampleAttributes]
 
 
 # Multi-sensor
@@ -608,12 +590,7 @@ class MultiSensorImageSequenceSampleAttributes(BaseModel):
 
 
 class MultiSensorSampleAttributes(BaseModel):
-    sensors: List[
-        Union[
-            MultiSensorPointcloudSequenceSampleAttributes,
-            MultiSensorImageSequenceSampleAttributes,
-        ],
-    ]
+    sensors: list[MultiSensorPointcloudSequenceSampleAttributes | MultiSensorImageSequenceSampleAttributes]
 
 
 # Text
@@ -621,30 +598,23 @@ class TextSampleAttributes(BaseModel):
     text: str
 
 
-SampleAttributes = Union[
-    ImageSampleAttributes,
-    ImageSequenceSampleAttributes,
-    PointcloudSampleAttributes,
-    PointcloudSequenceSampleAttributes,
-    MultiSensorSampleAttributes,
-    TextSampleAttributes,
-]
+SampleAttributes: TypeAlias = "ImageSampleAttributes | ImageSequenceSampleAttributes | PointcloudSampleAttributes | PointcloudSequenceSampleAttributes | MultiSensorSampleAttributes | TextSampleAttributes "
 
 
 class Sample(BaseModel):
     uuid: str
     name: str
     attributes: SampleAttributes
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
     created_at: str
     created_by: str
-    assigned_labeler: Optional[str] = None
-    assigned_reviewer: Optional[str] = None
-    comments: Optional[List[str]] = None
+    assigned_labeler: str | None = None
+    assigned_reviewer: str | None = None
+    comments: list[str] | None = None
     priority: float
-    label: Optional[Union[Label, LabelSummary]] = None
-    issues: Optional[List[Issue]] = None
-    dataset_full_name: Optional[str] = None
+    label: Label | LabelSummary | None = None
+    issues: list[Issue] | None = None
+    dataset_full_name: str | None = None
 
 
 ########################
@@ -655,17 +625,17 @@ class User(BaseModel):
     username: str
     created_at: str
     is_organization: bool
-    email: Optional[str] = None
-    webhooks_enabled: Optional[bool] = None
-    private_upload_count: Optional[int] = None
-    public_upload_count: Optional[int] = None
-    subscription: Optional[Subscription] = None
-    is_trial_expired: Optional[bool] = None
-    organizations: Optional[List[User]] = None
-    organization_created_by: Optional[str] = None
-    organization_role: Optional[Role] = None
-    members: Optional[List[User]] = None
-    insights_urls: Optional[Dict[str, str]] = None
+    email: str | None = None
+    webhooks_enabled: bool | None = None
+    private_upload_count: int | None = None
+    public_upload_count: int | None = None
+    subscription: Subscription | None = None
+    is_trial_expired: bool | None = None
+    organizations: list[User] | None = None
+    organization_created_by: str | None = None
+    organization_role: Role | None = None
+    members: list[User] | None = None
+    insights_urls: dict[str, str] | None = None
 
 
 class Collaborator(BaseModel):
@@ -676,26 +646,26 @@ class Collaborator(BaseModel):
 class SelectTaskAttribute(BaseModel):
     name: str
     input_type: Literal[InputType.SELECT]
-    values: List[str]
-    default_value: Optional[str] = None
-    is_mandatory: Optional[bool] = None
+    values: list[str]
+    default_value: str | None = None
+    is_mandatory: bool | None = None
 
 
 class TextTaskAttribute(BaseModel):
     name: str
-    input_type: Literal[InputType.TEXT] = None
-    default_value: Optional[str] = None
-    is_mandatory: Optional[bool] = None
+    input_type: Literal[InputType.TEXT]
+    default_value: str | None = None
+    is_mandatory: bool | None = None
 
 
 class NumberTaskAttribute(BaseModel):
     name: str
     input_type: Literal[InputType.NUMBER]
-    default_value: Optional[float] = None
-    min: Optional[float] = None
-    max: Optional[float] = None
-    step: Optional[float] = None
-    is_mandatory: Optional[bool] = None
+    default_value: float | None = None
+    min: float | None = None
+    max: float | None = None
+    step: float | None = None
+    is_mandatory: bool | None = None
 
     @field_validator("min", "max", "step", mode="before")
     @classmethod
@@ -709,38 +679,33 @@ class NumberTaskAttribute(BaseModel):
 class CheckboxTaskAttribute(BaseModel):
     name: str
     input_type: Literal[InputType.CHECKBOX]
-    default_value: Optional[bool] = None
+    default_value: bool | None = None
 
 
-TaskAttribute = Union[
-    SelectTaskAttribute,
-    TextTaskAttribute,
-    NumberTaskAttribute,
-    CheckboxTaskAttribute,
-]
+TaskAttribute: TypeAlias = "SelectTaskAttribute | TextTaskAttribute | NumberTaskAttribute | CheckboxTaskAttribute"
 
 
 class TaskAttributeCategory(BaseModel):
     name: str
     id: int
-    color: Optional[Union[RGB, RGBA]] = None
-    has_instances: Optional[bool] = None
-    attributes: Optional[List[TaskAttribute]] = None
-    dimensions: Optional[XYZ] = None
+    color: RGB | RGBA | None = None
+    has_instances: bool | None = None
+    attributes: list[TaskAttribute] | None = None
+    dimensions: XYZ | None = None
     model_config = ConfigDict(extra="allow")
 
 
 class TaskAttributes(BaseModel):
-    format_version: Optional[FormatVersion] = None
-    categories: Optional[List[TaskAttributeCategory]] = None
-    image_attributes: Optional[List[TaskAttribute]] = None
+    format_version: FormatVersion | None = None
+    categories: list[TaskAttributeCategory] | None = None
+    image_attributes: list[TaskAttribute] | None = None
     model_config = ConfigDict(extra="allow")
 
 
 class Owner(BaseModel):
     username: str
     created_at: str
-    email: Optional[str] = None
+    email: str | None = None
 
 
 # class Statistics(BaseModel):  # deprecated
@@ -755,20 +720,20 @@ class Owner(BaseModel):
 class Labelset(BaseModel):
     name: str
     description: str
-    # uuid: Optional[str]
-    # readme: Optional[str]
-    # task_type: Optional[TaskType]
-    # attributes: Optional[Union[str, TaskAttributes]]
-    is_groundtruth: Optional[bool] = None
-    # statistics: Optional[Statistics]
-    created_at: Optional[str] = None
-    # stats: Optional[Dict[str, Any]]
+    # uuid: str | None
+    # readme: str | None
+    # task_type: TaskType | None
+    # attributes: str | TaskAttributes | None
+    is_groundtruth: bool | None = None
+    # statistics: Statistics | None
+    created_at: str | None = None
+    # stats: dict[str, Any] | None
 
 
 class Dataset(BaseModel):
     name: str
     full_name: str
-    cloned_from: Optional[str] = None
+    cloned_from: str | None = None
     description: str
     # data_type: Literal["IMAGE"]
     category: Category
@@ -785,18 +750,18 @@ class Dataset(BaseModel):
     task_type: TaskType
     # task_readme: str
     label_stats: LabelStats
-    labeling_inactivity_timeout_seconds: Optional[int] = None
-    samples_count: Optional[Union[str, int]] = None
-    collaborators_count: Optional[int] = None
-    task_attributes: Optional[TaskAttributes] = None
-    labelsets: Optional[List[Labelset]] = None
-    role: Optional[str] = None
-    readme: Optional[str] = None
-    metadata: Dict[str, Any]
-    noncollaborator_can_label: Optional[bool] = None
-    noncollaborator_can_review: Optional[bool] = None
-    insights_urls: Optional[Dict[str, str]] = None
-    # tasks: Optional[List[Dict[str, Any]]]
+    labeling_inactivity_timeout_seconds: int | None = None
+    samples_count: str | int | None = None
+    collaborators_count: int | None = None
+    task_attributes: TaskAttributes | None = None
+    labelsets: list[Labelset] | None = None
+    role: str | None = None
+    readme: str | None = None
+    metadata: dict[str, Any]
+    noncollaborator_can_label: bool | None = None
+    noncollaborator_can_review: bool | None = None
+    insights_urls: dict[str, str] | None = None
+    # tasks: list[dict[str, Any]] | None
 
     @field_validator("category")
     @classmethod
@@ -812,6 +777,8 @@ class Dataset(BaseModel):
 class SegmentsDatasetCategory(BaseModel):
     id: int
     name: str
-    color: Optional[Union[RGB, RGBA]] = None
-    attributes: Optional[List[Any]] = None
+    color: RGB | RGBA | None = None
+    attributes: list[Any] | None = None
+    isthing: bool | None = None
+    has_instances: bool | None = None
     model_config = ConfigDict(populate_by_name=True, extra="allow")
