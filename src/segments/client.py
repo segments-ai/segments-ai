@@ -56,18 +56,12 @@ from segments.typing import (
 from typing_extensions import Literal, get_args
 
 
-try:
-    # __package__ allows for the case where __name__ is "__main__"
-    __version__ = importlib_metadata.version(__package__ or __name__)
-except importlib_metadata.PackageNotFoundError:
-    __version__ = "0.0.0"
-
 ################################
 # Constants and type variables #
 ################################
 logger = logging.getLogger(__name__)
 T = TypeVar("T")
-VERSION = __version__
+VERSION = importlib_metadata.version(__package__ or __name__)
 
 
 ####################

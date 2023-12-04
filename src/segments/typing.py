@@ -653,7 +653,7 @@ class SelectTaskAttribute(BaseModel):
 
 class TextTaskAttribute(BaseModel):
     name: str
-    input_type: Literal[InputType.TEXT] = None
+    input_type: Literal[InputType.TEXT]
     default_value: str | None = None
     is_mandatory: bool | None = None
 
