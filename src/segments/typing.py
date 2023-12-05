@@ -782,6 +782,7 @@ class Dataset(BaseModel):
     enable_label_status_verified: bool
     enable_same_dimensions_track_constraint: bool
     enable_interpolation: bool
+    use_timestamps_for_interpolation: bool
     task_type: TaskType
     # task_readme: str
     label_stats: LabelStats
