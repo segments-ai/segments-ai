@@ -303,14 +303,14 @@ class ImageSequenceSegmentationAnnotation(Annotation):
     is_keyframe: bool = False
 
 
-class ImageSequenceSegmentationFrame(ImageSegmentationLabelAttributes):
+class ImageSegmentationFrame(ImageSegmentationLabelAttributes):
     annotations: List[ImageSequenceSegmentationAnnotation]
     timestamp: Optional[Union[str, int]]
     format_version: Optional[FormatVersion]
 
 
 class ImageSequenceSegmentationLabelAttributes(BaseModel):
-    frames: List[ImageSequenceSegmentationFrame]
+    frames: List[ImageSegmentationFrame]
     format_version: Optional[FormatVersion]
 
 
