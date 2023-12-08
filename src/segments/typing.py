@@ -461,15 +461,13 @@ class PointcloudSequenceVectorLabelAttributes(BaseModel):
 class MultiSensorPointcloudSequenceCuboidLabelAttributes(BaseModel):
     name: str
     task_type: Literal[TaskType.POINTCLOUD_CUBOID_SEQUENCE]
-    # TODO remove list and replace with `Optional[PointcloudSequenceCuboidLabelAttributes] = None`
-    attributes: Union[PointcloudSequenceCuboidLabelAttributes, List]
+    attributes: PointcloudSequenceCuboidLabelAttributes
 
 
 class MultiSensorImageSequenceVectorLabelAttributes(BaseModel):
     name: str
     task_type: Literal[TaskType.IMAGE_VECTOR_SEQUENCE]
-    # TODO remove list and replace with `Optional[ImageSequenceVectorLabelAttributes] = None`
-    attributes: Union[ImageSequenceVectorLabelAttributes, List]
+    attributes: ImageSequenceVectorLabelAttributes
 
 
 class MultiSensorLabelAttributes(BaseModel):
