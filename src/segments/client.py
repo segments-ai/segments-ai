@@ -845,6 +845,7 @@ class SegmentsClient:
         direction: Literal["asc", "desc"] = "asc",
         per_page: int = 1000,
         page: int = 1,
+        include_label: bool = False,
     ) -> List[Sample]:
         """Get the samples in a dataset.
 
@@ -865,6 +866,7 @@ class SegmentsClient:
             direction: Sorting direction. One of ``asc`` (ascending) or ``desc`` (descending). Defaults to ``asc``.
             per_page: Pagination parameter indicating the maximum number of samples to return. Defaults to ``1000``.
             page: Pagination parameter indicating the page to return. Defaults to ``1``.
+            include_label: Whether to include the label in the response. Defaults to :obj:`False`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the samples fails.
@@ -901,6 +903,10 @@ class SegmentsClient:
         # sorting
         direction_str = "" if direction == "asc" else "-"
         query_string += f"&sort={direction_str}{sort}"
+
+        # label
+        if include_label:
+            query_string += "&include_label=1"
 
         r = self._get(f"/datasets/{dataset_identifier}/samples/{query_string}")
         results = r.json()
