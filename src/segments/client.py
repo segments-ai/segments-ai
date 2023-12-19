@@ -866,7 +866,7 @@ class SegmentsClient:
             direction: Sorting direction. One of ``asc`` (ascending) or ``desc`` (descending). Defaults to ``asc``.
             per_page: Pagination parameter indicating the maximum number of samples to return. Defaults to ``1000``.
             page: Pagination parameter indicating the page to return. Defaults to ``1``.
-            include_full_label: Whether to include the label in the response. Defaults to :obj:`False`.
+            include_full_label: Whether to include the full label in the response. Defaults to :obj:`False`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the samples fails.
