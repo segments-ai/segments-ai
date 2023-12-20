@@ -858,7 +858,7 @@ class SegmentsClient:
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
-            labelset: If defined, this additionally returns for each sample a label summary for the given labelset. Defaults to :obj:`None`.
+            labelset: If defined, this additionally returns for each sample a label summary or full label (depending on `include_full_label`) for the given labelset. Defaults to :obj:`None`.
             name: Name to filter by. Defaults to :obj:`None` (no filtering).
             label_status: Sequence of label statuses to filter by. Defaults to :obj:`None` (no filtering).
             metadata: Sequence of 'key:value' metadata attributes to filter by. Defaults to :obj:`None` (no filtering).
@@ -866,7 +866,7 @@ class SegmentsClient:
             direction: Sorting direction. One of ``asc`` (ascending) or ``desc`` (descending). Defaults to ``asc``.
             per_page: Pagination parameter indicating the maximum number of samples to return. Defaults to ``1000``.
             page: Pagination parameter indicating the page to return. Defaults to ``1``.
-            include_full_label: Whether to include the full label in the response. Defaults to :obj:`False`.
+            include_full_label: Whether to include the full label in the response, or only a summary. Ignored if `labelset` is `None`. Defaults to :obj:`False`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the samples fails.
@@ -881,6 +881,8 @@ class SegmentsClient:
 
         if labelset is not None:
             query_string += f"&labelset={labelset}"
+            if include_full_label:
+                query_string += "&include_full_label=1"
 
         # filter by name
         if name is not None:
@@ -903,10 +905,6 @@ class SegmentsClient:
         # sorting
         direction_str = "" if direction == "asc" else "-"
         query_string += f"&sort={direction_str}{sort}"
-
-        # label
-        if include_full_label:
-            query_string += "&include_full_label=1"
 
         r = self._get(f"/datasets/{dataset_identifier}/samples/{query_string}")
         results = r.json()
