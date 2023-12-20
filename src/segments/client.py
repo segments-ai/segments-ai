@@ -881,10 +881,7 @@ class SegmentsClient:
         # pagination
         query_string = f"?per_page={per_page}&page={page}"
 
-        if include_attributes:
-            query_string += "&include_attributes=1"
-        else:
-            query_string += "&include_attributes=0"
+        query_string += f"&include_attributes={'1' if include_attributes else '0'}"
 
         if labelset is not None:
             query_string += f"&labelset={labelset}"
