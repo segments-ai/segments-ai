@@ -846,6 +846,7 @@ class SegmentsClient:
         per_page: int = 1000,
         page: int = 1,
         include_full_label: bool = False,
+        include_attributes: bool = True,
     ) -> List[Sample]:
         """Get the samples in a dataset.
 
@@ -867,6 +868,7 @@ class SegmentsClient:
             per_page: Pagination parameter indicating the maximum number of samples to return. Defaults to ``1000``.
             page: Pagination parameter indicating the page to return. Defaults to ``1``.
             include_full_label: Whether to include the full label in the response, or only a summary. Ignored if `labelset` is `None`. Defaults to :obj:`False`.
+            include_attributes: Whether to include the sample attributes in the response. Defaults to :obj:`True`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the samples fails.
@@ -878,6 +880,8 @@ class SegmentsClient:
 
         # pagination
         query_string = f"?per_page={per_page}&page={page}"
+
+        query_string += f"&include_attributes={'1' if include_attributes else '0'}"
 
         if labelset is not None:
             query_string += f"&labelset={labelset}"
