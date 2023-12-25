@@ -691,11 +691,6 @@ TASK_TYPE_TO_SAMPLE_ATTRIBUTES = {
     TaskType.EMPTY: SampleAttributes,
 }
 
-sequence_sample_attributes = [
-    ImageSequenceSampleAttributes,
-    PointcloudSequenceSampleAttributes,
-]
-
 
 ########################
 # Dataset and labelset #
