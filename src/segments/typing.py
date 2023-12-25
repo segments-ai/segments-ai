@@ -533,30 +533,26 @@ class LabelSummary(BaseModel):
     reviewed_by: Optional[str] = None
 
 
-task_type_to_label_attributes = {
-    "segmentation-bitmap": ImageSegmentationLabelAttributes,
-    "segmentation-bitmap-highres": ImageSegmentationLabelAttributes,
-    "image-vector-sequence": ImageSequenceVectorLabelAttributes,
-    "bboxes": ImageVectorLabelAttributes,
-    "vector": ImageVectorLabelAttributes,
-    "pointcloud-cuboid": PointcloudCuboidLabelAttributes,
-    "pointcloud-cuboid-sequence": PointcloudSequenceCuboidLabelAttributes,
-    "pointcloud-segmentation": PointcloudSegmentationLabelAttributes,
-    "pointcloud-segmentation-sequence": PointcloudSequenceSegmentationLabelAttributes,
-    "pointcloud-vector": PointcloudVectorLabelAttributes,
-    "pointcloud-vector-sequence": PointcloudSequenceVectorLabelAttributes,
-    "text-named-entities": TextLabelAttributes,
-    "text-named-entities": TextLabelAttributes,
-    "text-span-categorization": TextLabelAttributes,
-    "": LabelAttributes,
+TASK_TYPE_TO_LABEL_ATTRIBUTES = {
+    # image
+    TaskType.SEGMENTATION_BITMAP: ImageSegmentationLabelAttributes,
+    TaskType.SEGMENTATION_BITMAP_HIGHRES: ImageSegmentationLabelAttributes,
+    TaskType.IMAGE_VECTOR_SEQUENCE: ImageSequenceVectorLabelAttributes,
+    TaskType.BBOXES: ImageVectorLabelAttributes,
+    TaskType.VECTOR: ImageVectorLabelAttributes,
+    # point cloud
+    TaskType.POINTCLOUD_CUBOID: PointcloudCuboidLabelAttributes,
+    TaskType.POINTCLOUD_CUBOID_SEQUENCE: PointcloudSequenceCuboidLabelAttributes,
+    TaskType.POINTCLOUD_SEGMENTATION: PointcloudSegmentationLabelAttributes,
+    TaskType.POINTCLOUD_SEGMENTATION_SEQUENCE: PointcloudSequenceSegmentationLabelAttributes,
+    TaskType.POINTCLOUD_VECTOR: PointcloudVectorLabelAttributes,
+    TaskType.POINTCLOUD_VECTOR_SEQUENCE: PointcloudSequenceVectorLabelAttributes,
+    # text
+    TaskType.TEXT_NAMED_ENTITIES: TextLabelAttributes,
+    TaskType.TEXT_SPAN_CATEGORIZATION: TextLabelAttributes,
+    # other
+    TaskType.EMPTY: LabelAttributes,
 }
-
-sequence_label_attributes = [
-    ImageSequenceVectorLabelAttributes,
-    PointcloudSequenceCuboidLabelAttributes,
-    PointcloudSequenceVectorLabelAttributes,
-    PointcloudSequenceSegmentationLabelAttributes,
-]
 
 
 ##########
@@ -674,22 +670,25 @@ class Sample(BaseModel):
     dataset_full_name: Optional[str] = None
 
 
-task_type_to_sample_attributes = {
-    "segmentation-bitmap": ImageSampleAttributes,
-    "segmentation-bitmap-highres": ImageSampleAttributes,
-    "image-vector-sequence": ImageSequenceSampleAttributes,
-    "bboxes": ImageSampleAttributes,
-    "vector": ImageSampleAttributes,
-    "pointcloud-cuboid": PointcloudSampleAttributes,
-    "pointcloud-cuboid-sequence": PointcloudSequenceSampleAttributes,
-    "pointcloud-segmentation": PointcloudSampleAttributes,
-    "pointcloud-segmentation-sequence": PointcloudSequenceSampleAttributes,
-    "pointcloud-vector": PointcloudSampleAttributes,
-    "pointcloud-vector-sequence": PointcloudSequenceSampleAttributes,
-    "text-named-entities": TextSampleAttributes,
-    "text-named-entities": TextSampleAttributes,
-    "text-span-categorization": TextSampleAttributes,
-    "": SampleAttributes,
+TASK_TYPE_TO_SAMPLE_ATTRIBUTES = {
+    # image
+    TaskType.SEGMENTATION_BITMAP: ImageSampleAttributes,
+    TaskType.SEGMENTATION_BITMAP_HIGHRES: ImageSampleAttributes,
+    TaskType.IMAGE_VECTOR_SEQUENCE: ImageSequenceSampleAttributes,
+    TaskType.BBOXES: ImageSampleAttributes,
+    TaskType.VECTOR: ImageSampleAttributes,
+    # point cloud
+    TaskType.POINTCLOUD_CUBOID: PointcloudSampleAttributes,
+    TaskType.POINTCLOUD_CUBOID_SEQUENCE: PointcloudSequenceSampleAttributes,
+    TaskType.POINTCLOUD_SEGMENTATION: PointcloudSampleAttributes,
+    TaskType.POINTCLOUD_SEGMENTATION_SEQUENCE: PointcloudSequenceSampleAttributes,
+    TaskType.POINTCLOUD_VECTOR: PointcloudSampleAttributes,
+    TaskType.POINTCLOUD_VECTOR_SEQUENCE: PointcloudSequenceSampleAttributes,
+    # text
+    TaskType.TEXT_NAMED_ENTITIES: TextSampleAttributes,
+    TaskType.TEXT_SPAN_CATEGORIZATION: TextSampleAttributes,
+    # other
+    TaskType.EMPTY: SampleAttributes,
 }
 
 sequence_sample_attributes = [
@@ -734,7 +733,7 @@ class SelectTaskAttribute(BaseModel):
 
 class TextTaskAttribute(BaseModel):
     name: str
-    input_type: Literal[InputType.TEXT] = None
+    input_type: Literal[InputType.TEXT]
     default_value: Optional[str] = None
     is_mandatory: Optional[bool] = None
 
@@ -763,9 +762,7 @@ class CheckboxTaskAttribute(BaseModel):
     default_value: Optional[bool] = None
 
 
-TaskAttribute = Union[
-    SelectTaskAttribute, TextTaskAttribute, NumberTaskAttribute, CheckboxTaskAttribute,
-]
+TaskAttribute = Union[SelectTaskAttribute, TextTaskAttribute, NumberTaskAttribute, CheckboxTaskAttribute]
 
 
 class TaskAttributeCategory(BaseModel):
