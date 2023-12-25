@@ -306,7 +306,6 @@ class TestSample(Test):
     def test_add_update_sample_validationerror(self) -> None:
         metadata = {"weather": "sunny", "camera_id": 3}
         priority = 0
-        # embedding = np.zeros(100).tolist()
         name = "Test sample"
         attributes_dict: Dict[str, Dict[str, Any]] = {
             "image": {"image": {"url": "url"}},
@@ -361,7 +360,6 @@ class TestSample(Test):
                     attributes,
                     metadata,
                     priority,
-                    # embedding
                 )
             with self.assertRaises(ValidationError):
                 self.client.update_sample(
@@ -370,7 +368,6 @@ class TestSample(Test):
                     attributes,
                     metadata,
                     priority,
-                    # embedding
                 )
 
         # Sequence with no frames
