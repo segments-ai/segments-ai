@@ -12,22 +12,29 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
+# https://gist.github.com/benkehoe/066a73903e84576a8d6d911cfedc2df6
+import importlib.metadata as importlib_metadata
 import os
 import sys
 from datetime import datetime
 
+
+try:
+    # __package__ allows for the case where __name__ is "__main__"
+    __version__ = importlib_metadata.version(__package__ or __name__)
+except importlib_metadata.PackageNotFoundError:
+    __version__ = "0.0.0"
+
 sys.path.insert(0, os.path.abspath(os.path.join("..", "..", "src")))
 
 # -----------------------------------------------------------------------------
-# Constants #
+# Constants
 # -----------------------------------------------------------------------------
-VERSION = "1.0.20"
+VERSION = __version__
 
 # -----------------------------------------------------------------------------
 # Project information
 # -----------------------------------------------------------------------------
-
-
 project = "Segments.ai Python SDK"
 copyright = f"{datetime.today().year}, Segments.ai"
 author = "Segments.ai team"
@@ -38,7 +45,6 @@ release = VERSION
 # -----------------------------------------------------------------------------
 # General configuration
 # -----------------------------------------------------------------------------
-
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
@@ -73,7 +79,7 @@ autodoc_typehints_description_target = "documented"
 intersphinx_mapping = {
     #     "python": ("https://docs.python.org/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
-    "PIL": ("https://pillow.readthedocs.io/en/stable/", None)
+    "PIL": ("https://pillow.readthedocs.io/en/stable/", None),
     #     "pydantic": ("https://prompt-build--pydantic-docs.netlify.app/", None),
     #     "requests": ("https://docs.python-requests.org/en/stable/", None),
 }
@@ -113,7 +119,6 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # -----------------------------------------------------------------------------
 # Options for HTML output
 # -----------------------------------------------------------------------------
-
 # The theme to use for HTML and HTML Help pages. See the documentation for
 # a list of builtin themes.
 

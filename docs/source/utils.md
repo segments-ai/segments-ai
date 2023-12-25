@@ -13,6 +13,12 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 .. autofunction:: segments.utils.load_image_from_url
 ```
 
+### Load a point cloud from a url
+
+```{eval-rst}
+.. autofunction:: segments.utils.load_pointcloud_from_url
+```
+
 ### Load a label bitmap from a url
 
 ```{eval-rst}
@@ -45,6 +51,30 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 .. autofunction:: segments.utils.handle_exif_rotation
 ```
 
+### Turn a cuboid label into a segmentation label
+
+```{eval-rst}
+.. autofunction:: segments.utils.cuboid_to_segmentation
+```
+
+### Turn a numpy array into a point cloud
+
+```{eval-rst}
+.. autofunction:: segments.utils.array_to_pcd
+```
+
+### Turn a ply file into a pcd file
+
+```{eval-rst}
+.. autofunction:: segments.utils.ply_to_pcd
+```
+
+### Turn a point cloud into a sampled point cloud
+
+```{eval-rst}
+.. autofunction:: segments.utils.sample_pcd
+```
+
 ## Export
 
 ### Export a dataset to a different format
@@ -59,4 +89,10 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 
 ```{eval-rst}
 .. autofunction:: segments.utils.show_polygons
+```
+
+### Try all camera rotations to find the best one
+
+```{eval-rst}
+.. autofunction:: segments.utils.find_camera_rotation
 ```

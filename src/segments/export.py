@@ -15,6 +15,7 @@ from skimage import img_as_ubyte
 from skimage.measure import regionprops
 from tqdm import tqdm
 
+
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
 if TYPE_CHECKING:
     from segments.dataset import SegmentsDataset
@@ -92,9 +93,7 @@ class IdGenerator:
 
     def get_color(self, cat_id: int) -> RGB:
         def random_color(base: RGB, max_dist: int = 30) -> RGB:
-            new_color: npt.NDArray[Any] = base + np.random.randint(
-                low=-max_dist, high=max_dist + 1, size=3
-            )
+            new_color: npt.NDArray[Any] = base + np.random.randint(low=-max_dist, high=max_dist + 1, size=3)
             rgb = tuple(np.maximum(0, np.minimum(255, new_color)))
             return cast(RGB, rgb)
 
@@ -126,6 +125,7 @@ def rgb2id(color: Union[npt.NDArray[Any], RGB]) -> Union[npt.NDArray[Any], int]:
 
     Args:
         color: An RGB value.
+
     Returns:
         The id.
     """
@@ -142,6 +142,7 @@ def id2rgb(id_map: npt.NDArray[Any]) -> Union[npt.NDArray[Any], RGB]:
 
     Args:
         id_map: An id map.
+
     Returns:
         An rgb.
     """
@@ -165,10 +166,7 @@ def get_color(id: int) -> RGB:
     return COLORMAP[id][0:3]
 
 
-def colorize(
-    img: npt.NDArray[Any], colormap: Optional[ColorMap] = None
-) -> npt.NDArray[Any]:
-
+def colorize(img: npt.NDArray[Any], colormap: Optional[ColorMap] = None) -> npt.NDArray[Any]:
     indices = np.unique(img)
     indices = indices[indices != 0]
 
@@ -190,6 +188,7 @@ def get_bbox(binary_mask: npt.NDArray[Any]) -> Union[Tuple[int, int, int, int], 
 
     Args:
         binary_mask: The binary mask as a numpy array.
+
     Returns:
         The bounding box or False if no bounding box is found.
     """
@@ -205,16 +204,16 @@ def get_bbox(binary_mask: npt.NDArray[Any]) -> Union[Tuple[int, int, int, int], 
 ##################
 # Export methods #
 ##################
-def export_coco_instance(
-    dataset: SegmentsDataset, export_folder: str
-) -> Tuple[str, Optional[str]]:
+def export_coco_instance(dataset: SegmentsDataset, export_folder: str) -> Tuple[str, Optional[str]]:
     """Export a Segments dataset as a coco instance.
 
     Args:
         dataset: A :class:`.SegmentsDataset`.
         export_folder: The output directory.
+
     Returns:
         Returns the file name and the image directory name.
+
     Raises:
         :exc:`ImportError`: If pycocotools is not installed.
     """
@@ -264,10 +263,7 @@ def export_coco_instance(
             }
         )
 
-        if (
-            task_type == "segmentation-bitmap"
-            or task_type == "segmentation-bitmap-highres"
-        ):
+        if task_type == "segmentation-bitmap" or task_type == "segmentation-bitmap-highres":
             # https://scikit-image.org/docs/dev/api/skimage.measure.html#skimage.measure.regionprops
             regions = regionprops(np.array(sample["segmentation_bitmap"], np.uint32))
             regions = {region.label: region for region in regions}
@@ -282,10 +278,7 @@ def export_coco_instance(
             }
 
             # Segmentation bitmap labels
-            if (
-                task_type == "segmentation-bitmap"
-                or task_type == "segmentation-bitmap-highres"
-            ):
+            if task_type == "segmentation-bitmap" or task_type == "segmentation-bitmap-highres":
                 if instance["id"] not in regions:
                     # Only happens when the instance has 0 labeled pixels, which should not happen.
                     logger.warning(
@@ -293,9 +286,7 @@ def export_coco_instance(
                     )
                     continue
 
-                instance_mask = (
-                    np.array(sample["segmentation_bitmap"], np.uint32) == instance["id"]
-                )
+                instance_mask = np.array(sample["segmentation_bitmap"], np.uint32) == instance["id"]
 
                 region = regions[instance["id"]]
                 bbox = region.bbox
@@ -303,9 +294,7 @@ def export_coco_instance(
 
                 y0, x0, y1, x1 = bbox
                 # rle = mask.encode(np.asfortranarray(instance_mask))
-                rle = pctmask.encode(
-                    np.array(instance_mask[:, :, None], dtype=np.uint8, order="F")
-                )[
+                rle = pctmask.encode(np.array(instance_mask[:, :, None], dtype=np.uint8, order="F"))[
                     0
                 ]  # https://github.com/matterport/Mask_RCNN/issues/387#issuecomment-522671380
                 #         instance_mask_crop = instance_mask[y0:y1, x0:x1]
@@ -371,17 +360,15 @@ def export_coco_instance(
 
     json_data = {
         "info": info,
-        "categories": [category.dict() for category in categories],
+        "categories": [category.model_dump(mode="json") for category in categories],
         "images": images,
-        "annotations": annotations
+        "annotations": annotations,
         # "segment_info": [] # Only in Panoptic annotations
     }
 
     file_name = os.path.join(
         export_folder,
-        "export_coco-instance_{}_{}.json".format(
-            dataset.dataset_identifier, dataset.release["name"]
-        ),
+        f"export_coco-instance_{dataset.dataset_identifier}_{dataset.release['name']}.json",
     )
     with open(file_name, "w") as f:
         json.dump(json_data, f)
@@ -390,14 +377,13 @@ def export_coco_instance(
     return file_name, dataset.image_dir
 
 
-def export_coco_panoptic(
-    dataset: SegmentsDataset, export_folder: str
-) -> Tuple[str, Optional[str]]:
+def export_coco_panoptic(dataset: SegmentsDataset, export_folder: str) -> Tuple[str, Optional[str]]:
     """Export a Segments dataset in COCO panoptic format.
 
     Args:
         dataset: A :class:`.SegmentsDataset`.
         export_folder: The output directory.
+
     Returns:
         Returns the file name and the image directory name.
     """
@@ -416,9 +402,7 @@ def export_coco_panoptic(
     categories: List[SegmentsDatasetCategory] = []
     for i, category in enumerate(dataset.categories):
         color = category.color[:3] if category.color else get_color(i)
-        isthing = (
-            int(category.has_instances) if hasattr(category, "has_instances") else 0
-        )
+        isthing = int(category.has_instances) if hasattr(category, "has_instances") else 0
 
         categories.append(
             SegmentsDatasetCategory(
@@ -429,9 +413,7 @@ def export_coco_panoptic(
             )
         )
 
-    categories_dict: Dict[int, SegmentsDatasetCategory] = {
-        category.id: category for category in categories
-    }
+    categories_dict: Dict[int, SegmentsDatasetCategory] = {category.id: category for category in categories}
     id_generator = IdGenerator(categories_dict)
 
     # IMAGES AND ANNOTATIONS
@@ -483,9 +465,7 @@ def export_coco_panoptic(
                 continue
 
             # Read the instance mask and fill in the panoptic label. TODO: take this out of the loop to speed things up.
-            instance_mask = (
-                np.array(sample["segmentation_bitmap"], np.uint32) == instance["id"]
-            )
+            instance_mask = np.array(sample["segmentation_bitmap"], np.uint32) == instance["id"]
             panoptic_label[instance_mask] = color
 
             # bbox = get_bbox(instance_mask)
@@ -549,7 +529,7 @@ def export_coco_panoptic(
     # PUT EVERYTHING TOGETHER
     json_data = {
         "info": info,
-        "categories": [category.dict() for category in categories],
+        "categories": [category.model_dump(mode="json") for category in categories],
         "images": images,
         "annotations": annotations,
     }
@@ -557,9 +537,7 @@ def export_coco_panoptic(
     # WRITE JSON TO FILE
     file_name = os.path.join(
         export_folder,
-        "export_coco-panoptic_{}_{}.json".format(
-            dataset.dataset_identifier, dataset.release["name"]
-        ),
+        f"export_coco-panoptic_{dataset.dataset_identifier}_{dataset.release['name']}.json",
     )
     with open(file_name, "w") as f:
         json.dump(json_data, f)
@@ -581,6 +559,7 @@ def export_image(
         export_folder: The output directory.
         export_format: The export format.
         id_increment: Increment the category ids with this number.
+
     Returns:
         Returns the export folder.
     """
@@ -595,12 +574,10 @@ def export_image(
     categories = []
     for i, category in enumerate(dataset.categories):
         color = category.color[:3] if category.color else get_color(i)
-        isthing = (
-            int(category.has_instances) if hasattr(category, "has_instances") else 0
-        )
+        isthing = int(category.has_instances) if hasattr(category, "has_instances") else 0
 
         categories.append(
-            SegmentsDatasetCategory.parse_obj(
+            SegmentsDatasetCategory.model_validate(
                 {
                     "id": category.id,
                     "name": category.name,
@@ -645,9 +622,7 @@ def export_image(
         elif export_format == "semantic":
             # Semantic png
             instance_label = sample["segmentation_bitmap"]
-            semantic_label = get_semantic_bitmap(
-                instance_label, sample["annotations"], id_increment
-            )
+            semantic_label = get_semantic_bitmap(instance_label, sample["annotations"], id_increment)
             export_file = os.path.join(
                 export_folder,
                 f"{file_name}_label_{dataset.labelset}_semantic.png",
@@ -657,12 +632,8 @@ def export_image(
         elif export_format == "semantic-color":
             # Colored semantic png
             instance_label = sample["segmentation_bitmap"]
-            semantic_label = get_semantic_bitmap(
-                instance_label, sample["annotations"], id_increment
-            )
-            semantic_label_colored = colorize(
-                np.uint8(semantic_label), colormap=[c.color for c in categories]
-            )
+            semantic_label = get_semantic_bitmap(instance_label, sample["annotations"], id_increment)
+            semantic_label_colored = colorize(np.uint8(semantic_label), colormap=[c.color for c in categories])
             export_file = os.path.join(
                 export_folder,
                 f"{file_name}_label_{dataset.labelset}_semantic_colored.png",
@@ -686,16 +657,16 @@ def export_yolo(
         export_folder: The output directory.
         image_width: The width of the image (needed for ``image-vector-sequence``).
         image_height: The height of the image (needed for ``image-vector-sequence``).
+
     Returns:
         The image directory of the dataset.
+
     Raises:
         :exc:`ValueError`: If the dataset is not a bounding box dataset.
         :exc:`ValueError`: If the dataset is an ``image-vector-sequence``and the image width or image height is :obj:`None`.
     """
 
-    def write_yolo_file(
-        file_name: str, annotations: Any, image_width: float, image_height: float
-    ) -> None:
+    def write_yolo_file(file_name: str, annotations: Any, image_width: float, image_height: float) -> None:
         with open(file_name, "w") as f:
             for annotation in annotations:
                 if annotation["type"] == "bbox":
@@ -714,11 +685,7 @@ def export_yolo(
 
                     # Save it to the file
                     # print(category_id, x_center, y_center, width, height)
-                    f.write(
-                        "{} {:.6f} {:.6f} {:.6f} {:.6f}\n".format(
-                            category_id, x_center, y_center, width, height
-                        )
-                    )
+                    f.write(f"{category_id} {x_center:.6f} {y_center:.6f} {width:.6f} {height:.6f}\n")
 
     # Create export folder
     os.makedirs(os.path.join(export_folder, dataset.image_dir), exist_ok=True)
@@ -740,21 +707,15 @@ def export_yolo(
             image_name = os.path.splitext(os.path.basename(sample["name"]))[0]
 
             if image_width is None or image_height is None:
-                raise ValueError(
-                    "Please provide image_width and image_height parameters (i.e., not None)."
-                )
+                raise ValueError("Please provide image_width and image_height parameters (i.e., not None).")
 
-            for j, frame in enumerate(
-                sample["labels"]["ground-truth"]["attributes"]["frames"]
-            ):
+            for j, frame in enumerate(sample["labels"]["ground-truth"]["attributes"]["frames"]):
                 # Construct the file name from image and frame name
                 try:
                     frame_name = sample["attributes"]["frames"][j]["name"]
                 except (KeyError, TypeError):
                     frame_name = f"{j + 1:05d}"
-                file_name = os.path.join(
-                    export_folder, dataset.image_dir, f"{image_name}-{frame_name}.txt"
-                )
+                file_name = os.path.join(export_folder, dataset.image_dir, f"{image_name}-{frame_name}.txt")
 
                 # Testing on x is the same as testing len(x)>0 (this also checks that x is not None - see truthy and falsy values in Python)
                 # https://stackoverflow.com/questions/39983695/what-is-truthy-and-falsy-how-is-it-different-from-true-and-false
@@ -765,37 +726,37 @@ def export_yolo(
         for i in tqdm(range(len(dataset)), total=len(dataset), colour="#FF9900"):
             sample = dataset[i]
             image_name = os.path.splitext(os.path.basename(sample["name"]))[0]
-            file_name = os.path.join(
-                export_folder, dataset.image_dir, f"{image_name}.txt"
-            )
-
-            if image_width is None or image_height is None:
-                image_width = sample["image"].width
-                image_height = sample["image"].height
+            file_name = os.path.join(export_folder, dataset.image_dir, f"{image_name}.txt")
 
             if "annotations" in sample and sample["annotations"]:
                 annotations = sample["annotations"]
                 write_yolo_file(
                     file_name,
                     annotations,
-                    cast(float, image_width),
-                    cast(float, image_height),
+                    cast(
+                        float,
+                        image_width if image_width is not None else sample["image"].width,
+                    ),
+                    cast(
+                        float,
+                        image_height if image_height is not None else sample["image"].height,
+                    ),
                 )
 
     print(f"Exported. Images and labels in {dataset.image_dir}")
     return dataset.image_dir
 
 
-def export_polygon(
-    dataset: SegmentsDataset, export_folder: str
-) -> Tuple[str, Optional[str]]:
+def export_polygon(dataset: SegmentsDataset, export_folder: str) -> Tuple[str, Optional[str]]:
     """Export a Segments dataset as polygons (i.e., contours).
 
     Args:
         dataset: A :class:`.SegmentsDataset`.
         export_folder: The output directory.
+
     Raises:
         :exc:`ImportError`: If OpenCV is not installed.
+
     Returns:
         Returns the file name and the image directory name.
     """
@@ -831,9 +792,13 @@ def export_polygon(
             }
         )
 
+        segmentation_bitmap = np.array(sample["segmentation_bitmap"], np.uint32)
         # https://scikit-image.org/docs/dev/api/skimage.measure.html#skimage.measure.regionprops
-        regions = regionprops(np.array(sample["segmentation_bitmap"], np.uint32))
+        regions = regionprops(segmentation_bitmap)
+
         regions = {region.label: region for region in regions}
+
+        segmentation_bitmap_uint8 = segmentation_bitmap.astype(np.uint8)
 
         for instance in sample["annotations"]:
             category_id = instance["category_id"]
@@ -852,22 +817,16 @@ def export_polygon(
                 )
                 continue
 
-            instance_mask = (
-                np.asarray(sample["segmentation_bitmap"], np.uint8) == instance["id"]
-            )
+            instance_mask = segmentation_bitmap_uint8 == instance["id"]
 
             # Allowed OpenCV data types: https://stackoverflow.com/questions/12785121/access-opencv-matrix-cv-32s-element
             black_white_image = instance_mask.astype("uint8")
 
             # Contour retrieval modes (all, outer, in a hierarchy, etc.): https://docs.opencv.org/4.x/d3/dc0/group__imgproc__shape.html#ga819779b9857cc2f8601e6526a3a5bc71
-            contours, hierarchy = cv.findContours(
-                black_white_image, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE
-            )
+            contours, hierarchy = cv.findContours(black_white_image, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)
 
             # Make object json serializable
-            serializable_contours = [
-                np.squeeze(contour).tolist() for contour in contours
-            ]
+            serializable_contours = [np.squeeze(contour).tolist() for contour in contours]
 
             annotation.update({"polygons": serializable_contours})
 
@@ -875,7 +834,7 @@ def export_polygon(
             annotation_id += 1
 
     json_data = {
-        "categories": [category.dict() for category in categories],
+        "categories": [category.model_dump(mode="json") for category in categories],
         "images": images,
         "annotations": annotations,
     }

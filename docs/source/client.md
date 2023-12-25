@@ -5,6 +5,14 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 
 # Client
 
+## Users
+
+### Get a user
+
+```{eval-rst}
+.. automethod:: segments.client.SegmentsClient.get_user
+```
+
 ## Datasets
 
 ### List datasets

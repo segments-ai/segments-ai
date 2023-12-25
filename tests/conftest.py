@@ -23,11 +23,7 @@ def owner() -> str:
 
 @pytest.fixture
 def client(API_KEY: str, API_URL: Optional[str]) -> Iterable[SegmentsClient]:
-    client = (
-        SegmentsClient(api_key=API_KEY, api_url=API_URL)
-        if API_URL
-        else SegmentsClient(api_key=API_KEY)
-    )
+    client = SegmentsClient(api_key=API_KEY, api_url=API_URL) if API_URL else SegmentsClient(api_key=API_KEY)
     yield client
     client.close()
 
@@ -45,22 +41,6 @@ def sample_uuids() -> List[str]:
     sample_uuids_str = cast(str, os.getenv("SAMPLE_UUIDS"))
     sample_uuids = cast(List[str], json.loads(sample_uuids_str))
     return sample_uuids
-
-
-@pytest.fixture
-def labelsets() -> List[str]:
-    """Labelsets of first sample of first dataset."""
-    labelsets_str = cast(str, os.getenv("LABELSETS"))
-    labelsets = cast(List[str], json.loads(labelsets_str))
-    return labelsets
-
-
-@pytest.fixture
-def releases() -> List[str]:
-    """Releases of first dataset."""
-    releases_str = cast(str, os.getenv("RELEASES"))
-    releases = cast(List[str], json.loads(releases_str))
-    return releases
 
 
 @pytest.fixture

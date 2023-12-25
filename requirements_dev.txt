@@ -1,22 +1,17 @@
-# Style
-flake8==4.0.1
+# code formatting
+flynt==1.*
+ruff==0.*
 
-# Code formatting
-black==22.3.0
-isort==5.10.1
-flynt==0.76
-pre-commit==2.20.0
+# type checking
+mypy==0.*
 
-# Type checking
-mypy==0.950
+# testing
+tox==3.*
+pytest==7.*
+pytest-cov==4.*
+pytest-dotenv==0.*
 
-# Testing
-tox==3.25.0
-pytest==7.1.2
-pytest-cov==3.0.0
-pytest-dotenv==0.5.2
-
-# General
-pycocotools
-scikit-image
-opencv-python
+# general
+pycocotools==2.*
+scikit-image==0.*
+opencv-python==4.*

@@ -10,8 +10,8 @@ from urllib.parse import urlparse
 import numpy as np
 import numpy.typing as npt
 import requests
-from PIL import Image
-from pydantic import parse_obj_as
+from PIL import Image, UnidentifiedImageError
+from pydantic import TypeAdapter
 from segments.typing import LabelStatus, Release, SegmentsDatasetCategory
 from segments.utils import (
     handle_exif_rotation,
@@ -19,6 +19,7 @@ from segments.utils import (
     load_label_bitmap_from_url,
 )
 from tqdm import tqdm
+
 
 #############
 # Variables #
@@ -75,9 +76,10 @@ class SegmentsDataset:
         labelset: The labelset that should be loaded. Defaults to ``ground-truth``.
         filter_by: A list of label statuses to filter by. Defaults to :obj:`None`.
         filter_by_metadata: A dict of metadata key:value pairs to filter by. Filters are ANDed together. Defaults to :obj:`None`.
-        segments_dir: The directory where the data will be downloaded to for caching. Set to :obj:`None` to disable caching. Defaults to ``segments``.
+        segments_dir: The directory where the data will be downloaded to for caching. Set to :obj:`None` to disable caching. Defaults to ``segments``. Alternatively, you can set the ``SEGMENTS_DIR`` environment variable to change the default.
         preload: Whether the data should be pre-downloaded when the dataset is initialized. Ignored if ``segments_dir`` is :obj:`None`. Defaults to :obj:`True`.
         s3_client: A boto3 S3 client, e.g. ``s3_client = boto3.client("s3")``. Needs to be provided if your images are in a private S3 bucket. Defaults to :obj:`None`.
+
     Raises:
         :exc:`ValueError`: If the release task type is not one of: ``segmentation-bitmap``, ``segmentation-bitmap-highres``, ``image-vector-sequence``, ``bboxes``, ``vector``, ``pointcloud-cuboid``, ``pointcloud-cuboid-sequence``, ``pointcloud-segmentation``, ``pointcloud-segmentation-sequence``, ``text-named-entities``, or ``text-span-categorization``.
         :exc:`ValueError`: If there is no labelset with this name.
@@ -94,6 +96,9 @@ class SegmentsDataset:
         preload: bool = True,
         s3_client: Optional[Any] = None,
     ):
+        # check environment for SEGMENTS_DIR variable if `segments_dir` has default value
+        if segments_dir == "segments":
+            segments_dir = os.getenv("SEGMENTS_DIR", "segments")
 
         self.labelset = labelset
         if isinstance(filter_by, list):
@@ -119,22 +124,14 @@ class SegmentsDataset:
             self.release = json.loads(content.content)
         self.release_file = release_file
 
-        self.dataset_identifier = "{}_{}".format(
-            self.release["dataset"]["owner"], self.release["dataset"]["name"]
-        )
+        self.dataset_identifier = f"{self.release['dataset']['owner']}_{self.release['dataset']['name']}"
 
         self.image_dir = (
-            None
-            if segments_dir is None
-            else os.path.join(
-                segments_dir, self.dataset_identifier, self.release["name"]
-            )
+            None if segments_dir is None else os.path.join(segments_dir, self.dataset_identifier, self.release["name"])
         )
 
         # First some checks
-        if self.labelset not in [
-            labelset["name"] for labelset in self.release["dataset"]["labelsets"]
-        ]:
+        if self.labelset not in [labelset["name"] for labelset in self.release["dataset"]["labelsets"]]:
             raise ValueError(f"There is no labelset with name '{self.labelset}'.")
 
         self.task_type = self.release["dataset"]["task_type"]
@@ -149,7 +146,7 @@ class SegmentsDataset:
             "pointcloud-segmentation",
         ]:
             raise ValueError(
-                "You can only create a dataset for tasks of type 'segmentation-bitmap', 'segmentation-bitmap-highres', 'vector', 'bboxes', 'keypoints', 'image-vector-sequence', 'pointcloud-cuboid', 'pointcloud-segmentation' for now."
+                f"You can only create a dataset for tasks of type 'segmentation-bitmap', 'segmentation-bitmap-highres', 'vector', 'bboxes', 'keypoints', 'image-vector-sequence', 'pointcloud-cuboid', 'pointcloud-segmentation' for now. Got {self.task_type}."
             )
 
         self.load_dataset()
@@ -158,11 +155,7 @@ class SegmentsDataset:
         print("Initializing dataset...")
 
         # Setup cache
-        if (
-            self.caching_enabled
-            and self.image_dir
-            and not os.path.exists(self.image_dir)
-        ):
+        if self.caching_enabled and self.image_dir and not os.path.exists(self.image_dir):
             os.makedirs(self.image_dir)
 
         # Load and filter the samples
@@ -221,10 +214,7 @@ class SegmentsDataset:
 
         print(f"Initialized dataset with {num_samples} images.")
 
-    def _load_image_from_cache(
-        self, sample: Dict[str, Any]
-    ) -> Tuple[Optional[Image.Image], str]:
-
+    def _load_image_from_cache(self, sample: Dict[str, Any]) -> Tuple[Optional[Image.Image], str]:
         sample_name = os.path.splitext(sample["name"])[0]
         image_url = sample["attributes"]["image"]["url"]
         image_url_parsed = urlparse(image_url)
@@ -238,11 +228,13 @@ class SegmentsDataset:
             if self.caching_enabled:
                 image_filename = os.path.join(self.image_dir, image_filename_rel)
                 if not os.path.exists(image_filename):
-                    image = load_image_from_url(
-                        image_url, image_filename, self.s3_client
-                    )
+                    image = load_image_from_url(image_url, image_filename, self.s3_client)
                 else:
-                    image = Image.open(image_filename)
+                    try:
+                        image = Image.open(image_filename)
+                    except UnidentifiedImageError:
+                        image = None
+                        logger.error(f"Something went wrong loading image: {image_filename}")
             else:
                 image = load_image_from_url(image_url, self.s3_client)
 
@@ -253,11 +245,13 @@ class SegmentsDataset:
     def _load_segmentation_bitmap_from_cache(
         self, sample: Dict[str, Any], labelset: str
     ) -> Union[npt.NDArray[np.uint32], Image.Image]:
-
         sample_name = os.path.splitext(sample["name"])[0]
         label = sample["labels"][labelset]
         segmentation_bitmap_url = label["attributes"]["segmentation_bitmap"]["url"]
         url_extension = os.path.splitext(urlparse(segmentation_bitmap_url).path)[1]
+
+        if not segmentation_bitmap_url:
+            return None
 
         if self.caching_enabled:
             # segmentation_bitmap_filename = os.path.join(self.image_dir, '{}{}'.format(label['uuid'], url_extension))
@@ -266,9 +260,7 @@ class SegmentsDataset:
                 f"{sample_name}_label_{labelset}{url_extension}",
             )
             if not os.path.exists(segmentation_bitmap_filename):
-                return load_label_bitmap_from_url(
-                    segmentation_bitmap_url, segmentation_bitmap_filename
-                )
+                return load_label_bitmap_from_url(segmentation_bitmap_url, segmentation_bitmap_filename)
             else:
                 return Image.open(segmentation_bitmap_filename)
         else:
@@ -276,8 +268,7 @@ class SegmentsDataset:
 
     @property
     def categories(self) -> List[SegmentsDatasetCategory]:
-        return parse_obj_as(
-            List[SegmentsDatasetCategory],
+        return TypeAdapter(List[SegmentsDatasetCategory]).validate_python(
             self.release["dataset"]["task_attributes"]["categories"],
         )
         # categories = {}
@@ -299,12 +290,11 @@ class SegmentsDataset:
             return sample
 
         # Load the image
+        image, image_filename = None, None
         try:
             image, image_filename = self._load_image_from_cache(sample)
-        except TypeError:
-            logger.error(
-                f"Something went wrong loading sample {sample['name']}: {sample}"
-            )
+        except (KeyError, TypeError):
+            logger.error(f"Something went wrong loading sample {sample['name']}: {sample}")
 
         item = {
             "uuid": sample["uuid"],
@@ -315,16 +305,11 @@ class SegmentsDataset:
         }
 
         # Segmentation bitmap
-        if (
-            self.task_type == "segmentation-bitmap"
-            or self.task_type == "segmentation-bitmap-highres"
-        ):
+        if self.task_type == "segmentation-bitmap" or self.task_type == "segmentation-bitmap-highres":
             # Load the label
             try:
                 label = sample["labels"][self.labelset]
-                segmentation_bitmap = self._load_segmentation_bitmap_from_cache(
-                    sample, self.labelset
-                )
+                segmentation_bitmap = self._load_segmentation_bitmap_from_cache(sample, self.labelset)
                 attributes = label["attributes"]
                 annotations = attributes["annotations"]
                 item.update(
@@ -334,7 +319,7 @@ class SegmentsDataset:
                         "attributes": attributes,
                     }
                 )
-            except TypeError:
+            except (KeyError, TypeError):
                 item.update(
                     {
                         "segmentation_bitmap": None,
@@ -344,11 +329,7 @@ class SegmentsDataset:
                 )
 
         # Vector labels
-        elif (
-            self.task_type == "vector"
-            or self.task_type == "bboxes"
-            or self.task_type == "keypoints"
-        ):
+        elif self.task_type == "vector" or self.task_type == "bboxes" or self.task_type == "keypoints":
             try:
                 label = sample["labels"][self.labelset]
                 attributes = label["attributes"]

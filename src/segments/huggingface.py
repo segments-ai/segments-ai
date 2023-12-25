@@ -11,6 +11,7 @@ import requests
 from PIL import Image
 from segments.utils import load_image_from_url, load_label_bitmap_from_url
 
+
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
 if TYPE_CHECKING:
     from segments.typing import Release
@@ -24,9 +25,7 @@ try:
     import datasets
     from huggingface_hub import HfApi
 except ImportError:
-    logger.error(
-        "Please install HuggingFace datasets first: pip install --upgrade datasets"
-    )
+    logger.error("Please install HuggingFace datasets first: pip install --upgrade datasets")
 
 # Add some functionality to the push_to_hub function of datasets.Dataset
 push_to_hub_original = datasets.Dataset.push_to_hub
@@ -37,9 +36,7 @@ hf_api = HfApi()
 #############
 # Functions #
 #############
-def push_to_hub(
-    self: datasets.Dataset, repo_id: str, *args: Any, **kwargs: Any
-) -> None:
+def push_to_hub(self: datasets.Dataset, repo_id: str, *args: Any, **kwargs: Any) -> None:
     push_to_hub_original(self, repo_id, *args, **kwargs)
 
     # Upload the label file (https://huggingface.co/datasets/huggingface/label-files)
@@ -90,8 +87,10 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
     Args:
         release: A Segments release resulting from :meth:`.get_release`.
         download_images: If images need to be downloaded from an AWS S3 url. Defaults to :obj:`True`.
+
     Returns:
         A HuggingFace dataset.
+
     Raises:
         :exc:`ValueError`: If the type of dataset is not yet supported.
     """
@@ -267,16 +266,10 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
 
         def download_segmentation_bitmap(data_row: Dict[str, Any]) -> Dict[str, Any]:
             try:
-                segmentation_bitmap = load_label_bitmap_from_url(
-                    data_row["label.segmentation_bitmap.url"]
-                )
-                data_row["label.segmentation_bitmap"] = Image.fromarray(
-                    segmentation_bitmap
-                )
+                segmentation_bitmap = load_label_bitmap_from_url(data_row["label.segmentation_bitmap.url"])
+                data_row["label.segmentation_bitmap"] = Image.fromarray(segmentation_bitmap)
             except Exception:
-                data_row["label.segmentation_bitmap"] = Image.new(
-                    "RGB", (1, 1)
-                )  # TODO: replace with None
+                data_row["label.segmentation_bitmap"] = Image.new("RGB", (1, 1))  # TODO: replace with None
             return data_row
 
         dataset = dataset.map(download_image, remove_columns=["image.url"])
@@ -335,16 +328,12 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
         "segments_url": f'https://segments.ai/{release_dict["dataset"]["owner"]}/{release_dict["dataset"]["name"]}',
         "short_description": release_dict["dataset"]["description"],
         "release": release_dict["name"],
-        "taxonomy_table": get_taxonomy_table(
-            release_dict["dataset"]["task_attributes"]
-        ),
+        "taxonomy_table": get_taxonomy_table(release_dict["dataset"]["task_attributes"]),
         "task_category": task_category,
     }
 
     # Create readme.md
-    with open(
-        os.path.join(os.path.dirname(__file__), "data", "dataset_card_template.md"), "r"
-    ) as f:
+    with open(os.path.join(os.path.dirname(__file__), "data", "dataset_card_template.md"), "r") as f:
         template = Template(f.read())
         readme = template.substitute(info)
         dataset.readme = readme

@@ -1,0 +1,9 @@
+// https://code.visualstudio.com/docs/editor/extension-marketplace#_workspace-recommended-extensions
+{
+  "recommendations": [
+    "ms-python.python",
+    "ms-python.vscode-pylance", // intellisense for python
+    "esbenp.prettier-vscode", // format json
+    "charliermarsh.ruff" // lint and format python
+  ]
+}

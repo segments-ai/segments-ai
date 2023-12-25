@@ -1,9 +1,9 @@
+# Types
+
 ```{seealso}
 Please visit our [docs](https://docs.segments.ai/) for more information on Segments.ai and visit the [setup page](https://sdkdocs.segments.ai/en/latest/setup.html) to learn how to install and setup the Segments.ai Python SDK.
 
 ```
-
-# Types
 
 ## Datasets
 
@@ -19,19 +19,39 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 .. autopydantic_model:: segments.typing.User
 ```
 
+```{eval-rst}
+.. autoclass:: segments.typing.TaskType
+    :members:
+    :undoc-members:
+```
+
 ## Samples
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.Sample
 ```
 
-### Image
+```{eval-rst}
+.. autopydantic_model:: segments.typing.Issue
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.IssueComment
+```
+
+```{eval-rst}
+.. autoclass:: segments.typing.IssueStatus
+    :members:
+    :undoc-members:
+```
+
+### Image sample
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.ImageSampleAttributes
 ```
 
-### Image sequence
+### Image sequence sample
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.ImageSequenceSampleAttributes
@@ -42,19 +62,33 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
     :show-inheritance:
 ```
 
-### Point cloud
+### Point cloud sample
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.PointcloudSampleAttributes
 ```
 
-### Point cloud sequence
+### Point cloud sequence sample
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.PointcloudSequenceSampleAttributes
 ```
 
-### Text
+### Multi-sensor sample
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.MultiSensorSampleAttributes
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.MultiSensorPointcloudSequenceSampleAttributes
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.MultiSensorImageSequenceSampleAttributes
+```
+
+### Text sample
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.TextSampleAttributes
@@ -66,7 +100,13 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 .. autopydantic_model:: segments.typing.Label
 ```
 
-### Image segmentation
+```{eval-rst}
+.. autoclass:: segments.typing.LabelStatus
+    :members:
+    :undoc-members:
+```
+
+### Image segmentation label
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.ImageSegmentationLabelAttributes
@@ -76,7 +116,7 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 .. autopydantic_model:: segments.typing.Annotation
 ```
 
-### Image vector
+### Image vector label
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.ImageVectorLabelAttributes
@@ -86,7 +126,13 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 .. autopydantic_model:: segments.typing.ImageVectorAnnotation
 ```
 
-### Image sequence vector
+```{eval-rst}
+.. autoclass:: segments.typing.ImageVectorAnnotationType
+    :members:
+    :undoc-members:
+```
+
+### Image sequence vector label
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.ImageSequenceVectorLabelAttributes
@@ -94,6 +140,7 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.ImageVectorFrame
+    :show-inheritance:
 ```
 
 ```{eval-rst}
@@ -101,13 +148,13 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
     :show-inheritance:
 ```
 
-### Point cloud segmentation
+### Point cloud segmentation label
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.PointcloudSegmentationLabelAttributes
 ```
 
-### Point cloud cuboid
+### Point cloud cuboid label
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.PointcloudCuboidLabelAttributes
@@ -117,7 +164,13 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 .. autopydantic_model:: segments.typing.PointcloudCuboidAnnotation
 ```
 
-### Point cloud vector
+```{eval-rst}
+.. autoclass:: segments.typing.PointcloudCuboidAnnotationType
+    :members:
+    :undoc-members:
+```
+
+### Point cloud vector label
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.PointcloudVectorLabelAttributes
@@ -125,6 +178,12 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.PointcloudVectorAnnotation
+```
+
+```{eval-rst}
+.. autoclass:: segments.typing.PointcloudVectorAnnotationType
+    :members:
+    :undoc-members:
 ```
 
 ### Point cloud sequence segmentation
@@ -135,13 +194,15 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.PointcloudSegmentationFrame
+    :show-inheritance:
 ```
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.PointcloudSequenceSegmentationAnnotation
+    :show-inheritance:
 ```
 
-### Point cloud sequence cuboid
+### Point cloud sequence cuboid label
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.PointcloudSequenceCuboidLabelAttributes
@@ -149,6 +210,7 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.PointcloudSequenceCuboidFrame
+    :show-inheritance:
 ```
 
 ```{eval-rst}
@@ -156,7 +218,7 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
     :show-inheritance:
 ```
 
-### Point cloud sequence vector
+### Point cloud sequence vector label
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.PointcloudSequenceVectorLabelAttributes
@@ -164,6 +226,7 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.PointcloudSequenceVectorFrame
+    :show-inheritance:
 ```
 
 ```{eval-rst}
@@ -171,7 +234,21 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
     :show-inheritance:
 ```
 
-### Text
+### Multi-sensor label
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.MultiSensorLabelAttributes
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.MultiSensorPointcloudSequenceCuboidLabelAttributes
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.MultiSensorImageSequenceVectorLabelAttributes
+```
+
+### Text label
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.TextLabelAttributes
@@ -193,10 +270,20 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 .. autopydantic_model:: segments.typing.Release
 ```
 
+```{eval-rst}
+.. autoclass:: segments.typing.ReleaseStatus
+    :members:
+    :undoc-members:
+```
+
 ## Files
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.File
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.PresignedPostFields
 ```
 
 ## Helper classes
@@ -218,11 +305,31 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 ```
 
 ```{eval-rst}
-.. autopydantic_model:: segments.typing.LabelStats
+.. autoclass:: segments.typing.SelectTaskAttribute
+    :members:
+    :undoc-members:
 ```
 
 ```{eval-rst}
-.. autopydantic_model:: segments.typing.Statistics
+.. autoclass:: segments.typing.TextTaskAttribute
+    :members:
+    :undoc-members:
+```
+
+```{eval-rst}
+.. autoclass:: segments.typing.NumberTaskAttribute
+    :members:
+    :undoc-members:
+```
+
+```{eval-rst}
+.. autoclass:: segments.typing.CheckboxTaskAttribute
+    :members:
+    :undoc-members:
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.LabelStats
 ```
 
 ```{eval-rst}
@@ -242,7 +349,20 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 ```
 
 ```{eval-rst}
+.. autoclass:: segments.typing.PCDType
+    :members:
+    :undoc-members:
+```
+
+```{eval-rst}
 .. autopydantic_model:: segments.typing.CalibratedImage
+    :show-inheritance:
+```
+
+```{eval-rst}
+.. autoclass:: segments.typing.CameraConvention
+    :members:
+    :undoc-members:
 ```
 
 ```{eval-rst}
@@ -251,4 +371,22 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.CameraExtrinsics
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.Distortion
+```
+
+```{eval-rst}
+.. autoclass:: segments.typing.CameraDistortionModel
+    :members:
+    :undoc-members:
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.FisheyeDistortionCoefficients
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.BrownConradyDistortionCoefficients
 ```

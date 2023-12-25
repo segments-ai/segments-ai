@@ -1,6 +1,8 @@
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
 from __future__ import annotations
 
+# https://gist.github.com/benkehoe/066a73903e84576a8d6d911cfedc2df6
+import importlib.metadata as importlib_metadata
 import logging
 import os
 import urllib.parse
@@ -19,10 +21,9 @@ from typing import (
     cast,
 )
 
-import numpy.typing as npt
 import pydantic
 import requests
-from pydantic import parse_obj_as
+from pydantic import TypeAdapter
 from segments.exceptions import (
     AlreadyExistsError,
     APILimitError,
@@ -36,7 +37,6 @@ from segments.exceptions import (
     ValidationError,
 )
 from segments.typing import (
-    AuthHeader,
     AWSFields,
     Category,
     Collaborator,
@@ -55,34 +55,47 @@ from segments.typing import (
     SampleAttributes,
     TaskAttributes,
     TaskType,
-    sequence_label_attributes,
-    sequence_sample_attributes,
     task_type_to_label_attributes,
     task_type_to_sample_attributes,
+    User,
 )
 from typing_extensions import Literal
+
+
+try:
+    # __package__ allows for the case where __name__ is "__main__"
+    __version__ = importlib_metadata.version(__package__ or __name__)
+except importlib_metadata.PackageNotFoundError:
+    __version__ = "0.0.0"
+
+
+try:
+    # __package__ allows for the case where __name__ is "__main__"
+    __version__ = importlib_metadata.version(__package__ or __name__)
+except importlib_metadata.PackageNotFoundError:
+    __version__ = "0.0.0"
 
 ################################
 # Constants and type variables #
 ################################
 logger = logging.getLogger(__name__)
 T = TypeVar("T")
-VERSION = "1.0.20"
+VERSION = __version__
 
 
 ####################
 # Helper functions #
 ####################
 # Error handling: https://stackoverflow.com/questions/16511337/correct-way-to-try-except-using-python-requests-module
-def handle_exceptions(
-    f: Callable[..., requests.Response]
-) -> Callable[..., Union[requests.Response, T]]:
+def handle_exceptions(f: Callable[..., requests.Response]) -> Callable[..., Union[requests.Response, T]]:
     """Catch exceptions and throw Segments exceptions.
 
     Args:
         model: The class to parse the JSON response into. Defaults to :obj:`None`.
+
     Returns:
         A wrapper function (of this exception handler decorator).
+
     Raises:
         :exc:`~segments.exceptions.ValidationError`: If validation of the response fails - catches :exc:`pydantic.ValidationError`.
         :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -105,8 +118,8 @@ def handle_exceptions(
                     message = r_json.get("detail", "")
                     if "throttled" in message:
                         raise APILimitError(message)
-                if model:
-                    m = parse_obj_as(model, r_json)
+                if model is not None:
+                    m = TypeAdapter(model).validate_python(r_json)
                     return m
             return r
         except requests.exceptions.Timeout as e:
@@ -119,11 +132,10 @@ def handle_exceptions(
                 raise NotFoundError(message=text, cause=e)
             if "already exists" in text or "already have" in text:
                 raise AlreadyExistsError(message=text, cause=e)
-            if (
-                "cannot be added as collaborator" in text
-                or "is already a collaborator" in text
-            ):
+            if "cannot be added as collaborator" in text or "is already a collaborator" in text:
                 raise CollaboratorError(message=text, cause=e)
+            if "authentication credentials were not provided" in text:
+                raise AuthenticationError(message=text, cause=e)
             if (
                 "cannot leave the organization" in text
                 or "need to be an administrator" in text
@@ -132,6 +144,15 @@ def handle_exceptions(
                 raise AuthorizationError(message=text, cause=e)
             if "free trial ended" in text or "exceeded user limit" in text:
                 raise SubscriptionError(message=text, cause=e)
+            if "time-out" in text:
+                raise TimeoutError(message=text, cause=e)
+            if "invalid page" in text:
+                raise NotFoundError(message=text, cause=e)
+            if "502 Server Error: Bad Gateway" in text:
+                raise NetworkError(
+                    message="502 Server Error. Decrease the `per_page` argument if you called `get_samples`.",
+                    cause=e,
+                )
             raise NetworkError(message=text, cause=e)
         except requests.exceptions.TooManyRedirects as e:
             # Tell the user their URL was bad and try a different one
@@ -148,8 +169,6 @@ def handle_exceptions(
 ##########
 # Client #
 ##########
-
-
 class SegmentsClient:
     """A client with a connection to the Segments.ai platform.
 
@@ -180,6 +199,7 @@ class SegmentsClient:
     Args:
         api_key: Your Segments.ai API key. If no API key given, reads ``SEGMENTS_API_KEY`` from the environment. Defaults to :obj:`None`.
         api_url: URL of the Segments.ai API. Defaults to ``https://api.segments.ai/``.
+
     Raises:
         :exc:`~segments.exceptions.AuthenticationError`: If an invalid API key is used or (when not passing the API key directly) if ``SEGMENTS_API_KEY`` is not found in your environment.
     """
@@ -218,17 +238,12 @@ class SegmentsClient:
             if r.status_code == 200:
                 logger.info("Initialized successfully.")
         except NetworkError as e:
-            if (
-                cast(requests.exceptions.RequestException, e.cause).response.status_code
-                == 426
-            ):
+            if cast(requests.exceptions.RequestException, e.cause).response.status_code == 426:
                 logger.warning(
                     "There's a new version available. Please upgrade by running 'pip install --upgrade segments-ai'"
                 )
             else:
-                raise AuthenticationError(
-                    message="Something went wrong. Did you use the right API key?"
-                )
+                raise AuthenticationError(message="Something went wrong. Did you use the right API key?")
 
     # https://stackoverflow.com/questions/48160728/resourcewarning-unclosed-socket-in-python-3-unit-test
     def close(self) -> None:
@@ -265,10 +280,44 @@ class SegmentsClient:
     ) -> None:
         self.close()
 
+    ########
+    # User #
+    ########
+    def get_user(self, user: Optional[str] = None) -> User:
+        """Get a user.
+
+        .. code-block:: python
+
+            user = client.get_user()
+            print(user)
+
+        Args:
+            user: The username for which to get the user details. Leave empty to get the authenticated user. Defaults to :obj:`None`.
+
+        Raises:
+            :exc:`~segments.exceptions.ValidationError`: If validation of the user fails.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the user is not found.
+            :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+        """
+
+        if user is not None:
+            r = self._get(f"/users/{user}", model=User)
+        else:
+            r = self._get("/user", model=User)
+
+        return cast(User, r)
+
     ############
     # Datasets #
     ############
-    def get_datasets(self, user: Optional[str] = None) -> List[Dataset]:
+    def get_datasets(
+        self,
+        user: Optional[str] = None,
+        per_page: int = 1000,
+        page: int = 1,
+    ) -> List[Dataset]:
         """Get a list of datasets.
 
         .. code-block:: python
@@ -279,6 +328,9 @@ class SegmentsClient:
 
         Args:
             user: The user for which to get the datasets. Leave empty to get datasets of current user. Defaults to :obj:`None`.
+            per_page: Pagination parameter indicating the maximum number of datasets to return. Defaults to ``1000``.
+            page: Pagination parameter indicating the page to return. Defaults to ``1``.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the datasets fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -287,10 +339,13 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        if user:
-            r = self._get(f"/users/{user}/datasets/", model=List[Dataset])
+        # pagination
+        query_string = f"?per_page={per_page}&page={page}"
+
+        if user is not None:
+            r = self._get(f"/users/{user}/datasets/{query_string}", model=List[Dataset])
         else:
-            r = self._get("/user/datasets/", model=List[Dataset])
+            r = self._get(f"/user/datasets/{query_string}", model=List[Dataset])
 
         return cast(List[Dataset], r)
 
@@ -305,6 +360,7 @@ class SegmentsClient:
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -321,11 +377,13 @@ class SegmentsClient:
         self,
         name: str,
         description: str = "",
-        task_type: TaskType = "segmentation-bitmap",
+        task_type: TaskType = TaskType.SEGMENTATION_BITMAP,
         task_attributes: Optional[Union[Dict[str, Any], TaskAttributes]] = None,
-        category: Category = "other",
+        category: Category = Category.OTHER,
         public: bool = False,
         readme: str = "",
+        metadata: Optional[Dict[str, Any]] = None,
+        labeling_inactivity_timeout_seconds: int = 300,
         enable_skip_labeling: bool = True,
         enable_skip_reviewing: bool = False,
         enable_ratings: bool = False,
@@ -346,27 +404,39 @@ class SegmentsClient:
             dataset = client.add_dataset(dataset_name, description, task_type)
             print(dataset)
 
-        +-------------------------------------------+---------------------------------------+
-        | Task type                                 | Value                                 |
-        +===========================================+=======================================+
-        | Image segmentation labels (bitmap)        | ``segmentation-bitmap``               |
-        +-------------------------------------------+---------------------------------------+
-        | Image bounding box labels                 | ``bboxes``                            |
-        +-------------------------------------------+---------------------------------------+
-        | Image vector labels                       | ``vector``                            |
-        +-------------------------------------------+---------------------------------------+
-        | Pointcloud cuboid labels                  | ``pointcloud-cuboid``                 |
-        +-------------------------------------------+---------------------------------------+
-        | Pointcloud cuboid labels (sequence)       | ``pointcloud-cuboid-sequence``        |
-        +-------------------------------------------+---------------------------------------+
-        | Pointcloud segmentation labels            | ``pointcloud-segmentation``           |
-        +-------------------------------------------+---------------------------------------+
-        | Pointcloud segmentation labels (sequence) | ``pointcloud-segmentation-sequence``  |
-        +-------------------------------------------+---------------------------------------+
-        | Text named entity labels                  | ``text-named-entities``               |
-        +-------------------------------------------+---------------------------------------+
-        | Text span categorization labels           | ``text-span-categorization``          |
-        +-------------------------------------------+---------------------------------------+
+        +--------------------------------------------+---------------------------------------+
+        | Task type                                  | Value                                 |
+        +============================================+=======================================+
+        | Image segmentation labels (bitmap)         | ``segmentation-bitmap``               |
+        +--------------------------------------------+---------------------------------------+
+        | Image segmentation labels (bitmap)         | ``segmentation-bitmap-highres``       |
+        +--------------------------------------------+---------------------------------------+
+        | Image segmentation labels (sequence)       | ``image-segmentation-sequence``       |
+        +--------------------------------------------+---------------------------------------+
+        | Image bounding box labels                  | ``bboxes``                            |
+        +--------------------------------------------+---------------------------------------+
+        | Image vector labels                        | ``vector``                            |
+        +--------------------------------------------+---------------------------------------+
+        | Image vector labels (sequence)             | ``image-vector-sequence``             |
+        +--------------------------------------------+---------------------------------------+
+        | Point cloud cuboid labels                  | ``pointcloud-cuboid``                 |
+        +--------------------------------------------+---------------------------------------+
+        | Point cloud cuboid labels (sequence)       | ``pointcloud-cuboid-sequence``        |
+        +--------------------------------------------+---------------------------------------+
+        | Point cloud segmentation labels            | ``pointcloud-segmentation``           |
+        +--------------------------------------------+---------------------------------------+
+        | Point cloud segmentation labels (sequence) | ``pointcloud-segmentation-sequence``  |
+        +--------------------------------------------+---------------------------------------+
+        | Point cloud vector labels                  | ``pointcloud-vector``                 |
+        +--------------------------------------------+---------------------------------------+
+        | Point cloud vector labels (sequence)       | ``pointcloud-vector-sequence``        |
+        +--------------------------------------------+---------------------------------------+
+        | Multisensor labels (sequence)              | ``multisensor-sequence``              |
+        +--------------------------------------------+---------------------------------------+
+        | Text named entity labels                   | ``text-named-entities``               |
+        +--------------------------------------------+---------------------------------------+
+        | Text span categorization labels            | ``text-span-categorization``          |
+        +--------------------------------------------+---------------------------------------+
 
         Args:
             name: The dataset name. Example: ``flowers``.
@@ -376,6 +446,8 @@ class SegmentsClient:
             category: The dataset category. Defaults to ``other``.
             public: The dataset visibility. Defaults to :obj:`False`.
             readme: The dataset readme. Defaults to ``''``.
+            metadata: Any dataset metadata. Example: ``{'day': 'sunday', 'robot_id': 3}``.
+            labeling_inactivity_timeout_seconds: The number of seconds after which a user is considered inactive during labeling. Only impacts label timing metrics. Defaults to ``300``.
             enable_skip_labeling: Enable the skip button in the labeling workflow. Defaults to :obj:`True`.
             enable_skip_reviewing: Enable the skip button in the reviewing workflow. Defaults to :obj:`False`.
             enable_ratings: Enable star-ratings for labeled images. Defaults to :obj:`False`.
@@ -385,6 +457,7 @@ class SegmentsClient:
             enable_label_status_verified: Enable an additional label status "Verified". Defaults to :obj:`False`.
             enable_3d_cuboid_rotation: Enable 3D cuboid rotation (i.e., yaw, pitch and roll). Defaults to :obj:`False`.
             organization: The username of the organization for which this dataset should be created. None will create a dataset for the current user. Defaults to :obj:`None`.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the task attributes fails.
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
@@ -400,16 +473,18 @@ class SegmentsClient:
                 "categories": [{"id": 1, "name": "object"}],
             }
 
-        if type(task_attributes) is dict:
+        if isinstance(task_attributes, TaskAttributes):
+            task_attributes = task_attributes.model_dump(mode="json", exclude_unset=True)
+        else:
             try:
-                TaskAttributes.parse_obj(task_attributes)
+                task_attributes = TaskAttributes.model_validate(task_attributes).model_dump(
+                    mode="json", exclude_unset=True
+                )
             except pydantic.ValidationError as e:
                 logger.error(
                     "Did you use the right task attributes? Please refer to the online documentation: https://docs.segments.ai/reference/categories-and-task-attributes#object-attribute-format.",
                 )
                 raise ValidationError(message=str(e), cause=e)
-        elif type(task_attributes) is TaskAttributes:
-            task_attributes = task_attributes.dict()
 
         payload: Dict[str, Any] = {
             "name": name,
@@ -419,6 +494,7 @@ class SegmentsClient:
             "category": category,
             "public": public,
             "readme": readme,
+            "labeling_inactivity_timeout_seconds": labeling_inactivity_timeout_seconds,
             "enable_skip_labeling": enable_skip_labeling,
             "enable_skip_reviewing": enable_skip_reviewing,
             "enable_ratings": enable_ratings,
@@ -430,11 +506,10 @@ class SegmentsClient:
             "data_type": "IMAGE",
         }
 
-        endpoint = (
-            f"/organizations/{organization}/datasets/"
-            if organization is not None
-            else "/user/datasets/"
-        )
+        if metadata:
+            payload["metadata"] = metadata
+
+        endpoint = f"/organizations/{organization}/datasets/" if organization is not None else "/user/datasets/"
 
         r = self._post(endpoint, data=payload, model=Dataset)
 
@@ -449,6 +524,8 @@ class SegmentsClient:
         category: Optional[Category] = None,
         public: Optional[bool] = None,
         readme: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+        labeling_inactivity_timeout_seconds: Optional[int] = None,
         enable_skip_labeling: Optional[bool] = None,
         enable_skip_reviewing: Optional[bool] = None,
         enable_ratings: Optional[bool] = None,
@@ -475,6 +552,8 @@ class SegmentsClient:
             category: The dataset category. Defaults to :obj:`None`.
             public: The dataset visibility. Defaults to :obj:`None`.
             readme: The dataset readme. Defaults to :obj:`None`.
+            metadata: Any dataset metadata. Example: ``{'day': 'sunday', 'robot_id': 3}``.
+            labeling_inactivity_timeout_seconds: The number of seconds after which a user is considered inactive during labeling. Only impacts label timing metrics. Defaults to :obj:`None`.
             enable_skip_labeling: Enable the skip button in the labeling workflow. Defaults to :obj:`None`.
             enable_skip_reviewing: Enable the skip button in the reviewing workflow. Defaults to :obj:`None`.
             enable_ratings: Enable star-ratings for labeled images. Defaults to :obj:`None`.
@@ -483,6 +562,7 @@ class SegmentsClient:
             enable_save_button: Enable a save button in the labeling and reviewing workflow, to save unfinished work. Defaults to :obj:`False`.
             enable_label_status_verified: Enable an additional label status "Verified". Defaults to :obj:`False`.
             enable_3d_cuboid_rotation: Enable 3D cuboid rotation (i.e., yaw, pitch and roll). Defaults to :obj:`False`.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -493,52 +573,65 @@ class SegmentsClient:
 
         payload: Dict[str, Any] = {}
 
-        if description:
+        if description is not None:
             payload["description"] = description
 
-        if task_type:
+        if task_type is not None:
             payload["task_type"] = task_type
 
-        if task_attributes:
-            payload["task_attributes"] = (
-                task_attributes.dict()
-                if type(task_attributes) is TaskAttributes
-                else task_attributes
-            )
+        if task_attributes is not None:
+            if isinstance(task_attributes, TaskAttributes):
+                task_attributes = task_attributes.model_dump(mode="json", exclude_unset=True)
+            else:
+                try:
+                    task_attributes = TaskAttributes.model_validate(task_attributes).model_dump(
+                        mode="json", exclude_unset=True
+                    )
+                except pydantic.ValidationError as e:
+                    logger.error(
+                        "Did you use the right task attributes? Please refer to the online documentation: https://docs.segments.ai/reference/categories-and-task-attributes#object-attribute-format.",
+                    )
+                    raise ValidationError(message=str(e), cause=e)
 
-        if category:
+            payload["task_attributes"] = task_attributes
+
+        if category is not None:
             payload["category"] = category
 
-        if public:
+        if public is not None:
             payload["public"] = public
 
-        if readme:
+        if readme is not None:
             payload["readme"] = readme
 
-        if enable_skip_labeling:
+        if metadata is not None:
+            payload["metadata"] = metadata
+
+        if labeling_inactivity_timeout_seconds is not None:
+            payload["labeling_inactivity_timeout_seconds"] = labeling_inactivity_timeout_seconds
+
+        if enable_skip_labeling is not None:
             payload["enable_skip_labeling"] = enable_skip_labeling
 
-        if enable_skip_reviewing:
+        if enable_skip_reviewing is not None:
             payload["enable_skip_reviewing"] = enable_skip_reviewing
 
-        if enable_ratings:
+        if enable_ratings is not None:
             payload["enable_ratings"] = enable_ratings
 
-        if enable_interpolation:
+        if enable_interpolation is not None:
             payload["enable_interpolation"] = enable_interpolation
 
-        if enable_same_dimensions_track_constraint:
-            payload[
-                "enable_same_dimensions_track_constraint"
-            ] = enable_same_dimensions_track_constraint
+        if enable_same_dimensions_track_constraint is not None:
+            payload["enable_same_dimensions_track_constraint"] = enable_same_dimensions_track_constraint
 
-        if enable_save_button:
+        if enable_save_button is not None:
             payload["enable_save_button"] = enable_save_button
 
-        if enable_label_status_verified:
+        if enable_label_status_verified is not None:
             payload["enable_label_status_verified"] = enable_label_status_verified
 
-        if enable_3d_cuboid_rotation:
+        if enable_3d_cuboid_rotation is not None:
             payload["enable_3d_cuboid_rotation"] = enable_3d_cuboid_rotation
 
         r = self._patch(f"/datasets/{dataset_identifier}/", data=payload, model=Dataset)
@@ -556,6 +649,7 @@ class SegmentsClient:
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NotFoundError`: If the dataset is not found.
@@ -571,6 +665,8 @@ class SegmentsClient:
         new_name: Optional[str] = None,
         new_task_type: Optional[TaskType] = None,
         new_public: Optional[bool] = None,
+        organization: Optional[str] = None,
+        clone_labels: bool = False,
     ) -> Dataset:
         """Clone a dataset.
 
@@ -592,6 +688,9 @@ class SegmentsClient:
             new_name: The dataset name for the clone. Defaults to ``f'{old_dataset_name}-clone'``.
             new_task_type: The task type for the clone. Defaults to the task type of the original dataset.
             new_public: The visibility for the clone. Defaults to the visibility of the original dataset.
+            organization: The username of the organization for which this dataset should be created. None will create a dataset for the current user. Defaults to :obj:`None`.
+            clone_labels: Whether to clone the labels of the original dataset. Defaults to :obj:`False`.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -606,24 +705,25 @@ class SegmentsClient:
 
         payload: Dict[str, Any] = {"name": new_name}
 
-        if new_task_type:
+        if new_task_type is not None:
             payload["task_type"] = new_task_type
 
-        if new_public:
+        if new_public is not None:
             payload["public"] = new_public
 
-        r = self._post(
-            f"/datasets/{dataset_identifier}/clone/", data=payload, model=Dataset
-        )
+        if organization is not None:
+            payload["owner"] = organization
+
+        payload["clone_labels"] = clone_labels
+
+        r = self._post(f"/datasets/{dataset_identifier}/clone/", data=payload, model=Dataset)
 
         return cast(Dataset, r)
 
     #################
     # Collaborators #
     #################
-    def get_dataset_collaborator(
-        self, dataset_identifier: str, username: str
-    ) -> Collaborator:
+    def get_dataset_collaborator(self, dataset_identifier: str, username: str) -> Collaborator:
         """Get a dataset collaborator.
 
         .. code-block:: python
@@ -635,6 +735,7 @@ class SegmentsClient:
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
             username: The username of the collaborator to be added.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the collaborator fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -650,7 +751,7 @@ class SegmentsClient:
         return cast(Collaborator, r)
 
     def add_dataset_collaborator(
-        self, dataset_identifier: str, username: str, role: Role = "labeler"
+        self, dataset_identifier: str, username: str, role: Role = Role.LABELER
     ) -> Collaborator:
         """Add a dataset collaborator.
 
@@ -664,7 +765,8 @@ class SegmentsClient:
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
             username: The username of the collaborator to be added.
-            role: The role of the collaborator to be added. Defaults to ``labeler``.
+            role: The role of the collaborator to be added. One of ``labeler``, ``reviewer``, ``manager``, ``admin``. Defaults to ``labeler``.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the collaborator fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -680,10 +782,8 @@ class SegmentsClient:
 
         return cast(Collaborator, r)
 
-    def update_dataset_collaborator(
-        self, dataset_identifier: str, username: str, role: Role
-    ) -> Collaborator:
-        """ "Update a dataset collaborator.
+    def update_dataset_collaborator(self, dataset_identifier: str, username: str, role: Role) -> Collaborator:
+        """Update a dataset collaborator.
 
         .. code-block:: python
 
@@ -696,6 +796,7 @@ class SegmentsClient:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
             username: The username of the collaborator to be added.
             role: The role of the collaborator to be added. Defaults to ``labeler``.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the collaborator fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -703,7 +804,11 @@ class SegmentsClient:
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
-        payload = {"role": role}
+        payload: Dict[str, Any] = {}
+
+        if role is not None:
+            payload["role"] = role
+
         r = self._patch(
             f"/datasets/{dataset_identifier}/collaborators/{username}",
             data=payload,
@@ -712,9 +817,7 @@ class SegmentsClient:
 
         return cast(Collaborator, r)
 
-    def delete_dataset_collaborator(
-        self, dataset_identifier: str, username: str
-    ) -> None:
+    def delete_dataset_collaborator(self, dataset_identifier: str, username: str) -> None:
         """Delete a dataset collaborator.
 
         .. code-block:: python
@@ -726,6 +829,7 @@ class SegmentsClient:
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
             username: The username of the collaborator to be deleted.
+
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NotFoundError`: If the dataset or dataset collaborator is not found.
@@ -742,13 +846,15 @@ class SegmentsClient:
     def get_samples(
         self,
         dataset_identifier: str,
+        labelset: Optional[str] = None,
         name: Optional[str] = None,
         label_status: Optional[Union[LabelStatus, List[LabelStatus]]] = None,
         metadata: Optional[Union[str, List[str]]] = None,
-        sort: Literal["name", "created", "priority"] = "name",
+        sort: Literal["name", "created", "priority", "updated_at", "gt_label__updated_at"] = "name",
         direction: Literal["asc", "desc"] = "asc",
         per_page: int = 1000,
         page: int = 1,
+        include_full_label: bool = False,
     ) -> List[Sample]:
         """Get the samples in a dataset.
 
@@ -761,13 +867,16 @@ class SegmentsClient:
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+            labelset: If defined, this additionally returns for each sample a label summary or full label (depending on `include_full_label`) for the given labelset. Defaults to :obj:`None`.
             name: Name to filter by. Defaults to :obj:`None` (no filtering).
             label_status: Sequence of label statuses to filter by. Defaults to :obj:`None` (no filtering).
             metadata: Sequence of 'key:value' metadata attributes to filter by. Defaults to :obj:`None` (no filtering).
-            sort: What to sort results by. One of ``name``, ``created``, ``priority``. Defaults to ``name``.
+            sort: What to sort results by. One of ``name``, ``created``, ``priority``, ``updated_at``, ``gt_label__updated_at``. Defaults to ``name``.
             direction: Sorting direction. One of ``asc`` (ascending) or ``desc`` (descending). Defaults to ``asc``.
             per_page: Pagination parameter indicating the maximum number of samples to return. Defaults to ``1000``.
             page: Pagination parameter indicating the page to return. Defaults to ``1``.
+            include_full_label: Whether to include the full label in the response, or only a summary. Ignored if `labelset` is `None`. Defaults to :obj:`False`.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the samples fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -779,48 +888,49 @@ class SegmentsClient:
         # pagination
         query_string = f"?per_page={per_page}&page={page}"
 
+        if labelset is not None:
+            query_string += f"&labelset={labelset}"
+            if include_full_label:
+                query_string += "&include_full_label=1"
+
         # filter by name
-        if name:
+        if name is not None:
             query_string += f"&name__contains={name}"
 
         # filter by metadata
-        if metadata:
+        if metadata is not None:
             if isinstance(metadata, str):
                 metadata = [metadata]
             query_string += f"&filters={','.join(metadata)}"
 
         # filter by label status
-        if label_status:
+        if label_status is not None:
             if isinstance(label_status, str):
                 label_status = [label_status]
             assert isinstance(label_status, list)
             # label_status = [status.upper() for status in label_status]
-            query_string += "&labelset=ground-truth&label_status={}".format(
-                ",".join(label_status)
-            )
+            query_string += f"&label_status={','.join(label_status)}"
 
         # sorting
-        sort_dict = {"name": "name", "created": "created_at", "priority": "priority"}
-        if sort != "name":
-            direction_str = "" if direction == "asc" else "-"
-            sort_str = sort_dict[sort]
-            query_string += f"&sort={direction_str}{sort_str}"
+        direction_str = "" if direction == "asc" else "-"
+        query_string += f"&sort={direction_str}{sort}"
 
         r = self._get(f"/datasets/{dataset_identifier}/samples/{query_string}")
         results = r.json()
 
-        # TODO
-        for result in results:
-            result.pop("label", None)
-
         try:
-            results = parse_obj_as(List[Sample], results)
+            results = TypeAdapter(List[Sample]).validate_python(results)
         except pydantic.ValidationError as e:
             raise ValidationError(message=str(e), cause=e)
 
         return cast(List[Sample], results)
 
-    def get_sample(self, uuid: str, labelset: Optional[str] = None) -> Sample:
+    def get_sample(
+        self,
+        uuid: str,
+        labelset: Optional[str] = None,
+        include_signed_url: bool = False,
+    ) -> Sample:
         """Get a sample.
 
         .. code-block:: python
@@ -832,6 +942,8 @@ class SegmentsClient:
         Args:
             uuid: The sample uuid.
             labelset: If defined, this additionally returns the label for the given labelset. Defaults to :obj:`None`.
+            include_signed_url: Whether to return the pre-signed URL in case of private S3 buckets. Defaults to :obj:`False`.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the samples fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -842,8 +954,11 @@ class SegmentsClient:
 
         query_string = f"/samples/{uuid}/"
 
-        if labelset:
+        if labelset is not None:
             query_string += f"?labelset={labelset}"
+
+        if include_signed_url:
+            query_string += "?include_signed_urls=1"
 
         r = self._get(query_string, model=Sample)
 
@@ -858,7 +973,6 @@ class SegmentsClient:
         priority: float = 0,
         assigned_labeler: Optional[str] = None,
         assigned_reviewer: Optional[str] = None,
-        embedding: Optional[Union[npt.NDArray[Any], List[float]]] = None,
     ) -> Sample:
         """Add a sample to a dataset.
 
@@ -894,7 +1008,7 @@ class SegmentsClient:
             priority: Priority in the labeling queue. Samples with higher values will be labeled first. Defaults to ``0``.
             assigned_labeler: The username of the user who should label this sample. Leave empty to not assign a specific labeler. Defaults to :obj:`None`.
             assigned_reviewer: The username of the user who should review this sample. Leave empty to not assign a specific reviewer. Defaults to :obj:`None`.
-            embedding: Embedding of this sample represented by an array of floats.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the sample attributes fails.
             :exc:`~segments.exceptions.ValidationError`: If validation of the sample fails.
@@ -909,47 +1023,37 @@ class SegmentsClient:
         task_type = self.get_dataset(dataset_identifier).task_type
         SampleAttributesType = task_type_to_sample_attributes[task_type]
 
-        if type(attributes) is dict:
+        if isinstance(attributes, get_args(SampleAttributes)):
+            attributes = attributes.model_dump(mode="json", exclude_unset=True)
+        else:
             try:
-                parse_obj_as(SampleAttributesType, attributes)
+                attributes = (
+                    TypeAdapter(SampleAttributesType)
+                    .validate_python(attributes)
+                    .model_dump(mode="json", exclude_unset=True)
+                )
             except pydantic.ValidationError as e:
                 logger.error(
                     f"Your dataset task type is {task_type}. Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
                 )
                 raise ValidationError(message=str(e), cause=e)
-        elif type(attributes) is SampleAttributesType:
-            attributes = attributes.dict()
-        else:
-            raise ValidationError(
-                message=f"Your dataset task type is {task_type}. Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types."
-            )
-
-        # Check if the sequence contains a frame
-        if (
-            SampleAttributesType in sequence_sample_attributes
-            and not attributes["frames"]
-        ):
-            raise ValidationError("The sequence must contain at least one frame.")
 
         payload: Dict[str, Any] = {
             "name": name,
             "attributes": attributes,
         }
 
-        if metadata:
+        if metadata is not None:
             payload["metadata"] = metadata
 
-        if priority:
+        if priority is not None:
             payload["priority"] = priority
 
-        if assigned_labeler:
+        if assigned_labeler is not None:
             payload["assigned_labeler"] = assigned_labeler
 
-        if assigned_reviewer:
+        if assigned_reviewer is not None:
             payload["assigned_reviewer"] = assigned_reviewer
-
-        if embedding:
-            payload["embedding"] = embedding
 
         r = self._post(
             f"/datasets/{dataset_identifier}/samples/",
@@ -959,14 +1063,13 @@ class SegmentsClient:
 
         return cast(Sample, r)
 
-    def add_samples(
-        self, dataset_identifier: str, samples: List[Union[Dict[str, Any], Sample]]
-    ) -> List[Sample]:
+    def add_samples(self, dataset_identifier: str, samples: List[Union[Dict[str, Any], Sample]]) -> List[Sample]:
         """Add samples to a dataset in bulk. When attempting to add samples which already exist, no error is thrown but the existing samples are returned without changes.
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: jane/flowers.
-            samples: A list of dicts with required ``name``, ``attributes`` fields and optional ``metadata``, ``priority``, ``embedding`` fields. See :meth:`.add_sample` for details.
+            samples: A list of dicts with required ``name``, ``attributes`` fields and optional ``metadata``, ``priority`` fields. See :meth:`.add_sample` for details.
+
         Raises:
             :exc:`KeyError`: If 'name' or 'attributes' is not in a sample dict.
             :exc:`~segments.exceptions.ValidationError`: If validation of the attributes of a sample fails.
@@ -982,40 +1085,28 @@ class SegmentsClient:
         task_type = self.get_dataset(dataset_identifier).task_type
         SampleAttributesType = task_type_to_sample_attributes[task_type]
 
-        # Check the input
-        checked_samples = []
-        for i, sample in enumerate(samples):
-            if type(sample) is dict:
+        for sample in samples:
+            if isinstance(sample, Sample):
+                sample = sample.model_dump(mode="json", exclude_unset=True)
+            else:
                 if "name" not in sample or "attributes" not in sample:
-                    raise KeyError(
-                        f"Please add a name and attributes to your sample (index {i}): {sample})"
-                    )
+                    raise KeyError(f"Please add a name and attributes to your sample: {sample}")
+
                 try:
-                    parse_obj_as(SampleAttributesType, sample["attributes"])
+                    sample["attributes"] = (
+                        TypeAdapter(SampleAttributes)
+                        .validate_python(sample["attributes"])
+                        .model_dump(mode="json", exclude_unset=True)
+                    )
                 except pydantic.ValidationError as e:
                     logger.error(
                         f"Your dataset task type is {task_type}. Did you use the right sample attributes for sample {i}? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
                     )
                     raise ValidationError(message=str(e), cause=e)
-            elif type(sample) is SampleAttributesType:
+            elif type(sample) is Sample:
                 sample = sample.dict()
-            else:
-                raise ValidationError(
-                    message=f"Your dataset task type is {task_type}. Did you use the right sample attributes for sample {i}? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types."
-                )
 
-            checked_samples.append(sample)
-
-            # Check if the sequence contains a frame
-            if (
-                SampleAttributesType in sequence_sample_attributes
-                and not sample["attributes"]["frames"]
-            ):
-                raise ValidationError(
-                    f"The sequence of sample {i} must contain at least one frame."
-                )
-
-        payload = checked_samples
+        payload = samples
 
         r = self._post(
             f"/datasets/{dataset_identifier}/samples_bulk/",
@@ -1034,7 +1125,6 @@ class SegmentsClient:
         priority: Optional[float] = None,
         assigned_labeler: Optional[str] = None,
         assigned_reviewer: Optional[str] = None,
-        embedding: Optional[Union[npt.NDArray[Any], List[float]]] = None,
     ) -> Sample:
         """Update a sample.
 
@@ -1058,10 +1148,10 @@ class SegmentsClient:
             priority: Priority in the labeling queue. Samples with higher values will be labeled first.
             assigned_labeler: The username of the user who should label this sample. Leave empty to not assign a specific labeler.
             assigned_reviewer: The username of the user who should review this sample. Leave empty to not assign a specific reviewer.
-            embedding: Embedding of this sample represented by list of floats.
+
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
-            :exc:`~segments.exceptions.ValidationError`: If validation of the samples fails.
+            :exc:`~segments.exceptions.ValidationError`: If validation of the sample fails.
             :exc:`~segments.exceptions.NotFoundError`: If the sample is not found.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
@@ -1069,54 +1159,38 @@ class SegmentsClient:
 
         payload: Dict[str, Any] = {}
 
-        if name:
+        if name is not None:
             payload["name"] = name
 
-        if attributes:
-
-            # Get the dataset task type
-            sample = self.get_sample(uuid)
-            task_type = self.get_dataset(sample.dataset_full_name).task_type
-            SampleAttributesType = task_type_to_sample_attributes[task_type]
-
-            if type(attributes) is dict:
+        if attributes is not None:
+            if isinstance(attributes, get_args(SampleAttributes)):
+                attributes = attributes.model_dump(mode="json", exclude_unset=True)
+            else:
                 try:
-                    parse_obj_as(SampleAttributesType, attributes)
+                    attributes = (
+                        TypeAdapter(SampleAttributes)
+                        .validate_python(attributes)
+                        .model_dump(mode="json", exclude_unset=True)
+                    )
                 except pydantic.ValidationError as e:
                     logger.error(
-                        f"Your dataset task type is {task_type}. Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
+                        "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
                     )
                     raise ValidationError(message=str(e), cause=e)
-            elif type(attributes) is SampleAttributesType:
-                attributes = attributes.dict()
-            else:
-                raise ValidationError(
-                    message=f"Your dataset task type is {task_type}. Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types."
-                )
-
-            # Check if the sequence contains a frame
-            if (
-                SampleAttributesType in sequence_sample_attributes
-                and not attributes["frames"]
-            ):
-                raise ValidationError("The sequence must contain at least one frame.")
 
             payload["attributes"] = attributes
 
-        if metadata:
+        if metadata is not None:
             payload["metadata"] = metadata
 
-        if priority:
+        if priority is not None:
             payload["priority"] = priority
 
-        if assigned_labeler:
+        if assigned_labeler is not None:
             payload["assigned_labeler"] = assigned_labeler
 
-        if assigned_reviewer:
+        if assigned_reviewer is not None:
             payload["assigned_reviewer"] = assigned_reviewer
-
-        if embedding:
-            payload["embedding"] = embedding
 
         r = self._patch(f"/samples/{uuid}/", data=payload, model=Sample)
         # logger.info(f"Updated {uuid}")
@@ -1133,6 +1207,7 @@ class SegmentsClient:
 
         Args:
             uuid: The sample uuid.
+
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NotFoundError`: If the sample is not found.
@@ -1148,6 +1223,9 @@ class SegmentsClient:
     def get_label(self, sample_uuid: str, labelset: str = "ground-truth") -> Label:
         """Get a label.
 
+        Note:
+            If the sample is unlabeled, a :exc:`~segments.exceptions.NotFoundError` will be raised.
+
         .. code-block:: python
 
             sample_uuid = '602a3eec-a61c-4a77-9fcc-3037ce5e9606'
@@ -1157,10 +1235,11 @@ class SegmentsClient:
         Args:
             sample_uuid: The sample uuid.
             labelset: The labelset this label belongs to. Defaults to ``ground-truth``.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the label fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
-            :exc:`~segments.exceptions.NotFoundError`: If the sample or labelset is not found.
+            :exc:`~segments.exceptions.NotFoundError`: If the sample or labelset is not found or if the sample is unlabeled.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
@@ -1174,7 +1253,7 @@ class SegmentsClient:
         sample_uuid: str,
         labelset: str,
         attributes: Union[Dict[str, Any], LabelAttributes],
-        label_status: LabelStatus = "PRELABELED",
+        label_status: LabelStatus = LabelStatus.PRELABELED,
         score: Optional[float] = None,
     ) -> Label:
         """Add a label to a sample.
@@ -1209,6 +1288,7 @@ class SegmentsClient:
             attributes: The label attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/sample-and-label-types/label-types>`__.
             label_status: The label status. Defaults to ``PRELABELED``.
             score: The label score. Defaults to :obj:`None`.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the attributes fails.
             :exc:`~segments.exceptions.ValidationError`: If validation of the label fails.
@@ -1223,34 +1303,27 @@ class SegmentsClient:
         task_type = self.get_dataset(sample.dataset_full_name).task_type
         LabelAttributesType = task_type_to_label_attributes[task_type]
 
-        if type(attributes) is dict:
+        if isinstance(attributes, get_args(LabelAttributes)):
+            attributes = attributes.model_dump(mode="json", exclude_unset=True)
+        else:
             try:
-                parse_obj_as(LabelAttributesType, attributes)
+                attributes = (
+                    TypeAdapter(LabelAttributes)
+                    .validate_python(attributes)
+                    .model_dump(mode="json", exclude_unset=True)
+                )
             except pydantic.ValidationError as e:
                 logger.error(
                     f"Your dataset task type is {task_type}. Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.",
                 )
                 raise ValidationError(message=str(e), cause=e)
-        elif type(attributes) is LabelAttributesType:
-            attributes = attributes.dict()
-        else:
-            raise ValidationError(
-                message=f"Your dataset task type is {task_type}. Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types."
-            )
-
-        # Check if the sequence contains a frame
-        if (
-            LabelAttributesType in sequence_label_attributes
-            and not attributes["frames"]
-        ):
-            raise ValidationError("The sequence must contain at least one frame.")
 
         payload: Dict[str, Any] = {
             "label_status": label_status,
             "attributes": attributes,
         }
 
-        if score:
+        if score is not None:
             payload["score"] = score
 
         r = self._put(f"/labels/{sample_uuid}/{labelset}/", data=payload, model=Label)
@@ -1261,8 +1334,8 @@ class SegmentsClient:
         self,
         sample_uuid: str,
         labelset: str,
-        attributes: Union[Dict[str, Any], LabelAttributes],
-        label_status: LabelStatus = "PRELABELED",
+        attributes: Optional[Union[Dict[str, Any], LabelAttributes]] = None,
+        label_status: Optional[LabelStatus] = None,
         score: Optional[float] = None,
     ) -> Label:
         """Update a label.
@@ -1289,9 +1362,10 @@ class SegmentsClient:
         Args:
             sample_uuid: The sample uuid.
             labelset: The labelset this label belongs to.
-            attributes: The label attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/sample-and-label-types/label-types>`__.
-            label_status: The label status. Defaults to ``PRELABELED``.
+            attributes: The label attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/sample-and-label-types/label-types>`__. Defaults to :obj:`None`.
+            label_status: The label status. Defaults to :obj:`None`.
             score: The label score. Defaults to :obj:`None`.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the label fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -1302,41 +1376,34 @@ class SegmentsClient:
 
         payload: Dict[str, Any] = {}
 
-        if attributes:
-
+        if attributes is not None:
+            
             # Get the dataset task type
             sample = self.get_sample(sample_uuid)
             task_type = self.get_dataset(sample.dataset_full_name).task_type
             LabelAttributesType = task_type_to_label_attributes[task_type]
-
-            if type(attributes) is dict:
+            
+            if isinstance(attributes, LabelAttributesType):
+                attributes = attributes.model_dump(mode="json", exclude_unset=True)
+            else:
                 try:
-                    parse_obj_as(LabelAttributesType, attributes)
+                    attributes = (
+                        TypeAdapter(LabelAttributes)
+                        .validate_python(attributes)
+                        .model_dump(mode="json", exclude_unset=True)
+                    )
                 except pydantic.ValidationError as e:
                     logger.error(
-                        f"Your dataset task type is {task_type}. Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.",
+                        "Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.",
                     )
                     raise ValidationError(message=str(e), cause=e)
-            elif type(attributes) is LabelAttributesType:
-                attributes = attributes.dict()
-            else:
-                raise ValidationError(
-                    message=f"Your dataset task type is {task_type}. Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types."
-                )
-
-            # Check if the sequence contains a frame
-            if (
-                LabelAttributesType in sequence_label_attributes
-                and not attributes["frames"]
-            ):
-                raise ValidationError("The sequence must contain at least one frame.")
 
             payload["attributes"] = attributes
 
-        if label_status:
+        if label_status is not None:
             payload["label_status"] = label_status
 
-        if score:
+        if score is not None:
             payload["score"] = score
 
         r = self._patch(f"/labels/{sample_uuid}/{labelset}/", data=payload, model=Label)
@@ -1355,6 +1422,7 @@ class SegmentsClient:
         Args:
             sample_uuid: The sample uuid.
             labelset: The labelset this label belongs to.
+
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NotFoundError`: If the sample or labelset is not found.
@@ -1379,6 +1447,7 @@ class SegmentsClient:
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the labelsets fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -1387,9 +1456,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        r = self._get(
-            f"/datasets/{dataset_identifier}/labelsets/", model=List[Labelset]
-        )
+        r = self._get(f"/datasets/{dataset_identifier}/labelsets/", model=List[Labelset])
 
         return cast(List[Labelset], r)
 
@@ -1406,6 +1473,7 @@ class SegmentsClient:
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
             name: The name of the labelset.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the labelset fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -1414,15 +1482,11 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        r = self._get(
-            f"/datasets/{dataset_identifier}/labelsets/{name}/", model=Labelset
-        )
+        r = self._get(f"/datasets/{dataset_identifier}/labelsets/{name}/", model=Labelset)
 
         return cast(Labelset, r)
 
-    def add_labelset(
-        self, dataset_identifier: str, name: str, description: str = ""
-    ) -> Labelset:
+    def add_labelset(self, dataset_identifier: str, name: str, description: str = "") -> Labelset:
         """Add a labelset to a dataset.
 
         .. code-block:: python
@@ -1435,6 +1499,7 @@ class SegmentsClient:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
             name: The name of the labelset.
             description: The labelset description. Defaults to ``''``.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the labelset fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -1443,6 +1508,7 @@ class SegmentsClient:
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
+
         payload = {
             "name": name,
             "description": description,
@@ -1468,6 +1534,7 @@ class SegmentsClient:
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
             name: The name of the labelset.
+
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NotFoundError`: If the dataset or labelset is not found.
@@ -1492,6 +1559,7 @@ class SegmentsClient:
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NotFoundError`: If the dataset is not found.
@@ -1507,7 +1575,7 @@ class SegmentsClient:
         self,
         sample_uuid: str,
         description: str,
-        status: IssueStatus = "OPEN",
+        status: IssueStatus = IssueStatus.OPEN,
     ) -> Issue:
         """Add an issue to a sample.
 
@@ -1522,6 +1590,7 @@ class SegmentsClient:
             sample_uuid: The sample uuid.
             description: The issue description.
             status: The issue status. One of ``OPEN`` or ``CLOSED``. Defaults to ``OPEN``.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the issue fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -1558,6 +1627,7 @@ class SegmentsClient:
             uuid: The issue uuid.
             description: The issue description. Defaults to :obj:`None`.
             status: The issue status. One of ``OPEN`` or ``CLOSED``. Defaults to :obj:`None`.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the issue fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -1568,10 +1638,10 @@ class SegmentsClient:
 
         payload: Dict[str, Any] = {}
 
-        if description:
+        if description is not None:
             payload["description"] = description
 
-        if status:
+        if status is not None:
             payload["status"] = status
 
         r = self._patch(f"/issues/{uuid}/", data=payload, model=Issue)
@@ -1588,6 +1658,7 @@ class SegmentsClient:
 
         Args:
             uuid: The issue uuid.
+
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NotFoundError`: If the issue is not found.
@@ -1612,6 +1683,7 @@ class SegmentsClient:
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the releases fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -1637,6 +1709,7 @@ class SegmentsClient:
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
             name: The name of the release.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the release fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -1649,9 +1722,7 @@ class SegmentsClient:
 
         return cast(Release, r)
 
-    def add_release(
-        self, dataset_identifier: str, name: str, description: str = ""
-    ) -> Release:
+    def add_release(self, dataset_identifier: str, name: str, description: str = "") -> Release:
         """Add a release to a dataset.
 
         .. code-block:: python
@@ -1666,6 +1737,7 @@ class SegmentsClient:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
             name: The name of the release.
             description: The release description. Defaults to ``''``.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the release fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -1696,6 +1768,7 @@ class SegmentsClient:
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
             name: The name of the release.
+
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NotFoundError`: If the dataset or release is not found.
@@ -1708,9 +1781,7 @@ class SegmentsClient:
     ##########
     # Assets #
     ##########
-    def upload_asset(
-        self, file: Union[TextIO, BinaryIO], filename: str = "label.png"
-    ) -> File:
+    def upload_asset(self, file: Union[TextIO, BinaryIO], filename: str = "label.png") -> File:
         """Upload an asset.
 
         .. code-block:: python
@@ -1725,6 +1796,7 @@ class SegmentsClient:
         Args:
             file: A file object.
             filename: The file name. Defaults to ``label.png``.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the file fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -1733,15 +1805,11 @@ class SegmentsClient:
         """
 
         r = self._post("/assets/", data={"filename": filename})
-        presigned_post_fields = PresignedPostFields.parse_obj(
-            r.json()["presignedPostFields"]
-        )
-        self._upload_to_aws(
-            file, presigned_post_fields.url, presigned_post_fields.fields
-        )
+        presigned_post_fields = PresignedPostFields.model_validate(r.json()["presignedPostFields"])
+        self._upload_to_aws(file, presigned_post_fields.url, presigned_post_fields.fields)
 
         try:
-            f = File.parse_obj(r.json())
+            f = File.model_validate(r.json())
         except pydantic.ValidationError as e:
             raise ValidationError(message=str(e), cause=e)
 
@@ -1763,6 +1831,7 @@ class SegmentsClient:
             endpoint: The API endpoint.
             auth: If we want to authorize the request. Defaults to :obj:`True`.
             model: The class to parse the JSON response into. Defaults to :obj:`None`.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the response fails - catches :exc:`pydantic.ValidationError`.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -1770,11 +1839,9 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out - catches :exc:`requests.exceptions.TimeoutError`.
         """
 
-        headers = self._get_auth_header() if auth else None
+        headers = self._get_headers(auth)
 
-        r = self.api_session.get(
-            urllib.parse.urljoin(self.api_url, endpoint), headers=headers
-        )
+        r = self.api_session.get(urllib.parse.urljoin(self.api_url, endpoint), headers=headers)
 
         return r
 
@@ -1793,13 +1860,14 @@ class SegmentsClient:
             data: The JSON data. Defaults to :obj:`None`.
             auth: If we want to authorize the request with the API key. Defaults to :obj:`True`.
             model: The class to parse the JSON response into. Defaults to :obj:`None`.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the response fails - catches :exc:`pydantic.ValidationError`.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error - catches :exc:`requests.HTTPError` and catches :exc:`requests.RequestException`.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out - catches :exc:`requests.exceptions.TimeoutError`.
         """
-        headers = self._get_auth_header() if auth else None
+        headers = self._get_headers(auth)
 
         r = self.api_session.post(
             urllib.parse.urljoin(self.api_url, endpoint),
@@ -1824,13 +1892,14 @@ class SegmentsClient:
             data: The JSON data. Defaults to :obj:`None`.
             auth: If we want to authorize the request with the API key. Defaults to :obj:`True`.
             model: The class to parse the JSON response into. Defaults to :obj:`None`.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the response fails - catches :exc:`pydantic.ValidationError`.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error - catches :exc:`requests.HTTPError` and catches :exc:`requests.RequestException`.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out - catches :exc:`requests.exceptions.TimeoutError`.
         """
-        headers = self._get_auth_header() if auth else None
+        headers = self._get_headers(auth)
 
         r = self.api_session.put(
             urllib.parse.urljoin(self.api_url, endpoint),
@@ -1855,13 +1924,14 @@ class SegmentsClient:
             data: The JSON data. Defaults to :obj:`None`.
             auth: If we want to authorize the request with the API key. Defaults to :obj:`True`.
             model: The class to parse the JSON response into. Defaults to :obj:`None`.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the response fails - catches :exc:`pydantic.ValidationError`.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error - catches :exc:`requests.HTTPError` and catches :exc:`requests.RequestException`.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out - catches :exc:`requests.exceptions.TimeoutError`.
         """
-        headers = self._get_auth_header() if auth else None
+        headers = self._get_headers(auth)
 
         r = self.api_session.patch(
             urllib.parse.urljoin(self.api_url, endpoint),
@@ -1886,13 +1956,14 @@ class SegmentsClient:
             data: The JSON data. Defaults to :obj:`None`.
             auth: If we want to authorize the request with the API key. Defaults to :obj:`True`.
             model: The class to parse the JSON response into. Defaults to :obj:`None`.
+
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the response fails - catches :exc:`pydantic.ValidationError`.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error - catches :exc:`requests.HTTPError` and catches :exc:`requests.RequestException`.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out - catches :exc:`requests.exceptions.TimeoutError`.
         """
-        headers = self._get_auth_header() if auth else None
+        headers = self._get_headers(auth)
 
         r = self.api_session.delete(
             urllib.parse.urljoin(self.api_url, endpoint),
@@ -1902,20 +1973,22 @@ class SegmentsClient:
 
         return r
 
-    def _get_auth_header(self) -> Optional[AuthHeader]:
+    def _get_headers(self, auth: bool = True) -> Dict[str, str]:
         """Get the authorization header with the API key."""
-        return {"Authorization": f"APIKey {self.api_key}"} if self.api_key else None
+        headers = {"X-source": "python-sdk"}
+        if auth and self.api_key:
+            headers["Authorization"] = f"APIKey {self.api_key}"
+        return headers
 
     @handle_exceptions
-    def _upload_to_aws(
-        self, file: Union[TextIO, BinaryIO], url: str, aws_fields: AWSFields
-    ) -> requests.Response:
+    def _upload_to_aws(self, file: Union[TextIO, BinaryIO], url: str, aws_fields: AWSFields) -> requests.Response:
         """Upload file to AWS.
 
         Args:
             file: The file we want to upload.
             url: The request's url.
             aws_fields: The AWS fields.
+
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
