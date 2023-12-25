@@ -44,15 +44,15 @@ class Test(unittest.TestCase):
         self.datasets = json.loads(cast(str, os.getenv("DATASETS")))
         # First sample uuid
         self.sample_uuids = json.loads(cast(str, os.getenv("SAMPLE_UUIDS")))
-        # First sample of first dataset.
+        # First sample of first dataset
         self.labelsets = json.loads(cast(str, os.getenv("LABELSETS")))
-        # Releases of first dataset.
+        # Releases of first dataset
         self.releases = json.loads(cast(str, os.getenv("RELEASES")))
-        # Sample attribute type of the datasets.
+        # Sample attribute type of the datasets
         self.sample_attribute_types = json.loads(cast(str, os.getenv("SAMPLE_ATTRIBUTE_TYPES")))
-        # Label attribute type of the datasets.
+        # Label attribute type of the datasets
         self.label_attribute_types = json.loads(cast(str, os.getenv("LABEL_ATTRIBUTE_TYPES")))
-        self.TIME_INTERVAL = 0.2  # Wait for API call to complete.
+        self.TIME_INTERVAL = 0.2  # Wait for API call to complete
 
     def tearDown(self) -> None:
         self.client.close()
