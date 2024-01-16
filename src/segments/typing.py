@@ -305,13 +305,13 @@ class ImageSequenceSegmentationAnnotation(Annotation):
 
 class ImageSequenceSegmentationFrame(ImageSegmentationLabelAttributes):
     annotations: List[ImageSequenceSegmentationAnnotation]
-    timestamp: Optional[Union[str, int]]
-    format_version: Optional[FormatVersion]
+    timestamp: Optional[Union[str, int]] = None
+    format_version: Optional[FormatVersion] = None
 
 
 class ImageSequenceSegmentationLabelAttributes(BaseModel):
     frames: List[ImageSequenceSegmentationFrame]
-    format_version: Optional[FormatVersion]
+    format_version: Optional[FormatVersion] = None
 
 
 # Image sequence vector
@@ -684,7 +684,7 @@ class SelectTaskAttribute(BaseModel):
 
 class TextTaskAttribute(BaseModel):
     name: str
-    input_type: Literal[InputType.TEXT] = None
+    input_type: Literal[InputType.TEXT]
     default_value: Optional[str] = None
     is_mandatory: Optional[bool] = None
 
@@ -756,14 +756,14 @@ class Owner(BaseModel):
 class Labelset(BaseModel):
     name: str
     description: str
-    # uuid: Optional[str]
-    # readme: Optional[str]
-    # task_type: Optional[TaskType]
-    # attributes: Optional[Union[str, TaskAttributes]]
+    # uuid: Optional[str] = None
+    # readme: Optional[str] = None
+    # task_type: Optional[TaskType] = None
+    # attributes: Optional[Union[str, TaskAttributes]] = None
     is_groundtruth: Optional[bool] = None
-    # statistics: Optional[Statistics]
+    # statistics: Optional[Statistics] = None
     created_at: Optional[str] = None
-    # stats: Optional[Dict[str, Any]]
+    # stats: Optional[Dict[str, Any]] = None
 
 
 class Dataset(BaseModel):
@@ -798,7 +798,7 @@ class Dataset(BaseModel):
     noncollaborator_can_label: Optional[bool] = None
     noncollaborator_can_review: Optional[bool] = None
     insights_urls: Optional[Dict[str, str]] = None
-    # tasks: Optional[List[Dict[str, Any]]]
+    # tasks: Optional[List[Dict[str, Any]]] = None
 
     @field_validator("category")
     @classmethod
