@@ -204,7 +204,7 @@ class SegmentsClient:
             api_key = os.getenv("SEGMENTS_API_KEY")
             if api_key is None:
                 raise AuthenticationError(
-                    message="Please provide the api_key argument or set SEGMENTS_API_KEY in your environment."
+                    message="Please provide the `api_key` or set `SEGMENTS_API_KEY` in your environment."
                 )
             else:
                 print("Found a Segments API key in your environment.")
@@ -231,7 +231,7 @@ class SegmentsClient:
         except NetworkError as e:
             if cast(requests.exceptions.RequestException, e.cause).response.status_code == 426:
                 logger.warning(
-                    "There's a new version available. Please upgrade by running 'pip install --upgrade segments-ai'"
+                    "There's a new version available. Please upgrade by running `pip install --upgrade segments-ai`"
                 )
             else:
                 raise AuthenticationError(message="Something went wrong. Did you use the right API key?")
@@ -1062,7 +1062,7 @@ class SegmentsClient:
             samples: A list of dicts with required ``name``, ``attributes`` fields and optional ``metadata``, ``priority`` fields. See :meth:`.add_sample` for details.
 
         Raises:
-            :exc:`KeyError`: If 'name' or 'attributes' is not in a sample dict.
+            :exc:`KeyError`: If `name` or `attributes` is not in a sample dict.
             :exc:`~segments.exceptions.ValidationError`: If validation of the attributes of a sample fails.
             :exc:`~segments.exceptions.ValidationError`: If validation of a sample fails.
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.

@@ -132,7 +132,7 @@ class SegmentsDataset:
 
         # First some checks
         if self.labelset not in [labelset["name"] for labelset in self.release["dataset"]["labelsets"]]:
-            raise ValueError(f"There is no labelset with name '{self.labelset}'.")
+            raise ValueError(f"There is no labelset with name `{self.labelset}`.")
 
         self.task_type = self.release["dataset"]["task_type"]
         if self.task_type not in [
@@ -146,7 +146,7 @@ class SegmentsDataset:
             "pointcloud-segmentation",
         ]:
             raise ValueError(
-                f"You can only create a dataset for tasks of type 'segmentation-bitmap', 'segmentation-bitmap-highres', 'vector', 'bboxes', 'keypoints', 'image-vector-sequence', 'pointcloud-cuboid', 'pointcloud-segmentation' for now. Got {self.task_type}."
+                f"You can only create a dataset for tasks of type `segmentation-bitmap`, `segmentation-bitmap-highres`, `vector`, `bboxes`, `keypoints`, `image-vector-sequence`, `pointcloud-cuboid`, `pointcloud-segmentation` for now. Got {self.task_type}."
             )
 
         self.load_dataset()
