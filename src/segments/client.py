@@ -879,6 +879,9 @@ class SegmentsClient:
         # pagination
         query_string = f"?per_page={per_page}&page={page}"
 
+        if include_full_label and labelset is None:
+            raise ValidationError(message="Please specify the `labelset` if you use `include_full_label`.")
+
         if labelset is not None:
             query_string += f"&labelset={labelset}"
             if include_full_label:
