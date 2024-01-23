@@ -4,6 +4,7 @@
     "ms-python.python",
     "ms-python.vscode-pylance", // intellisense for python
     "esbenp.prettier-vscode", // format json
-    "charliermarsh.ruff" // lint and format python
+    "charliermarsh.ruff", // lint and format python
+    "tamasfe.even-better-toml" // toml support
   ]
 }
