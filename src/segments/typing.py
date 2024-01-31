@@ -5,7 +5,7 @@ from enum import EnumMeta as BaseEnumMeta
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel as PydanticBaseModel
-from pydantic import ConfigDict, field_validator
+from pydantic import ConfigDict, conlist, field_validator
 from segments.exceptions import ValidationError
 from typing_extensions import Literal, TypedDict
 
@@ -275,7 +275,7 @@ class Annotation(BaseModel):
 
 # Image segmentation
 class ImageSegmentationLabelAttributes(BaseModel):
-    annotations: List[Annotation]
+    annotations: conlist(Annotation, min_length=1)
     segmentation_bitmap: URL
     image_attributes: Optional[ImageAttributes] = None
     format_version: Optional[FormatVersion] = None
@@ -292,7 +292,7 @@ class ImageVectorAnnotation(BaseModel):
 
 
 class ImageVectorLabelAttributes(BaseModel):
-    annotations: List[ImageVectorAnnotation]
+    annotations: conlist(ImageVectorAnnotation, min_length=1)
     format_version: Optional[FormatVersion] = None
     image_attributes: Optional[ImageAttributes] = None
 
@@ -304,13 +304,13 @@ class ImageSequenceSegmentationAnnotation(Annotation):
 
 
 class ImageSequenceSegmentationFrame(ImageSegmentationLabelAttributes):
-    annotations: List[ImageSequenceSegmentationAnnotation]
+    annotations: conlist(ImageSequenceSegmentationAnnotation, min_length=1)
     timestamp: Optional[Union[str, int]] = None
     format_version: Optional[FormatVersion] = None
 
 
 class ImageSequenceSegmentationLabelAttributes(BaseModel):
-    frames: List[ImageSequenceSegmentationFrame]
+    frames: conlist(ImageSequenceSegmentationFrame, min_length=1)
     format_version: Optional[FormatVersion] = None
 
 
@@ -321,21 +321,21 @@ class ImageSequenceVectorAnnotation(ImageVectorAnnotation):
 
 
 class ImageVectorFrame(ImageVectorLabelAttributes):
-    annotations: List[ImageSequenceVectorAnnotation]
+    annotations: conlist(ImageSequenceVectorAnnotation, min_length=1)
     timestamp: Optional[Union[str, int]] = None
     format_version: Optional[FormatVersion] = None
     image_attributes: Optional[ImageAttributes] = None
 
 
 class ImageSequenceVectorLabelAttributes(BaseModel):
-    frames: List[ImageVectorFrame]
+    frames: conlist(ImageVectorFrame, min_length=1)
     format_version: Optional[FormatVersion] = None
 
 
 # Point cloud segmentation
 class PointcloudSegmentationLabelAttributes(BaseModel):
-    annotations: List[Annotation]
-    point_annotations: List[int]
+    annotations: conlist(Annotation, min_length=1)
+    point_annotations: conlist(int, min_length=1)
     format_version: Optional[FormatVersion] = None
 
 
@@ -386,7 +386,7 @@ class PointcloudCuboidAnnotation(BaseModel):
 
 
 class PointcloudCuboidLabelAttributes(BaseModel):
-    annotations: List[PointcloudCuboidAnnotation]
+    annotations: conlist(PointcloudCuboidAnnotation, min_length=1)
     format_version: Optional[FormatVersion] = None
 
 
@@ -394,13 +394,13 @@ class PointcloudCuboidLabelAttributes(BaseModel):
 class PointcloudVectorAnnotation(BaseModel):
     id: int
     category_id: int
-    points: List[List[float]]
+    points: conlist(conlist(float, min_length=3, max_length=3), min_length=1)  # 3D points
     type: PointcloudVectorAnnotationType
     attributes: Optional[ObjectAttributes] = None
 
 
 class PointcloudVectorLabelAttributes(BaseModel):
-    annotations: List[PointcloudVectorAnnotation]
+    annotations: conlist(PointcloudVectorAnnotation, min_length=1)
     format_version: Optional[FormatVersion] = None
 
 
@@ -412,14 +412,14 @@ class PointcloudSequenceSegmentationAnnotation(Annotation):
 
 
 class PointcloudSegmentationFrame(PointcloudSegmentationLabelAttributes):
-    annotations: List[PointcloudSequenceSegmentationAnnotation]
-    point_annotations: List[int]
+    annotations: conlist(PointcloudSequenceSegmentationAnnotation, min_length=1)
+    point_annotations: conlist(int, min_length=1)
     timestamp: Optional[Union[str, int]] = None
     format_version: Optional[FormatVersion] = None
 
 
 class PointcloudSequenceSegmentationLabelAttributes(BaseModel):
-    frames: List[PointcloudSegmentationFrame]
+    frames: conlist(PointcloudSegmentationFrame, min_length=1)
     format_version: Optional[FormatVersion] = None
 
 
@@ -430,13 +430,13 @@ class PointcloudSequenceCuboidAnnotation(PointcloudCuboidAnnotation):
 
 
 class PointcloudSequenceCuboidFrame(PointcloudCuboidLabelAttributes):
-    annotations: List[PointcloudSequenceCuboidAnnotation]
+    annotations: conlist(PointcloudSequenceCuboidAnnotation, min_length=1)
     timestamp: Optional[Union[str, int]] = None
     format_version: Optional[FormatVersion] = None
 
 
 class PointcloudSequenceCuboidLabelAttributes(BaseModel):
-    frames: List[PointcloudSequenceCuboidFrame]
+    frames: conlist(PointcloudSequenceCuboidFrame, min_length=1)
     format_version: Optional[FormatVersion] = None
 
 
@@ -447,13 +447,13 @@ class PointcloudSequenceVectorAnnotation(PointcloudVectorAnnotation):
 
 
 class PointcloudSequenceVectorFrame(PointcloudVectorLabelAttributes):
-    annotations: List[PointcloudSequenceVectorAnnotation]
+    annotations: conlist(PointcloudSequenceVectorAnnotation, min_length=1)
     format_version: Optional[FormatVersion] = None
     timestamp: Optional[Union[str, int]] = None
 
 
 class PointcloudSequenceVectorLabelAttributes(BaseModel):
-    frames: List[PointcloudSequenceVectorFrame]
+    frames: conlist(PointcloudSequenceVectorFrame, min_length=1)
     format_version: Optional[FormatVersion] = None
 
 
@@ -473,12 +473,13 @@ class MultiSensorImageSequenceVectorLabelAttributes(BaseModel):
 
 
 class MultiSensorLabelAttributes(BaseModel):
-    sensors: List[
+    sensors: conlist(
         Union[
             MultiSensorPointcloudSequenceCuboidLabelAttributes,
             MultiSensorImageSequenceVectorLabelAttributes,
         ],
-    ]
+        min_length=2,  # minimum one point cloud sequence and one image sequence
+    )
 
 
 # Text
@@ -489,7 +490,7 @@ class TextAnnotation(BaseModel):
 
 
 class TextLabelAttributes(BaseModel):
-    annotations: List[TextAnnotation]
+    annotations: conlist(TextAnnotation, min_length=1)
     format_version: Optional[FormatVersion] = None
 
 
@@ -547,7 +548,7 @@ class ImageFrame(ImageSampleAttributes):
 
 
 class ImageSequenceSampleAttributes(BaseModel):
-    frames: List[ImageFrame]
+    frames: conlist(ImageFrame, min_length=1)
 
 
 # Point cloud
@@ -563,7 +564,8 @@ class EgoPose(BaseModel):
 
 
 class CameraIntrinsics(BaseModel):
-    intrinsic_matrix: List[List[float]]
+    # an intrinsic matrix is a 3x3 matrix [[fx, 0, cx], [0, fy, cy], [0, 0, 1]]
+    intrinsic_matrix: conlist(conlist(float, min_length=3, max_length=3), min_length=3, max_length=3)
 
 
 class CameraExtrinsics(BaseModel):
@@ -592,7 +594,7 @@ class PointcloudSampleAttributes(BaseModel):
 
 # Point cloud sequence
 class PointcloudSequenceSampleAttributes(BaseModel):
-    frames: List[PointcloudSampleAttributes]
+    frames: conlist(PointcloudSampleAttributes, min_length=1)
 
 
 # Multi-sensor
@@ -609,12 +611,13 @@ class MultiSensorImageSequenceSampleAttributes(BaseModel):
 
 
 class MultiSensorSampleAttributes(BaseModel):
-    sensors: List[
+    sensors: conlist(
         Union[
             MultiSensorPointcloudSequenceSampleAttributes,
             MultiSensorImageSequenceSampleAttributes,
         ],
-    ]
+        min_length=2,  # minimum one point cloud and one image
+    )
 
 
 # Text
@@ -677,7 +680,8 @@ class Collaborator(BaseModel):
 class SelectTaskAttribute(BaseModel):
     name: str
     input_type: Literal[InputType.SELECT]
-    values: List[str]
+    # a select task box should have at least two options (if it has one option, we suggest to use a checkbox)
+    values: conlist(str, min_length=2)
     default_value: Optional[str] = None
     is_mandatory: Optional[bool] = None
 
@@ -791,7 +795,7 @@ class Dataset(BaseModel):
     samples_count: Optional[Union[str, int]] = None
     collaborators_count: Optional[int] = None
     task_attributes: Optional[TaskAttributes] = None
-    labelsets: Optional[List[Labelset]] = None
+    labelsets: Optional[conlist(Labelset, min_length=1)] = None  # ground-truth labelset is always present
     role: Optional[str] = None
     readme: Optional[str] = None
     metadata: Dict[str, Any]
