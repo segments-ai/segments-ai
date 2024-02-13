@@ -138,6 +138,7 @@ class PCDType(str, Enum):
     BINARY_XYZIR = "binary-xyzir"
     NUSCENES = "nuscenes"
     PLY = "ply"
+    LAS = "las"
 
 
 class ReleaseStatus(str, Enum):
