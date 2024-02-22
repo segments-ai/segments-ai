@@ -37,6 +37,8 @@ from segments.exceptions import (
     ValidationError,
 )
 from segments.typing import (
+    TASK_TYPE_TO_LABEL_ATTRIBUTES,
+    TASK_TYPE_TO_SAMPLE_ATTRIBUTES,
     AWSFields,
     Category,
     Collaborator,
@@ -57,7 +59,14 @@ from segments.typing import (
     TaskType,
     User,
 )
-from typing_extensions import Literal, get_args
+from typing_extensions import Literal
+
+
+try:
+    # __package__ allows for the case where __name__ is "__main__"
+    __version__ = importlib_metadata.version(__package__ or __name__)
+except importlib_metadata.PackageNotFoundError:
+    __version__ = "0.0.0"
 
 
 try:
@@ -1013,18 +1022,21 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        if isinstance(attributes, get_args(SampleAttributes)):
+        task_type = self.get_dataset(dataset_identifier).task_type
+        SampleAttributesType = TASK_TYPE_TO_SAMPLE_ATTRIBUTES[task_type]
+
+        if isinstance(attributes, SampleAttributesType):
             attributes = attributes.model_dump(mode="json", exclude_unset=True)
         else:
             try:
                 attributes = (
-                    TypeAdapter(SampleAttributes)
+                    TypeAdapter(SampleAttributesType)
                     .validate_python(attributes)
                     .model_dump(mode="json", exclude_unset=True)
                 )
             except pydantic.ValidationError as e:
                 logger.error(
-                    "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
+                    f"Your dataset task type is {task_type}. Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
                 )
                 raise ValidationError(message=str(e), cause=e)
 
@@ -1050,7 +1062,6 @@ class SegmentsClient:
             data=payload,
             model=Sample,
         )
-        # logger.info(f"Added {name}")
 
         return cast(Sample, r)
 
@@ -1072,8 +1083,25 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        for sample in samples:
+        # Get the dataset task type
+        task_type = self.get_dataset(dataset_identifier).task_type
+        SampleAttributesType = TASK_TYPE_TO_SAMPLE_ATTRIBUTES[task_type]
+
+        for i, sample in enumerate(samples):
             if isinstance(sample, Sample):
+                try:
+                    sample.attributes = (
+                        TypeAdapter(SampleAttributesType)
+                        .validate_python(sample.attributes)
+                        .model_dump(mode="json", exclude_unset=True)
+                    )
+
+                except pydantic.ValidationError as e:
+                    logger.error(
+                        f"Your dataset task type is {task_type}. Did you use the right sample attributes for sample {i+1}? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
+                    )
+                    raise ValidationError(message=str(e), cause=e)
+
                 sample = sample.model_dump(mode="json", exclude_unset=True)
             else:
                 if "name" not in sample or "attributes" not in sample:
@@ -1081,13 +1109,13 @@ class SegmentsClient:
 
                 try:
                     sample["attributes"] = (
-                        TypeAdapter(SampleAttributes)
+                        TypeAdapter(SampleAttributesType)
                         .validate_python(sample["attributes"])
                         .model_dump(mode="json", exclude_unset=True)
                     )
                 except pydantic.ValidationError as e:
                     logger.error(
-                        "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
+                        f"Your dataset task type is {task_type}. Did you use the right sample attributes for sample {i+1}? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
                     )
                     raise ValidationError(message=str(e), cause=e)
 
@@ -1283,18 +1311,23 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
 
-        if isinstance(attributes, get_args(LabelAttributes)):
+        # Get the dataset task type
+        sample = self.get_sample(sample_uuid)
+        task_type = self.get_dataset(sample.dataset_full_name).task_type
+        LabelAttributesType = TASK_TYPE_TO_LABEL_ATTRIBUTES[task_type]
+
+        if isinstance(attributes, LabelAttributesType):
             attributes = attributes.model_dump(mode="json", exclude_unset=True)
         else:
             try:
                 attributes = (
-                    TypeAdapter(LabelAttributes)
+                    TypeAdapter(LabelAttributesType)
                     .validate_python(attributes)
                     .model_dump(mode="json", exclude_unset=True)
                 )
             except pydantic.ValidationError as e:
                 logger.error(
-                    "Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.",
+                    f"Your dataset task type is {task_type}. Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.",
                 )
                 raise ValidationError(message=str(e), cause=e)
 
@@ -1357,7 +1390,12 @@ class SegmentsClient:
         payload: Dict[str, Any] = {}
 
         if attributes is not None:
-            if isinstance(attributes, get_args(LabelAttributes)):
+            # Get the dataset task type
+            sample = self.get_sample(sample_uuid)
+            task_type = self.get_dataset(sample.dataset_full_name).task_type
+            LabelAttributesType = TASK_TYPE_TO_LABEL_ATTRIBUTES[task_type]
+
+            if isinstance(attributes, LabelAttributesType):
                 attributes = attributes.model_dump(mode="json", exclude_unset=True)
             else:
                 try:

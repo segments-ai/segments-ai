@@ -534,6 +534,28 @@ class LabelSummary(BaseModel):
     reviewed_by: Optional[str] = None
 
 
+TASK_TYPE_TO_LABEL_ATTRIBUTES = {
+    # image
+    TaskType.SEGMENTATION_BITMAP: ImageSegmentationLabelAttributes,
+    TaskType.SEGMENTATION_BITMAP_HIGHRES: ImageSegmentationLabelAttributes,
+    TaskType.IMAGE_VECTOR_SEQUENCE: ImageSequenceVectorLabelAttributes,
+    TaskType.BBOXES: ImageVectorLabelAttributes,
+    TaskType.VECTOR: ImageVectorLabelAttributes,
+    # point cloud
+    TaskType.POINTCLOUD_CUBOID: PointcloudCuboidLabelAttributes,
+    TaskType.POINTCLOUD_CUBOID_SEQUENCE: PointcloudSequenceCuboidLabelAttributes,
+    TaskType.POINTCLOUD_SEGMENTATION: PointcloudSegmentationLabelAttributes,
+    TaskType.POINTCLOUD_SEGMENTATION_SEQUENCE: PointcloudSequenceSegmentationLabelAttributes,
+    TaskType.POINTCLOUD_VECTOR: PointcloudVectorLabelAttributes,
+    TaskType.POINTCLOUD_VECTOR_SEQUENCE: PointcloudSequenceVectorLabelAttributes,
+    # text
+    TaskType.TEXT_NAMED_ENTITIES: TextLabelAttributes,
+    TaskType.TEXT_SPAN_CATEGORIZATION: TextLabelAttributes,
+    # other
+    TaskType.EMPTY: LabelAttributes,
+}
+
+
 ##########
 # Sample #
 ##########
@@ -649,6 +671,28 @@ class Sample(BaseModel):
     dataset_full_name: Optional[str] = None
 
 
+TASK_TYPE_TO_SAMPLE_ATTRIBUTES = {
+    # image
+    TaskType.SEGMENTATION_BITMAP: ImageSampleAttributes,
+    TaskType.SEGMENTATION_BITMAP_HIGHRES: ImageSampleAttributes,
+    TaskType.IMAGE_VECTOR_SEQUENCE: ImageSequenceSampleAttributes,
+    TaskType.BBOXES: ImageSampleAttributes,
+    TaskType.VECTOR: ImageSampleAttributes,
+    # point cloud
+    TaskType.POINTCLOUD_CUBOID: PointcloudSampleAttributes,
+    TaskType.POINTCLOUD_CUBOID_SEQUENCE: PointcloudSequenceSampleAttributes,
+    TaskType.POINTCLOUD_SEGMENTATION: PointcloudSampleAttributes,
+    TaskType.POINTCLOUD_SEGMENTATION_SEQUENCE: PointcloudSequenceSampleAttributes,
+    TaskType.POINTCLOUD_VECTOR: PointcloudSampleAttributes,
+    TaskType.POINTCLOUD_VECTOR_SEQUENCE: PointcloudSequenceSampleAttributes,
+    # text
+    TaskType.TEXT_NAMED_ENTITIES: TextSampleAttributes,
+    TaskType.TEXT_SPAN_CATEGORIZATION: TextSampleAttributes,
+    # other
+    TaskType.EMPTY: SampleAttributes,
+}
+
+
 ########################
 # Dataset and labelset #
 ########################
@@ -714,12 +758,7 @@ class CheckboxTaskAttribute(BaseModel):
     default_value: Optional[bool] = None
 
 
-TaskAttribute = Union[
-    SelectTaskAttribute,
-    TextTaskAttribute,
-    NumberTaskAttribute,
-    CheckboxTaskAttribute,
-]
+TaskAttribute = Union[SelectTaskAttribute, TextTaskAttribute, NumberTaskAttribute, CheckboxTaskAttribute]
 
 
 class TaskAttributeCategory(BaseModel):
