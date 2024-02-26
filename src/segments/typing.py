@@ -545,6 +545,7 @@ class ImageSampleAttributes(BaseModel):
 # Image sequence
 class ImageFrame(ImageSampleAttributes):
     name: Optional[str] = None
+    timestamp: Optional[Union[str, int]] = None
 
 
 class ImageSequenceSampleAttributes(BaseModel):
