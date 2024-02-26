@@ -189,6 +189,7 @@ RGBA = Tuple[int, int, int, int]
 FormatVersion = Union[float, str]
 ObjectAttributes = Dict[str, Optional[Union[str, bool, int]]]
 ImageAttributes = Dict[str, Optional[Union[str, bool, int]]]
+Timestamp = Union[str, int]
 
 
 ###########
@@ -306,7 +307,7 @@ class ImageSequenceSegmentationAnnotation(Annotation):
 
 class ImageSequenceSegmentationFrame(ImageSegmentationLabelAttributes):
     annotations: List[ImageSequenceSegmentationAnnotation]
-    timestamp: Optional[Union[str, int]] = None
+    timestamp: Optional[Timestamp] = None
     format_version: Optional[FormatVersion] = None
 
 
@@ -323,7 +324,7 @@ class ImageSequenceVectorAnnotation(ImageVectorAnnotation):
 
 class ImageVectorFrame(ImageVectorLabelAttributes):
     annotations: List[ImageSequenceVectorAnnotation]
-    timestamp: Optional[Union[str, int]] = None
+    timestamp: Optional[Timestamp] = None
     format_version: Optional[FormatVersion] = None
     image_attributes: Optional[ImageAttributes] = None
 
@@ -415,7 +416,7 @@ class PointcloudSequenceSegmentationAnnotation(Annotation):
 class PointcloudSegmentationFrame(PointcloudSegmentationLabelAttributes):
     annotations: List[PointcloudSequenceSegmentationAnnotation]
     point_annotations: List[int]
-    timestamp: Optional[Union[str, int]] = None
+    timestamp: Optional[Timestamp] = None
     format_version: Optional[FormatVersion] = None
 
 
@@ -432,7 +433,7 @@ class PointcloudSequenceCuboidAnnotation(PointcloudCuboidAnnotation):
 
 class PointcloudSequenceCuboidFrame(PointcloudCuboidLabelAttributes):
     annotations: List[PointcloudSequenceCuboidAnnotation]
-    timestamp: Optional[Union[str, int]] = None
+    timestamp: Optional[Timestamp] = None
     format_version: Optional[FormatVersion] = None
 
 
@@ -450,7 +451,7 @@ class PointcloudSequenceVectorAnnotation(PointcloudVectorAnnotation):
 class PointcloudSequenceVectorFrame(PointcloudVectorLabelAttributes):
     annotations: List[PointcloudSequenceVectorAnnotation]
     format_version: Optional[FormatVersion] = None
-    timestamp: Optional[Union[str, int]] = None
+    timestamp: Optional[Timestamp] = None
 
 
 class PointcloudSequenceVectorLabelAttributes(BaseModel):
@@ -545,7 +546,7 @@ class ImageSampleAttributes(BaseModel):
 # Image sequence
 class ImageFrame(ImageSampleAttributes):
     name: Optional[str] = None
-    timestamp: Optional[Union[str, int]] = None
+    timestamp: Optional[Timestamp] = None
 
 
 class ImageSequenceSampleAttributes(BaseModel):
@@ -589,7 +590,7 @@ class PointcloudSampleAttributes(BaseModel):
     ego_pose: Optional[EgoPose] = None
     default_z: Optional[float] = None
     name: Optional[str] = None
-    timestamp: Optional[Union[str, int]] = None
+    timestamp: Optional[Timestamp] = None
 
 
 # Point cloud sequence
