@@ -572,12 +572,21 @@ class SegmentsClient:
 
         if task_attributes is not None:
             if isinstance(task_attributes, TaskAttributes):
+                if enable_same_dimensions_track_constraint is not None and task_attributes is not None:
+                    for category in task_attributes.categories:
+                        category.attributes[
+                            "enable_same_dimensions_track_constraint"
+                        ] = enable_same_dimensions_track_constraint
                 task_attributes = task_attributes.model_dump(mode="json", exclude_unset=True)
             else:
                 try:
-                    task_attributes = TaskAttributes.model_validate(task_attributes).model_dump(
-                        mode="json", exclude_unset=True
-                    )
+                    task_attributes = TaskAttributes.model_validate(task_attributes)
+                    if enable_same_dimensions_track_constraint is not None and task_attributes is not None:
+                        for category in task_attributes.categories:
+                            category.attributes[
+                                "enable_same_dimensions_track_constraint"
+                            ] = enable_same_dimensions_track_constraint
+                    task_attributes = task_attributes.model_dump(mode="json", exclude_unset=True)
                 except pydantic.ValidationError as e:
                     logger.error(
                         "Did you use the right task attributes? Please refer to the online documentation: https://docs.segments.ai/reference/categories-and-task-attributes#object-attribute-format.",
@@ -612,9 +621,6 @@ class SegmentsClient:
 
         if enable_interpolation is not None:
             payload["enable_interpolation"] = enable_interpolation
-
-        if enable_same_dimensions_track_constraint is not None:
-            payload["enable_same_dimensions_track_constraint"] = enable_same_dimensions_track_constraint
 
         if enable_save_button is not None:
             payload["enable_save_button"] = enable_save_button
