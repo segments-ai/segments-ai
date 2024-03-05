@@ -248,7 +248,6 @@ class SegmentsDataset:
         sample_name = os.path.splitext(sample["name"])[0]
         label = sample["labels"][labelset]
         segmentation_bitmap_url = label["attributes"]["segmentation_bitmap"]["url"]
-        url_extension = os.path.splitext(urlparse(segmentation_bitmap_url).path)[1]
 
         if not segmentation_bitmap_url:
             return None
@@ -257,7 +256,7 @@ class SegmentsDataset:
             # segmentation_bitmap_filename = os.path.join(self.image_dir, '{}{}'.format(label['uuid'], url_extension))
             segmentation_bitmap_filename = os.path.join(
                 self.image_dir,
-                f"{sample_name}_label_{labelset}{url_extension}",
+                f"{sample_name}_label_{labelset}.png",
             )
             if not os.path.exists(segmentation_bitmap_filename):
                 return load_label_bitmap_from_url(segmentation_bitmap_url, segmentation_bitmap_filename)
