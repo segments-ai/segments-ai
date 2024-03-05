@@ -8,6 +8,7 @@ import random
 import re
 from collections import defaultdict
 from io import BytesIO
+from os.path import splitext
 from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union, cast
 from urllib.parse import urlparse
@@ -410,6 +411,7 @@ def load_label_bitmap_from_url(url: str, save_filename: Optional[str] = None) ->
     bitmap_array = extract_bitmap(bitmap)
 
     if save_filename:
+        save_filename = f"{splitext(save_filename)[0]}.png"
         Image.fromarray(bitmap_array).save(save_filename)
 
     return bitmap_array
