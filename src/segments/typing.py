@@ -566,8 +566,8 @@ class EgoPose(BaseModel):
 
 
 class Bounds(BaseModel):
-    min_z: Optional[int] = None
-    max_z: Optional[int] = None
+    min_z: Optional[float] = None
+    max_z: Optional[float] = None
 
 
 class CameraIntrinsics(BaseModel):
