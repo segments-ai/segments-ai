@@ -565,6 +565,11 @@ class EgoPose(BaseModel):
     heading: XYZW
 
 
+class HeightColoring(BaseModel):
+    min: Optional[int] = None
+    max: Optional[int] = None
+
+
 class CameraIntrinsics(BaseModel):
     intrinsic_matrix: List[List[float]]
 
@@ -591,6 +596,7 @@ class PointcloudSampleAttributes(BaseModel):
     default_z: Optional[float] = None
     name: Optional[str] = None
     timestamp: Optional[Timestamp] = None
+    height_coloring: Optional[HeightColoring] = None
 
 
 # Point cloud sequence
