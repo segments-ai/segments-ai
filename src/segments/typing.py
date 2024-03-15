@@ -124,6 +124,8 @@ class InputType(str, Enum):
     TEXT = "text"
     NUMBER = "number"
     CHECKBOX = "checkbox"
+    VECTOR3 = "vector3"
+    QUATERNION = "quaternion"
 
 
 class CameraDistortionModel(str, Enum):
@@ -189,7 +191,7 @@ RGBA = Tuple[int, int, int, int]
 FormatVersion = Union[float, str]
 ObjectAttributes = Dict[str, Optional[Union[str, bool, int]]]
 ImageAttributes = Dict[str, Optional[Union[str, bool, int]]]
-Timestamp = Union[str, int]
+Timestamp = Union[str, int, float]
 
 
 ###########
@@ -689,6 +691,7 @@ class SelectTaskAttribute(BaseModel):
     values: List[str]
     default_value: Optional[str] = None
     is_mandatory: Optional[bool] = None
+    is_track_level: Optional[bool] = None
 
 
 class TextTaskAttribute(BaseModel):
@@ -720,6 +723,21 @@ class CheckboxTaskAttribute(BaseModel):
     name: str
     input_type: Literal[InputType.CHECKBOX]
     default_value: Optional[bool] = None
+    is_track_level: Optional[bool] = None
+
+
+class Vector3TaskAttribute(BaseModel):
+    name: str
+    input_type: Literal[InputType.VECTOR3]
+    is_mandatory: Optional[bool] = None
+    is_track_level: Optional[bool] = None
+
+
+class QuaternionTaskAttribute(BaseModel):
+    name: str
+    input_type: Literal[InputType.QUATERNION]
+    is_mandatory: Optional[bool] = None
+    is_track_level: Optional[bool] = None
 
 
 TaskAttribute = Union[
@@ -727,6 +745,8 @@ TaskAttribute = Union[
     TextTaskAttribute,
     NumberTaskAttribute,
     CheckboxTaskAttribute,
+    Vector3TaskAttribute,
+    QuaternionTaskAttribute,
 ]
 
 
