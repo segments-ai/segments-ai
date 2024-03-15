@@ -566,6 +566,10 @@ class EgoPose(BaseModel):
 
 
 class Bounds(BaseModel):
+    min_x: Optional[float] = None
+    max_x: Optional[float] = None
+    min_y: Optional[float] = None
+    max_y: Optional[float] = None
     min_z: Optional[float] = None
     max_z: Optional[float] = None
 
