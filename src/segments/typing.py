@@ -124,6 +124,8 @@ class InputType(str, Enum):
     TEXT = "text"
     NUMBER = "number"
     CHECKBOX = "checkbox"
+    VECTOR3 = "vector3"
+    QUATERNION = "quaternion"
 
 
 class CameraDistortionModel(str, Enum):
@@ -138,6 +140,7 @@ class PCDType(str, Enum):
     BINARY_XYZIR = "binary-xyzir"
     NUSCENES = "nuscenes"
     PLY = "ply"
+    LAS = "las"
 
 
 class ReleaseStatus(str, Enum):
@@ -188,6 +191,7 @@ RGBA = Tuple[int, int, int, int]
 FormatVersion = Union[float, str]
 ObjectAttributes = Dict[str, Optional[Union[str, bool, int]]]
 ImageAttributes = Dict[str, Optional[Union[str, bool, int]]]
+Timestamp = Union[str, int, float]
 
 
 ###########
@@ -305,13 +309,13 @@ class ImageSequenceSegmentationAnnotation(Annotation):
 
 class ImageSequenceSegmentationFrame(ImageSegmentationLabelAttributes):
     annotations: List[ImageSequenceSegmentationAnnotation]
-    timestamp: Optional[Union[str, int]]
-    format_version: Optional[FormatVersion]
+    timestamp: Optional[Timestamp] = None
+    format_version: Optional[FormatVersion] = None
 
 
 class ImageSequenceSegmentationLabelAttributes(BaseModel):
     frames: List[ImageSequenceSegmentationFrame]
-    format_version: Optional[FormatVersion]
+    format_version: Optional[FormatVersion] = None
 
 
 # Image sequence vector
@@ -322,7 +326,7 @@ class ImageSequenceVectorAnnotation(ImageVectorAnnotation):
 
 class ImageVectorFrame(ImageVectorLabelAttributes):
     annotations: List[ImageSequenceVectorAnnotation]
-    timestamp: Optional[Union[str, int]] = None
+    timestamp: Optional[Timestamp] = None
     format_version: Optional[FormatVersion] = None
     image_attributes: Optional[ImageAttributes] = None
 
@@ -414,7 +418,7 @@ class PointcloudSequenceSegmentationAnnotation(Annotation):
 class PointcloudSegmentationFrame(PointcloudSegmentationLabelAttributes):
     annotations: List[PointcloudSequenceSegmentationAnnotation]
     point_annotations: List[int]
-    timestamp: Optional[Union[str, int]] = None
+    timestamp: Optional[Timestamp] = None
     format_version: Optional[FormatVersion] = None
 
 
@@ -431,7 +435,7 @@ class PointcloudSequenceCuboidAnnotation(PointcloudCuboidAnnotation):
 
 class PointcloudSequenceCuboidFrame(PointcloudCuboidLabelAttributes):
     annotations: List[PointcloudSequenceCuboidAnnotation]
-    timestamp: Optional[Union[str, int]] = None
+    timestamp: Optional[Timestamp] = None
     format_version: Optional[FormatVersion] = None
 
 
@@ -449,7 +453,7 @@ class PointcloudSequenceVectorAnnotation(PointcloudVectorAnnotation):
 class PointcloudSequenceVectorFrame(PointcloudVectorLabelAttributes):
     annotations: List[PointcloudSequenceVectorAnnotation]
     format_version: Optional[FormatVersion] = None
-    timestamp: Optional[Union[str, int]] = None
+    timestamp: Optional[Timestamp] = None
 
 
 class PointcloudSequenceVectorLabelAttributes(BaseModel):
@@ -544,6 +548,7 @@ class ImageSampleAttributes(BaseModel):
 # Image sequence
 class ImageFrame(ImageSampleAttributes):
     name: Optional[str] = None
+    timestamp: Optional[Timestamp] = None
 
 
 class ImageSequenceSampleAttributes(BaseModel):
@@ -562,6 +567,11 @@ class EgoPose(BaseModel):
     heading: XYZW
 
 
+class Bounds(BaseModel):
+    min_z: Optional[float] = None
+    max_z: Optional[float] = None
+
+
 class CameraIntrinsics(BaseModel):
     intrinsic_matrix: List[List[float]]
 
@@ -578,6 +588,7 @@ class CalibratedImage(URL):
     extrinsics: Optional[CameraExtrinsics] = None
     distortion: Optional[Distortion] = None
     camera_convention: CameraConvention = CameraConvention.OPEN_GL
+    name: Optional[str] = None
     rotation: Optional[float] = None
 
 
@@ -587,7 +598,8 @@ class PointcloudSampleAttributes(BaseModel):
     ego_pose: Optional[EgoPose] = None
     default_z: Optional[float] = None
     name: Optional[str] = None
-    timestamp: Optional[Union[str, int]] = None
+    timestamp: Optional[Timestamp] = None
+    bounds: Optional[Bounds] = None
 
 
 # Point cloud sequence
@@ -680,11 +692,12 @@ class SelectTaskAttribute(BaseModel):
     values: List[str]
     default_value: Optional[str] = None
     is_mandatory: Optional[bool] = None
+    is_track_level: Optional[bool] = None
 
 
 class TextTaskAttribute(BaseModel):
     name: str
-    input_type: Literal[InputType.TEXT] = None
+    input_type: Literal[InputType.TEXT]
     default_value: Optional[str] = None
     is_mandatory: Optional[bool] = None
 
@@ -711,6 +724,21 @@ class CheckboxTaskAttribute(BaseModel):
     name: str
     input_type: Literal[InputType.CHECKBOX]
     default_value: Optional[bool] = None
+    is_track_level: Optional[bool] = None
+
+
+class Vector3TaskAttribute(BaseModel):
+    name: str
+    input_type: Literal[InputType.VECTOR3]
+    is_mandatory: Optional[bool] = None
+    is_track_level: Optional[bool] = None
+
+
+class QuaternionTaskAttribute(BaseModel):
+    name: str
+    input_type: Literal[InputType.QUATERNION]
+    is_mandatory: Optional[bool] = None
+    is_track_level: Optional[bool] = None
 
 
 TaskAttribute = Union[
@@ -718,6 +746,8 @@ TaskAttribute = Union[
     TextTaskAttribute,
     NumberTaskAttribute,
     CheckboxTaskAttribute,
+    Vector3TaskAttribute,
+    QuaternionTaskAttribute,
 ]
 
 
@@ -756,14 +786,14 @@ class Owner(BaseModel):
 class Labelset(BaseModel):
     name: str
     description: str
-    # uuid: Optional[str]
-    # readme: Optional[str]
-    # task_type: Optional[TaskType]
-    # attributes: Optional[Union[str, TaskAttributes]]
+    # uuid: Optional[str] = None
+    # readme: Optional[str] = None
+    # task_type: Optional[TaskType] = None
+    # attributes: Optional[Union[str, TaskAttributes]] = None
     is_groundtruth: Optional[bool] = None
-    # statistics: Optional[Statistics]
+    # statistics: Optional[Statistics] = None
     created_at: Optional[str] = None
-    # stats: Optional[Dict[str, Any]]
+    # stats: Optional[Dict[str, Any]] = None
 
 
 class Dataset(BaseModel):
@@ -783,6 +813,7 @@ class Dataset(BaseModel):
     enable_label_status_verified: bool
     enable_same_dimensions_track_constraint: bool
     enable_interpolation: bool
+    use_timestamps_for_interpolation: bool
     task_type: TaskType
     # task_readme: str
     label_stats: LabelStats
@@ -797,7 +828,7 @@ class Dataset(BaseModel):
     noncollaborator_can_label: Optional[bool] = None
     noncollaborator_can_review: Optional[bool] = None
     insights_urls: Optional[Dict[str, str]] = None
-    # tasks: Optional[List[Dict[str, Any]]]
+    # tasks: Optional[List[Dict[str, Any]]] = None
 
     @field_validator("category")
     @classmethod

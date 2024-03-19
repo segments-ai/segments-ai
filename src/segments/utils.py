@@ -108,7 +108,7 @@ def bitmap2file(
     elif bitmap.dtype == "uint8":
         bitmap = np.uint32(bitmap)
     else:
-        raise ValueError("Only np.ndarrays with np.uint32 dtype can be used.")
+        raise ValueError("Only `np.ndarrays` with `np.uint32` data type can be used.")
 
     if is_segmentation_bitmap:
         bitmap2 = np.copy(bitmap)
@@ -239,14 +239,14 @@ def export_dataset(
     try:
         import skimage  # noqa: F401
     except ImportError as e:
-        logger.error("Please install scikit-image first: pip install scikit-image.")
+        logger.error("Please install `scikit-image` first: `pip install scikit-image`.")
         raise e
 
     print("Exporting dataset. This may take a while...")
     if export_format == ExportFormat.COCO_PANOPTIC:
         if dataset.task_type not in COMPATIBLE_TASK_TYPES[export_format]:
             raise ValueError(
-                "Only datasets of type 'segmentation-bitmap' and 'segmentation-bitmap-highres' can be exported to this format."
+                "Only datasets of type `segmentation-bitmap` and `segmentation-bitmap-highres` can be exported to this format."
             )
         from .export import export_coco_panoptic
 
@@ -254,7 +254,7 @@ def export_dataset(
     elif export_format == ExportFormat.COCO_INSTANCE:
         if dataset.task_type not in COMPATIBLE_TASK_TYPES[export_format]:
             raise ValueError(
-                "Only datasets of type 'segmentation-bitmap', 'segmentation-bitmap-highres', 'vector', 'bboxes' and 'keypoints' can be exported to this format."
+                "Only datasets of type `segmentation-bitmap`, `segmentation-bitmap-highres`, `vector`, `bboxes` and `keypoints` can be exported to this format."
             )
         from .export import export_coco_instance
 
@@ -262,7 +262,7 @@ def export_dataset(
     elif export_format == ExportFormat.YOLO:
         if dataset.task_type not in COMPATIBLE_TASK_TYPES[export_format]:
             raise ValueError(
-                'Only datasets of type "vector", "bboxes" and "image-vector-sequence" can be exported to this format.'
+                "Only datasets of type `vector`, `bboxes` and `image-vector-sequence` can be exported to this format."
             )
         from .export import export_yolo
 
@@ -280,7 +280,7 @@ def export_dataset(
     }:
         if dataset.task_type not in COMPATIBLE_TASK_TYPES[export_format]:
             raise ValueError(
-                "Only datasets of type 'segmentation-bitmap' and 'segmentation-bitmap-highres' can be exported to this format."
+                "Only datasets of type `segmentation-bitmap` and `segmentation-bitmap-highres` can be exported to this format."
             )
         from .export import export_image
 
@@ -288,13 +288,13 @@ def export_dataset(
     elif export_format == ExportFormat.POLYGON:
         if dataset.task_type not in COMPATIBLE_TASK_TYPES[export_format]:
             raise ValueError(
-                'Only datasets of type "segmentation-bitmap" and "segmentation-bitmap-highres" can be exported to this format.'
+                "Only datasets of type `segmentation-bitmap` and `segmentation-bitmap-highres` can be exported to this format."
             )
         from .export import export_polygon
 
         return export_polygon(dataset, export_folder)
     else:
-        raise ValueError("Please choose a valid export_format.")
+        raise ValueError("Please choose a valid `export_format`.")
 
 
 def load_image_from_url(url: str, save_filename: Optional[str] = None, s3_client: Optional[Any] = None) -> Image.Image:
@@ -487,7 +487,7 @@ def show_polygons(
         from matplotlib import pyplot as plt
         from matplotlib.patches import Polygon
     except ImportError as e:
-        logger.error("Please install matplotlib first: pip install matplotlib.")
+        logger.error("Please install `matplotlib` first: `pip install matplotlib`.")
         raise e
 
     def find_image_name(images: List[Dict[str, Any]], image_id: int) -> str:
@@ -500,7 +500,7 @@ def show_polygons(
         return (random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1))
 
     def normalize(color: List[int]) -> Tuple[float, float, float]:
-        """Transform a color from 0-255 range to 0-1 range and from a list to a tuple, e.g., [255, 0, 123] to (1, 0, 0.5)."""
+        """Transform a color from 0-255 range to 0-1 range and from a list to a tuple, e.g., `[255, 0, 123]` to `(1, 0, 0.5)`."""
         return (color[0] / 255, color[1] / 255, color[2] / 255)
 
     random.seed(seed)
@@ -619,7 +619,7 @@ def cuboid_to_segmentation(
     try:
         import open3d as o3d
     except ImportError as e:
-        logger.error("Please install open3d first: pip install open3d")
+        logger.error("Please install `open3d` first: `pip install open3d`")
         raise e
 
     # check dimensions of input
@@ -707,7 +707,7 @@ def array_to_pcd(
     try:
         import open3d as o3d
     except ImportError as e:
-        logger.error("Please install open3d first: pip install open3d")
+        logger.error("Please install `open3d` first: `pip install open3d`")
         raise e
 
     assert positions.shape[1] == 3, f"Positions must have shape (N, 3) but has shape {positions.shape}"
@@ -770,7 +770,7 @@ def ply_to_pcd(ply_file: str, compressed: bool = False, write_ascii: bool = True
     try:
         from plyfile import PlyData
     except ImportError as e:
-        logger.error("Please install plyfile first: pip install plyfile")
+        logger.error("Please install `plyfile` first: `pip install plyfile`")
         raise e
 
     with open(ply_file, "rb") as f:
@@ -831,7 +831,7 @@ def sample_pcd(pcd_path: str, points: int = 500_000, output_path: Optional[str] 
     try:
         import open3d as o3d
     except ImportError as e:
-        logger.error("Please install open3d first: pip install open3d")
+        logger.error("Please install `open3d` first: `pip install open3d`")
         raise e
 
     if output_path is None:
@@ -857,7 +857,7 @@ def find_camera_rotation(client: SegmentsClient, dataset_identifier: str) -> Qua
     Raises:
         :exc:`ImportError`: If pyquaternion is not installed (to install run ``pip install pyquaternion``).
         :exc:`ValueError`: If the dataset is not a point cloud sequence dataset.
-        :exc:`ValueError`: If the user answers neither 'y(es)' nor 'n(o)' (case insensitive).
+        :exc:`ValueError`: If the user answers neither `y(es)` nor `n(o) (case insensitive).
         :exc:`ValueError`: If the correct rotation is not found.
         :exc:`AlreadyExistsError`: If the cloned dataset already exists.
     """
@@ -865,7 +865,7 @@ def find_camera_rotation(client: SegmentsClient, dataset_identifier: str) -> Qua
     try:
         from pyquaternion import Quaternion
     except ImportError as e:
-        logger.error("Please install pyquaternion first: pip install pyquaternion")
+        logger.error("Please install `pyquaternion` first: `pip install pyquaternion`")
         raise e
 
     # 6 options for x axis, 4 options for y axis and 1 option for z axis
@@ -902,7 +902,7 @@ def find_camera_rotation(client: SegmentsClient, dataset_identifier: str) -> Qua
     cloned_samples = client.get_samples(cloned_dataset.full_name)
     if not isinstance(samples[0].attributes, PointcloudSequenceSampleAttributes):
         raise ValueError(
-            "Brute force camera rotations only works for point cloud sequence datasets. Reach out to support@segments.ai and arnaud@segments.ai if you are interested in this functionality for other dataset types."
+            "Brute force camera rotations only works for point cloud sequence datasets. Reach out to `support@segments.ai` and `arnaud@segments.ai` if you are interested in this functionality for other dataset types."
         )
 
     # rotate images
@@ -941,6 +941,6 @@ def find_camera_rotation(client: SegmentsClient, dataset_identifier: str) -> Qua
                     client.delete_dataset(cloned_dataset.full_name)
                     return (x_rot * y_rot).inverse if invert else x_rot * y_rot
                 elif rotation_OK.lower() not in ["n", "no"]:
-                    raise ValueError(f"Please enter 'y(es)' or 'n(o)' (case insensitive) not {rotation_OK}.")
+                    raise ValueError(f"Please enter `y(es)` or `n(o)` (case insensitive) not `{rotation_OK}`.")
 
     raise ValueError("Correct rotation not found.")
