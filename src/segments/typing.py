@@ -307,10 +307,12 @@ class ImageSequenceSegmentationAnnotation(Annotation):
     is_keyframe: bool = False
 
 
-class ImageSequenceSegmentationFrame(ImageSegmentationLabelAttributes):
+class ImageSequenceSegmentationFrame(BaseModel):
     annotations: List[ImageSequenceSegmentationAnnotation]
-    timestamp: Optional[Timestamp] = None
+    segmentation_bitmap: Optional[URL] = None
     format_version: Optional[FormatVersion] = None
+    image_attributes: Optional[ImageAttributes] = None
+    timestamp: Optional[Timestamp] = None
 
 
 class ImageSequenceSegmentationLabelAttributes(BaseModel):
