@@ -120,6 +120,11 @@ def handle_exceptions(f: Callable[..., requests.Response]) -> Callable[..., Unio
             # Make string comparison case insensitive.
             text = e.response.text.lower()
             if "not found" in text or "does not exist" in text:
+                text += """\n
+Potential fixes:
+- Check for typos in the dataset name, sample name, labelset name, etc.
+- Are you using the argument `dataset_name` -> Did you add the organization to the dataset name? E.g., 'jane/flowers' instead of 'flowers'.
+"""
                 raise NotFoundError(message=text, cause=e)
             if "already exists" in text or "already have" in text:
                 raise AlreadyExistsError(message=text, cause=e)
