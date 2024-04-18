@@ -126,6 +126,7 @@ class InputType(str, Enum):
     CHECKBOX = "checkbox"
     VECTOR3 = "vector3"
     QUATERNION = "quaternion"
+    POINTS = "points"
 
 
 class CameraDistortionModel(str, Enum):
@@ -745,6 +746,13 @@ class QuaternionTaskAttribute(BaseModel):
     is_track_level: Optional[bool] = None
 
 
+class PointsTaskAttribute(BaseModel):
+    name: str
+    input_type: Literal[InputType.POINTS]
+    is_mandatory: Optional[bool] = None
+    is_track_level: Optional[bool] = None
+
+
 TaskAttribute = Union[
     SelectTaskAttribute,
     TextTaskAttribute,
@@ -752,6 +760,7 @@ TaskAttribute = Union[
     CheckboxTaskAttribute,
     Vector3TaskAttribute,
     QuaternionTaskAttribute,
+    PointsTaskAttribute,
 ]
 
 
