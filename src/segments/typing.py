@@ -142,6 +142,7 @@ class PCDType(str, Enum):
     NUSCENES = "nuscenes"
     PLY = "ply"
     LAS = "las"
+    SPLAT = "splat"
 
 
 class ReleaseStatus(str, Enum):
