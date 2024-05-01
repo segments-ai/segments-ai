@@ -46,6 +46,7 @@ adapter = requests.adapters.HTTPAdapter(max_retries=3)
 session.mount("http://", adapter)
 session.mount("https://", adapter)
 logger = logging.getLogger(__name__)
+SEGMENTS_ORANGE = "#FF9900"
 COMPATIBLE_TASK_TYPES = {
     ExportFormat.COCO_PANOPTIC: {
         TaskType.SEGMENTATION_BITMAP,
@@ -842,7 +843,7 @@ def las_to_pcd(las_file: str, compressed: bool = False, write_ascii: bool = True
     column_names = raw_array.dtype.names
 
     array = []
-    for row in tqdm(raw_array, total=len(raw_array), colour="FF9900"):
+    for row in tqdm(raw_array, total=len(raw_array), color=SEGMENTS_ORANGE):
         array.append(np.array(list(row)))
     array = np.reshape(array, (-1, len(column_names)))
 
