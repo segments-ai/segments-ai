@@ -10,7 +10,7 @@ import numpy as np
 import numpy.typing as npt
 from PIL import Image
 from segments.typing import SegmentsDatasetCategory
-from segments.utils import get_semantic_bitmap
+from segments.utils import SEGMENTS_ORANGE, get_semantic_bitmap
 from skimage import img_as_ubyte
 from skimage.measure import regionprops
 from tqdm import tqdm
@@ -247,7 +247,7 @@ def export_coco_instance(dataset: SegmentsDataset, export_folder: str) -> Tuple[
     annotations = []
 
     annotation_id = 1
-    for i in tqdm(range(len(dataset)), total=len(dataset), colour="#FF9900"):
+    for i in tqdm(range(len(dataset)), total=len(dataset), colour=SEGMENTS_ORANGE):
         sample = dataset[i]
 
         if sample["annotations"] is None:
@@ -419,7 +419,7 @@ def export_coco_panoptic(dataset: SegmentsDataset, export_folder: str) -> Tuple[
     # IMAGES AND ANNOTATIONS
     images = []
     annotations = []
-    for i in tqdm(range(len(dataset)), total=len(dataset), colour="#FF9900"):
+    for i in tqdm(range(len(dataset)), total=len(dataset), colour=SEGMENTS_ORANGE):
         sample = dataset[i]
 
         if sample["annotations"] is None:
@@ -587,7 +587,7 @@ def export_image(
             )
         )
 
-    for i in tqdm(range(len(dataset)), total=len(dataset), colour="#FF9900"):
+    for i in tqdm(range(len(dataset)), total=len(dataset), colour=SEGMENTS_ORANGE):
         sample = dataset[i]
 
         if sample["annotations"] is None:
@@ -702,7 +702,7 @@ def export_yolo(
         logger.warning(
             "Note that the sequences will be exported as individual frames, disregarding the tracking information."
         )
-        for i in tqdm(range(len(dataset)), total=len(dataset), colour="#FF9900"):
+        for i in tqdm(range(len(dataset)), total=len(dataset), colour=SEGMENTS_ORANGE):
             sample = dataset[i]
             image_name = os.path.splitext(os.path.basename(sample["name"]))[0]
 
@@ -723,7 +723,7 @@ def export_yolo(
                     annotations = frame["annotations"]
                     write_yolo_file(file_name, annotations, image_width, image_height)
     else:
-        for i in tqdm(range(len(dataset)), total=len(dataset), colour="#FF9900"):
+        for i in tqdm(range(len(dataset)), total=len(dataset), colour=SEGMENTS_ORANGE):
             sample = dataset[i]
             image_name = os.path.splitext(os.path.basename(sample["name"]))[0]
             file_name = os.path.join(export_folder, dataset.image_dir, f"{image_name}.txt")
@@ -776,7 +776,7 @@ def export_polygon(dataset: SegmentsDataset, export_folder: str) -> Tuple[str, O
     annotations = []
 
     annotation_id = 1
-    for i in tqdm(range(len(dataset)), total=len(dataset), colour="#FF9900"):
+    for i in tqdm(range(len(dataset)), total=len(dataset), colour=SEGMENTS_ORANGE):
         sample = dataset[i]
 
         if sample["annotations"] is None:

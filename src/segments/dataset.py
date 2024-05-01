@@ -14,6 +14,7 @@ from PIL import Image, UnidentifiedImageError
 from pydantic import TypeAdapter
 from segments.typing import LabelStatus, Release, SegmentsDatasetCategory
 from segments.utils import (
+    SEGMENTS_ORANGE,
     handle_exif_rotation,
     load_image_from_url,
     load_label_bitmap_from_url,
@@ -208,7 +209,7 @@ class SegmentsDataset:
                     tqdm(
                         pool.imap_unordered(_load_image, range(num_samples)),
                         total=num_samples,
-                        colour="#FF9900",
+                        colour=SEGMENTS_ORANGE,
                     )
                 )
 
