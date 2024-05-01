@@ -26,6 +26,7 @@ from segments.typing import (
     PointcloudSequenceSampleAttributes,
     TaskType,
 )
+from tqdm import tqdm
 
 
 # https://adamj.eu/tech/2021/05/13/python-type-hints-how-to-fix-circular-imports/
@@ -800,7 +801,8 @@ def ply_to_pcd(ply_file: str, compressed: bool = False, write_ascii: bool = True
         except KeyError:
             rgb = None
 
-    pcd_path = ply_file.replace(".ply", ".pcd")
+    pcd_extension = "_compressed.pcd" if compressed else ".pcd"
+    pcd_path = ply_file.replace(".ply", pcd_extension)
     # prefer RGB over intensity (tiled point cloud does not support both)
     intensity = intensity if rgb is None else None
     array_to_pcd(
@@ -813,11 +815,13 @@ def ply_to_pcd(ply_file: str, compressed: bool = False, write_ascii: bool = True
     )
 
 
-def las_to_pcd(las_file: str) -> None:
+def las_to_pcd(las_file: str, compressed: bool = False, write_ascii: bool = True) -> None:
     """Convert a .las/.laz file to a .pcd file.
 
     Args:
         las_file: The path to the .las/.laz file.
+        compressed: If the pcd should be compressed. Defaults to :obj:`False`.
+        write_ascii: If the pcd should be written in ascii format. Defaults to :obj:`True`.
 
     Returns:
         None
@@ -836,7 +840,11 @@ def las_to_pcd(las_file: str) -> None:
     pipeline.execute()
     raw_array = pipeline.arrays[0]
     column_names = raw_array.dtype.names
-    array = np.reshape(np.array([list(row) for row in raw_array]), (-1, len(column_names)))
+
+    array = []
+    for row in tqdm(raw_array, total=len(raw_array), colour="FF9900"):
+        array.append(np.array(list(row)))
+    array = np.reshape(array, (-1, len(column_names)))
 
     def find_las_column_index(column_name: Union[str, List[str]]) -> Union[int, Tuple[int]]:
         def find_single_las_column_index(column_name: str) -> int:
@@ -866,7 +874,12 @@ def las_to_pcd(las_file: str) -> None:
     intensity = get_data(intensity)
     rgb = get_data([r, g, b])
 
-    pcd_path = las_file.replace(".las", ".pcd") if las_file.endswith(".las") else las_file.replace(".laz", ".pcd")
+    pcd_extension = "_compressed.pcd" if compressed else ".pcd"
+    pcd_path = (
+        las_file.replace(".las", pcd_extension)
+        if las_file.endswith(".las")
+        else las_file.replace(".laz", pcd_extension)
+    )
     # prefer RGB over intensity (tiled point cloud does not support both)
     intensity = intensity if rgb is None else None
     array_to_pcd(
@@ -874,6 +887,8 @@ def las_to_pcd(las_file: str) -> None:
         pcd_path,
         intensity=intensity,
         rgb=rgb,
+        compressed=compressed,
+        write_ascii=write_ascii,
     )
 
 
