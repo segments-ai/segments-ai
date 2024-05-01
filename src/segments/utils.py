@@ -813,6 +813,70 @@ def ply_to_pcd(ply_file: str, compressed: bool = False, write_ascii: bool = True
     )
 
 
+def las_to_pcd(las_file: str) -> None:
+    """Convert a .las/.laz file to a .pcd file.
+
+    Args:
+        las_file: The path to the .las/.laz file.
+
+    Returns:
+        None
+
+    Raises:
+        :exc:`ImportError`: If pdal is not installed (to install run ``pip install pdal``).
+    """
+    try:
+        from pdal import Pipeline
+    except ImportError:
+        logger.error("Please install `pdal` first: `pip install pdal`")
+
+    pipeline = json.dumps({"pipeline": [{"type": "readers.las", "filename": las_file}]})
+
+    pipeline = Pipeline(pipeline)
+    pipeline.execute()
+    raw_array = pipeline.arrays[0]
+    column_names = raw_array.dtype.names
+    array = np.reshape(np.array([list(row) for row in raw_array]), (-1, len(column_names)))
+
+    def find_las_column_index(column_name: Union[str, List[str]]) -> Union[int, Tuple[int]]:
+        def find_single_las_column_index(column_name: str) -> int:
+            index = column_names.index(column_name)
+
+            if index == -1:
+                return ValueError(f"Can't find column index of column with name {column_name}")
+
+            return index
+
+        if isinstance(column_name, list):
+            return tuple(find_single_las_column_index(column) for column in column_name)
+
+        return find_single_las_column_index(column_name)
+
+    def get_data(column_index: Union[int, List[int]]) -> np.ndarray:
+        if isinstance(column_index, list):
+            return np.stack((array[:, index] for index in column_index), axis=-1)
+
+        return array[:, column_index]
+
+    x, y, z = find_las_column_index(["X", "Y", "Z"])
+    intensity = find_las_column_index("Intensity")
+    r, g, b = find_las_column_index(["Red", "Green", "Blue"])
+
+    positions = get_data([x, y, z])
+    intensity = get_data(intensity)
+    rgb = get_data([r, g, b])
+
+    pcd_path = las_file.replace(".las", ".pcd") if las_file.endswith(".las") else las_file.replace(".laz", ".pcd")
+    # prefer RGB over intensity (tiled point cloud does not support both)
+    intensity = intensity if rgb is None else None
+    array_to_pcd(
+        positions,
+        pcd_path,
+        intensity=intensity,
+        rgb=rgb,
+    )
+
+
 def sample_pcd(pcd_path: str, points: int = 500_000, output_path: Optional[str] = None) -> None:
     """Sample a point cloud to a given number of points.
 
