@@ -1,3 +1,9 @@
+# general
+pycocotools == 2.*
+scikit-image == 0.*
+opencv-python == 4.*
+
+
 # code formatting
 flynt == 1.*
 ruff == 0.*
@@ -12,9 +18,3 @@ tox == 3.*
 pytest == 8.*
 pytest-cov == 5.*
 pytest-dotenv == 0.*
-
-
-# general
-pycocotools == 2.*
-scikit-image == 0.*
-opencv-python == 4.*
