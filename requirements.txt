@@ -1,5 +1,5 @@
 # general
-numpy >= 1.20, < 2 # include type stubs
+numpy >= 1.20 # include type stubs
 requests == 2.*
 Pillow >= 9.0
 tqdm == 4.*
