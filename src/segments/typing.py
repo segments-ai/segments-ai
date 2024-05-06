@@ -525,12 +525,11 @@ class LabelSummary(BaseModel):
 ##########
 # Sample #
 ##########
-# Image
+# Image (sequence)
 class ImageSampleAttributes(BaseModel):
     image: URL
 
 
-# Image sequence
 class ImageFrame(ImageSampleAttributes):
     name: Optional[str] = None
     timestamp: Optional[Timestamp] = None
@@ -540,7 +539,7 @@ class ImageSequenceSampleAttributes(BaseModel):
     frames: List[ImageFrame]
 
 
-# Point cloud
+# Point cloud (sequence)
 class PCD(BaseModel):
     url: str
     signed_url: Optional[str] = None
@@ -591,29 +590,28 @@ class PointcloudSampleAttributes(BaseModel):
     bounds: Optional[Bounds] = None
 
 
-# Point cloud sequence
 class PointcloudSequenceSampleAttributes(BaseModel):
     frames: List[PointcloudSampleAttributes]
 
 
-# Multi-sensor
-class MultiSensorPointcloudSequenceSampleAttributes(BaseModel):
-    name: str
-    task_type: Literal[TaskType.POINTCLOUD_CUBOID_SEQUENCE]
-    attributes: PointcloudSequenceSampleAttributes
-
-
+# Multi-sensor sequence
 class MultiSensorImageSequenceSampleAttributes(BaseModel):
     name: str
     task_type: Literal[TaskType.IMAGE_VECTOR_SEQUENCE]
     attributes: ImageSequenceSampleAttributes
 
 
+class MultiSensorPointcloudSequenceSampleAttributes(BaseModel):
+    name: str
+    task_type: Literal[TaskType.POINTCLOUD_CUBOID_SEQUENCE]
+    attributes: PointcloudSequenceSampleAttributes
+
+
 class MultiSensorSampleAttributes(BaseModel):
     sensors: List[
         Union[
-            MultiSensorPointcloudSequenceSampleAttributes,
             MultiSensorImageSequenceSampleAttributes,
+            MultiSensorPointcloudSequenceSampleAttributes,
         ],
     ]
 
