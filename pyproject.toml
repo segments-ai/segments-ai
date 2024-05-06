@@ -31,4 +31,4 @@ line-length = 119 # huggingface default
 
 [tool.ruff.isort]
 known-third-party = ["segments"]
-lines-after-imports = 2          # huggingface default
+lines-after-imports = 2 # huggingface default
