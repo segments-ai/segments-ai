@@ -273,78 +273,84 @@ class File(BaseModel):
 #########
 # Label #
 #########
-class Annotation(BaseModel):
+# Base structure
+class BaseAnnotation(BaseModel):
     id: int
     category_id: int
     attributes: Optional[ObjectAttributes] = None
 
 
-# Image segmentation
-class ImageSegmentationLabelAttributes(BaseModel):
-    annotations: List[Annotation]
-    segmentation_bitmap: URL
+class BaseSequenceAnnotation(BaseAnnotation):
+    track_id: int
+    is_keyframe: bool = False
+
+
+class BaseLabelAttributes(BaseModel):
+    annotations: List[BaseAnnotation]
+    format_version: Optional[FormatVersion] = None
     image_attributes: Optional[ImageAttributes] = None
+
+
+class BaseLabelAttributesFrame(BaseLabelAttributes):
+    timestamp: Optional[Timestamp] = None
+
+
+class BaseSequenceLabelAttributes(BaseModel):
+    frames: List[BaseLabelAttributesFrame]
     format_version: Optional[FormatVersion] = None
 
 
-# Image vector
-# https://stackoverflow.com/questions/51575931/class-inheritance-in-python-3-7-dataclasses
-class ImageVectorAnnotation(BaseModel):
-    id: int
-    category_id: int
+class BaseMultiSensorSequenceLabelAttributes(BaseModel):
+    name: str
+    task_type: TaskType
+    attributes: BaseSequenceLabelAttributes
+
+
+# Image (sequence) segmentation
+class ImageSegmentationAnnotation(BaseAnnotation):
+    pass
+
+
+class ImageSequenceSegmentationAnnotation(BaseSequenceAnnotation, ImageSegmentationAnnotation):
+    pass
+
+
+class ImageSegmentationLabelAttributes(BaseLabelAttributes):
+    annotations: List[ImageSegmentationAnnotation]
+    segmentation_bitmap: URL
+
+
+class ImageSequenceSegmentationFrame(BaseLabelAttributesFrame, ImageSegmentationLabelAttributes):
+    annotations: List[ImageSequenceSegmentationAnnotation]
+
+
+class ImageSequenceSegmentationLabelAttributes(BaseSequenceLabelAttributes):
+    frames: List[ImageSequenceSegmentationFrame]
+
+
+# Image (sequence) vector
+class ImageVectorAnnotation(BaseAnnotation):
     points: List[List[float]]
     type: ImageVectorAnnotationType
-    attributes: Optional[ObjectAttributes] = None
 
 
-class ImageVectorLabelAttributes(BaseModel):
+class ImageSequenceVectorAnnotation(BaseSequenceAnnotation, ImageVectorAnnotation):
+    pass
+
+
+class ImageVectorLabelAttributes(BaseLabelAttributes):
     annotations: List[ImageVectorAnnotation]
-    format_version: Optional[FormatVersion] = None
-    image_attributes: Optional[ImageAttributes] = None
 
 
-# Image sequence segmentation
-class ImageSequenceSegmentationAnnotation(Annotation):
-    track_id: int
-    is_keyframe: bool = False
-
-
-class ImageSequenceSegmentationFrame(ImageSegmentationLabelAttributes):
-    annotations: List[ImageSequenceSegmentationAnnotation]
-    timestamp: Optional[Timestamp] = None
-    format_version: Optional[FormatVersion] = None
-
-
-class ImageSequenceSegmentationLabelAttributes(BaseModel):
-    frames: List[ImageSequenceSegmentationFrame]
-    format_version: Optional[FormatVersion] = None
-
-
-# Image sequence vector
-class ImageSequenceVectorAnnotation(ImageVectorAnnotation):
-    track_id: int
-    is_keyframe: bool = False
-
-
-class ImageVectorFrame(ImageVectorLabelAttributes):
+class ImageVectorFrame(BaseLabelAttributesFrame, ImageVectorLabelAttributes):
     annotations: List[ImageSequenceVectorAnnotation]
-    timestamp: Optional[Timestamp] = None
-    format_version: Optional[FormatVersion] = None
-    image_attributes: Optional[ImageAttributes] = None
 
 
-class ImageSequenceVectorLabelAttributes(BaseModel):
+class ImageSequenceVectorLabelAttributes(BaseSequenceLabelAttributes):
     frames: List[ImageVectorFrame]
-    format_version: Optional[FormatVersion] = None
 
 
-# Point cloud segmentation
-class PointcloudSegmentationLabelAttributes(BaseModel):
-    annotations: List[Annotation]
-    point_annotations: List[int]
-    format_version: Optional[FormatVersion] = None
-
-
+# Point cloud (sequence) segmentation
 class XYZ(BaseModel):
     x: float
     y: float
@@ -378,138 +384,118 @@ class Distortion(BaseModel):
     coefficients: Union[FisheyeDistortionCoefficients, BrownConradyDistortionCoefficients]
 
 
-# Point cloud cuboid
-# https://stackoverflow.com/questions/51575931/class-inheritance-in-python-3-7-dataclasses
-class PointcloudCuboidAnnotation(BaseModel):
-    id: int
-    category_id: int
+class PointcloudSegmentationAnnotation(BaseAnnotation):
+    pass
+
+
+class PointcloudSequenceSegmentationAnnotation(BaseSequenceAnnotation, PointcloudSegmentationAnnotation):
+    pass
+
+
+class PointcloudSegmentationLabelAttributes(BaseLabelAttributes):
+    annotations: List[PointcloudSegmentationAnnotation]
+    point_annotations: List[int]
+
+
+class PointcloudSegmentationFrame(BaseLabelAttributesFrame, PointcloudSegmentationLabelAttributes):
+    annotations: List[PointcloudSequenceSegmentationAnnotation]
+
+
+class PointcloudSequenceSegmentationLabelAttributes(BaseSequenceLabelAttributes):
+    frames: List[PointcloudSegmentationFrame]
+
+
+# Point cloud (sequence) cuboid
+class PointcloudCuboidAnnotation(BaseAnnotation):
     position: XYZ
     dimensions: XYZ
     yaw: float
     rotation: Optional[XYZW] = None
     type: PointcloudCuboidAnnotationType
-    attributes: Optional[ObjectAttributes] = None
 
 
-class PointcloudCuboidLabelAttributes(BaseModel):
+class PointcloudSequenceCuboidAnnotation(BaseSequenceAnnotation, PointcloudCuboidAnnotation):
+    pass
+
+
+class PointcloudCuboidLabelAttributes(BaseLabelAttributes):
     annotations: List[PointcloudCuboidAnnotation]
-    format_version: Optional[FormatVersion] = None
 
 
-# Point cloud vector
-class PointcloudVectorAnnotation(BaseModel):
-    id: int
-    category_id: int
+class PointcloudSequenceCuboidFrame(BaseLabelAttributesFrame, PointcloudCuboidLabelAttributes):
+    annotations: List[PointcloudSequenceCuboidAnnotation]
+
+
+class PointcloudSequenceCuboidLabelAttributes(BaseSequenceLabelAttributes):
+    frames: List[PointcloudSequenceCuboidFrame]
+
+
+# Point cloud (sequence) vector
+class PointcloudVectorAnnotation(BaseAnnotation):
     points: List[List[float]]
     type: PointcloudVectorAnnotationType
-    attributes: Optional[ObjectAttributes] = None
 
 
-class PointcloudVectorLabelAttributes(BaseModel):
+class PointcloudSequenceVectorAnnotation(BaseSequenceAnnotation, PointcloudVectorAnnotation):
+    pass
+
+
+class PointcloudVectorLabelAttributes(BaseLabelAttributes):
     annotations: List[PointcloudVectorAnnotation]
-    format_version: Optional[FormatVersion] = None
 
 
-# Point cloud sequence segmentation
-class PointcloudSequenceSegmentationAnnotation(Annotation):
-    track_id: int
-    is_keyframe: bool = False
-    attributes: Optional[ObjectAttributes] = None
-
-
-class PointcloudSegmentationFrame(PointcloudSegmentationLabelAttributes):
-    annotations: List[PointcloudSequenceSegmentationAnnotation]
-    point_annotations: List[int]
-    timestamp: Optional[Timestamp] = None
-    format_version: Optional[FormatVersion] = None
-
-
-class PointcloudSequenceSegmentationLabelAttributes(BaseModel):
-    frames: List[PointcloudSegmentationFrame]
-    format_version: Optional[FormatVersion] = None
-
-
-# Point cloud sequence cuboid
-class PointcloudSequenceCuboidAnnotation(PointcloudCuboidAnnotation):
-    track_id: int
-    is_keyframe: bool = False
-
-
-class PointcloudSequenceCuboidFrame(PointcloudCuboidLabelAttributes):
-    annotations: List[PointcloudSequenceCuboidAnnotation]
-    timestamp: Optional[Timestamp] = None
-    format_version: Optional[FormatVersion] = None
-
-
-class PointcloudSequenceCuboidLabelAttributes(BaseModel):
-    frames: List[PointcloudSequenceCuboidFrame]
-    format_version: Optional[FormatVersion] = None
-
-
-# Point cloud sequence vector
-class PointcloudSequenceVectorAnnotation(PointcloudVectorAnnotation):
-    track_id: int
-    is_keyframe: bool = False
-
-
-class PointcloudSequenceVectorFrame(PointcloudVectorLabelAttributes):
+class PointcloudSequenceVectorFrame(BaseLabelAttributesFrame, PointcloudVectorLabelAttributes):
     annotations: List[PointcloudSequenceVectorAnnotation]
-    format_version: Optional[FormatVersion] = None
-    timestamp: Optional[Timestamp] = None
 
 
-class PointcloudSequenceVectorLabelAttributes(BaseModel):
+class PointcloudSequenceVectorLabelAttributes(BaseSequenceLabelAttributes):
     frames: List[PointcloudSequenceVectorFrame]
-    format_version: Optional[FormatVersion] = None
 
 
-# Multi-sensor
-class MultiSensorPointcloudSequenceCuboidLabelAttributes(BaseModel):
-    name: str
-    task_type: Literal[TaskType.POINTCLOUD_CUBOID_SEQUENCE]
-    # TODO remove list and replace with `Optional[PointcloudSequenceCuboidLabelAttributes] = None`
-    attributes: Union[PointcloudSequenceCuboidLabelAttributes, List]
-
-
-class MultiSensorImageSequenceVectorLabelAttributes(BaseModel):
-    name: str
+# Multi-sensor sequence
+class MultiSensorImageSequenceVectorLabelAttributes(BaseMultiSensorSequenceLabelAttributes):
     task_type: Literal[TaskType.IMAGE_VECTOR_SEQUENCE]
     # TODO remove list and replace with `Optional[ImageSequenceVectorLabelAttributes] = None`
     attributes: Union[ImageSequenceVectorLabelAttributes, List]
 
 
+class MultiSensorPointcloudSequenceCuboidLabelAttributes(BaseMultiSensorSequenceLabelAttributes):
+    task_type: Literal[TaskType.POINTCLOUD_CUBOID_SEQUENCE]
+    # TODO remove list and replace with `Optional[PointcloudSequenceCuboidLabelAttributes] = None`
+    attributes: Union[PointcloudSequenceCuboidLabelAttributes, List]
+
+
 class MultiSensorLabelAttributes(BaseModel):
     sensors: List[
         Union[
-            MultiSensorPointcloudSequenceCuboidLabelAttributes,
             MultiSensorImageSequenceVectorLabelAttributes,
+            MultiSensorPointcloudSequenceCuboidLabelAttributes,
         ],
     ]
 
 
 # Text
-class TextAnnotation(BaseModel):
+class TextAnnotation(BaseAnnotation):
     start: int
     end: int
-    category_id: int
+    id: Optional[int] = None  # TODO add in frontend and remove here (is mandatory in `BaseAnnotation`)
 
 
-class TextLabelAttributes(BaseModel):
+class TextLabelAttributes(BaseLabelAttributes):
     annotations: List[TextAnnotation]
-    format_version: Optional[FormatVersion] = None
 
 
 # https://pydantic-docs.helpmanual.io/usage/types/#unions
 LabelAttributes = Union[
     ImageVectorLabelAttributes,
-    ImageSegmentationLabelAttributes,
     ImageSequenceVectorLabelAttributes,
+    ImageSegmentationLabelAttributes,
     ImageSequenceSegmentationLabelAttributes,
     PointcloudCuboidLabelAttributes,
-    PointcloudVectorLabelAttributes,
-    PointcloudSegmentationLabelAttributes,
     PointcloudSequenceCuboidLabelAttributes,
+    PointcloudVectorLabelAttributes,
     PointcloudSequenceVectorLabelAttributes,
+    PointcloudSegmentationLabelAttributes,
     PointcloudSequenceSegmentationLabelAttributes,
     MultiSensorLabelAttributes,
     TextLabelAttributes,
@@ -542,22 +528,40 @@ class LabelSummary(BaseModel):
 ##########
 # Sample #
 ##########
-# Image
-class ImageSampleAttributes(BaseModel):
+# Base structure
+class BaseSampleAttributes(BaseModel):
+    pass
+
+
+class BaseSampleAttributesFrame(BaseSampleAttributes):
+    pass
+
+
+class BaseSequenceSampleAttributes(BaseSampleAttributes):
+    frames: List[BaseSampleAttributesFrame]
+
+
+class BaseMultiSensorSequenceSampleAttributes(BaseModel):
+    name: str
+    task_type: TaskType
+    attributes: BaseSequenceSampleAttributes
+
+
+# Image (sequence)
+class ImageSampleAttributes(BaseSampleAttributes):
     image: URL
 
 
-# Image sequence
 class ImageFrame(ImageSampleAttributes):
     name: Optional[str] = None
     timestamp: Optional[Timestamp] = None
 
 
-class ImageSequenceSampleAttributes(BaseModel):
+class ImageSequenceSampleAttributes(BaseSequenceSampleAttributes):
     frames: List[ImageFrame]
 
 
-# Point cloud
+# Point cloud (sequence)
 class PCD(BaseModel):
     url: str
     signed_url: Optional[str] = None
@@ -598,7 +602,7 @@ class CalibratedImage(URL):
     rotation: Optional[float] = None
 
 
-class PointcloudSampleAttributes(BaseModel):
+class PointcloudSampleAttributes(BaseSampleAttributes):
     pcd: PCD
     images: Optional[List[CalibratedImage]] = None
     ego_pose: Optional[EgoPose] = None
@@ -608,29 +612,26 @@ class PointcloudSampleAttributes(BaseModel):
     bounds: Optional[Bounds] = None
 
 
-# Point cloud sequence
-class PointcloudSequenceSampleAttributes(BaseModel):
+class PointcloudSequenceSampleAttributes(BaseSequenceSampleAttributes):
     frames: List[PointcloudSampleAttributes]
 
 
-# Multi-sensor
-class MultiSensorPointcloudSequenceSampleAttributes(BaseModel):
-    name: str
-    task_type: Literal[TaskType.POINTCLOUD_CUBOID_SEQUENCE]
-    attributes: PointcloudSequenceSampleAttributes
-
-
-class MultiSensorImageSequenceSampleAttributes(BaseModel):
-    name: str
+# Multi-sensor sequence
+class MultiSensorImageSequenceSampleAttributes(BaseMultiSensorSequenceSampleAttributes):
     task_type: Literal[TaskType.IMAGE_VECTOR_SEQUENCE]
     attributes: ImageSequenceSampleAttributes
+
+
+class MultiSensorPointcloudSequenceSampleAttributes(BaseMultiSensorSequenceSampleAttributes):
+    task_type: Literal[TaskType.POINTCLOUD_CUBOID_SEQUENCE]
+    attributes: PointcloudSequenceSampleAttributes
 
 
 class MultiSensorSampleAttributes(BaseModel):
     sensors: List[
         Union[
-            MultiSensorPointcloudSequenceSampleAttributes,
             MultiSensorImageSequenceSampleAttributes,
+            MultiSensorPointcloudSequenceSampleAttributes,
         ],
     ]
 
