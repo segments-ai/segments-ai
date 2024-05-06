@@ -25,17 +25,23 @@ def read_requirements(filename: str) -> List[str]:
             )
             if m is None:
                 return req
-            else:
-                return f"{m.group('name')} @ {req}"
+
+            return f"{m.group('name')} @ {req}"
 
         requirements = []
         for line in requirements_file:
             line = line.strip()
             if line.startswith("#") or len(line) <= 0:
                 continue
+
             requirements.append(fix_url_dependencies(line))
+
     return requirements
 
+
+dev_requirements = read_requirements("requirements_dev.txt")
+docs_requirements = read_requirements("requirements_docs.txt")
+all_requirements = dev_requirements + docs_requirements
 
 setup(
     name="segments-ai",  # How you named your package folder (MyLib)
@@ -57,8 +63,9 @@ setup(
     ],  # Keywords that define your package best
     install_requires=read_requirements("requirements.txt"),
     extras_require={
-        "dev": read_requirements("requirements_dev.txt"),
-        "docs": read_requirements("requirements_docs.txt"),
+        "dev": dev_requirements,
+        "docs": docs_requirements,
+        "all": all_requirements,
     },  # Install with: pip install segments-ai[dev or docs]
     python_requires=">=3.8",
     classifiers=[
