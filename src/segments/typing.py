@@ -291,13 +291,19 @@ class BaseLabelAttributes(BaseModel):
     image_attributes: Optional[ImageAttributes] = None
 
 
-class BaseFrame(BaseLabelAttributes):
+class BaseLabelAttributesFrame(BaseLabelAttributes):
     timestamp: Optional[Timestamp] = None
 
 
 class BaseSequenceLabelAttributes(BaseModel):
-    frames: List[BaseFrame]
+    frames: List[BaseLabelAttributesFrame]
     format_version: Optional[FormatVersion] = None
+
+
+class BaseMultiSensorSequenceLabelAttributes(BaseModel):
+    name: str
+    task_type: TaskType
+    attributes: BaseSequenceLabelAttributes
 
 
 # Image (sequence) segmentation
@@ -314,7 +320,7 @@ class ImageSegmentationLabelAttributes(BaseLabelAttributes):
     segmentation_bitmap: URL
 
 
-class ImageSequenceSegmentationFrame(BaseFrame, ImageSegmentationLabelAttributes):
+class ImageSequenceSegmentationFrame(BaseLabelAttributesFrame, ImageSegmentationLabelAttributes):
     annotations: List[ImageSequenceSegmentationAnnotation]
 
 
@@ -336,7 +342,7 @@ class ImageVectorLabelAttributes(BaseLabelAttributes):
     annotations: List[ImageVectorAnnotation]
 
 
-class ImageVectorFrame(BaseFrame, ImageVectorLabelAttributes):
+class ImageVectorFrame(BaseLabelAttributesFrame, ImageVectorLabelAttributes):
     annotations: List[ImageSequenceVectorAnnotation]
 
 
@@ -391,7 +397,7 @@ class PointcloudSegmentationLabelAttributes(BaseLabelAttributes):
     point_annotations: List[int]
 
 
-class PointcloudSegmentationFrame(BaseFrame, PointcloudSegmentationLabelAttributes):
+class PointcloudSegmentationFrame(BaseLabelAttributesFrame, PointcloudSegmentationLabelAttributes):
     annotations: List[PointcloudSequenceSegmentationAnnotation]
 
 
@@ -418,7 +424,7 @@ class PointcloudCuboidLabelAttributes(BaseLabelAttributes):
     annotations: List[PointcloudCuboidAnnotation]
 
 
-class PointcloudSequenceCuboidFrame(BaseFrame, PointcloudCuboidLabelAttributes):
+class PointcloudSequenceCuboidFrame(BaseLabelAttributesFrame, PointcloudCuboidLabelAttributes):
     annotations: List[PointcloudSequenceCuboidAnnotation]
 
 
@@ -440,7 +446,7 @@ class PointcloudVectorLabelAttributes(BaseLabelAttributes):
     annotations: List[PointcloudVectorAnnotation]
 
 
-class PointcloudSequenceVectorFrame(BaseFrame, PointcloudVectorLabelAttributes):
+class PointcloudSequenceVectorFrame(BaseLabelAttributesFrame, PointcloudVectorLabelAttributes):
     annotations: List[PointcloudSequenceVectorAnnotation]
 
 
@@ -449,15 +455,13 @@ class PointcloudSequenceVectorLabelAttributes(BaseSequenceLabelAttributes, Point
 
 
 # Multi-sensor sequence
-class MultiSensorImageSequenceVectorLabelAttributes(BaseModel):
-    name: str
+class MultiSensorImageSequenceVectorLabelAttributes(BaseMultiSensorSequenceLabelAttributes):
     task_type: Literal[TaskType.IMAGE_VECTOR_SEQUENCE]
     # TODO remove list and replace with `Optional[ImageSequenceVectorLabelAttributes] = None`
     attributes: Union[ImageSequenceVectorLabelAttributes, List]
 
 
-class MultiSensorPointcloudSequenceCuboidLabelAttributes(BaseModel):
-    name: str
+class MultiSensorPointcloudSequenceCuboidLabelAttributes(BaseMultiSensorSequenceLabelAttributes):
     task_type: Literal[TaskType.POINTCLOUD_CUBOID_SEQUENCE]
     # TODO remove list and replace with `Optional[PointcloudSequenceCuboidLabelAttributes] = None`
     attributes: Union[PointcloudSequenceCuboidLabelAttributes, List]
@@ -525,8 +529,27 @@ class LabelSummary(BaseModel):
 ##########
 # Sample #
 ##########
+# Base structure
+class BaseSampleAttributes(BaseModel):
+    pass
+
+
+class BaseSampleAttributesFrame(BaseSampleAttributes):
+    pass
+
+
+class BaseSequenceSampleAttributes(BaseSampleAttributes):
+    frames: List[BaseSampleAttributesFrame]
+
+
+class BaseMultiSensorSequenceSampleAttributes(BaseModel):
+    name: str
+    task_type: TaskType
+    attributes: BaseSequenceSampleAttributes
+
+
 # Image (sequence)
-class ImageSampleAttributes(BaseModel):
+class ImageSampleAttributes(BaseSampleAttributes):
     image: URL
 
 
@@ -535,7 +558,7 @@ class ImageFrame(ImageSampleAttributes):
     timestamp: Optional[Timestamp] = None
 
 
-class ImageSequenceSampleAttributes(BaseModel):
+class ImageSequenceSampleAttributes(BaseSequenceSampleAttributes):
     frames: List[ImageFrame]
 
 
@@ -580,7 +603,7 @@ class CalibratedImage(URL):
     rotation: Optional[float] = None
 
 
-class PointcloudSampleAttributes(BaseModel):
+class PointcloudSampleAttributes(BaseSampleAttributes):
     pcd: PCD
     images: Optional[List[CalibratedImage]] = None
     ego_pose: Optional[EgoPose] = None
@@ -590,19 +613,17 @@ class PointcloudSampleAttributes(BaseModel):
     bounds: Optional[Bounds] = None
 
 
-class PointcloudSequenceSampleAttributes(BaseModel):
+class PointcloudSequenceSampleAttributes(BaseSequenceSampleAttributes):
     frames: List[PointcloudSampleAttributes]
 
 
 # Multi-sensor sequence
-class MultiSensorImageSequenceSampleAttributes(BaseModel):
-    name: str
+class MultiSensorImageSequenceSampleAttributes(BaseMultiSensorSequenceSampleAttributes):
     task_type: Literal[TaskType.IMAGE_VECTOR_SEQUENCE]
     attributes: ImageSequenceSampleAttributes
 
 
-class MultiSensorPointcloudSequenceSampleAttributes(BaseModel):
-    name: str
+class MultiSensorPointcloudSequenceSampleAttributes(BaseMultiSensorSequenceSampleAttributes):
     task_type: Literal[TaskType.POINTCLOUD_CUBOID_SEQUENCE]
     attributes: PointcloudSequenceSampleAttributes
 
