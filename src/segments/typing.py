@@ -478,6 +478,7 @@ class MultiSensorLabelAttributes(BaseModel):
 class TextAnnotation(BaseAnnotation):
     start: int
     end: int
+    id: Optional[int] = None  # TODO add in frontend and remove here (is mandatory in `BaseAnnotation`)
 
 
 class TextLabelAttributes(BaseLabelAttributes):
@@ -488,19 +489,14 @@ class TextLabelAttributes(BaseLabelAttributes):
 LabelAttributes = Union[
     ImageVectorLabelAttributes,
     ImageSequenceVectorLabelAttributes,
-    
     ImageSegmentationLabelAttributes,
     ImageSequenceSegmentationLabelAttributes,
-    
     PointcloudCuboidLabelAttributes,
     PointcloudSequenceCuboidLabelAttributes,
-    
     PointcloudVectorLabelAttributes,
     PointcloudSequenceVectorLabelAttributes,
-    
     PointcloudSegmentationLabelAttributes,
     PointcloudSequenceSegmentationLabelAttributes,
-    
     MultiSensorLabelAttributes,
     TextLabelAttributes,
 ]
