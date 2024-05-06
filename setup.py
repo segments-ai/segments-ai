@@ -68,7 +68,7 @@ setup(
         "docs": docs_requirements,
         "all": all_requirements,
     },  # Install with: pip install segments-ai[dev / docs / all]
-    python_requires=">=3.9",
+    python_requires=f">=3.{MIN_PYTHON3_VERSION}",
     classifiers=[
         "Development Status :: 5 - Production/Stable",  # Chose either "3 - Alpha", "4 - Beta" or "5 - Production/Stable" as the current state of your package
         "Intended Audience :: Developers",  # Define that your audience are developers
