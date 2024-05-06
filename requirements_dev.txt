@@ -15,6 +15,6 @@ mypy == 0.*
 
 # testing
 tox == 3.*
-pytest == 8.*
-pytest-cov == 5.*
+pytest == 7.*
+pytest-cov == 4.*
 pytest-dotenv == 0.*
