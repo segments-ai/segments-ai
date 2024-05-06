@@ -2,6 +2,7 @@
   "python.envFile": "${workspaceFolder}/.env",
   "editor.formatOnSave": true,
 
+
   // ruff
   "[python]": {
     "editor.codeActionsOnSave": {
@@ -11,6 +12,7 @@
     "editor.defaultFormatter": "charliermarsh.ruff"
   },
 
+  
   // unittest and pytest
   "python.testing.unittestArgs": ["-v", "-s", "./tests", "-p", "test_*.py"],
   "python.testing.pytestArgs": [
