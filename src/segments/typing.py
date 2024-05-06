@@ -401,9 +401,7 @@ class PointcloudSegmentationFrame(BaseLabelAttributesFrame, PointcloudSegmentati
     annotations: List[PointcloudSequenceSegmentationAnnotation]
 
 
-class PointcloudSequenceSegmentationLabelAttributes(
-    BaseSequenceLabelAttributes, PointcloudSegmentationLabelAttributes
-):
+class PointcloudSequenceSegmentationLabelAttributes(BaseSequenceLabelAttributes):
     frames: List[PointcloudSegmentationFrame]
 
 
@@ -428,7 +426,7 @@ class PointcloudSequenceCuboidFrame(BaseLabelAttributesFrame, PointcloudCuboidLa
     annotations: List[PointcloudSequenceCuboidAnnotation]
 
 
-class PointcloudSequenceCuboidLabelAttributes(BaseSequenceLabelAttributes, PointcloudCuboidLabelAttributes):
+class PointcloudSequenceCuboidLabelAttributes(BaseSequenceLabelAttributes):
     frames: List[PointcloudSequenceCuboidFrame]
 
 
@@ -450,7 +448,7 @@ class PointcloudSequenceVectorFrame(BaseLabelAttributesFrame, PointcloudVectorLa
     annotations: List[PointcloudSequenceVectorAnnotation]
 
 
-class PointcloudSequenceVectorLabelAttributes(BaseSequenceLabelAttributes, PointcloudVectorLabelAttributes):
+class PointcloudSequenceVectorLabelAttributes(BaseSequenceLabelAttributes):
     frames: List[PointcloudSequenceVectorFrame]
 
 
@@ -489,14 +487,14 @@ class TextLabelAttributes(BaseLabelAttributes):
 # https://pydantic-docs.helpmanual.io/usage/types/#unions
 LabelAttributes = Union[
     ImageVectorLabelAttributes,
-    ImageSegmentationLabelAttributes,
     ImageSequenceVectorLabelAttributes,
+    ImageSegmentationLabelAttributes,
     ImageSequenceSegmentationLabelAttributes,
     PointcloudCuboidLabelAttributes,
-    PointcloudVectorLabelAttributes,
-    PointcloudSegmentationLabelAttributes,
     PointcloudSequenceCuboidLabelAttributes,
+    PointcloudVectorLabelAttributes,
     PointcloudSequenceVectorLabelAttributes,
+    PointcloudSegmentationLabelAttributes,
     PointcloudSequenceSegmentationLabelAttributes,
     MultiSensorLabelAttributes,
     TextLabelAttributes,
