@@ -488,14 +488,19 @@ class TextLabelAttributes(BaseLabelAttributes):
 LabelAttributes = Union[
     ImageVectorLabelAttributes,
     ImageSequenceVectorLabelAttributes,
+    
     ImageSegmentationLabelAttributes,
     ImageSequenceSegmentationLabelAttributes,
+    
     PointcloudCuboidLabelAttributes,
     PointcloudSequenceCuboidLabelAttributes,
+    
     PointcloudVectorLabelAttributes,
     PointcloudSequenceVectorLabelAttributes,
+    
     PointcloudSegmentationLabelAttributes,
     PointcloudSequenceSegmentationLabelAttributes,
+    
     MultiSensorLabelAttributes,
     TextLabelAttributes,
 ]
