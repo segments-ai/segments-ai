@@ -7,6 +7,7 @@ from typing import List
 #############
 MAJOR, MINOR, PATCH = 1, 7, 6
 VERSION = f"{MAJOR}.{MINOR}.{PATCH}"
+MIN_PYTHON3_VERSION, MAX_PYTHON3_VERSION = 9, 13
 
 
 ####################
@@ -66,24 +67,20 @@ setup(
         "dev": dev_requirements,
         "docs": docs_requirements,
         "all": all_requirements,
-    },  # Install with: pip install segments-ai[dev or docs]
-    python_requires=">=3.8",
+    },  # Install with: pip install segments-ai[dev / docs / all]
+    python_requires=">=3.9",
     classifiers=[
-        "Development Status :: 3 - Alpha",  # Chose either "3 - Alpha", "4 - Beta" or "5 - Production/Stable" as the current state of your package
+        "Development Status :: 5 - Production/Stable",  # Chose either "3 - Alpha", "4 - Beta" or "5 - Production/Stable" as the current state of your package
         "Intended Audience :: Developers",  # Define that your audience are developers
         "Topic :: Software Development :: Build Tools",
         "License :: OSI Approved :: MIT License",  # Again, pick a license
+        "Typing :: Typed",
         "Programming Language :: Python :: 3",  # Specify which python versions that you want to support
         "Programming Language :: Python :: 3 :: Only",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
-        "Programming Language :: Python :: 3.12",
-        "Programming Language :: Python :: 3.13",
-        "Typing :: Typed",
-        "Operating System :: Microsoft :: Windows",
-        "Operating System :: POSIX",
-        "Operating System :: Unix",
-        "Operating System :: MacOS",
-    ],
+    ]
+    + [
+        f"Programming Language :: Python :: 3.{version}"
+        for version in range(MIN_PYTHON3_VERSION, MAX_PYTHON3_VERSION + 1)
+    ]
+    + [f"Operating System :: {os}" for os in ["Microsoft :: Windows", "POSIX", "Unix", "MacOS"]],
 )
