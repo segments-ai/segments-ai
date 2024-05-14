@@ -341,7 +341,7 @@ class ImageSequenceVectorLabelAttributes(BaseModel):
 # Point cloud segmentation
 class PointcloudSegmentationLabelAttributes(BaseModel):
     annotations: List[Annotation]
-    point_annotations: Optional[List[int]] = None
+    point_annotations: List[int]
     format_version: Optional[FormatVersion] = None
 
 
@@ -419,9 +419,7 @@ class PointcloudSequenceSegmentationAnnotation(Annotation):
 
 class PointcloudSegmentationFrame(PointcloudSegmentationLabelAttributes):
     annotations: List[PointcloudSequenceSegmentationAnnotation]
-    point_annotations: Optional[List[int]] = None
     timestamp: Optional[Timestamp] = None
-    format_version: Optional[FormatVersion] = None
 
 
 class PointcloudSequenceSegmentationLabelAttributes(BaseModel):
