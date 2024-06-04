@@ -690,66 +690,55 @@ class Collaborator(BaseModel):
     role: Role
 
 
-class SelectTaskAttribute(BaseModel):
+class BaseTaskAttribute(BaseModel):
     name: str
+    input_type: InputType
+    is_track_level: Optional[bool] = None
+    is_mandatory: Optional[bool] = None
+
+
+class SelectTaskAttribute(BaseTaskAttribute):
     input_type: Literal[InputType.SELECT]
     values: List[str]
     default_value: Optional[str] = None
-    is_mandatory: Optional[bool] = None
-    is_track_level: Optional[bool] = None
 
 
-class TextTaskAttribute(BaseModel):
-    name: str
+class TextTaskAttribute(BaseTaskAttribute):
     input_type: Literal[InputType.TEXT]
     default_value: Optional[str] = None
-    is_mandatory: Optional[bool] = None
 
 
-class NumberTaskAttribute(BaseModel):
-    name: str
+class NumberTaskAttribute(BaseTaskAttribute):
     input_type: Literal[InputType.NUMBER]
     default_value: Optional[float] = None
     min: Optional[float] = None
     max: Optional[float] = None
     step: Optional[float] = None
-    is_mandatory: Optional[bool] = None
 
     @field_validator("min", "max", "step", mode="before")
     @classmethod
     def empty_str_to_none(cls, v):
-        # min, max and step are empty strings when not filled in
+        # `min`, `max` and `step` are empty strings when not filled in
         if isinstance(v, str) and v.strip() == "":
             return None
         return v
 
 
-class CheckboxTaskAttribute(BaseModel):
-    name: str
+class CheckboxTaskAttribute(BaseTaskAttribute):
     input_type: Literal[InputType.CHECKBOX]
     default_value: Optional[bool] = None
-    is_track_level: Optional[bool] = None
 
 
-class Vector3TaskAttribute(BaseModel):
-    name: str
+class Vector3TaskAttribute(BaseTaskAttribute):
     input_type: Literal[InputType.VECTOR3]
-    is_mandatory: Optional[bool] = None
-    is_track_level: Optional[bool] = None
 
 
-class QuaternionTaskAttribute(BaseModel):
-    name: str
+class QuaternionTaskAttribute(BaseTaskAttribute):
     input_type: Literal[InputType.QUATERNION]
-    is_mandatory: Optional[bool] = None
-    is_track_level: Optional[bool] = None
 
 
-class PointsTaskAttribute(BaseModel):
-    name: str
+class PointsTaskAttribute(BaseTaskAttribute):
     input_type: Literal[InputType.POINTS]
-    is_mandatory: Optional[bool] = None
-    is_track_level: Optional[bool] = None
 
 
 TaskAttribute = Union[
