@@ -56,6 +56,7 @@ from segments.typing import (
     TaskAttributes,
     TaskType,
     User,
+    Workunit,
 )
 from typing_extensions import Literal, get_args
 
@@ -1756,6 +1757,70 @@ class SegmentsClient:
         """
 
         self._delete(f"/datasets/{dataset_identifier}/releases/{name}/")
+
+    #############
+    # Workunits #
+    #############
+    def get_workunits(
+        self,
+        dataset_identifier: str,
+        sort: Literal["created_at"] = "created_at",
+        direction: Literal["asc", "desc"] = "desc",
+        start: Optional[str] = None,
+        end: Optional[str] = None,
+        per_page: int = 1000,
+        page: int = 1,
+    ) -> List[Workunit]:
+        """Get the workunits in a dataset.
+
+        .. code-block:: python
+
+            dataset_identifier = 'jane/flowers'
+            workunits = client.get_workunits(dataset_identifier)
+            for workunit in workunits:
+                print(workunit.created_at)
+
+        Args:
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+            sort: What to sort results by. One of ``created_at``. Defaults to ``created_at``.
+            direction: Sorting direction. One of ``asc`` (ascending) or ``desc`` (descending). Defaults to ``desc``.
+            start: The start datetime for filtering workunits. Must be in the format 'YYYY-MM-DDTHH:MM:SS'. Defaults to :obj:`None`.
+            end: The end datetime for filtering workunits. Must be in the format 'YYYY-MM-DDTHH:MM:SS'. Defaults to :obj:`None`.
+            per_page: Pagination parameter indicating the maximum number of results to return. Defaults to ``1000``.
+            page: Pagination parameter indicating the page to return. Defaults to ``1``.
+
+        Raises:
+            :exc:`~segments.exceptions.ValidationError`: If validation of the samples fails.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the dataset is not found.
+            :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+        """
+
+        # pagination
+        query_string = f"?per_page={per_page}&page={page}"
+
+        # sorting
+        direction_str = "" if direction == "asc" else "-"
+        query_string += f"&sort={direction_str}{sort}"
+
+        # filter by start datetime
+        if start is not None:
+            query_string += f"&start={start}"
+
+        # filter by end datetime
+        if end is not None:
+            query_string += f"&end={end}"
+
+        r = self._get(f"/datasets/{dataset_identifier}/workunits/{query_string}")
+        results = r.json()
+
+        try:
+            results = TypeAdapter(List[Workunit]).validate_python(results)
+        except pydantic.ValidationError as e:
+            raise ValidationError(message=str(e), cause=e)
+
+        return cast(List[Workunit], results)
 
     ##########
     # Assets #

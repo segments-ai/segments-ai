@@ -797,6 +797,19 @@ class Labelset(BaseModel):
     # stats: Optional[Dict[str, Any]] = None
 
 
+class Workunit(BaseModel):
+    uuid: Optional[str] = None
+    created_at: str
+    created_by: str
+    work_type: str
+    next_label_status: Optional[str] = None
+    time: int
+    inactive_time: int
+    sample_uuid: str
+    sample_name: str
+    label_rating: Optional[int] = None
+
+
 class Dataset(BaseModel):
     name: str
     full_name: str

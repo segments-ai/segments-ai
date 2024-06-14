@@ -219,6 +219,14 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 .. automethod:: segments.client.SegmentsClient.delete_release
 ```
 
+## Workunits
+
+### List workunits
+
+```{eval-rst}
+.. automethod:: segments.client.SegmentsClient.get_workunits
+```
+
 ## Upload an asset to Segments' S3 bucket
 
 ```{eval-rst}
