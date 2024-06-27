@@ -282,7 +282,7 @@ class Annotation(BaseModel):
 # Image segmentation
 class ImageSegmentationLabelAttributes(BaseModel):
     annotations: List[Annotation]
-    segmentation_bitmap: URL
+    segmentation_bitmap: Optional[URL] = None
     image_attributes: Optional[ImageAttributes] = None
     format_version: Optional[FormatVersion] = None
 
