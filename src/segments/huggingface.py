@@ -148,25 +148,6 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
             }
         )
 
-    elif task_type in ["text-named-entities", "text-span-categorization"]:
-        features = datasets.Features(
-            {
-                "name": datasets.Value("string"),
-                "uuid": datasets.Value("string"),
-                "text": datasets.Value("string"),
-                "status": datasets.Value("string"),
-                "label": {
-                    "annotations": [
-                        {
-                            "start": datasets.Value("int32"),
-                            "end": datasets.Value("int32"),
-                            "category_id": datasets.Value("int32"),
-                        }
-                    ],
-                },
-            }
-        )
-
     else:
         raise ValueError("This type of dataset is not yet supported.")
 
@@ -193,7 +174,7 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
         except (KeyError, TypeError):
             data_row["status"] = "UNLABELED"
 
-        # Image or text
+        # Image
         if task_type in [
             "vector",
             "bboxes",
@@ -205,11 +186,6 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
                 data_row["image"] = sample["attributes"]["image"]
             except (KeyError, TypeError):
                 data_row["image"] = {"url": None}
-        elif task_type in ["text-named-entities", "text-span-categorization"]:
-            try:
-                data_row["text"] = sample["attributes"]["text"]
-            except (KeyError, TypeError):
-                data_row["text"] = None
 
         # Label
         try:
@@ -318,8 +294,6 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
         task_category = "image-segmentation"
     elif task_type in ["vector", "bboxes"]:
         task_category = "object-detection"
-    elif task_type in ["text-named-entities", "text-span-categorization"]:
-        task_category = "named-entity-recognition"
     else:
         task_category = "other"
 

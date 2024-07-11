@@ -86,8 +86,6 @@ class TaskType(str, Enum):
     MULTISENSOR_SEQUENCE = (
         "multisensor-sequence"  # combination of pointcloud-cuboid-sequence and image-vector-sequence
     )
-    TEXT_NAMED_ENTITIES = "text-named-entities"
-    TEXT_SPAN_CATEGORIZATION = "text-span-categorization"
     EMPTY = ""
 
 
@@ -485,18 +483,6 @@ class MultiSensorLabelAttributes(BaseModel):
     ]
 
 
-# Text
-class TextAnnotation(BaseModel):
-    start: int
-    end: int
-    category_id: int
-
-
-class TextLabelAttributes(BaseModel):
-    annotations: List[TextAnnotation]
-    format_version: Optional[FormatVersion] = None
-
-
 # https://pydantic-docs.helpmanual.io/usage/types/#unions
 LabelAttributes = Union[
     ImageVectorLabelAttributes,
@@ -510,7 +496,6 @@ LabelAttributes = Union[
     PointcloudSequenceVectorLabelAttributes,
     PointcloudSequenceSegmentationLabelAttributes,
     MultiSensorLabelAttributes,
-    TextLabelAttributes,
 ]
 
 
@@ -633,18 +618,12 @@ class MultiSensorSampleAttributes(BaseModel):
     ]
 
 
-# Text
-class TextSampleAttributes(BaseModel):
-    text: str
-
-
 SampleAttributes = Union[
     ImageSampleAttributes,
     ImageSequenceSampleAttributes,
     PointcloudSampleAttributes,
     PointcloudSequenceSampleAttributes,
     MultiSensorSampleAttributes,
-    TextSampleAttributes,
 ]
 
 

@@ -88,12 +88,6 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 .. autopydantic_model:: segments.typing.MultiSensorImageSequenceSampleAttributes
 ```
 
-### Text sample
-
-```{eval-rst}
-.. autopydantic_model:: segments.typing.TextSampleAttributes
-```
-
 ## Labels
 
 ```{eval-rst}
@@ -246,16 +240,6 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.MultiSensorImageSequenceVectorLabelAttributes
-```
-
-### Text label
-
-```{eval-rst}
-.. autopydantic_model:: segments.typing.TextLabelAttributes
-```
-
-```{eval-rst}
-.. autopydantic_model:: segments.typing.TextAnnotation
 ```
 
 ## Labelsets

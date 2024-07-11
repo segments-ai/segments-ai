@@ -340,7 +340,6 @@ class TestSample(Test):
                     },
                 ]
             },
-            "text": {"text": "This is a test sentence."},
         }
         # Multi-sensor
         attributes_dict["multi-sensor"] = {
@@ -690,18 +689,6 @@ class TestLabel(Test):
                             },
                         ],
                     },
-                ],
-            },
-            "text": {
-                "format_version": "0.1",
-                "annotations": [
-                    {
-                        "start": 0,  # the first character index of the label
-                        "end": 5,  # the last character index of the the label (exclusive)
-                        "category_id": 1,  # the category id
-                    },
-                    {"start": 7, "end": 12, "category_id": 0},
-                    {"start": 20, "end": 30, "category_id": 2},
                 ],
             },
         }
