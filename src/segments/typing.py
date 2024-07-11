@@ -657,7 +657,6 @@ class Sample(BaseModel):
     created_by: str
     assigned_labeler: Optional[str] = None
     assigned_reviewer: Optional[str] = None
-    comments: Optional[List[str]] = None
     priority: float
     label: Optional[Union[Label, LabelSummary]] = None
     issues: Optional[List[Issue]] = None
