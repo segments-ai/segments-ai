@@ -430,10 +430,6 @@ class SegmentsClient:
         +--------------------------------------------+---------------------------------------+
         | Multisensor labels (sequence)              | ``multisensor-sequence``              |
         +--------------------------------------------+---------------------------------------+
-        | Text named entity labels                   | ``text-named-entities``               |
-        +--------------------------------------------+---------------------------------------+
-        | Text span categorization labels            | ``text-span-categorization``          |
-        +--------------------------------------------+---------------------------------------+
 
         Args:
             name: The dataset name. Example: ``flowers``.
