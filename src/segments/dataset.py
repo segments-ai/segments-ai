@@ -80,6 +80,7 @@ class SegmentsDataset:
         segments_dir: The directory where the data will be downloaded to for caching. Set to :obj:`None` to disable caching. Defaults to ``segments``. Alternatively, you can set the ``SEGMENTS_DIR`` environment variable to change the default.
         preload: Whether the data should be pre-downloaded when the dataset is initialized. Ignored if ``segments_dir`` is :obj:`None`. Defaults to :obj:`True`.
         s3_client: A boto3 S3 client, e.g. ``s3_client = boto3.client("s3")``. Needs to be provided if your images are in a private S3 bucket. Defaults to :obj:`None`.
+        gcp_client: A Google Gloud Storage client, e.g. ``gcp_client = storage.Client()``. Needs to be provided if your images are in a private GCP bucket. Defaults to :obj:`None`.
 
     Raises:
         :exc:`ValueError`: If the release task type is not one of: ``segmentation-bitmap``, ``segmentation-bitmap-highres``, ``image-vector-sequence``, ``bboxes``, ``vector``, ``pointcloud-cuboid``, ``pointcloud-cuboid-sequence``, ``pointcloud-segmentation``, ``pointcloud-segmentation-sequence``.
@@ -96,6 +97,7 @@ class SegmentsDataset:
         segments_dir: str = "segments",
         preload: bool = True,
         s3_client: Optional[Any] = None,
+        gcp_client: Optional[Any] = None,
     ):
         # check environment for SEGMENTS_DIR variable if `segments_dir` has default value
         if segments_dir == "segments":
@@ -114,6 +116,7 @@ class SegmentsDataset:
         self.caching_enabled = segments_dir is not None
         self.preload = preload
         self.s3_client = s3_client
+        self.gcp_client = gcp_client
 
         # if urlparse(release_file).scheme in ('http', 'https'): # If it's a url
         if isinstance(release_file, str):  # If it's a file path
@@ -229,7 +232,7 @@ class SegmentsDataset:
             if self.caching_enabled:
                 image_filename = os.path.join(self.image_dir, image_filename_rel)
                 if not os.path.exists(image_filename):
-                    image = load_image_from_url(image_url, image_filename, self.s3_client)
+                    image = load_image_from_url(image_url, image_filename, self.s3_client, self.gcp_client)
                 else:
                     try:
                         image = Image.open(image_filename)
@@ -237,7 +240,7 @@ class SegmentsDataset:
                         image = None
                         logger.error(f"Something went wrong loading image: {image_filename}")
             else:
-                image = load_image_from_url(image_url, self.s3_client)
+                image = load_image_from_url(image_url, self.s3_client, self.gcp_client)
 
             image = handle_exif_rotation(image)
 
