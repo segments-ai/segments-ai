@@ -299,13 +299,19 @@ def export_dataset(
         raise ValueError("Please choose a valid `export_format`.")
 
 
-def load_image_from_url(url: str, save_filename: Optional[str] = None, s3_client: Optional[Any] = None) -> Image.Image:
+def load_image_from_url(
+    url: str,
+    save_filename: Optional[str] = None,
+    s3_client: Optional[Any] = None,
+    gcp_client: Optional[Any] = None,
+) -> Image.Image:
     """Load an image from url.
 
     Args:
         url: The image url.
         save_filename: The filename to save to.
         s3_client: A boto3 S3 client, e.g. ``s3_client = boto3.client("s3")``. Needs to be provided if your images are in a private S3 bucket. Defaults to :obj:`None`.
+        gcp_client: A Google Gloud Storage client, e.g. ``gcp_client = storage.Client()``. Needs to be provided if your images are in a private GCP bucket. Defaults to :obj:`None`.
 
     Returns:
         A PIL image.
@@ -319,14 +325,18 @@ def load_image_from_url(url: str, save_filename: Optional[str] = None, s3_client
             if bucket == "segmentsai-prod":
                 image = Image.open(BytesIO(session.get(url).content))
             else:
-                # region_name = regex.group(2)
                 key = url_parsed.path.lstrip("/")
 
                 file_byte_string = s3_client.get_object(Bucket=bucket, Key=key)["Body"].read()
                 image = Image.open(BytesIO(file_byte_string))
+    elif gcp_client is not None and url.startswith("gs://"):
+        bucket_name, blob_name = url[5:].split("/", 1)
+        bucket = gcp_client.bucket(bucket_name)
+        blob = bucket.blob(blob_name)
+        file_byte_string = blob.download_as_bytes()
+        image = Image.open(BytesIO(file_byte_string))
     else:
         image = Image.open(BytesIO(session.get(url).content))
-        # urllib.request.urlretrieve(url, save_filename)
 
     if save_filename is not None:
         if "exif" in image.info:
@@ -338,7 +348,10 @@ def load_image_from_url(url: str, save_filename: Optional[str] = None, s3_client
 
 
 def load_pointcloud_from_url(
-    url: str, save_filename: Optional[str] = None, s3_client: Optional[Any] = None
+    url: str,
+    save_filename: Optional[str] = None,
+    s3_client: Optional[Any] = None,
+    gcp_client: Optional[Any] = None,
 ) -> o3d.geometry.PointCloud:
     """Load a point cloud from a url.
 
@@ -346,6 +359,7 @@ def load_pointcloud_from_url(
         url: The point cloud url.
         save_filename: The filename to save to.
         s3_client: A boto3 S3 client, e.g. ``s3_client = boto3.client("s3")``. Needs to be provided if your point clouds are in a private S3 bucket. Defaults to :obj:`None`.
+        gcp_client: A Google Gloud Storage client, e.g. ``gcp_client = storage.Client()``. Needs to be provided if your images are in a private GCP bucket. Defaults to :obj:`None`.
 
     Returns:
         A point cloud.
@@ -381,6 +395,14 @@ def load_pointcloud_from_url(
                 with NamedTemporaryFile(suffix=".pcd") as f:
                     f.write(file_byte_string)
                     pointcloud = o3d.io.read_point_cloud(f.name)
+    elif gcp_client is not None and url.startswith("gs://"):
+        bucket_name, blob_name = url[5:].split("/", 1)
+        bucket = gcp_client.bucket(bucket_name)
+        blob = bucket.blob(blob_name)
+        file_byte_string = blob.download_as_bytes()
+        with NamedTemporaryFile(suffix=".pcd") as f:
+            f.write(file_byte_string)
+            pointcloud = o3d.io.read_point_cloud(f.name)
     else:
         pointcloud = load_pointcloud_from_parsed_url(url)
     if save_filename is not None:
