@@ -81,6 +81,7 @@ class SegmentsDataset:
         preload: Whether the data should be pre-downloaded when the dataset is initialized. Ignored if ``segments_dir`` is :obj:`None`. Defaults to :obj:`True`.
         s3_client: A boto3 S3 client, e.g. ``s3_client = boto3.client("s3")``. Needs to be provided if your images are in a private S3 bucket. Defaults to :obj:`None`.
         gcp_client: A Google Gloud Storage client, e.g. ``gcp_client = storage.Client()``. Needs to be provided if your images are in a private GCP bucket. Defaults to :obj:`None`.
+        load_images: Whether this dataset object should load images when iterating over it. Disabling this allows you to load the annotations of your dataset while not fetching the images.
 
     Raises:
         :exc:`ValueError`: If the release task type is not one of: ``segmentation-bitmap``, ``segmentation-bitmap-highres``, ``image-vector-sequence``, ``bboxes``, ``vector``, ``pointcloud-cuboid``, ``pointcloud-cuboid-sequence``, ``pointcloud-segmentation``, ``pointcloud-segmentation-sequence``.
@@ -98,6 +99,7 @@ class SegmentsDataset:
         preload: bool = True,
         s3_client: Optional[Any] = None,
         gcp_client: Optional[Any] = None,
+        load_images: Optional[bool] = True
     ):
         # check environment for SEGMENTS_DIR variable if `segments_dir` has default value
         if segments_dir == "segments":
@@ -117,6 +119,7 @@ class SegmentsDataset:
         self.preload = preload
         self.s3_client = s3_client
         self.gcp_client = gcp_client
+        self.load_images = load_images
 
         # if urlparse(release_file).scheme in ('http', 'https'): # If it's a url
         if isinstance(release_file, str):  # If it's a file path
@@ -226,7 +229,7 @@ class SegmentsDataset:
         # image_filename_rel = '{}{}'.format(sample['uuid'], url_extension)
         image_filename_rel = f"{sample_name}{url_extension}"
 
-        if image_url_parsed.scheme == "s3":
+        if image_url_parsed.scheme == "s3" or not self.load_images:
             image = None
         else:
             if self.caching_enabled:
