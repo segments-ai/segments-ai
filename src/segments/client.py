@@ -1709,6 +1709,11 @@ class SegmentsClient:
             release = client.add_release(dataset_identifier, name, description)
             print(release)
 
+            # Wait for the release to be created
+            while release.status == ReleaseStatus.PENDING:
+                release = client.get_release(dataset_identifier, name)
+                sleep(5)
+
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
             name: The name of the release.
