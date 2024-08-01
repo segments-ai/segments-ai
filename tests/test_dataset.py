@@ -34,3 +34,13 @@ def test_dataset(
             # Iterate over samples
             for sample in segments_dataset:
                 assert isinstance(sample, dict)
+
+def test_dataset_no_image_load(client: SegmentsClient,owner: str):
+    releases = client.get_releases("python-sdk-tests-organization/example-images-segmentation")
+    release = releases[0]
+
+    dataset = SegmentsDataset(release, preload=False, load_images=False)
+    assert dataset[0]["image"] is None, "Image was loaded, but shouldn't have been"
+
+    dataset = SegmentsDataset(release, preload=False, load_images=True)
+    assert dataset[0]["image"] is not None, "Image should have been loaded, but not found!"
