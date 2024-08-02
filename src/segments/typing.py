@@ -404,7 +404,7 @@ class PointcloudVectorAnnotation(BaseModel):
 
 
 class PointcloudVectorLabelAttributes(BaseModel):
-    annotations: List[PointcloudVectorAnnotation]
+    annotations: List[Union[PointcloudVectorAnnotation, PointcloudCuboidAnnotation]]
     format_version: Optional[FormatVersion] = None
 
 
