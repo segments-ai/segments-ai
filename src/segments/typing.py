@@ -200,6 +200,7 @@ Timestamp = Union[str, int, float]
 class URL(BaseModel):
     # TODO Remove optional (the backend does not return an URL when adding a release)
     url: Optional[str] = None
+    signed_url: Optional[str] = None
 
 
 class Release(BaseModel):
