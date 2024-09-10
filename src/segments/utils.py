@@ -20,6 +20,7 @@ from segments import SegmentsClient
 from segments.exceptions import AlreadyExistsError
 from segments.typing import (
     XYZW,
+    Annotation,
     EgoPose,
     ExportFormat,
     PointcloudCuboidLabelAttributes,
@@ -127,7 +128,7 @@ def bitmap2file(
 
 def get_semantic_bitmap(
     instance_bitmap: Optional[npt.NDArray[np.uint32]] = None,
-    annotations: Optional[Dict[str, Any]] = None,
+    annotations: Optional[Union[List[Dict[str, Any], List[Annotation]]]] = None,
     id_increment: int = 0,
 ) -> Optional[npt.NDArray[np.uint32]]:
     """Convert an instance bitmap and annotations dict into a segmentation bitmap.
@@ -140,6 +141,9 @@ def get_semantic_bitmap(
     Returns:
         An array here each unique value represents a category id.
     """
+    # Check if annotations isa list of Annotation objects, if they are, convert them.
+    if isinstance(annotations[0], Annotation):
+        annotations = [annotation.model_dump() for annotation in annotations]
 
     if instance_bitmap is None or annotations is None:
         return None
