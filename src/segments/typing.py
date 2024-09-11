@@ -370,6 +370,9 @@ class BrownConradyDistortionCoefficients(BaseModel):
     p1: float
     p2: float
     k3: float
+    k4: Optional[float] = 0.0
+    k5: Optional[float] = 0.0
+    k6: Optional[float] = 0.0
 
 
 class Distortion(BaseModel):
