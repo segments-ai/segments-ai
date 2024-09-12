@@ -340,6 +340,7 @@ class ImageSequenceVectorLabelAttributes(BaseModel):
 # Point cloud segmentation
 class PointcloudSegmentationLabelAttributes(BaseModel):
     annotations: List[Annotation]
+    image_attributes: Optional[ImageAttributes] = None
     point_annotations: List[int]
     format_version: Optional[FormatVersion] = None
 
@@ -392,6 +393,7 @@ class PointcloudCuboidAnnotation(BaseModel):
 
 class PointcloudCuboidLabelAttributes(BaseModel):
     annotations: List[PointcloudCuboidAnnotation]
+    image_attributes: Optional[ImageAttributes] = None
     format_version: Optional[FormatVersion] = None
 
 
@@ -406,6 +408,7 @@ class PointcloudVectorAnnotation(BaseModel):
 
 class PointcloudVectorLabelAttributes(BaseModel):
     annotations: List[Union[PointcloudVectorAnnotation, PointcloudCuboidAnnotation]]
+    image_attributes: Optional[ImageAttributes] = None
     format_version: Optional[FormatVersion] = None
 
 
