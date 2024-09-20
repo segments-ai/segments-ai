@@ -10,7 +10,7 @@ contain the root `toctree` directive.
 The Python SDK is a convenient wrapper for the API.
 
 ```{eval-rst}
-.. image:: ../../assets/overview.png
+.. image:: ../../assets/overview.jpg
     :width: 800
     :alt: Segments.ai overview
     :align: center
