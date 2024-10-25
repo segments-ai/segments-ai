@@ -675,8 +675,9 @@ class Collaborator(BaseModel):
 class BaseTaskAttribute(BaseModel):
     name: str
     input_type: InputType
-    is_track_level: Optional[bool] = None
     is_mandatory: Optional[bool] = None
+    is_track_level: Optional[bool] = None
+    synced_across_sensors: Optional[bool] = None
 
 
 class SelectTaskAttribute(BaseTaskAttribute):
