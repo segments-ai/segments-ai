@@ -678,6 +678,7 @@ class BaseTaskAttribute(BaseModel):
     is_mandatory: Optional[bool] = None
     is_track_level: Optional[bool] = None
     synced_across_sensors: Optional[bool] = None
+    sensor_filter: Optional[str] = None
 
 
 class SelectTaskAttribute(BaseTaskAttribute):
