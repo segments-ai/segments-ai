@@ -119,6 +119,7 @@ class CameraConvention(str, Enum):
 
 class InputType(str, Enum):
     SELECT = "select"
+    MULTISELECT = "multiselect"
     TEXT = "text"
     NUMBER = "number"
     CHECKBOX = "checkbox"
@@ -690,6 +691,12 @@ class SelectTaskAttribute(BaseTaskAttribute):
     default_value: Optional[str] = None
 
 
+class MultiselectTaskAttribute(BaseTaskAttribute):
+    input_type: Literal[InputType.MULTISELECT]
+    values: List[str]
+    default_value: Optional[str] = None
+
+
 class TextTaskAttribute(BaseTaskAttribute):
     input_type: Literal[InputType.TEXT]
     default_value: Optional[str] = None
@@ -730,6 +737,7 @@ class PointsTaskAttribute(BaseTaskAttribute):
 
 TaskAttribute = Union[
     SelectTaskAttribute,
+    MultiselectTaskAttribute,
     TextTaskAttribute,
     NumberTaskAttribute,
     CheckboxTaskAttribute,
