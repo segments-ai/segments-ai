@@ -591,7 +591,7 @@ class CalibratedImage(URL):
 
 class PointcloudSampleAttributes(BaseModel):
     pcd: PCD
-    images: Optional[List[CalibratedImage]] = None
+    images: List[CalibratedImage] = []
     ego_pose: Optional[EgoPose] = None
     default_z: Optional[float] = None
     name: Optional[str] = None
