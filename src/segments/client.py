@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 # https://gist.github.com/benkehoe/066a73903e84576a8d6d911cfedc2df6
+import gzip
 import importlib.metadata as importlib_metadata
+import json
 import logging
 import os
 import urllib.parse
@@ -969,6 +971,7 @@ class SegmentsClient:
         priority: float = 0,
         assigned_labeler: Optional[str] = None,
         assigned_reviewer: Optional[str] = None,
+        enable_compression: bool = True,
     ) -> Sample:
         """Add a sample to a dataset.
 
@@ -1004,6 +1007,7 @@ class SegmentsClient:
             priority: Priority in the labeling queue. Samples with higher values will be labeled first. Defaults to ``0``.
             assigned_labeler: The username of the user who should label this sample. Leave empty to not assign a specific labeler. Defaults to :obj:`None`.
             assigned_reviewer: The username of the user who should review this sample. Leave empty to not assign a specific reviewer. Defaults to :obj:`None`.
+            enable_compression: Whether to enable gzip compression for the request. Defaults to :obj:`True`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the sample attributes fails.
@@ -1048,15 +1052,18 @@ class SegmentsClient:
             payload["assigned_reviewer"] = assigned_reviewer
 
         r = self._post(
-            f"/datasets/{dataset_identifier}/samples/",
-            data=payload,
-            model=Sample,
+            f"/datasets/{dataset_identifier}/samples/", data=payload, model=Sample, gzip_compress=enable_compression
         )
         # logger.info(f"Added {name}")
 
         return cast(Sample, r)
 
-    def add_samples(self, dataset_identifier: str, samples: List[Union[Dict[str, Any], Sample]]) -> List[Sample]:
+    def add_samples(
+        self,
+        dataset_identifier: str,
+        samples: List[Union[Dict[str, Any], Sample]],
+        enable_compression: bool = True,
+    ) -> List[Sample]:
         """Add samples to a dataset in bulk. When attempting to add samples which already exist, no error is thrown but the existing samples are returned without changes.
 
         Args:
@@ -1099,6 +1106,7 @@ class SegmentsClient:
             f"/datasets/{dataset_identifier}/samples_bulk/",
             data=payload,
             model=List[Sample],
+            gzip_compress=enable_compression,
         )
 
         return cast(List[Sample], r)
@@ -1112,6 +1120,7 @@ class SegmentsClient:
         priority: Optional[float] = None,
         assigned_labeler: Optional[str] = None,
         assigned_reviewer: Optional[str] = None,
+        enable_compression: bool = True,
     ) -> Sample:
         """Update a sample.
 
@@ -1135,6 +1144,7 @@ class SegmentsClient:
             priority: Priority in the labeling queue. Samples with higher values will be labeled first.
             assigned_labeler: The username of the user who should label this sample. Leave empty to not assign a specific labeler.
             assigned_reviewer: The username of the user who should review this sample. Leave empty to not assign a specific reviewer.
+            enable_compression: Whether to enable gzip compression for the request. Defaults to :obj:`True`.
 
         Raises:
             :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
@@ -1179,7 +1189,7 @@ class SegmentsClient:
         if assigned_reviewer is not None:
             payload["assigned_reviewer"] = assigned_reviewer
 
-        r = self._patch(f"/samples/{uuid}/", data=payload, model=Sample)
+        r = self._patch(f"/samples/{uuid}/", data=payload, model=Sample, gzip_compress=enable_compression)
         # logger.info(f"Updated {uuid}")
 
         return cast(Sample, r)
@@ -1242,6 +1252,7 @@ class SegmentsClient:
         attributes: Union[Dict[str, Any], LabelAttributes],
         label_status: LabelStatus = LabelStatus.PRELABELED,
         score: Optional[float] = None,
+        enable_compression: bool = True,
     ) -> Label:
         """Add a label to a sample.
 
@@ -1275,6 +1286,7 @@ class SegmentsClient:
             attributes: The label attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/sample-and-label-types/label-types>`__.
             label_status: The label status. Defaults to ``PRELABELED``.
             score: The label score. Defaults to :obj:`None`.
+            enable_compression: Whether to enable gzip compression for the request. Defaults to :obj:`True`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the attributes fails.
@@ -1308,7 +1320,9 @@ class SegmentsClient:
         if score is not None:
             payload["score"] = score
 
-        r = self._put(f"/labels/{sample_uuid}/{labelset}/", data=payload, model=Label)
+        r = self._put(
+            f"/labels/{sample_uuid}/{labelset}/", data=payload, model=Label, gzip_compress=enable_compression
+        )
 
         return cast(Label, r)
 
@@ -1319,6 +1333,7 @@ class SegmentsClient:
         attributes: Optional[Union[Dict[str, Any], LabelAttributes]] = None,
         label_status: Optional[LabelStatus] = None,
         score: Optional[float] = None,
+        enable_compression: bool = True,
     ) -> Label:
         """Update a label.
 
@@ -1347,6 +1362,7 @@ class SegmentsClient:
             attributes: The label attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/sample-and-label-types/label-types>`__. Defaults to :obj:`None`.
             label_status: The label status. Defaults to :obj:`None`.
             score: The label score. Defaults to :obj:`None`.
+            enable_compression: Whether to enable gzip compression for the request. Defaults to :obj:`True`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the label fails.
@@ -1382,7 +1398,9 @@ class SegmentsClient:
         if score is not None:
             payload["score"] = score
 
-        r = self._patch(f"/labels/{sample_uuid}/{labelset}/", data=payload, model=Label)
+        r = self._patch(
+            f"/labels/{sample_uuid}/{labelset}/", data=payload, model=Label, gzip_compress=enable_compression
+        )
 
         return cast(Label, r)
 
@@ -1897,6 +1915,7 @@ class SegmentsClient:
         data: Optional[Dict[str, Any]] = None,
         auth: bool = True,
         model: Optional[T] = None,
+        gzip_compress: bool = False,
     ) -> requests.Response:
         """Send a POST request.
 
@@ -1914,11 +1933,10 @@ class SegmentsClient:
         """
         headers = self._get_headers(auth)
 
-        r = self.api_session.post(
-            urllib.parse.urljoin(self.api_url, endpoint),
-            json=data,  # data=data
-            headers=headers,
-        )
+        request_args = {"url": urllib.parse.urljoin(self.api_url, endpoint), "headers": headers}
+        self._set_request_body(data, request_args, gzip_compress)
+
+        r = self.api_session.post(**request_args)
 
         return r
 
@@ -1929,6 +1947,7 @@ class SegmentsClient:
         data: Optional[Dict[str, Any]] = None,
         auth: bool = True,
         model: Optional[T] = None,
+        gzip_compress: bool = False,
     ) -> requests.Response:
         """Send a PUT request.
 
@@ -1946,11 +1965,9 @@ class SegmentsClient:
         """
         headers = self._get_headers(auth)
 
-        r = self.api_session.put(
-            urllib.parse.urljoin(self.api_url, endpoint),
-            json=data,  # data=data
-            headers=headers,
-        )
+        request_args = {"url": urllib.parse.urljoin(self.api_url, endpoint), "headers": headers}
+        self._set_request_body(data, request_args, gzip_compress)
+        r = self.api_session.put(**request_args)
 
         return r
 
@@ -1961,6 +1978,7 @@ class SegmentsClient:
         data: Optional[Dict[str, Any]] = None,
         auth: bool = True,
         model: Optional[T] = None,
+        gzip_compress: bool = False,
     ) -> requests.Response:
         """Send a PATCH request.
 
@@ -1977,12 +1995,10 @@ class SegmentsClient:
             :exc:`~segments.exceptions.TimeoutError`: If the request times out - catches :exc:`requests.exceptions.TimeoutError`.
         """
         headers = self._get_headers(auth)
+        request_args = {"url": urllib.parse.urljoin(self.api_url, endpoint), "headers": headers}
+        self._set_request_body(data, request_args, gzip_compress)
 
-        r = self.api_session.patch(
-            urllib.parse.urljoin(self.api_url, endpoint),
-            json=data,  # data=data
-            headers=headers,
-        )
+        r = self.api_session.patch(**request_args)
 
         return r
 
@@ -2024,6 +2040,16 @@ class SegmentsClient:
         if auth and self.api_key:
             headers["Authorization"] = f"APIKey {self.api_key}"
         return headers
+
+    def _set_request_body(self, data: Dict[str, Any], request_args: Dict[str, Any], gzip_compress: bool):
+        """Set the appropriate request body and headers based on whether gzip compression is requested."""
+        if gzip_compress:
+            request_args["data"] = gzip.compress(json.dumps(data).encode())
+            request_args["headers"]["Content-Encoding"] = "gzip"
+            request_args["headers"]["Content-Type"] = "application/json"
+            request_args["headers"]["Content-Length"] = str(len(request_args["data"]))
+        else:
+            request_args["json"] = data
 
     @handle_exceptions
     def _upload_to_aws(self, file: Union[TextIO, BinaryIO], url: str, aws_fields: AWSFields) -> requests.Response:
