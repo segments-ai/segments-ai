@@ -900,11 +900,17 @@ class TestRelease(Test):
             wrong_name = "abcde"
             self.client.get_release(right_dataset_identifier, wrong_name)
 
+    # @unittest.skip("No 3D segmentation release available")
     def test_add_delete_release(self) -> None:
         name = "v0.4"
         description = "Test release description."
         for dataset in self.datasets:
             dataset_identifier = f"{self.owner}/{dataset}"
+            dataset_info = self.client.get_dataset(dataset_identifier)
+            if "pointcloud-segmentation" in dataset_info.task_type:
+                # Release files not supported for 3D segmentation
+                continue
+
             try:
                 # Add release
                 release = self.client.add_release(dataset_identifier, name, description)
