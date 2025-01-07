@@ -642,6 +642,7 @@ class Sample(BaseModel):
     metadata: Dict[str, Any]
     created_at: str
     created_by: str
+    readme: str = ""
     assigned_labeler: Optional[str] = None
     assigned_reviewer: Optional[str] = None
     priority: float
