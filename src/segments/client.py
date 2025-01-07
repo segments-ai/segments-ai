@@ -971,6 +971,7 @@ class SegmentsClient:
         priority: float = 0,
         assigned_labeler: Optional[str] = None,
         assigned_reviewer: Optional[str] = None,
+        readme: str = "",
         enable_compression: bool = True,
     ) -> Sample:
         """Add a sample to a dataset.
@@ -1007,6 +1008,7 @@ class SegmentsClient:
             priority: Priority in the labeling queue. Samples with higher values will be labeled first. Defaults to ``0``.
             assigned_labeler: The username of the user who should label this sample. Leave empty to not assign a specific labeler. Defaults to :obj:`None`.
             assigned_reviewer: The username of the user who should review this sample. Leave empty to not assign a specific reviewer. Defaults to :obj:`None`.
+            readme: The sample readme. Defaults to :obj:`None`.
             enable_compression: Whether to enable gzip compression for the request. Defaults to :obj:`True`.
 
         Raises:
@@ -1050,6 +1052,11 @@ class SegmentsClient:
 
         if assigned_reviewer is not None:
             payload["assigned_reviewer"] = assigned_reviewer
+
+        if readme is not None:
+            payload["readme"] = readme
+
+        print(payload)
 
         r = self._post(
             f"/datasets/{dataset_identifier}/samples/", data=payload, model=Sample, gzip_compress=enable_compression
@@ -1120,6 +1127,7 @@ class SegmentsClient:
         priority: Optional[float] = None,
         assigned_labeler: Optional[str] = None,
         assigned_reviewer: Optional[str] = None,
+        readme: Optional[str] = None,
         enable_compression: bool = True,
     ) -> Sample:
         """Update a sample.
@@ -1144,6 +1152,7 @@ class SegmentsClient:
             priority: Priority in the labeling queue. Samples with higher values will be labeled first.
             assigned_labeler: The username of the user who should label this sample. Leave empty to not assign a specific labeler.
             assigned_reviewer: The username of the user who should review this sample. Leave empty to not assign a specific reviewer.
+            readme: The sample readme.
             enable_compression: Whether to enable gzip compression for the request. Defaults to :obj:`True`.
 
         Raises:
@@ -1188,6 +1197,9 @@ class SegmentsClient:
 
         if assigned_reviewer is not None:
             payload["assigned_reviewer"] = assigned_reviewer
+
+        if readme is not None:
+            payload["readme"] = readme
 
         r = self._patch(f"/samples/{uuid}/", data=payload, model=Sample, gzip_compress=enable_compression)
         # logger.info(f"Updated {uuid}")
