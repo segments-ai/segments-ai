@@ -1056,8 +1056,6 @@ class SegmentsClient:
         if readme is not None:
             payload["readme"] = readme
 
-        print(payload)
-
         r = self._post(
             f"/datasets/{dataset_identifier}/samples/", data=payload, model=Sample, gzip_compress=enable_compression
         )
