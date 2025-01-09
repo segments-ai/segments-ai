@@ -98,12 +98,13 @@ def handle_exceptions(f: Callable[..., requests.Response]) -> Callable[..., Unio
     """
 
     def throw_segments_exception(
+        self: SegmentsClient,
         *args: Any,
         model: Optional[Type[T]] = None,
         **kwargs: Any,
     ) -> Union[requests.Response, T]:
         try:
-            r = f(*args, **kwargs)
+            r = f(self, *args, **kwargs)
             r.raise_for_status()
             if r.content:
                 r_json = r.json()
@@ -113,7 +114,16 @@ def handle_exceptions(f: Callable[..., requests.Response]) -> Callable[..., Unio
                     if "throttled" in message:
                         raise APILimitError(message)
                 if model is not None:
-                    m = TypeAdapter(model).validate_python(r_json)
+                    try:
+                        m = TypeAdapter(model).validate_python(r_json)
+                    except pydantic.ValidationError as e:
+                        if not self._strict_checking:
+                            # We're not applying strict type checking, just return the decoded json
+                            logging.warning(f"Validation failed for model {model}, returning the raw json.")
+                            return r_json
+                        else:
+                            raise e
+
                     return m
             return r
         except requests.exceptions.Timeout as e:
@@ -231,6 +241,8 @@ class SegmentsClient:
         self.s3_session = requests.Session()
         self.s3_session.mount("http://", adapter)
         self.s3_session.mount("https://", adapter)
+
+        self._strict_checking = True
 
         try:
             r = self._get(f"/api_status/?lib_version={VERSION}")
