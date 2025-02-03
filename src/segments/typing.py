@@ -607,7 +607,7 @@ class PointcloudSequenceSampleAttributes(BaseModel):
 # Multi-sensor
 class MultiSensorPointcloudSequenceSampleAttributes(BaseModel):
     name: str
-    task_type: Literal[TaskType.POINTCLOUD_CUBOID_SEQUENCE]
+    task_type: Union[Literal[TaskType.POINTCLOUD_CUBOID_SEQUENCE], Literal[TaskType.POINTCLOUD_VECTOR_SEQUENCE]]
     attributes: PointcloudSequenceSampleAttributes
 
 
