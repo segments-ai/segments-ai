@@ -457,8 +457,6 @@ class PointcloudSequenceVectorAnnotation(PointcloudVectorAnnotation):
 
 
 class PointcloudSequenceVectorFrame(PointcloudVectorLabelAttributes):
-    annotations: List[PointcloudSequenceVectorAnnotation]
-    format_version: Optional[FormatVersion] = None
     timestamp: Optional[Timestamp] = None
 
 
@@ -482,10 +480,18 @@ class MultiSensorImageSequenceVectorLabelAttributes(BaseModel):
     attributes: Union[ImageSequenceVectorLabelAttributes, List]
 
 
+class MultiSensorPointcloudSequenceVectorLabelAttributes(BaseModel):
+    name: str
+    task_type: Literal[TaskType.POINTCLOUD_VECTOR_SEQUENCE]
+    # TODO remove list and replace with `Optional[ImageSequenceVectorLabelAttributes] = None`
+    attributes: Union[PointcloudSequenceVectorLabelAttributes, List]
+
+
 class MultiSensorLabelAttributes(BaseModel):
     sensors: List[
         Union[
             MultiSensorPointcloudSequenceCuboidLabelAttributes,
+            MultiSensorPointcloudSequenceVectorLabelAttributes,
             MultiSensorImageSequenceVectorLabelAttributes,
         ],
     ]
@@ -607,7 +613,10 @@ class PointcloudSequenceSampleAttributes(BaseModel):
 # Multi-sensor
 class MultiSensorPointcloudSequenceSampleAttributes(BaseModel):
     name: str
-    task_type: Union[Literal[TaskType.POINTCLOUD_CUBOID_SEQUENCE], Literal[TaskType.POINTCLOUD_VECTOR_SEQUENCE]]
+    task_type: Union[
+        Literal[TaskType.POINTCLOUD_CUBOID_SEQUENCE],
+        Literal[TaskType.POINTCLOUD_VECTOR_SEQUENCE],
+    ]
     attributes: PointcloudSequenceSampleAttributes
 
 
