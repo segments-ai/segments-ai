@@ -522,6 +522,7 @@ class Label(BaseModel):
     created_at: str
     created_by: str
     updated_at: str
+    updated_by: Optional[str] = None
     score: Optional[float] = None
     rating: Optional[float] = None
     reviewed_at: Optional[str] = None
