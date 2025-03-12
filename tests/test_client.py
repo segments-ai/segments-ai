@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import time
+import typing
 import unittest
 from typing import Any, Dict, cast
 
@@ -720,13 +721,13 @@ class TestLabel(Test):
             try:
                 # Add
                 label = self.client.add_label(sample_uuid, labelset, attributes, label_status, score)
-                self.assertIsInstance(label, Label)
+                self.assertIsInstance(label, typing.get_args(Label))
                 # Update
                 label = self.client.update_label(sample_uuid, labelset, attributes, label_status, score)
-                self.assertIsInstance(label, Label)
+                self.assertIsInstance(label, typing.get_args(Label))
                 # Get
                 label = self.client.get_label(sample_uuid, labelset)
-                self.assertIsInstance(label, Label)
+                self.assertIsInstance(label, typing.get_args(Label))
             except AlreadyExistsError:
                 pass
             finally:

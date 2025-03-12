@@ -526,12 +526,11 @@ LabelAttributes = Union[
 ]
 
 
-class Label(BaseModel):
+class BaseLabel(BaseModel):
     sample_uuid: str
-    label_type: TaskType
+    label_type: Optional[TaskType] = None
     label_status: LabelStatus
     labelset: str
-    attributes: Optional[LabelAttributes] = None
     created_at: str
     created_by: str
     updated_at: str
@@ -539,6 +538,79 @@ class Label(BaseModel):
     rating: Optional[float] = None
     reviewed_at: Optional[str] = None
     reviewed_by: Optional[str] = None
+
+
+class ImageVectorLabel(BaseLabel):
+    attributes: ImageVectorLabelAttributes
+    label_type: Literal[TaskType.VECTOR]
+
+
+class ImageSegmentationLabel(BaseLabel):
+    attributes: ImageSegmentationLabelAttributes
+    label_type: Literal[TaskType.SEGMENTATION_BITMAP, TaskType.SEGMENTATION_BITMAP_HIGHRES]
+
+
+class ImageSequenceVectorLabel(BaseLabel):
+    attributes: ImageSequenceVectorLabelAttributes
+    label_type: Literal[TaskType.IMAGE_VECTOR_SEQUENCE]
+
+
+class ImageSequenceSegmentationLabel(BaseLabel):
+    attributes: ImageSequenceSegmentationLabelAttributes
+    label_type: Literal[TaskType.IMAGE_SEGMENTATION_SEQUENCE]
+
+
+class PointcloudCuboidLabel(BaseLabel):
+    attributes: PointcloudCuboidLabelAttributes
+    label_type: Literal[TaskType.POINTCLOUD_CUBOID]
+
+
+class PointcloudVectorLabel(BaseLabel):
+    attributes: PointcloudVectorLabelAttributes
+    label_type: Literal[TaskType.POINTCLOUD_VECTOR]
+
+
+class PointcloudSegmentationLabel(BaseLabel):
+    attributes: PointcloudSegmentationLabelAttributes
+    label_type: Literal[TaskType.POINTCLOUD_SEGMENTATION]
+
+
+class PointcloudSequenceCuboidLabel(BaseLabel):
+    attributes: PointcloudSequenceCuboidLabelAttributes
+    label_type: Literal[TaskType.POINTCLOUD_CUBOID_SEQUENCE]
+
+
+class PointcloudSequenceVectorLabel(BaseLabel):
+    attributes: PointcloudSequenceVectorLabelAttributes
+    label_type: Literal[TaskType.POINTCLOUD_VECTOR_SEQUENCE]
+
+
+class PointcloudSequenceSegmentationLabel(BaseLabel):
+    attributes: PointcloudSequenceSegmentationLabelAttributes
+    label_type: Literal[TaskType.POINTCLOUD_SEGMENTATION_SEQUENCE]
+
+
+class MultiSensorLabel(BaseLabel):
+    attributes: MultiSensorLabelAttributes
+    label_type: Literal[TaskType.MULTISENSOR_SEQUENCE]
+
+
+Label = Annotated[
+    Union[
+        ImageVectorLabel,
+        ImageSegmentationLabel,
+        ImageSequenceVectorLabel,
+        ImageSequenceSegmentationLabel,
+        PointcloudCuboidLabel,
+        PointcloudVectorLabel,
+        PointcloudSegmentationLabel,
+        PointcloudSequenceCuboidLabel,
+        PointcloudSequenceVectorLabel,
+        PointcloudSequenceSegmentationLabel,
+        MultiSensorLabel,
+    ],
+    pydantic.Field(discriminator="label_type"),
+]
 
 
 class LabelSummary(BaseModel):
