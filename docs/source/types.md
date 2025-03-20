@@ -295,27 +295,47 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 ```
 
 ```{eval-rst}
-.. autoclass:: segments.typing.SelectTaskAttribute
-    :members:
-    :undoc-members:
+.. autopydantic_model:: segments.typing.BaseTaskAttribute
 ```
 
 ```{eval-rst}
-.. autoclass:: segments.typing.TextTaskAttribute
-    :members:
-    :undoc-members:
+.. autopydantic_model:: segments.typing.SelectTaskAttribute
+    :show-inheritance: BaseModel
 ```
 
 ```{eval-rst}
-.. autoclass:: segments.typing.NumberTaskAttribute
-    :members:
-    :undoc-members:
+.. autopydantic_model:: segments.typing.TextTaskAttribute
+    :show-inheritance: BaseModel
 ```
 
 ```{eval-rst}
-.. autoclass:: segments.typing.CheckboxTaskAttribute
-    :members:
-    :undoc-members:
+.. autopydantic_model:: segments.typing.NumberTaskAttribute
+    :show-inheritance: BaseModel
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.CheckboxTaskAttribute
+    :show-inheritance: BaseModel
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.MultiselectTaskAttribute
+    :show-inheritance: BaseModel
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.Vector3TaskAttribute
+    :show-inheritance: BaseModel
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.QuaternionTaskAttribute
+    :show-inheritance: BaseModel
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.PointsTaskAttribute
+    :show-inheritance: BaseModel
 ```
 
 ```{eval-rst}

@@ -963,7 +963,7 @@ def find_camera_rotation(client: SegmentsClient, dataset_identifier: str) -> Qua
     Raises:
         :exc:`ImportError`: If pyquaternion is not installed (to install run ``pip install pyquaternion``).
         :exc:`ValueError`: If the dataset is not a point cloud sequence dataset.
-        :exc:`ValueError`: If the user answers neither `y(es)` nor `n(o) (case insensitive).
+        :exc:`ValueError`: If the user answers neither `y(es)` nor `n(o)` (case insensitive).
         :exc:`ValueError`: If the correct rotation is not found.
         :exc:`AlreadyExistsError`: If the cloned dataset already exists.
     """

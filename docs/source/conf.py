@@ -107,6 +107,7 @@ autodoc_pydantic_model_show_config = False
 autodoc_pydantic_model_signature_prefix = "class"
 autodoc_pydantic_field_show_default = False
 autodoc_pydantic_field_show_required = False
+autodoc_pydantic_field_list_validators = False
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
