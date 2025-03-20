@@ -4,6 +4,7 @@ from __future__ import annotations
 # https://gist.github.com/benkehoe/066a73903e84576a8d6d911cfedc2df6
 import gzip
 import importlib.metadata as importlib_metadata
+import inspect
 import json
 import logging
 import os
@@ -42,18 +43,15 @@ from segments.typing import (
     AWSFields,
     Category,
     Collaborator,
-    Dataset,
     File,
     Issue,
     IssueStatus,
-    Label,
     LabelAttributes,
     Labelset,
     LabelStatus,
     PresignedPostFields,
     Release,
     Role,
-    Sample,
     SampleAttributes,
     TaskAttributes,
     TaskType,
@@ -61,6 +59,8 @@ from segments.typing import (
     Workunit,
 )
 from typing_extensions import Literal, get_args
+
+from .covenience_api import Dataset, HasClient, Label, Sample
 
 
 try:
@@ -116,6 +116,12 @@ def handle_exceptions(f: Callable[..., requests.Response]) -> Callable[..., Unio
                 if model is not None:
                     try:
                         m = TypeAdapter(model).validate_python(r_json)
+                        if isinstance(model, List) and issubclass(get_args(model)[0], HasClient):
+                            for item in m:
+                                item.inject_client(self)
+                        elif inspect.isclass(model) and issubclass(model, HasClient):
+                            m._inject_client(self)
+
                     except pydantic.ValidationError as e:
                         if not self._strict_checking:
                             # We're not applying strict type checking, just return the decoded json
@@ -932,6 +938,10 @@ class SegmentsClient:
             results = TypeAdapter(List[Sample]).validate_python(results)
         except pydantic.ValidationError as e:
             raise ValidationError(message=str(e), cause=e)
+
+        # TODO: refactor into decorator
+        for s in results:
+            s._inject_client(self)
 
         return cast(List[Sample], results)
 

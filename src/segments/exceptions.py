@@ -95,3 +95,9 @@ class ValidationError(SegmentsError):
     """Raised when validation of the response fails."""
 
     pass
+
+
+class InvalidModelError(SegmentsError):
+    """Raised when the model is invalid for the dataset type."""
+
+    pass
