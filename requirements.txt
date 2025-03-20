@@ -1,11 +1,11 @@
 # general
-numpy>=1.20,<2 # include type stubs
-requests==2.*
+numpy>=1.20 # include type stubs
+requests>=2.0
 Pillow>=9.0
-tqdm==4.*
+tqdm>=4.0
 
 # type hints
-typing_extensions==4.*
+typing_extensions>=4.0
 pydantic==2.*,!=2.4.0 # bug in 2.4.0
 types-Pillow>=9.0
-types-requests==2.*
+types-requests>=2.0
