@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from enum import Enum as BaseEnum
 from enum import EnumMeta as BaseEnumMeta
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Annotated, Any, Dict, List, Optional, Tuple, Union
 
+import pydantic
 from pydantic import BaseModel as PydanticBaseModel
 from pydantic import ConfigDict, field_validator
 from segments.exceptions import ValidationError
@@ -162,10 +163,23 @@ class PointcloudCuboidAnnotationType(str, Enum):
     CUBOID_SYNC = "cuboid-sync"
 
 
+PointcloudCuboidAnnotationTypeLiteral = Literal[
+    PointcloudCuboidAnnotationType.CUBOID,
+    PointcloudCuboidAnnotationType.CUBOID_SYNC,
+]
+
+
 class PointcloudVectorAnnotationType(str, Enum):
     POLYGON = "polygon"
     POLYLINE = "polyline"
     POINT = "point"
+
+
+PointcloudVectorAnnotationTypeLiteral = Literal[
+    PointcloudVectorAnnotationType.POLYGON,
+    PointcloudVectorAnnotationType.POLYLINE,
+    PointcloudVectorAnnotationType.POINT,
+]
 
 
 class ExportFormat(str, Enum):
@@ -377,9 +391,17 @@ class BrownConradyDistortionCoefficients(BaseModel):
     k6: Optional[float] = None
 
 
-class Distortion(BaseModel):
-    model: CameraDistortionModel
-    coefficients: Union[FisheyeDistortionCoefficients, BrownConradyDistortionCoefficients]
+class DistortionFisheye(BaseModel):
+    model: Literal[CameraDistortionModel.FISH_EYE]
+    coefficients: FisheyeDistortionCoefficients
+
+
+class DistortionBrownConrady(BaseModel):
+    model: Literal[CameraDistortionModel.BROWN_CONRADY]
+    coefficients: BrownConradyDistortionCoefficients
+
+
+Distortion = Annotated[Union[DistortionFisheye, DistortionBrownConrady], pydantic.Field(discriminator="model")]
 
 
 # Point cloud cuboid
@@ -391,7 +413,7 @@ class PointcloudCuboidAnnotation(BaseModel):
     dimensions: XYZ
     yaw: float
     rotation: Optional[XYZW] = None
-    type: PointcloudCuboidAnnotationType
+    type: PointcloudCuboidAnnotationTypeLiteral
     attributes: Optional[ObjectAttributes] = None
 
 
@@ -406,12 +428,14 @@ class PointcloudVectorAnnotation(BaseModel):
     id: int
     category_id: int
     points: List[List[float]]
-    type: PointcloudVectorAnnotationType
+    type: PointcloudVectorAnnotationTypeLiteral
     attributes: Optional[ObjectAttributes] = None
 
 
 class PointcloudVectorLabelAttributes(BaseModel):
-    annotations: List[Union[PointcloudVectorAnnotation, PointcloudCuboidAnnotation]]
+    annotations: List[
+        Annotated[Union[PointcloudVectorAnnotation, PointcloudCuboidAnnotation], pydantic.Field(discriminator="type")]
+    ]
     image_attributes: Optional[ImageAttributes] = None
     format_version: Optional[FormatVersion] = None
 
@@ -489,15 +513,17 @@ class MultiSensorPointcloudSequenceVectorLabelAttributes(BaseModel):
 
 class MultiSensorLabelAttributes(BaseModel):
     sensors: List[
-        Union[
-            MultiSensorPointcloudSequenceCuboidLabelAttributes,
-            MultiSensorPointcloudSequenceVectorLabelAttributes,
-            MultiSensorImageSequenceVectorLabelAttributes,
-        ],
+        Annotated[
+            Union[
+                MultiSensorPointcloudSequenceCuboidLabelAttributes,
+                MultiSensorPointcloudSequenceVectorLabelAttributes,
+                MultiSensorImageSequenceVectorLabelAttributes,
+            ],
+            pydantic.Field(discriminator="task_type"),
+        ]
     ]
 
 
-# https://pydantic-docs.helpmanual.io/usage/types/#unions
 LabelAttributes = Union[
     ImageVectorLabelAttributes,
     ImageSegmentationLabelAttributes,
@@ -746,15 +772,18 @@ class PointsTaskAttribute(BaseTaskAttribute):
     input_type: Literal[InputType.POINTS]
 
 
-TaskAttribute = Union[
-    SelectTaskAttribute,
-    MultiselectTaskAttribute,
-    TextTaskAttribute,
-    NumberTaskAttribute,
-    CheckboxTaskAttribute,
-    Vector3TaskAttribute,
-    QuaternionTaskAttribute,
-    PointsTaskAttribute,
+TaskAttribute = Annotated[
+    Union[
+        SelectTaskAttribute,
+        MultiselectTaskAttribute,
+        TextTaskAttribute,
+        NumberTaskAttribute,
+        CheckboxTaskAttribute,
+        Vector3TaskAttribute,
+        QuaternionTaskAttribute,
+        PointsTaskAttribute,
+    ],
+    pydantic.Field(discriminator="input_type"),
 ]
 
 
@@ -779,15 +808,6 @@ class Owner(BaseModel):
     username: str
     created_at: str
     email: Optional[str] = None
-
-
-# class Statistics(BaseModel):  # deprecated
-#     prelabeled_count: int
-#     labeled_count: int
-#     reviewed_count: int
-#     rejected_count: int
-#     skipped_count: int
-#     samples_count: int
 
 
 class Labelset(BaseModel):

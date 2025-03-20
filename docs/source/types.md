@@ -164,6 +164,10 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
     :undoc-members:
 ```
 
+```{eval-rst}
+.. autoclass:: segments.typing.PointcloudCuboidAnnotationTypeLiteral
+```
+
 ### Point cloud vector label
 
 ```{eval-rst}
@@ -178,6 +182,10 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 .. autoclass:: segments.typing.PointcloudVectorAnnotationType
     :members:
     :undoc-members:
+```
+
+```{eval-rst}
+.. autoclass:: segments.typing.PointcloudVectorAnnotationTypeLiteral
 ```
 
 ### Point cloud sequence segmentation
@@ -384,7 +392,11 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 ```
 
 ```{eval-rst}
-.. autopydantic_model:: segments.typing.Distortion
+.. autopydantic_model:: segments.typing.DistortionFisheye
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.DistortionBrownConrady
 ```
 
 ```{eval-rst}
