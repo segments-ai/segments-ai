@@ -8,7 +8,16 @@ import segments
 from segments.client import SegmentsClient
 from segments.covenience_api import Dataset, Label, Sample
 from segments.exceptions import AlreadyExistsError, InvalidModelError
-from segments.typing import Collaborator, LabelStatus, PointcloudSegmentationLabelAttributes, Role, TaskType
+from segments.typing import (
+    Collaborator,
+    Issue,
+    Labelset,
+    LabelStatus,
+    PointcloudSegmentationLabelAttributes,
+    Release,
+    Role,
+    TaskType,
+)
 
 
 @pytest.mark.parametrize(
@@ -22,7 +31,7 @@ from segments.typing import Collaborator, LabelStatus, PointcloudSegmentationLab
         (Dataset.add_collaborator, SegmentsClient.add_dataset_collaborator, ["dataset_identifier"]),
         (Dataset.add_release, SegmentsClient.add_release, ["dataset_identifier"]),
         (Dataset.get_release, SegmentsClient.get_release, ["dataset_identifier"]),
-        (Dataset.list_releases, SegmentsClient.get_releases, ["dataset_identifier"]),
+        (Dataset.get_releases, SegmentsClient.get_releases, ["dataset_identifier"]),
         (Dataset.get_labelsets, SegmentsClient.get_labelsets, ["dataset_identifier"]),
         (Dataset.get_labelset, SegmentsClient.get_labelset, ["dataset_identifier"]),
         (Dataset.add_labelset, SegmentsClient.add_labelset, ["dataset_identifier"]),
@@ -265,3 +274,110 @@ class TestLabel:
         sample = self.client.get_sample(sample_uuid)
         with pytest.raises(InvalidModelError):
             sample.add_label("ground-truth", PointcloudSegmentationLabelAttributes.model_validate(bad_attributes))
+
+
+@pytest.mark.usefixtures("setup_class_client")
+class TestIssue:
+    def test_get_issues(self, datasets, owner) -> None:
+        for dataset in datasets:
+            dataset_identifier = f"{owner}/{dataset}"
+            dataset = self.client.get_dataset(dataset_identifier)
+            issues = dataset.get_issues()
+            for issue in issues:
+                assert isinstance(issue, Issue)
+
+    def test_add_update_delete_issue(self, sample_uuids) -> None:
+        description = "You forgot to label this car."
+        for sample_uuid in sample_uuids:
+            sample = self.client.get_sample(sample_uuid)
+            issue = None
+            try:
+                # Add issue
+                issue = sample.add_issue(description)
+                assert isinstance(issue, Issue)
+                # TODO: issue updating not yet implemented
+                # issue = self.client.update_issue(issue.uuid, description)
+                # assert isinstance(issue, Issue)
+            except AlreadyExistsError:
+                pass
+            finally:
+                # Delete issue
+                if issue:
+                    self.client.delete_issue(issue.uuid)
+
+
+@pytest.mark.usefixtures("setup_class_client")
+class TestRelease:
+    def test_get_releases(self, datasets, owner) -> None:
+        for dataset in datasets:
+            dataset_identifier = f"{owner}/{dataset}"
+            dataset = self.client.get_dataset(dataset_identifier)
+            releases = dataset.get_releases()
+            for release in releases:
+                assert isinstance(release, Release)
+
+    def test_get_release(self, datasets, owner) -> None:
+        for dataset in datasets:
+            dataset_identifier = f"{owner}/{dataset}"
+            dataset = self.client.get_dataset(dataset_identifier)
+            releases = dataset.get_releases()
+            for release in releases:
+                release = dataset.get_release(release.name)
+                assert isinstance(release, Release)
+
+    def test_add_delete_release(self, datasets, owner, TIME_INTERVAL) -> None:
+        name = "v0.4"
+        description = "Test release description."
+        for dataset_name in datasets:
+            dataset_identifier = f"{owner}/{dataset_name}"
+            dataset = self.client.get_dataset(dataset_identifier)
+            if "pointcloud-segmentation" in dataset.task_type:
+                # Release files not supported for 3D segmentation
+                continue
+
+            try:
+                # Add release
+                release = dataset.add_release(name, description)
+                assert isinstance(release, Release)
+            except AlreadyExistsError:
+                pass
+            finally:
+                # Delete release
+                time.sleep(TIME_INTERVAL)
+                self.client.delete_release(dataset_identifier, name)
+
+
+@pytest.mark.usefixtures("setup_class_client")
+class TestLabelset:
+    def test_get_labelsets(self, datasets, owner) -> None:
+        for dataset in datasets:
+            dataset_identifier = f"{owner}/{dataset}"
+            dataset = self.client.get_dataset(dataset_identifier)
+            labelsets = dataset.get_labelsets()
+            for labelset in labelsets:
+                assert isinstance(labelset, Labelset)
+
+    def test_get_labelset(self, datasets, owner) -> None:
+        for dataset in datasets:
+            dataset_identifier = f"{owner}/{dataset}"
+            dataset = self.client.get_dataset(dataset_identifier)
+            labelsets = dataset.get_labelsets()
+            for labelset in labelsets:
+                labelset = dataset.get_labelset(labelset.name)
+                assert isinstance(labelset, Labelset)
+
+    def test_add_delete_labelset(self, datasets, owner) -> None:
+        name = "labelset4"
+        description = "Test add_delete_labelset description."
+        for dataset in datasets:
+            dataset_identifier = f"{owner}/{dataset}"
+            dataset = self.client.get_dataset(dataset_identifier)
+            try:
+                # Add labelset
+                labelset = dataset.add_labelset(name, description)
+                assert isinstance(labelset, Labelset)
+            except AlreadyExistsError:
+                pass
+            finally:
+                # Delete labelset
+                self.client.delete_labelset(dataset_identifier, name)

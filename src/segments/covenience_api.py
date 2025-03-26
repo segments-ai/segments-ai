@@ -178,7 +178,7 @@ class Dataset(segments_typing.Dataset, HasClient):
     def get_release(self, name: str) -> segments_typing.Release:
         return self._client.get_release(self.full_name, name)
 
-    def list_releases(self) -> List[segments_typing.Release]:
+    def get_releases(self) -> List[segments_typing.Release]:
         return self._client.get_releases(self.full_name)
 
     def get_labelsets(self) -> List[segments_typing.Labelset]:
