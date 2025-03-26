@@ -60,7 +60,7 @@ from segments.typing import (
 )
 from typing_extensions import Literal, get_args
 
-from .covenience_api import Dataset, HasClient, Label, Sample
+from .convenience_api import Dataset, HasClient, Label, Sample
 
 
 try:

@@ -6,7 +6,7 @@ import pydantic
 import pytest
 import segments
 from segments.client import SegmentsClient
-from segments.covenience_api import Dataset, Label, Sample
+from segments.convenience_api import Dataset, Label, Sample
 from segments.exceptions import AlreadyExistsError, InvalidModelError
 from segments.typing import (
     Collaborator,
