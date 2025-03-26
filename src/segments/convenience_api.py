@@ -236,7 +236,7 @@ class Dataset(segments_typing.Dataset, HasClient):
         new_public: Optional[bool] = None,
         organization: Optional[str] = None,
         clone_labels: bool = False,
-    ):
+    ) -> Dataset:
         return self._client.clone_dataset(
             self.full_name, new_name, new_task_type, new_public, organization, clone_labels
         )
@@ -416,6 +416,10 @@ class Sample(segments_typing.Sample, HasClient):
 
     @property
     def dataset(self) -> Dataset:
+        """This property contains a lazy loaded dataset object that this sample belongs to.
+
+        When using the high level API, this property is always available. When fetching the sample with a :class:`~SegmentsClient` directly, using this property will trigger an additional API request to fetch the dataset.
+        """
         # Lazy load the dataset. This should be provided as often as possible but might be missing
         # when using the low-level client approach.
         if self._dataset is None:
@@ -605,6 +609,10 @@ class Label(segments_typing.Label, HasClient):
 
     @property
     def sample(self) -> Sample:
+        """This property contains a lazy loaded sample object that this label is attached to.
+
+        When using the high level API, this property is always available. When fetching the label with the :class:`~segments.SegmentsClient` directly, using this property will trigger an additional API request to fetch the sample.
+        """
         # Lazy load the sample. This should be provided as often as possible but might be missing
         # when using the low-level client approach.
         if self._sample is None:

@@ -37,6 +37,7 @@ from segments.typing import (
         (Dataset.add_labelset, SegmentsClient.add_labelset, ["dataset_identifier"]),
         (Dataset.get_issues, SegmentsClient.get_issues, ["dataset_identifier"]),
         (Dataset.get_workunits, SegmentsClient.get_workunits, ["dataset_identifier"]),
+        (Dataset.clone, SegmentsClient.clone_dataset, ["dataset_identifier"]),
         (Sample.delete, SegmentsClient.delete_sample, ["uuid"]),
         (Sample.update, SegmentsClient.update_sample, ["uuid"]),
         (Sample.get_label, SegmentsClient.get_label, ["sample_uuid"]),

@@ -23,13 +23,13 @@ The Python SDK is a convenient wrapper for the API.
 
 setup
 client
+convenience_api
 segmentsdataset
 utils
 huggingface
 types
 exceptions
 ```
-
 <!--
 # Indices and tables
 
