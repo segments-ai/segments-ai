@@ -42,9 +42,7 @@ from segments.exceptions import (
 from segments.typing import (
     AWSFields,
     Category,
-    Collaborator,
     File,
-    Issue,
     IssueStatus,
     LabelAttributes,
     Labelset,
@@ -60,7 +58,7 @@ from segments.typing import (
 )
 from typing_extensions import Literal, get_args
 
-from .convenience_api import Dataset, HasClient, Label, Sample
+from .convenience_api import Collaborator, Dataset, HasClient, Issue, Label, Sample
 
 
 try:

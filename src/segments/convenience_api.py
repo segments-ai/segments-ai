@@ -4,7 +4,7 @@ import functools
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 
 import pydantic
-from segments.exceptions import InvalidModelError
+from segments.exceptions import InvalidModelError, MissingContextError
 
 from . import typing as segments_typing
 
@@ -56,6 +56,8 @@ class HasClient(pydantic.BaseModel):
 
 
 class Dataset(segments_typing.Dataset, HasClient):
+    """See :class:`~segments.typing.Dataset` an overview of the properties this model has."""
+
     def add_sample(
         self,
         name: str,
@@ -91,7 +93,7 @@ class Dataset(segments_typing.Dataset, HasClient):
 
         attributes = validate_sample_attributes(attributes, self.task_type)
 
-        return self._client.add_sample(
+        sample = self._client.add_sample(
             self.full_name,
             name,
             attributes,
@@ -102,6 +104,8 @@ class Dataset(segments_typing.Dataset, HasClient):
             readme,
             enable_compression,
         )
+        sample._dataset = self
+        return sample
 
     def delete(self) -> None:
         """Deletes this dataset. See :meth:`segments.client.SegmentsClient.delete_dataset` for more details.
@@ -241,7 +245,7 @@ class Dataset(segments_typing.Dataset, HasClient):
             self.full_name, new_name, new_task_type, new_public, organization, clone_labels
         )
 
-    def get_collaborator(self, username: str) -> segments_typing.Collaborator:
+    def get_collaborator(self, username: str) -> Collaborator:
         """Fetches a specific collaborator from the dataset, see :meth:`segments.client.SegmentsClient.get_dataset_collaborator` for more details.
 
         Args:
@@ -254,11 +258,13 @@ class Dataset(segments_typing.Dataset, HasClient):
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid (e.g., if the dataset collaborator does not exist) or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
-        return self._client.get_dataset_collaborator(self.full_name, username)
+        collaborator = self._client.get_dataset_collaborator(self.full_name, username)
+        collaborator._dataset = self
+        return collaborator
 
     def add_collaborator(
         self, username: str, role: segments_typing.Role = segments_typing.Role.LABELER
-    ) -> segments_typing.Collaborator:
+    ) -> Collaborator:
         """Adds a collaborator to the dataset, see :meth:`segments.client.SegmentsClient.add_dataset_collaborator` for more details.
 
         Args:
@@ -271,7 +277,9 @@ class Dataset(segments_typing.Dataset, HasClient):
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
-        return self._client.add_dataset_collaborator(self.full_name, username, role)
+        collaborator = self._client.add_dataset_collaborator(self.full_name, username, role)
+        collaborator._dataset = self
+        return collaborator
 
     def add_release(self, name: str, description: str = "") -> segments_typing.Release:
         """Adds a release to the dataset, see :meth:`segments.client.SegmentsClient.add_release` for more details.
@@ -361,7 +369,7 @@ class Dataset(segments_typing.Dataset, HasClient):
         """
         return self._client.add_labelset(self.full_name, name, description)
 
-    def get_issues(self) -> List[segments_typing.Issue]:
+    def get_issues(self) -> List[Issue]:
         """Gets all issues in this dataset, see :meth:`segments.client.SegmentsClient.get_issues` for more details.
 
         Raises:
@@ -412,7 +420,9 @@ def inject_sample(func):
 
 
 class Sample(segments_typing.Sample, HasClient):
-    _dataset: Dataset = None
+    """See :class:`~segments.typing.Sample` an overview of the properties this model has."""
+
+    _dataset: Optional[Dataset] = None
 
     @property
     def dataset(self) -> Dataset:
@@ -576,7 +586,7 @@ class Sample(segments_typing.Sample, HasClient):
 
     def add_issue(
         self, description: str, status: segments_typing.IssueStatus = segments_typing.IssueStatus.OPEN
-    ) -> segments_typing.Issue:
+    ) -> Issue:
         """Adds an issue to this sample. See :meth:`segments.client.SegmentsClient.add_issue` for more details.
 
         Args:
@@ -592,7 +602,7 @@ class Sample(segments_typing.Sample, HasClient):
         """
         return self._client.add_issue(self.uuid, description, status)
 
-    def get_issues(self) -> List[segments_typing.Issue]:
+    def get_issues(self) -> List[Issue]:
         """Gets all issues associated to this sample. See :meth:`segments.client.SegmentsClient.get_issues` for more details.
 
         Raises:
@@ -605,7 +615,9 @@ class Sample(segments_typing.Sample, HasClient):
 
 
 class Label(segments_typing.Label, HasClient):
-    _sample: Sample = None
+    """See :class:`~segments.typing.Label` an overview of the properties this model has."""
+
+    _sample: Sample = None  # TODO: Remove? Might not be necessary?
 
     @property
     def sample(self) -> Sample:
@@ -658,6 +670,88 @@ class Label(segments_typing.Label, HasClient):
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
         return self._client.delete_label(self.sample_uuid, self.labelset)
+
+
+class Issue(segments_typing.Issue, HasClient):
+    """See :class:`~segments.typing.Issue` an overview of the properties this model has."""
+
+    def update(
+        self,
+        description: Optional[str] = None,
+        status: Optional[segments_typing.IssueStatus] = None,
+    ) -> Issue:
+        """Updates this issue. See :meth:`segments.client.SegmentsClient.add_issue` for more details.
+
+        Args:
+            description: The issue description. Defaults to :obj:`None`.
+            status: The issue status. One of ``OPEN`` or ``CLOSED``. Defaults to :obj:`None`.
+
+        Raises:
+            :exc:`~segments.exceptions.ValidationError`: If validation of the issue fails.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the issue is not found.
+            :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+        """
+        return self._client.update_issue(self.uuid, description, status)
+
+    def delete(
+        self,
+    ) -> None:
+        """Deletes this issue. See :meth:`segments.client.SegmentsClient.delete_issue` for more details.
+
+        Raises:
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the issue is not found.
+            :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+        """
+        self._client.delete_issue(self.uuid)
+
+
+class Collaborator(segments_typing.Collaborator, HasClient):
+    """See :class:`~segments.typing.Collaborator` an overview of the properties this model has."""
+
+    _dataset: Optional[Dataset] = None
+
+    @property
+    def dataset(self):
+        if self._dataset is None:
+            # TODO: Rephrase "high-level API"
+            raise MissingContextError(
+                "It is not possible to deduce which dataset this Collaborator object belongs to. This error occurs when you are not using the high-level API. Either fetch the Collaborator using `Dataset.get_collaborator` or use the SegmentsClient directly to operate on the Collaborator resource."
+            )
+
+        return self._dataset
+
+    def delete(self) -> None:
+        """Delete a dataset collaborator. See :meth:`segments.client.SegmentsClient.delete_dataset_collaborator` for more details.
+
+        Raises:
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the dataset or dataset collaborator is not found.
+            :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+            :exc:`~segments.exceptions.MissingContextError`: If the dataset property is not available, usually because the `Collaborator` object was not fetched using the high-level api.
+        """
+        """"""
+        self._client.delete_dataset_collaborator(self.dataset.full_name, self.user.username)
+
+    def update(self, role: segments_typing.Role) -> Collaborator:
+        """Update this dataset collaborator. See :meth:`segments.client.SegmentsClient.update_dataset_collaborator` for more details.
+
+        Args:
+            role: The role of the collaborator to be added. Defaults to ``labeler``.
+
+        Raises:
+            :exc:`~segments.exceptions.ValidationError`: If validation of the collaborator fails.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the dataset or dataset collaborator is not found.
+            :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+            :exc:`~segments.exceptions.MissingContextError`: If the dataset property is not available, usually because the `Collaborator` object was not fetched using the high-level api.
+        """
+        return self._client.update_dataset_collaborator(self.dataset.full_name, self.user.username, role)
 
 
 def validate_sample_attributes(attributes, task_type):

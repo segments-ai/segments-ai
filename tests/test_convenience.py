@@ -5,12 +5,11 @@ from typing import Final
 import pydantic
 import pytest
 import segments
+import segments.typing as segments_typing
 from segments.client import SegmentsClient
-from segments.convenience_api import Dataset, Label, Sample
-from segments.exceptions import AlreadyExistsError, InvalidModelError
+from segments.convenience_api import Collaborator, Dataset, Issue, Label, Sample
+from segments.exceptions import AlreadyExistsError, CollaboratorError, InvalidModelError
 from segments.typing import (
-    Collaborator,
-    Issue,
     Labelset,
     LabelStatus,
     PointcloudSegmentationLabelAttributes,
@@ -47,6 +46,10 @@ from segments.typing import (
         (Sample.add_issue, SegmentsClient.add_issue, ["sample_uuid"]),
         (Label.update, SegmentsClient.update_label, ["sample_uuid", "labelset"]),
         (Label.delete, SegmentsClient.delete_label, ["sample_uuid", "labelset"]),
+        (Issue.delete, SegmentsClient.delete_issue, ["uuid"]),
+        (Issue.update, SegmentsClient.update_issue, ["uuid"]),
+        (Collaborator.update, SegmentsClient.update_dataset_collaborator, ["dataset_identifier", "username"]),
+        (Collaborator.delete, SegmentsClient.delete_dataset_collaborator, ["dataset_identifier", "username"]),
     ],
 )
 def test_same_arguments(func1, func2, ignore: list[str]):
@@ -130,21 +133,30 @@ class TestDataset:
     def test_get_add_update_delete_dataset_collaborator(self, owner, datasets) -> None:
         username = "admin-arnaud"
         role = Role.ADMIN
-        for dataset_name in datasets:
-            dataset_identifier = f"{owner}/{dataset_name}"
-            dataset = self.client.get_dataset(dataset_identifier)
-            try:
-                # Add collaborator
-                collaborator = dataset.add_collaborator(username, role)
-                assert isinstance(collaborator, Collaborator)
-                # Get collaborator
-                collaborator = dataset.get_collaborator(username)
-                assert isinstance(collaborator, Collaborator)
-            except AlreadyExistsError:
-                pass
-            finally:
-                # Delete collaborator
-                self.client.delete_dataset_collaborator(dataset_identifier, username)
+        dataset_name = datasets[0]
+        dataset_identifier = f"{owner}/{dataset_name}"
+
+        dataset = self.client.get_dataset(dataset_identifier)
+        collaborator = None
+        try:
+            # Add collaborator
+            collaborator = dataset.add_collaborator(username, role)
+            assert isinstance(collaborator, segments_typing.Collaborator)
+            # Get collaborator
+            collaborator_get = dataset.get_collaborator(username)
+            assert isinstance(collaborator, segments_typing.Collaborator)
+            assert collaborator == collaborator_get
+
+            collaborator_update = collaborator.update(Role.ADMIN)
+            assert collaborator_update.role == Role.ADMIN
+        except CollaboratorError as e:
+            # Collaborator already exists, clean it up and fail the test. This should let the test pass on the next run.
+            self.client.delete_dataset_collaborator(dataset_identifier, username)
+            raise e
+        finally:
+            # Delete collaborator
+            if collaborator is not None:
+                collaborator.delete()
 
 
 @pytest.mark.usefixtures("setup_class_client")
@@ -285,26 +297,25 @@ class TestIssue:
             dataset = self.client.get_dataset(dataset_identifier)
             issues = dataset.get_issues()
             for issue in issues:
-                assert isinstance(issue, Issue)
+                assert isinstance(issue, segments_typing.Issue)
 
     def test_add_update_delete_issue(self, sample_uuids) -> None:
         description = "You forgot to label this car."
-        for sample_uuid in sample_uuids:
-            sample = self.client.get_sample(sample_uuid)
-            issue = None
-            try:
-                # Add issue
-                issue = sample.add_issue(description)
-                assert isinstance(issue, Issue)
-                # TODO: issue updating not yet implemented
-                # issue = self.client.update_issue(issue.uuid, description)
-                # assert isinstance(issue, Issue)
-            except AlreadyExistsError:
-                pass
-            finally:
-                # Delete issue
-                if issue:
-                    self.client.delete_issue(issue.uuid)
+        sample_uuid = sample_uuids[0]
+        sample = self.client.get_sample(sample_uuid)
+        issue = None
+        try:
+            # Add issue
+            issue = sample.add_issue(description)
+            assert isinstance(issue, segments_typing.Issue)
+            description2 = description.replace("car", "bike")
+            issue = issue.update(description2)
+            assert isinstance(issue, segments_typing.Issue)
+            assert issue.description == description2
+        finally:
+            # Delete issue
+            if issue:
+                issue.delete()
 
 
 @pytest.mark.usefixtures("setup_class_client")

@@ -101,3 +101,12 @@ class InvalidModelError(SegmentsError):
     """Raised when the model is invalid for the dataset type."""
 
     pass
+
+
+#############
+# SDK Usage #
+#############
+class MissingContextError(SegmentsError):
+    """Raised when the SDK is missing context information about a resource."""
+
+    pass
