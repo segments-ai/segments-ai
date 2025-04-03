@@ -404,6 +404,7 @@ class SegmentsClient:
         enable_label_status_verified: bool = False,
         enable_3d_cuboid_rotation: bool = False,
         organization: Optional[str] = None,
+        enable_confirm_on_commit: bool = False,
     ) -> Dataset:
         """Add a dataset.
 
@@ -464,6 +465,7 @@ class SegmentsClient:
             enable_label_status_verified: Enable an additional label status "Verified". Defaults to :obj:`False`.
             enable_3d_cuboid_rotation: Enable 3D cuboid rotation (i.e., yaw, pitch and roll). Defaults to :obj:`False`.
             organization: The username of the organization for which this dataset should be created. None will create a dataset for the current user. Defaults to :obj:`None`.
+            enable_confirm_on_commit: Enable a confirmation dialog when saving a sample in this dataset. Defaults to :obj:`False`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the task attributes fails.
@@ -510,6 +512,7 @@ class SegmentsClient:
             "enable_save_button": enable_save_button,
             "enable_label_status_verified": enable_label_status_verified,
             "enable_3d_cuboid_rotation": enable_3d_cuboid_rotation,
+            "enable_confirm_on_submit": enable_confirm_on_commit,
             "data_type": "IMAGE",
         }
 
@@ -541,6 +544,7 @@ class SegmentsClient:
         enable_save_button: Optional[bool] = None,
         enable_label_status_verified: Optional[bool] = None,
         enable_3d_cuboid_rotation: Optional[bool] = None,
+        enable_confirm_on_commit: Optional[bool] = None,
     ) -> Dataset:
         """Update a dataset.
 
@@ -553,22 +557,23 @@ class SegmentsClient:
 
         Args:
             dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
-            description: The dataset description. Defaults to :obj:`None`.
-            task_type: The dataset's task type. Defaults to :obj:`None`.
-            task_attributes: The dataset's task attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/categories-and-task-attributes#object-attribute-format>`__. Defaults to :obj:`None`.
-            category: The dataset category. Defaults to :obj:`None`.
-            public: The dataset visibility. Defaults to :obj:`None`.
-            readme: The dataset readme. Defaults to :obj:`None`.
+            description: The dataset description. If not provided, the current value is kept.
+            task_type: The dataset's task type. If not provided, the current value is kept.
+            task_attributes: The dataset's task attributes. Please refer to the `online documentation <https://docs.segments.ai/reference/categories-and-task-attributes#object-attribute-format>`__. If not provided, the current value is kept.
+            category: The dataset category. If not provided, the current value is kept.
+            public: The dataset visibility. If not provided, the current value is kept.
+            readme: The dataset readme. If not provided, the current value is kept.
             metadata: Any dataset metadata. Example: ``{'day': 'sunday', 'robot_id': 3}``.
-            labeling_inactivity_timeout_seconds: The number of seconds after which a user is considered inactive during labeling. Only impacts label timing metrics. Defaults to :obj:`None`.
-            enable_skip_labeling: Enable the skip button in the labeling workflow. Defaults to :obj:`None`.
-            enable_skip_reviewing: Enable the skip button in the reviewing workflow. Defaults to :obj:`None`.
-            enable_ratings: Enable star-ratings for labeled images. Defaults to :obj:`None`.
-            enable_interpolation: Enable label interpolation in sequence datasets. Ignored for non-sequence datasets. Defaults to :obj:`None`.
-            enable_same_dimensions_track_constraint: Enable constraint to keep same cuboid dimensions for the entire object track in point cloud cuboid datasets. Ignored for non-cuboid datasets. Defaults to :obj:`None`.
-            enable_save_button: Enable a save button in the labeling and reviewing workflow, to save unfinished work. Defaults to :obj:`False`.
-            enable_label_status_verified: Enable an additional label status "Verified". Defaults to :obj:`False`.
-            enable_3d_cuboid_rotation: Enable 3D cuboid rotation (i.e., yaw, pitch and roll). Defaults to :obj:`False`.
+            labeling_inactivity_timeout_seconds: The number of seconds after which a user is considered inactive during labeling. Only impacts label timing metrics. If not provided, the current value is kept.
+            enable_skip_labeling: Enable the skip button in the labeling workflow. If not provided, the current value is kept.
+            enable_skip_reviewing: Enable the skip button in the reviewing workflow. If not provided, the current value is kept.
+            enable_ratings: Enable star-ratings for labeled images. If not provided, the current value is kept.
+            enable_interpolation: Enable label interpolation in sequence datasets. Ignored for non-sequence datasets. If not provided, the current value is kept.
+            enable_same_dimensions_track_constraint: Enable constraint to keep same cuboid dimensions for the entire object track in point cloud cuboid datasets. Ignored for non-cuboid datasets. If not provided, the current value is kept.
+            enable_save_button: Enable a save button in the labeling and reviewing workflow, to save unfinished work. If not provided, the current value is kept.
+            enable_label_status_verified: Enable an additional label status "Verified". If not provided, the current value is kept.
+            enable_3d_cuboid_rotation: Enable 3D cuboid rotation (i.e., yaw, pitch and roll). If not provided, the current value is kept.
+            enable_confirm_on_commit: Enable a confirmation dialog when saving a sample in this dataset. If not provided, the current value is kept.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
@@ -640,6 +645,9 @@ class SegmentsClient:
 
         if enable_3d_cuboid_rotation is not None:
             payload["enable_3d_cuboid_rotation"] = enable_3d_cuboid_rotation
+
+        if enable_confirm_on_commit is not None:
+            payload["enable_confirm_on_submit"] = enable_confirm_on_commit
 
         r = self._patch(f"/datasets/{dataset_identifier}/", data=payload, model=Dataset)
         # logger.info(f"Updated {dataset_identifier}")
