@@ -404,6 +404,7 @@ class SegmentsClient:
         enable_label_status_verified: bool = False,
         enable_3d_cuboid_rotation: bool = False,
         organization: Optional[str] = None,
+        enable_confirm_on_commit: bool = False,
     ) -> Dataset:
         """Add a dataset.
 
@@ -464,6 +465,7 @@ class SegmentsClient:
             enable_label_status_verified: Enable an additional label status "Verified". Defaults to :obj:`False`.
             enable_3d_cuboid_rotation: Enable 3D cuboid rotation (i.e., yaw, pitch and roll). Defaults to :obj:`False`.
             organization: The username of the organization for which this dataset should be created. None will create a dataset for the current user. Defaults to :obj:`None`.
+            enable_confirm_on_commit: Enable a confirmation dialog when saving a sample in this dataset. Defaults to :obj:`False`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the task attributes fails.
@@ -510,6 +512,7 @@ class SegmentsClient:
             "enable_save_button": enable_save_button,
             "enable_label_status_verified": enable_label_status_verified,
             "enable_3d_cuboid_rotation": enable_3d_cuboid_rotation,
+            "enable_confirm_on_submit": enable_confirm_on_commit,
             "data_type": "IMAGE",
         }
 
@@ -541,6 +544,7 @@ class SegmentsClient:
         enable_save_button: Optional[bool] = None,
         enable_label_status_verified: Optional[bool] = None,
         enable_3d_cuboid_rotation: Optional[bool] = None,
+        enable_confirm_on_commit: Optional[bool] = None,
     ) -> Dataset:
         """Update a dataset.
 
@@ -569,6 +573,7 @@ class SegmentsClient:
             enable_save_button: Enable a save button in the labeling and reviewing workflow, to save unfinished work. Defaults to :obj:`False`.
             enable_label_status_verified: Enable an additional label status "Verified". Defaults to :obj:`False`.
             enable_3d_cuboid_rotation: Enable 3D cuboid rotation (i.e., yaw, pitch and roll). Defaults to :obj:`False`.
+            enable_confirm_on_commit: Enable a confirmation dialog when saving a sample in this dataset. Defaults to :obj:`None`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
@@ -640,6 +645,9 @@ class SegmentsClient:
 
         if enable_3d_cuboid_rotation is not None:
             payload["enable_3d_cuboid_rotation"] = enable_3d_cuboid_rotation
+
+        if enable_confirm_on_commit is not None:
+            payload["enable_confirm_on_submit"] = enable_confirm_on_commit
 
         r = self._patch(f"/datasets/{dataset_identifier}/", data=payload, model=Dataset)
         # logger.info(f"Updated {dataset_identifier}")
