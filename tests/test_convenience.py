@@ -7,13 +7,11 @@ import pytest
 import segments
 import segments.typing as segments_typing
 from segments.client import SegmentsClient
-from segments.convenience_api import Collaborator, Dataset, Issue, Label, Sample
+from segments.convenience_api import Collaborator, Dataset, Issue, Label, Labelset, Release, Sample
 from segments.exceptions import AlreadyExistsError, CollaboratorError, InvalidModelError
 from segments.typing import (
-    Labelset,
     LabelStatus,
     PointcloudSegmentationLabelAttributes,
-    Release,
     Role,
     TaskType,
 )
@@ -50,6 +48,8 @@ from segments.typing import (
         (Issue.update, SegmentsClient.update_issue, ["uuid"]),
         (Collaborator.update, SegmentsClient.update_dataset_collaborator, ["dataset_identifier", "username"]),
         (Collaborator.delete, SegmentsClient.delete_dataset_collaborator, ["dataset_identifier", "username"]),
+        (Labelset.delete, SegmentsClient.delete_labelset, ["dataset_identifier", "name"]),
+        (Release.delete, SegmentsClient.delete_release, ["dataset_identifier", "name"]),
     ],
 )
 def test_same_arguments(func1, func2, ignore: list[str]):
@@ -347,16 +347,19 @@ class TestRelease:
                 # Release files not supported for 3D segmentation
                 continue
 
+            release = None
             try:
                 # Add release
                 release = dataset.add_release(name, description)
                 assert isinstance(release, Release)
-            except AlreadyExistsError:
-                pass
+            except AlreadyExistsError as e:
+                release = dataset.get_release(name)
+                raise e
             finally:
                 # Delete release
                 time.sleep(TIME_INTERVAL)
-                self.client.delete_release(dataset_identifier, name)
+                if release is not None:
+                    release.delete()
 
 
 @pytest.mark.usefixtures("setup_class_client")
@@ -384,12 +387,15 @@ class TestLabelset:
         for dataset in datasets:
             dataset_identifier = f"{owner}/{dataset}"
             dataset = self.client.get_dataset(dataset_identifier)
+            labelset = None
             try:
                 # Add labelset
                 labelset = dataset.add_labelset(name, description)
                 assert isinstance(labelset, Labelset)
-            except AlreadyExistsError:
-                pass
+            except AlreadyExistsError as e:
+                labelset = dataset.get_labelset(name)
+                raise e
             finally:
                 # Delete labelset
-                self.client.delete_labelset(dataset_identifier, name)
+                if labelset is not None:
+                    labelset.delete()

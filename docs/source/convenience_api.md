@@ -67,3 +67,21 @@ sample.delete()
     :undoc-members:
     :exclude-members: model_config, model_post_init
 ```
+
+### Labelset
+
+```{eval-rst}
+.. autoclass:: segments.convenience_api.Labelset
+    :members:
+    :undoc-members:
+    :exclude-members: model_config, model_post_init
+```
+
+### Release
+
+```{eval-rst}
+.. autoclass:: segments.convenience_api.Release
+    :members:
+    :undoc-members:
+    :exclude-members: model_config, model_post_init
+```

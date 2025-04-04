@@ -85,7 +85,7 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
     """Create a Huggingface dataset from a release.
 
     Args:
-        release: A Segments release resulting from :meth:`.get_release`.
+        release: A Segments release resulting from :meth:`~segments.SegmentsClient.get_release`.
         download_images: If images need to be downloaded from an AWS S3 url. Defaults to :obj:`True`.
 
     Returns:
@@ -299,7 +299,7 @@ def release2dataset(release: Release, download_images: bool = True) -> datasets.
 
     info = {
         "name": release_dict["dataset"]["name"],
-        "segments_url": f'https://segments.ai/{release_dict["dataset"]["owner"]}/{release_dict["dataset"]["name"]}',
+        "segments_url": f"https://segments.ai/{release_dict['dataset']['owner']}/{release_dict['dataset']['name']}",
         "short_description": release_dict["dataset"]["description"],
         "release": release_dict["name"],
         "taxonomy_table": get_taxonomy_table(release_dict["dataset"]["task_attributes"]),

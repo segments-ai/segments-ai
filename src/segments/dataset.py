@@ -73,7 +73,7 @@ class SegmentsDataset:
             plt.show()
 
     Args:
-        release_file: Path to a release file, or a release class resulting from :meth:`.get_release`.
+        release_file: Path to a release file, or a release class resulting from :meth:`~segments.SegmentsClient.get_release`.
         labelset: The labelset that should be loaded. Defaults to ``ground-truth``.
         filter_by: A list of label statuses to filter by. Defaults to :obj:`None`.
         filter_by_metadata: A dict of metadata key:value pairs to filter by. Filters are ANDed together. Defaults to :obj:`None`.
@@ -99,7 +99,7 @@ class SegmentsDataset:
         preload: bool = True,
         s3_client: Optional[Any] = None,
         gcp_client: Optional[Any] = None,
-        load_images: Optional[bool] = True
+        load_images: Optional[bool] = True,
     ):
         # check environment for SEGMENTS_DIR variable if `segments_dir` has default value
         if segments_dir == "segments":

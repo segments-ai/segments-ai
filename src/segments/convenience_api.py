@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import functools
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 
 import pydantic
@@ -296,9 +295,11 @@ class Dataset(segments_typing.Dataset, HasClient):
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
-        return self._client.add_release(self.full_name, name, description)
+        release = self._client.add_release(self.full_name, name, description)
+        release._dataset = self
+        return release
 
-    def get_release(self, name: str) -> segments_typing.Release:
+    def get_release(self, name: str) -> Release:
         """Gets a specific release from the dataset, see :meth:`segments.client.SegmentsClient.get_release` for more details.
 
         Args:
@@ -311,9 +312,11 @@ class Dataset(segments_typing.Dataset, HasClient):
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid (e.g., if the dataset does not exist) or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
-        return self._client.get_release(self.full_name, name)
+        release = self._client.get_release(self.full_name, name)
+        release._dataset = self
+        return release
 
-    def get_releases(self) -> List[segments_typing.Release]:
+    def get_releases(self) -> List[Release]:
         """Lists all releases in the dataset, see :meth:`segments.client.SegmentsClient.get_releases` for more details.
 
         Raises:
@@ -323,7 +326,11 @@ class Dataset(segments_typing.Dataset, HasClient):
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
-        return self._client.get_releases(self.full_name)
+        releases = self._client.get_releases(self.full_name)
+        for release in releases:
+            release._dataset = self
+
+        return releases
 
     def get_labelsets(self) -> List[segments_typing.Labelset]:
         """Gets all labelsets in this dataset, see :meth:`segments.client.SegmentsClient.get_labelsets` for more details.
@@ -335,7 +342,11 @@ class Dataset(segments_typing.Dataset, HasClient):
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid (e.g., if the dataset does not exist) or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
-        return self._client.get_labelsets(self.full_name)
+        labelsets = self._client.get_labelsets(self.full_name)
+        for labelset in labelsets:
+            labelset._dataset = self
+
+        return labelsets
 
     def get_labelset(self, name: str) -> segments_typing.Labelset:
         """Gets a labelset from this dataset, see :meth:`segments.client.SegmentsClient.get_labelset` for more details.
@@ -350,7 +361,9 @@ class Dataset(segments_typing.Dataset, HasClient):
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid (e.g., if the dataset does not exist) or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
-        return self._client.get_labelset(self.full_name, name)
+        labelset = self._client.get_labelset(self.full_name, name)
+        labelset._dataset = self
+        return labelset
 
     def add_labelset(self, name: str, description: str = "") -> segments_typing.Labelset:
         """Adds a labelset to the dataset, see :meth:`segments.client.SegmentsClient.add_labelset` for more details.
@@ -367,7 +380,9 @@ class Dataset(segments_typing.Dataset, HasClient):
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
-        return self._client.add_labelset(self.full_name, name, description)
+        labelset = self._client.add_labelset(self.full_name, name, description)
+        labelset._dataset = self
+        return labelset
 
     def get_issues(self) -> List[Issue]:
         """Gets all issues in this dataset, see :meth:`segments.client.SegmentsClient.get_issues` for more details.
@@ -407,16 +422,6 @@ class Dataset(segments_typing.Dataset, HasClient):
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
         return self._client.get_workunits(self.full_name, sort, direction, start, end, per_page, page)
-
-
-def inject_sample(func):
-    @functools.wraps(func)
-    def wrapper(self, *args, **kwargs):
-        model = func(self, *args, **kwargs)
-        model._sample = self
-        return model
-
-    return wrapper
 
 
 class Sample(segments_typing.Sample, HasClient):
@@ -495,7 +500,6 @@ class Sample(segments_typing.Sample, HasClient):
             enable_compression,
         )
 
-    @inject_sample
     def get_label(self, labelset: Optional[str] = "ground-truth") -> Label:
         """Gets the label of this sample. See :meth:`segments.client.SegmentsClient.get_label` for more details.
 
@@ -511,7 +515,6 @@ class Sample(segments_typing.Sample, HasClient):
         """
         return self._client.get_label(self.uuid, labelset)
 
-    @inject_sample
     def add_label(
         self,
         labelset: str,
@@ -540,7 +543,6 @@ class Sample(segments_typing.Sample, HasClient):
         attributes_model = validate_label_attributes(attributes, self.dataset.task_type)
         return self._client.add_label(self.uuid, labelset, attributes_model, label_status, score, enable_compression)
 
-    @inject_sample
     def update_label(
         self,
         labelset: str,
@@ -616,21 +618,6 @@ class Sample(segments_typing.Sample, HasClient):
 
 class Label(segments_typing.Label, HasClient):
     """See :class:`~segments.typing.Label` an overview of the properties this model has."""
-
-    _sample: Sample = None  # TODO: Remove? Might not be necessary?
-
-    @property
-    def sample(self) -> Sample:
-        """This property contains a lazy loaded sample object that this label is attached to.
-
-        When using the high level API, this property is always available. When fetching the label with the :class:`~segments.SegmentsClient` directly, using this property will trigger an additional API request to fetch the sample.
-        """
-        # Lazy load the sample. This should be provided as often as possible but might be missing
-        # when using the low-level client approach.
-        if self._sample is None:
-            self._sample = self._client.get_sample(self.sample_uuid)
-
-        return self._sample
 
     def update(
         self,
@@ -752,6 +739,58 @@ class Collaborator(segments_typing.Collaborator, HasClient):
             :exc:`~segments.exceptions.MissingContextError`: If the dataset property is not available, usually because the `Collaborator` object was not fetched using the high-level api.
         """
         return self._client.update_dataset_collaborator(self.dataset.full_name, self.user.username, role)
+
+
+class Release(segments_typing.Release, HasClient):
+    _dataset: Optional[Dataset] = None
+
+    @property
+    def dataset(self):
+        if self._dataset is None:
+            # TODO: Rephrase "high-level API"
+            raise MissingContextError(
+                "It is not possible to deduce which dataset this Release object belongs to. This error occurs when you are not using the high-level API. Either fetch the Release using `Dataset.get_release` or use the SegmentsClient directly to operate on the Release resource."
+            )
+
+        return self._dataset
+
+    def delete(self) -> None:
+        """Deletes this release. See :meth:`segments.client.SegmentsClient.delete_release` for more details.
+
+        Raises:
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the dataset or release is not found.
+            :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+            :exc:`~segments.exceptions.MissingContextError`: If the dataset property is not available, usually because the `Release` object was not fetched using the high-level api.
+        """
+        return self._client.delete_release(self.dataset.full_name, self.name)
+
+
+class Labelset(segments_typing.Labelset, HasClient):
+    _dataset: Optional[Dataset] = None
+
+    @property
+    def dataset(self):
+        if self._dataset is None:
+            # TODO: Rephrase "high-level API"
+            raise MissingContextError(
+                "It is not possible to deduce which dataset this Labelset object belongs to. This error occurs when you are not using the high-level API. Either fetch the Labelset using `Dataset.get_labelset` or use the SegmentsClient directly to operate on the Labelset resource."
+            )
+
+        return self._dataset
+
+    def delete(self) -> None:
+        """Deletes this labelset. See :meth:`segments.client.SegmentsClient.delete_labelset` for more details.
+
+        Raises:
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the dataset or labelset is not found.
+            :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+            :exc:`~segments.exceptions.MissingContextError`: If the dataset property is not available, usually because the `Labelset` object was not fetched using the high-level api.
+        """
+        return self._client.delete_labelset(self.dataset.full_name, self.name)
 
 
 def validate_sample_attributes(attributes, task_type):

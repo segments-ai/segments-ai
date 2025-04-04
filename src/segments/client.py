@@ -45,10 +45,8 @@ from segments.typing import (
     File,
     IssueStatus,
     LabelAttributes,
-    Labelset,
     LabelStatus,
     PresignedPostFields,
-    Release,
     Role,
     SampleAttributes,
     TaskAttributes,
@@ -58,7 +56,7 @@ from segments.typing import (
 )
 from typing_extensions import Literal, get_args
 
-from .convenience_api import Collaborator, Dataset, HasClient, Issue, Label, Sample
+from .convenience_api import Collaborator, Dataset, HasClient, Issue, Label, Labelset, Release, Sample
 
 
 try:
