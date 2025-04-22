@@ -135,6 +135,7 @@ class Dataset(segments_typing.Dataset, HasClient):
         enable_save_button: Optional[bool] = None,
         enable_label_status_verified: Optional[bool] = None,
         enable_3d_cuboid_rotation: Optional[bool] = None,
+        enable_confirm_on_commit: Optional[bool] = None,
     ) -> Dataset:
         """Updates the dataset, see :meth:`segments.client.SegmentsClient.update_dataset` for more details.
 
@@ -155,6 +156,7 @@ class Dataset(segments_typing.Dataset, HasClient):
             enable_save_button: Enable a save button in the labeling and reviewing workflow, to save unfinished work. Defaults to :obj:`False`.
             enable_label_status_verified: Enable an additional label status "Verified". Defaults to :obj:`False`.
             enable_3d_cuboid_rotation: Enable 3D cuboid rotation (i.e., yaw, pitch and roll). Defaults to :obj:`False`.
+            enable_confirm_on_commit: Enable a confirmation dialog when saving a sample in this dataset. Defaults to :obj:`None`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
