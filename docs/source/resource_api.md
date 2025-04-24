@@ -2,7 +2,7 @@
 
 ## Usage
 
-There are 2 main approaches to using the SDK. One is using the [SegmentsClient](client.md) for each API call directly. However, you can also methods attached to the segments.ai resources directly. We recommend using the latter in most cases, as this allows the SDK to perform better validation checks to the inputs you provide to the API. This will both speed up performance, reduce the risk of errors, and give more descriptive error messages in case there is a mistake anywhere.
+There are 2 main approaches to using the SDK. One is using the [SegmentsClient](client.md) for each API call directly. However, you can also call methods attached to the Segments.ai resources directly. We recommend using the latter in most cases, as this allows the SDK to perform better validation checks to the inputs you provide to the API. This will both speed up performance, reduce the risk of errors, and give more descriptive error messages in case there is a mistake anywhere.
 
 When using the resource-driven approach, you will always start out fetching or creating a resource using a [SegmentsClient](client.md):
 
