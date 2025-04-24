@@ -112,9 +112,9 @@ def handle_exceptions(f: Callable[..., requests.Response]) -> Callable[..., Unio
                 if model is not None:
                     try:
                         m = TypeAdapter(model).validate_python(r_json)
-                        if isinstance(model, List) and issubclass(get_args(model)[0], HasClient):
+                        if isinstance(m, list) and issubclass(get_args(model)[0], HasClient):
                             for item in m:
-                                item.inject_client(self)
+                                item._inject_client(self)
                         elif inspect.isclass(model) and issubclass(model, HasClient):
                             m._inject_client(self)
 
