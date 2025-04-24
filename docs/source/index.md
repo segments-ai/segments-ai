@@ -22,6 +22,7 @@ The Python SDK is a convenient wrapper for the API.
 :hidden:
 
 setup
+resource_api
 client
 segmentsdataset
 utils
@@ -29,7 +30,6 @@ huggingface
 types
 exceptions
 ```
-
 <!--
 # Indices and tables
 
