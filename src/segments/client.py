@@ -179,6 +179,9 @@ def convert_model(
         r_json = resp.json()
         try:
             m = TypeAdapter(model).validate_python(r_json)
+
+            # Add the client to the model if it has teh HasClient mixin
+            # This is required for the resource API to work
             if isinstance(m, list) and issubclass(get_args(model)[0], HasClient):
                 for item in m:
                     item._inject_client(self)
