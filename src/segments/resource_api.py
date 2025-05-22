@@ -6,6 +6,7 @@ import pydantic
 from segments.exceptions import InvalidModelError, MissingContextError
 
 from . import typing as segments_typing
+from .sentinel import _NOT_ASSIGNED
 
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -465,8 +466,8 @@ class Sample(segments_typing.Sample, HasClient):
         attributes: Optional[Union[Dict[str, Any], segments_typing.SampleAttributes]] = None,
         metadata: Optional[Dict[str, Any]] = None,
         priority: Optional[float] = None,
-        assigned_labeler: Optional[str] = None,
-        assigned_reviewer: Optional[str] = None,
+        assigned_labeler: Optional[str] = _NOT_ASSIGNED,
+        assigned_reviewer: Optional[str] = _NOT_ASSIGNED,
         readme: Optional[str] = None,
         enable_compression: bool = True,
     ) -> Sample:
