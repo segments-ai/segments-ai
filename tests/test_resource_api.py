@@ -217,6 +217,36 @@ class TestSample:
                     time.sleep(TIME_INTERVAL)
                     sample.delete()
 
+    def test_unset_assigned(self, datasets, owner, add_update_sample_arguments, sample_attribute_types) -> None:
+        attributes = add_update_sample_arguments
+        name = "test_unset_assigned"
+
+        attributes_type = sample_attribute_types[0]
+        dataset_name = datasets[0]
+        dataset_identifier = f"{owner}/{dataset_name}"
+
+        dataset = self.client.get_dataset(dataset_identifier)
+
+        if matched_samples := dataset.get_samples(name=name):
+            assert len(matched_samples) == 1, f"Multiple matches found for sample with name {name}"
+            matched_samples[0].delete()
+
+        sample = dataset.add_sample(name, attributes[attributes_type], assigned_reviewer=owner, assigned_labeler=owner)
+        try:
+            assert sample.assigned_labeler == owner
+            assert sample.assigned_reviewer == owner
+
+            sample = sample.update(assigned_labeler=None)
+
+            assert sample.assigned_labeler is None
+            assert sample.assigned_reviewer == owner
+            
+            sample = sample.update(assigned_reviewer=None)
+
+            assert sample.assigned_reviewer is None
+        finally:
+            sample.delete()
+
 
 @pytest.mark.usefixtures("setup_class_client")
 class TestLabel:
