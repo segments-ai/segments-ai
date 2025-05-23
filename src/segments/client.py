@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 # https://gist.github.com/benkehoe/066a73903e84576a8d6d911cfedc2df6
+import functools
 import gzip
 import importlib.metadata as importlib_metadata
 import inspect
@@ -78,28 +79,24 @@ VERSION = __version__
 # Helper functions #
 ####################
 # Error handling: https://stackoverflow.com/questions/16511337/correct-way-to-try-except-using-python-requests-module
-def handle_exceptions(f: Callable[..., requests.Response]) -> Callable[..., Union[requests.Response, T]]:
+def handle_exceptions(f: Callable[..., requests.Response]) -> Callable[..., requests.Response]:
     """Catch exceptions and throw Segments exceptions.
-
-    Args:
-        model: The class to parse the JSON response into. Defaults to :obj:`None`.
 
     Returns:
         A wrapper function (of this exception handler decorator).
 
     Raises:
-        :exc:`~segments.exceptions.ValidationError`: If validation of the response fails - catches :exc:`pydantic.ValidationError`.
         :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
         :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error - catches :exc:`requests.HTTPError` and catches :exc:`requests.RequestException`.
         :exc:`~segments.exceptions.TimeoutError`: If the request times out - catches :exc:`requests.exceptions.TimeoutError`.
     """
 
+    @functools.wraps(f)
     def throw_segments_exception(
         self: SegmentsClient,
         *args: Any,
-        model: Optional[Type[T]] = None,
         **kwargs: Any,
-    ) -> Union[requests.Response, T]:
+    ) -> requests.Response:
         try:
             r = f(self, *args, **kwargs)
             r.raise_for_status()
@@ -110,24 +107,6 @@ def handle_exceptions(f: Callable[..., requests.Response]) -> Callable[..., Unio
                     message = r_json.get("detail", "")
                     if "throttled" in message:
                         raise APILimitError(message)
-                if model is not None:
-                    try:
-                        m = TypeAdapter(model).validate_python(r_json)
-                        if isinstance(m, list) and issubclass(get_args(model)[0], HasClient):
-                            for item in m:
-                                item._inject_client(self)
-                        elif inspect.isclass(model) and issubclass(model, HasClient):
-                            m._inject_client(self)
-
-                    except pydantic.ValidationError as e:
-                        if not self._strict_checking:
-                            # We're not applying strict type checking, just return the decoded json
-                            logging.warning(f"Validation failed for model {model}, returning the raw json.")
-                            return r_json
-                        else:
-                            raise e
-
-                    return m
             return r
         except requests.exceptions.Timeout as e:
             # Maybe set up for a retry, or continue in a retry loop
@@ -172,10 +151,55 @@ Possible fixes:
         except requests.exceptions.RequestException as e:
             logger.error(f"Unknown error: {e}")
             raise NetworkError(message=str(e), cause=e)
-        except pydantic.ValidationError as e:
-            raise ValidationError(message=str(e), cause=e)
 
     return throw_segments_exception
+
+
+def convert_model(
+    f: Callable[..., requests.Response],
+) -> Callable[..., Union[requests.Response, T, dict, list]]:
+    """Converts the response of the function to a pydantic model. Which model is determined by the `model` argument.
+
+    Returns:
+
+    Raises:
+        :exc:`~segments.exceptions.ValidationError`: If validation of the response fails - catches :exc:`pydantic.ValidationError`.
+    """
+
+    @functools.wraps(f)
+    def convert_model_wrapper(
+        self: SegmentsClient,
+        *args: Any,
+        model: Optional[Type[T]] = None,
+        **kwargs: Any,
+    ):
+        resp = f(self, *args, **kwargs)
+        if model is None:
+            return resp
+
+        r_json = resp.json()
+        try:
+            m = TypeAdapter(model).validate_python(r_json)
+
+            # Add the client to the model if it has teh HasClient mixin
+            # This is required for the resource API to work
+            if isinstance(m, list) and issubclass(get_args(model)[0], HasClient):
+                for item in m:
+                    item._inject_client(self)
+            elif inspect.isclass(model) and issubclass(model, HasClient):
+                m._inject_client(self)
+
+        except pydantic.ValidationError as e:
+            if not self._strict_checking:
+                # We're not applying strict type checking, just return the decoded json
+                logging.warning(f"Validation failed for model {model}, returning the raw json.")
+                return r_json
+            else:
+                raise ValidationError(message=str(e), cause=e)
+
+        return m
+
+    return convert_model_wrapper
 
 
 ##########
@@ -1918,6 +1942,7 @@ class SegmentsClient:
     ####################
     # Helper functions #
     ####################
+    @convert_model
     @handle_exceptions
     def _get(
         self,
@@ -1945,6 +1970,7 @@ class SegmentsClient:
 
         return r
 
+    @convert_model
     @handle_exceptions
     def _post(
         self,
@@ -1977,6 +2003,7 @@ class SegmentsClient:
 
         return r
 
+    @convert_model
     @handle_exceptions
     def _put(
         self,
@@ -2008,6 +2035,7 @@ class SegmentsClient:
 
         return r
 
+    @convert_model
     @handle_exceptions
     def _patch(
         self,
@@ -2039,6 +2067,7 @@ class SegmentsClient:
 
         return r
 
+    @convert_model
     @handle_exceptions
     def _delete(
         self,
