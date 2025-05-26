@@ -5,7 +5,7 @@ from typing import List
 #############
 # Constants #
 #############
-MAJOR, MINOR, PATCH = 1, 12, 1
+MAJOR, MINOR, PATCH = 1, 13, 0
 VERSION = f"{MAJOR}.{MINOR}.{PATCH}"
 
 

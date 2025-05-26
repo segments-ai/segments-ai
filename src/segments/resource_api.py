@@ -6,6 +6,7 @@ import pydantic
 from segments.exceptions import InvalidModelError, MissingContextError
 
 from . import typing as segments_typing
+from .sentinel import _NOT_ASSIGNED
 
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -465,8 +466,8 @@ class Sample(segments_typing.Sample, HasClient):
         attributes: Optional[Union[Dict[str, Any], segments_typing.SampleAttributes]] = None,
         metadata: Optional[Dict[str, Any]] = None,
         priority: Optional[float] = None,
-        assigned_labeler: Optional[str] = None,
-        assigned_reviewer: Optional[str] = None,
+        assigned_labeler: Optional[str] = _NOT_ASSIGNED,
+        assigned_reviewer: Optional[str] = _NOT_ASSIGNED,
         readme: Optional[str] = None,
         enable_compression: bool = True,
     ) -> Sample:
@@ -489,11 +490,13 @@ class Sample(segments_typing.Sample, HasClient):
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
-        attributes_model = validate_sample_attributes(attributes, self.dataset.task_type)
+        if attributes is not None:
+            attributes = validate_sample_attributes(attributes, self.dataset.task_type)
+
         return self._client.update_sample(
             self.uuid,
             name,
-            attributes_model,
+            attributes,
             metadata,
             priority,
             assigned_labeler,
@@ -548,7 +551,7 @@ class Sample(segments_typing.Sample, HasClient):
     def update_label(
         self,
         labelset: str,
-        attributes: Union[Dict[str, Any], segments_typing.LabelAttributes],
+        attributes: Optional[Union[Dict[str, Any], segments_typing.LabelAttributes]] = None,
         label_status: segments_typing.LabelStatus = segments_typing.LabelStatus.PRELABELED,
         score: Optional[float] = None,
         enable_compression: bool = True,
@@ -569,9 +572,11 @@ class Sample(segments_typing.Sample, HasClient):
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
-        attributes_model = validate_label_attributes(attributes, self.dataset.task_type)
+        if attributes is not None:
+            attributes = validate_label_attributes(attributes, self.dataset.task_type)
+
         return self._client.update_label(
-            self.uuid, labelset, attributes_model, label_status, score, enable_compression
+            self.uuid, labelset, attributes, label_status, score, enable_compression
         )
 
     def delete_label(self, labelset: str) -> None:
@@ -623,7 +628,7 @@ class Label(segments_typing.Label, HasClient):
 
     def update(
         self,
-        attributes: Union[Dict[str, Any], segments_typing.LabelAttributes],
+        attributes: Optional[Union[Dict[str, Any], segments_typing.LabelAttributes]] = None,
         label_status: segments_typing.LabelStatus = segments_typing.LabelStatus.PRELABELED,
         score: Optional[float] = None,
         enable_compression: bool = True,
@@ -644,7 +649,9 @@ class Label(segments_typing.Label, HasClient):
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
-        attributes = validate_label_attributes(attributes, self.label_type)
+        if attributes is not None:
+            attributes = validate_label_attributes(attributes, self.label_type)
+
         return self._client.update_label(
             self.sample_uuid, self.labelset, attributes, label_status, score, enable_compression
         )

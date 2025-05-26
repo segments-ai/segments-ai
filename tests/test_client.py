@@ -279,6 +279,34 @@ class TestSample:
             wrong_uuid = "12345"
             self.client.delete_sample(wrong_uuid)
 
+    def test_unset_assigned(self, datasets, owner, add_update_sample_arguments, sample_attribute_types) -> None:
+        attributes = add_update_sample_arguments
+        name = "test_unset_assigned"
+
+        attributes_type = sample_attribute_types[0]
+        dataset = datasets[0]
+        dataset_identifier = f"{owner}/{dataset}"
+
+        if matched_samples := self.client.get_samples(dataset_identifier, name=name):
+            assert len(matched_samples) == 1, f"Multiple matches found for sample with name {name}"
+            self.client.delete_sample(matched_samples[0].uuid)
+
+        sample = self.client.add_sample(dataset_identifier, name, attributes[attributes_type], assigned_reviewer=owner, assigned_labeler=owner)
+        try:
+            assert sample.assigned_labeler == owner
+            assert sample.assigned_reviewer == owner
+
+            sample = self.client.update_sample(sample.uuid, assigned_labeler=None)
+
+            assert sample.assigned_labeler is None
+            assert sample.assigned_reviewer == owner
+            
+            sample = self.client.update_sample(sample.uuid, assigned_reviewer=None)
+
+            assert sample.assigned_reviewer is None
+        finally:
+            self.client.delete_sample(sample.uuid)
+
 
 #########
 # Label #

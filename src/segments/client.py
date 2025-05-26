@@ -58,6 +58,7 @@ from segments.typing import (
 from typing_extensions import Literal, get_args
 
 from .resource_api import Collaborator, Dataset, HasClient, Issue, Label, Labelset, Release, Sample
+from .sentinel import _NOT_ASSIGNED
 
 
 try:
@@ -1173,8 +1174,8 @@ class SegmentsClient:
         attributes: Optional[Union[Dict[str, Any], SampleAttributes]] = None,
         metadata: Optional[Dict[str, Any]] = None,
         priority: Optional[float] = None,
-        assigned_labeler: Optional[str] = None,
-        assigned_reviewer: Optional[str] = None,
+        assigned_labeler: Optional[str] = _NOT_ASSIGNED,
+        assigned_reviewer: Optional[str] = _NOT_ASSIGNED,
         readme: Optional[str] = None,
         enable_compression: bool = True,
     ) -> Sample:
@@ -1240,10 +1241,10 @@ class SegmentsClient:
         if priority is not None:
             payload["priority"] = priority
 
-        if assigned_labeler is not None:
+        if assigned_labeler is not _NOT_ASSIGNED:
             payload["assigned_labeler"] = assigned_labeler
 
-        if assigned_reviewer is not None:
+        if assigned_reviewer is not _NOT_ASSIGNED:
             payload["assigned_reviewer"] = assigned_reviewer
 
         if readme is not None:
