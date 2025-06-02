@@ -481,6 +481,12 @@ class PointcloudSequenceVectorAnnotation(PointcloudVectorAnnotation):
 
 
 class PointcloudSequenceVectorFrame(PointcloudVectorLabelAttributes):
+    annotations: List[
+        Annotated[
+            Union[PointcloudSequenceVectorAnnotation, PointcloudSequenceCuboidAnnotation],
+            pydantic.Field(discriminator="type"),
+        ]
+    ]
     timestamp: Optional[Timestamp] = None
 
 
