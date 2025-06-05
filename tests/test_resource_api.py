@@ -240,7 +240,7 @@ class TestSample:
 
             assert sample.assigned_labeler is None
             assert sample.assigned_reviewer == owner
-            
+
             sample = sample.update(assigned_reviewer=None)
 
             assert sample.assigned_reviewer is None
@@ -317,6 +317,23 @@ class TestLabel:
         sample = self.client.get_sample(sample_uuid)
         with pytest.raises(InvalidModelError):
             sample.add_label("ground-truth", PointcloudSegmentationLabelAttributes.model_validate(bad_attributes))
+
+    def test_vector_label_attributes_contains_track_id(
+        self, sample_uuids, label_attribute_types, label_test_attributes
+    ):
+        task_type = "pointcloud-sequence-vector"
+        sample_idx = label_attribute_types.index(task_type)
+        sample_uuid = sample_uuids[sample_idx]
+        sample = self.client.get_sample(sample_uuid)
+
+        try:
+            sample.add_label(labelset="ground-truth", attributes=label_test_attributes[task_type])
+            label = sample.get_label()
+
+            for annotation in label.attributes.frames[0].annotations:
+                assert isinstance(annotation.track_id, int)
+        finally:
+            sample.delete_label(labelset="ground-truth")
 
 
 @pytest.mark.usefixtures("setup_class_client")

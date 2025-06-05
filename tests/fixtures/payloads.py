@@ -356,6 +356,51 @@ def label_test_attributes(label_image_or_object_attributes):
                 },
             ],
         },
+        "pointcloud-sequence-vector": {
+            "format_version": "0.2",
+            "frames": [
+                {
+                    "format_version": "0.2",
+                    "timestamp": "00001",  # this field is only included if the sample has a timestamp
+                    "annotations": [
+                        {
+                            "id": 1,  # the object id
+                            "category_id": 1,  # the category id
+                            "type": "cuboid",  # refers to the annotation type (cuboid)
+                            "position": {"x": 0.0, "y": 0.2, "z": 0.5},
+                            "dimensions": {"x": 1.2, "y": 1, "z": 1},
+                            "yaw": 1.63,
+                            "is_keyframe": True,  # whether this frame is a keyframe
+                            "track_id": 6,  # this id is used to links objects across frames
+                        },
+                        {
+                            "id": 2,
+                            "category_id": 2,
+                            "type": "cuboid",
+                            "position": {"x": 0.0, "y": 0.2, "z": 0.5},
+                            "dimensions": {"x": 1.2, "y": 1, "z": 1},
+                            "yaw": 1.63,
+                            "is_keyframe": False,
+                            "track_id": 7,
+                        },
+                        {
+                            "id": 3,
+                            "category_id": 2,
+                            "type": "polygon",
+                            "points": [
+                                [12.34, 56.78],
+                                [90.12, 34.56],
+                                [78.91, 23.45],
+                                [67.89, 98.76],
+                                [54.32, 10.01],
+                            ],
+                            "is_keyframe": False,
+                            "track_id": 8,
+                        },
+                    ],
+                },
+            ],
+        },
     }
     # Multi-sensor
     label_attributes["multi-sensor"] = {
