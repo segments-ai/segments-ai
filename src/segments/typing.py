@@ -206,6 +206,7 @@ RGBA = Tuple[int, int, int, int]
 FormatVersion = Union[float, str]
 ObjectAttributes = Dict[str, Optional[Union[str, bool, int, float]]]
 ImageAttributes = Dict[str, Optional[Union[str, bool, int, float]]]
+LinkAttributes = Dict[str, Optional[Union[str, bool, int, float]]]
 Timestamp = Union[str, int, float]
 
 
@@ -291,6 +292,12 @@ class Annotation(BaseModel):
     id: int
     category_id: int
     attributes: Optional[ObjectAttributes] = None
+
+
+class Link(BaseModel):
+    from_id: int
+    to_id: int
+    attributes: Optional[LinkAttributes] = None
 
 
 # Image segmentation
@@ -417,10 +424,14 @@ class PointcloudCuboidAnnotation(BaseModel):
     attributes: Optional[ObjectAttributes] = None
 
 
-class PointcloudCuboidLabelAttributes(BaseModel):
+class BasePointcloudCuboidLabelAttributes(BaseModel):
     annotations: List[PointcloudCuboidAnnotation]
     image_attributes: Optional[ImageAttributes] = None
     format_version: Optional[FormatVersion] = None
+
+
+class PointcloudCuboidLabelAttributes(BasePointcloudCuboidLabelAttributes):
+    links: Optional[List[Link]] = None
 
 
 # Point cloud vector
@@ -432,12 +443,16 @@ class PointcloudVectorAnnotation(BaseModel):
     attributes: Optional[ObjectAttributes] = None
 
 
-class PointcloudVectorLabelAttributes(BaseModel):
+class BasePointcloudVectorLabelAttributes(BaseModel):
     annotations: List[
         Annotated[Union[PointcloudVectorAnnotation, PointcloudCuboidAnnotation], pydantic.Field(discriminator="type")]
     ]
     image_attributes: Optional[ImageAttributes] = None
     format_version: Optional[FormatVersion] = None
+
+
+class PointcloudVectorLabelAttributes(BasePointcloudVectorLabelAttributes):
+    links: Optional[List[Link]] = None
 
 
 # Point cloud sequence segmentation
@@ -463,15 +478,19 @@ class PointcloudSequenceCuboidAnnotation(PointcloudCuboidAnnotation):
     is_keyframe: bool = False
 
 
-class PointcloudSequenceCuboidFrame(PointcloudCuboidLabelAttributes):
+class PointcloudSequenceCuboidFrame(BasePointcloudCuboidLabelAttributes):
     annotations: List[PointcloudSequenceCuboidAnnotation]
     timestamp: Optional[Timestamp] = None
     format_version: Optional[FormatVersion] = None
 
 
-class PointcloudSequenceCuboidLabelAttributes(BaseModel):
+class BasePointcloudSequenceCuboidLabelAttributes(BaseModel):
     frames: List[PointcloudSequenceCuboidFrame]
     format_version: Optional[FormatVersion] = None
+
+
+class PointcloudSequenceCuboidLabelAttributes(BasePointcloudSequenceCuboidLabelAttributes):
+    links: Optional[List[Link]] = None
 
 
 # Point cloud sequence vector
@@ -480,13 +499,17 @@ class PointcloudSequenceVectorAnnotation(PointcloudVectorAnnotation):
     is_keyframe: bool = False
 
 
-class PointcloudSequenceVectorFrame(PointcloudVectorLabelAttributes):
+class PointcloudSequenceVectorFrame(BasePointcloudVectorLabelAttributes):
     timestamp: Optional[Timestamp] = None
 
 
-class PointcloudSequenceVectorLabelAttributes(BaseModel):
+class BasePointcloudSequenceVectorLabelAttributes(BaseModel):
     frames: List[PointcloudSequenceVectorFrame]
     format_version: Optional[FormatVersion] = None
+
+
+class PointcloudSequenceVectorLabelAttributes(BasePointcloudSequenceVectorLabelAttributes):
+    links: Optional[List[Link]] = None
 
 
 # Multi-sensor
@@ -494,7 +517,7 @@ class MultiSensorPointcloudSequenceCuboidLabelAttributes(BaseModel):
     name: str
     task_type: Literal[TaskType.POINTCLOUD_CUBOID_SEQUENCE]
     # TODO remove list and replace with `Optional[PointcloudSequenceCuboidLabelAttributes] = None`
-    attributes: Union[PointcloudSequenceCuboidLabelAttributes, List]
+    attributes: Union[BasePointcloudSequenceCuboidLabelAttributes, List]
 
 
 class MultiSensorImageSequenceVectorLabelAttributes(BaseModel):
@@ -508,7 +531,7 @@ class MultiSensorPointcloudSequenceVectorLabelAttributes(BaseModel):
     name: str
     task_type: Literal[TaskType.POINTCLOUD_VECTOR_SEQUENCE]
     # TODO remove list and replace with `Optional[ImageSequenceVectorLabelAttributes] = None`
-    attributes: Union[PointcloudSequenceVectorLabelAttributes, List]
+    attributes: Union[BasePointcloudSequenceVectorLabelAttributes, List]
 
 
 class MultiSensorLabelAttributes(BaseModel):
@@ -522,6 +545,7 @@ class MultiSensorLabelAttributes(BaseModel):
             pydantic.Field(discriminator="task_type"),
         ]
     ]
+    links: Optional[List[Link]] = None
 
 
 LabelAttributes = Union[
@@ -713,33 +737,29 @@ class Collaborator(BaseModel):
     role: Role
 
 
-class BaseTaskAttribute(BaseModel):
+class BaseAttribute(BaseModel):
     name: str
-    input_type: InputType
     is_mandatory: Optional[bool] = None
-    is_track_level: Optional[bool] = None
-    synced_across_sensors: Optional[bool] = None
-    sensor_filter: Optional[str] = None
 
 
-class SelectTaskAttribute(BaseTaskAttribute):
+class BaseSelectTaskAttribute(BaseAttribute):
     input_type: Literal[InputType.SELECT]
     values: List[str]
     default_value: Optional[str] = None
 
 
-class MultiselectTaskAttribute(BaseTaskAttribute):
+class BaseMultiselectTaskAttribute(BaseAttribute):
     input_type: Literal[InputType.MULTISELECT]
     values: List[str]
     default_value: Optional[str] = None
 
 
-class TextTaskAttribute(BaseTaskAttribute):
+class BaseTextTaskAttribute(BaseAttribute):
     input_type: Literal[InputType.TEXT]
     default_value: Optional[str] = None
 
 
-class NumberTaskAttribute(BaseTaskAttribute):
+class BaseNumberTaskAttribute(BaseAttribute):
     input_type: Literal[InputType.NUMBER]
     default_value: Optional[float] = None
     min: Optional[float] = None
@@ -755,21 +775,59 @@ class NumberTaskAttribute(BaseTaskAttribute):
         return v
 
 
-class CheckboxTaskAttribute(BaseTaskAttribute):
+class BaseCheckboxTaskAttribute(BaseAttribute):
     input_type: Literal[InputType.CHECKBOX]
     default_value: Optional[bool] = None
 
 
-class Vector3TaskAttribute(BaseTaskAttribute):
+class BaseVector3TaskAttribute(BaseAttribute):
     input_type: Literal[InputType.VECTOR3]
 
 
-class QuaternionTaskAttribute(BaseTaskAttribute):
+class BaseQuaternionTaskAttribute(BaseAttribute):
     input_type: Literal[InputType.QUATERNION]
 
 
-class PointsTaskAttribute(BaseTaskAttribute):
+class BasePointsTaskAttribute(BaseAttribute):
     input_type: Literal[InputType.POINTS]
+
+
+class BaseTaskAttribute:
+    is_track_level: Optional[bool] = None
+    synced_across_sensors: Optional[bool] = None
+    sensor_filter: Optional[str] = None
+
+
+class SelectTaskAttribute(BaseTaskAttribute, BaseSelectTaskAttribute):
+    pass
+
+
+class MultiselectTaskAttribute(BaseTaskAttribute, BaseMultiselectTaskAttribute):
+    pass
+
+
+class TextTaskAttribute(BaseTaskAttribute, BaseTextTaskAttribute):
+    pass
+
+
+class NumberTaskAttribute(BaseTaskAttribute, BaseNumberTaskAttribute):
+    pass
+
+
+class CheckboxTaskAttribute(BaseTaskAttribute, BaseCheckboxTaskAttribute):
+    pass
+
+
+class Vector3TaskAttribute(BaseTaskAttribute, BaseVector3TaskAttribute):
+    pass
+
+
+class QuaternionTaskAttribute(BaseTaskAttribute, BaseQuaternionTaskAttribute):
+    pass
+
+
+class PointsTaskAttribute(BaseTaskAttribute, BasePointsTaskAttribute):
+    pass
 
 
 TaskAttribute = Annotated[
@@ -787,6 +845,42 @@ TaskAttribute = Annotated[
 ]
 
 
+class BaseTaskLinkAttribute:
+    is_track_level: Literal[True] = True
+
+
+class SelectTaskLinkAttribute(BaseTaskLinkAttribute, BaseSelectTaskAttribute):
+    pass
+
+
+class MultiselectTaskLinkAttribute(BaseTaskLinkAttribute, BaseMultiselectTaskAttribute):
+    pass
+
+
+class TextTaskLinkAttribute(BaseTaskLinkAttribute, BaseTextTaskAttribute):
+    pass
+
+
+class NumberTaskLinkAttribute(BaseTaskLinkAttribute, BaseNumberTaskAttribute):
+    pass
+
+
+class CheckboxTaskLinkAttribute(BaseTaskLinkAttribute, BaseCheckboxTaskAttribute):
+    pass
+
+
+TaskLinkAttribute = Annotated[
+    Union[
+        SelectTaskLinkAttribute,
+        MultiselectTaskLinkAttribute,
+        TextTaskLinkAttribute,
+        NumberTaskLinkAttribute,
+        CheckboxTaskLinkAttribute,
+    ],
+    pydantic.Field(discriminator="input_type"),
+]
+
+
 class TaskAttributeCategory(BaseModel):
     name: str
     id: int
@@ -795,6 +889,7 @@ class TaskAttributeCategory(BaseModel):
     attributes: Optional[List[TaskAttribute]] = None
     dimensions: Optional[XYZ] = None
     model_config = ConfigDict(extra="allow")
+    link_attributes: Optional[List[TaskLinkAttribute]] = None
 
 
 class TaskAttributes(BaseModel):
@@ -854,6 +949,7 @@ class Dataset(BaseModel):
     enable_same_dimensions_track_constraint: bool
     enable_interpolation: bool
     use_timestamps_for_interpolation: bool
+    enable_object_linking: bool
     task_type: TaskType
     # task_readme: str
     label_stats: LabelStats
