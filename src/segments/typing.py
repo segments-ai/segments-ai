@@ -798,7 +798,7 @@ class BasePointsTaskAttribute(BaseAttribute):
     input_type: Literal[InputType.POINTS]
 
 
-class BaseTaskAttribute:
+class BaseTaskAttribute(BaseModel):
     is_track_level: Optional[bool] = None
     synced_across_sensors: Optional[bool] = None
     sensor_filter: Optional[str] = None
@@ -849,9 +849,20 @@ TaskAttribute = Annotated[
     ],
     pydantic.Field(discriminator="input_type"),
 ]
+"""TaskAttribute can be one of the following:
+
+- :py:class:`SelectTaskAttribute`
+- :py:class:`MultiselectTaskAttribute`
+- :py:class:`TextTaskAttribute`
+- :py:class:`NumberTaskAttribute`
+- :py:class:`CheckboxTaskAttribute`
+- :py:class:`Vector3TaskAttribute`
+- :py:class:`QuaternionTaskAttribute`
+- :py:class:`PointsTaskAttribute`
+"""
 
 
-class BaseTaskLinkAttribute:
+class BaseTaskLinkAttribute(BaseModel):
     is_track_level: Literal[True] = True
 
 
@@ -885,6 +896,15 @@ TaskLinkAttribute = Annotated[
     ],
     pydantic.Field(discriminator="input_type"),
 ]
+"""TaskLinkAttribute can be one of the following:
+
+
+- :py:class:`SelectTaskLinkAttribute`
+- :py:class:`MultiselectTaskLinkAttribute`
+- :py:class:`TextTaskLinkAttribute`
+- :py:class:`NumberTaskLinkAttribute`
+- :py:class:`CheckboxTaskLinkAttribute`
+"""
 
 
 class TaskAttributeCategory(BaseModel):
