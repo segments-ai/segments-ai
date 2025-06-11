@@ -1,3 +1,6 @@
+---
+tocdepth: 3
+---
 # Types
 
 ```{seealso}
@@ -14,6 +17,7 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.Collaborator
 ```
+
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.User
@@ -206,8 +210,14 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 
 ### Point cloud sequence cuboid label
 
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.BasePointcloudSequenceCuboidLabelAttributes
+```
+
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.PointcloudSequenceCuboidLabelAttributes
+    :show-inheritance:
 ```
 
 ```{eval-rst}
@@ -222,8 +232,14 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 
 ### Point cloud sequence vector label
 
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.BasePointcloudSequenceVectorLabelAttributes
+```
+
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.PointcloudSequenceVectorLabelAttributes
+    :show-inheritance:
 ```
 
 ```{eval-rst}
@@ -247,7 +263,17 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 ```
 
 ```{eval-rst}
+.. autopydantic_model:: segments.typing.MultiSensorPointcloudSequenceVectorLabelAttributes
+```
+
+```{eval-rst}
 .. autopydantic_model:: segments.typing.MultiSensorImageSequenceVectorLabelAttributes
+```
+
+### Links
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.Link
 ```
 
 ## Labelsets
@@ -284,18 +310,69 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 .. autopydantic_model:: segments.typing.PresignedPostFields
 ```
 
-## Helper classes
+## Object attribute definitions
+
+
+### Base task attributes
+
+This types are not used directly, but are instead mix-ins for their respective object and linking attribute classes.
 
 ```{eval-rst}
-.. autopydantic_model:: segments.typing.URL
+.. autopydantic_model:: segments.typing.BaseAttribute
 ```
 
 ```{eval-rst}
-.. autopydantic_model:: segments.typing.Owner
+.. autopydantic_model:: segments.typing.BaseSelectTaskAttribute
+    :show-inheritance: BaseModel
 ```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.BaseTextTaskAttribute
+    :show-inheritance: BaseModel
+```
+
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.BaseNumberTaskAttribute
+    :show-inheritance: BaseModel
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.BaseCheckboxTaskAttribute
+    :show-inheritance: BaseModel
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.BaseMultiselectTaskAttribute
+    :show-inheritance: BaseModel
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.BaseVector3TaskAttribute
+    :show-inheritance: BaseModel
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.BaseQuaternionTaskAttribute
+    :show-inheritance: BaseModel
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.BasePointsTaskAttribute
+    :show-inheritance: BaseModel
+```
+
+### Task attributes
+
+These types are used for defining task attributes.
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.TaskAttributes
+```
+
+
+```{eval-rst}
+.. autoclass:: segments.typing.TaskAttribute
 ```
 
 ```{eval-rst}
@@ -345,6 +422,56 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 .. autopydantic_model:: segments.typing.PointsTaskAttribute
     :show-inheritance: BaseModel
 ```
+
+### Link attributes
+
+These types are used for defining link attributes.
+
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.BaseTaskLinkAttribute
+```
+
+
+```{eval-rst}
+.. autoclass:: segments.typing.TaskLinkAttribute
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.CheckboxTaskLinkAttribute
+    :show-inheritance: BaseModel
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.NumberTaskLinkAttribute
+    :show-inheritance: BaseModel
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.TextTaskLinkAttribute
+    :show-inheritance: BaseModel
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.MultiselectTaskLinkAttribute
+    :show-inheritance: BaseModel
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.SelectTaskLinkAttribute
+    :show-inheritance: BaseModel
+```
+
+## Helper classes
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.URL
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.Owner
+```
+
 
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.LabelStats
