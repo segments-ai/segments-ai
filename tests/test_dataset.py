@@ -1,3 +1,4 @@
+import pytest
 from segments.client import SegmentsClient
 from segments.dataset import SegmentsDataset
 from segments.typing import SegmentsDatasetCategory
@@ -12,10 +13,6 @@ def test_dataset(
     datasets = client.get_datasets(owner)
 
     for dataset in datasets:
-        # Skip the example-multi-sensor dataset
-        if dataset.name == "example-multi-sensor" or dataset.name == "example-point-cloud-sequences-segmentation":
-            continue
-
         # Get the releases
         dataset_identifier = f"{owner}/{dataset.name}"
         releases = client.get_releases(dataset_identifier)
@@ -23,19 +20,26 @@ def test_dataset(
         for release in releases:
             # Get the dataset
             release = client.get_release(dataset_identifier, release.name)
-            segments_dataset = SegmentsDataset(release, segments_dir=f"{ARTIFACTS_DIR}/segments")
+            if dataset.task_type in SegmentsDataset.SUPPORTED_DATASET_TYPES:
+                segments_dataset = SegmentsDataset(release, segments_dir=f"{ARTIFACTS_DIR}/segments")
 
-            # Load the categories
-            categories = segments_dataset.categories
-            assert isinstance(categories, list)
-            for category in categories:
-                assert isinstance(category, SegmentsDatasetCategory)
+                # Load the categories
+                categories = segments_dataset.categories
+                assert isinstance(categories, list)
+                for category in categories:
+                    assert isinstance(category, SegmentsDatasetCategory)
 
-            # Iterate over samples
-            for sample in segments_dataset:
-                assert isinstance(sample, dict)
+                # Iterate over samples
+                for sample in segments_dataset:
+                    assert isinstance(sample, dict)
 
-def test_dataset_no_image_load(client: SegmentsClient,owner: str):
+            else:
+                # Should throw an error for unsupported dataset types
+                with pytest.raises(ValueError):
+                    SegmentsDataset(release, segments_dir=f"{ARTIFACTS_DIR}/segments")
+
+
+def test_dataset_no_image_load(client: SegmentsClient, owner: str):
     releases = client.get_releases("python-sdk-tests-organization/example-images-segmentation")
     release = releases[0]
 

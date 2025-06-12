@@ -88,6 +88,17 @@ class SegmentsDataset:
         :exc:`ValueError`: If there is no labelset with this name.
     """
 
+    SUPPORTED_DATASET_TYPES = [
+        "segmentation-bitmap",
+        "segmentation-bitmap-highres",
+        "vector",
+        "bboxes",
+        "keypoints",
+        "image-vector-sequence",
+        "pointcloud-cuboid",
+        "pointcloud-segmentation",
+    ]
+
     # https://stackoverflow.com/questions/682504/what-is-a-clean-pythonic-way-to-have-multiple-constructors-in-python
     def __init__(
         self,
@@ -142,18 +153,10 @@ class SegmentsDataset:
             raise ValueError(f"There is no labelset with name `{self.labelset}`.")
 
         self.task_type = self.release["dataset"]["task_type"]
-        if self.task_type not in [
-            "segmentation-bitmap",
-            "segmentation-bitmap-highres",
-            "vector",
-            "bboxes",
-            "keypoints",
-            "image-vector-sequence",
-            "pointcloud-cuboid",
-            "pointcloud-segmentation",
-        ]:
+        if self.task_type not in self.SUPPORTED_DATASET_TYPES:
+            supported_dataset_str = ", ".join(self.SUPPORTED_DATASET_TYPES)
             raise ValueError(
-                f"You can only create a dataset for tasks of type `segmentation-bitmap`, `segmentation-bitmap-highres`, `vector`, `bboxes`, `keypoints`, `image-vector-sequence`, `pointcloud-cuboid`, `pointcloud-segmentation` for now. Got {self.task_type}."
+                f"You can only create a dataset for tasks of types {supported_dataset_str} for now. Got {self.task_type}."
             )
 
         self.load_dataset()
