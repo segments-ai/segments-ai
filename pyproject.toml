@@ -1,6 +1,83 @@
+[project]
+name = "segments"
+authors = [
+    {name = "Bert De Branderere", email = "bert@segments.ai"},
+]
+description = ""
+requires-python = ">=3.9"
+keywords=[ "image", "segmentation", "labeling", "vision"]
+classifiers = [
+    "Development Status :: 3 - Alpha", 
+    "Intended Audience :: Developers",  
+    "Topic :: Software Development :: Build Tools",
+    "Programming Language :: Python :: 3", 
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Typing :: Typed",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX",
+    "Operating System :: Unix",
+    "Operating System :: MacOS",
+]
+readme = "README.md"
+license  = "MIT"
+dependencies = [
+    "numpy>=1.20",
+    "requests>=2.0",
+    "Pillow>=9.0",
+    "tqdm>=4.0",
+    "typing_extensions>=4.0",
+    "pydantic==2.*,!=2.4.0",
+    "types-Pillow>=9.0",
+    "types-requests>=2.0",
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = [
+    # Code formatting
+    "flynt==1.*",
+    "ruff==0.*",
+    # Type checking
+    "mypy==0.*",
+    # Testing
+    "tox==3.*",
+    "pytest==7.*",
+    "pytest-cov==4.*",
+    "pytest-dotenv==0.*",
+    # General
+    "pycocotools==2.*",
+    "scikit-image==0.*",
+    "opencv-python==4.*",
+    "build>=1.2.0"
+]
+docs = [
+    "sphinx>=4.0",
+    "furo>=2022.0",
+    "myst_parser>=0.0",
+    "sphinx-autobuild>=2021.0",
+    "sphinx-copybutton>=0.0",
+    "sphinx_autodoc_typehints>=1.0",
+    "autodoc_pydantic>=2.0",
+    "datasets>=2.0",
+]
+
+[project.urls]
+Homepage = "https://segments.ai/"
+Repository = "https://github.com/segments-ai/segments-ai"
+
 [build-system]
 requires = ["setuptools>=42.0", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {""= "src/"}
+
+[tool.setuptools.dynamic]
+version = { attr = "segments.version.__version__"}
 
 # pytest
 [tool.pytest.ini_options]

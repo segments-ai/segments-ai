@@ -59,13 +59,7 @@ from typing_extensions import Literal, get_args
 
 from .resource_api import Collaborator, Dataset, HasClient, Issue, Label, Labelset, Release, Sample
 from .sentinel import _NOT_ASSIGNED
-
-
-try:
-    # __package__ allows for the case where __name__ is "__main__"
-    __version__ = importlib_metadata.version(__package__ or __name__)
-except importlib_metadata.PackageNotFoundError:
-    __version__ = "0.0.0"
+from .version import __version__
 
 ################################
 # Constants and type variables #
@@ -2102,7 +2096,10 @@ class SegmentsClient:
 
     def _get_headers(self, auth: bool = True) -> Dict[str, str]:
         """Get the authorization header with the API key."""
-        headers = {"X-source": "python-sdk"}
+        headers = {
+            "X-source": "python-sdk",
+            "Segments-SDK-Version": VERSION,
+        }
         if auth and self.api_key:
             headers["Authorization"] = f"APIKey {self.api_key}"
         return headers
