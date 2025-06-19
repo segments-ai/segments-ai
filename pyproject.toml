@@ -1,5 +1,5 @@
 [project]
-name = "segments"
+name = "segments-ai"
 authors = [
     {name = "Bert De Branderere", email = "bert@segments.ai"},
 ]
