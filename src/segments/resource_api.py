@@ -192,7 +192,7 @@ class Dataset(segments_typing.Dataset, HasClient):
         name: Optional[str] = None,
         label_status: Optional[Union[segments_typing.LabelStatus, List[segments_typing.LabelStatus]]] = None,
         metadata: Optional[Union[str, List[str]]] = None,
-        sort: Literal["name", "created", "priority", "updated_at", "gt_label__updated_at"] = "name",
+        sort: Literal["name", "created_at", "priority", "updated_at", "gt_label__updated_at"] = "name",
         direction: Literal["asc", "desc"] = "asc",
         per_page: int = 1000,
         page: int = 1,
@@ -205,7 +205,7 @@ class Dataset(segments_typing.Dataset, HasClient):
             name: Name to filter by. Defaults to :obj:`None` (no filtering).
             label_status: Sequence of label statuses to filter by. Defaults to :obj:`None` (no filtering).
             metadata: Sequence of 'key:value' metadata attributes to filter by. Defaults to :obj:`None` (no filtering).
-            sort: What to sort results by. One of ``name``, ``created``, ``priority``, ``updated_at``, ``gt_label__updated_at``. Defaults to ``name``.
+            sort: What to sort results by. One of ``name``, ``created_at``, ``priority``, ``updated_at``, ``gt_label__updated_at``. Defaults to ``name``.
             direction: Sorting direction. One of ``asc`` (ascending) or ``desc`` (descending). Defaults to ``asc``.
             per_page: Pagination parameter indicating the maximum number of samples to return. Defaults to ``1000``.
             page: Pagination parameter indicating the page to return. Defaults to ``1``.
