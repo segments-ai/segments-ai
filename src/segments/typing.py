@@ -647,7 +647,7 @@ SampleAttributes = Union[
 class Sample(BaseModel):
     uuid: str
     name: str
-    attributes: SampleAttributes
+    attributes: Optional[SampleAttributes] = None
     metadata: Dict[str, Any]
     created_at: str
     created_by: str
