@@ -137,6 +137,7 @@ class Dataset(segments_typing.Dataset, HasClient):
         enable_label_status_verified: Optional[bool] = None,
         enable_3d_cuboid_rotation: Optional[bool] = None,
         enable_confirm_on_commit: Optional[bool] = None,
+        archived: Optional[bool] = None,
     ) -> Dataset:
         """Updates the dataset, see :meth:`segments.client.SegmentsClient.update_dataset` for more details.
 
@@ -158,6 +159,7 @@ class Dataset(segments_typing.Dataset, HasClient):
             enable_label_status_verified: Enable an additional label status "Verified". Defaults to :obj:`False`.
             enable_3d_cuboid_rotation: Enable 3D cuboid rotation (i.e., yaw, pitch and roll). Defaults to :obj:`False`.
             enable_confirm_on_commit: Enable a confirmation dialog when saving a sample in this dataset. Defaults to :obj:`None`.
+            archived: Whether the dataset is archived. Defaults to :obj:`None`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
@@ -184,6 +186,8 @@ class Dataset(segments_typing.Dataset, HasClient):
             enable_save_button,
             enable_label_status_verified,
             enable_3d_cuboid_rotation,
+            enable_confirm_on_commit,
+            archived,
         )
 
     def get_samples(
@@ -575,9 +579,7 @@ class Sample(segments_typing.Sample, HasClient):
         if attributes is not None:
             attributes = validate_label_attributes(attributes, self.dataset.task_type)
 
-        return self._client.update_label(
-            self.uuid, labelset, attributes, label_status, score, enable_compression
-        )
+        return self._client.update_label(self.uuid, labelset, attributes, label_status, score, enable_compression)
 
     def delete_label(self, labelset: str) -> None:
         """Deletes the label of this sample. See :meth:`segments.client.SegmentsClient.delete_label` for more details.

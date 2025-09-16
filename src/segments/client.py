@@ -4,7 +4,6 @@ from __future__ import annotations
 # https://gist.github.com/benkehoe/066a73903e84576a8d6d911cfedc2df6
 import functools
 import gzip
-import importlib.metadata as importlib_metadata
 import inspect
 import json
 import logging
@@ -60,6 +59,7 @@ from typing_extensions import Literal, get_args
 from .resource_api import Collaborator, Dataset, HasClient, Issue, Label, Labelset, Release, Sample
 from .sentinel import _NOT_ASSIGNED
 from .version import __version__
+
 
 ################################
 # Constants and type variables #
@@ -426,6 +426,7 @@ class SegmentsClient:
         enable_3d_cuboid_rotation: bool = False,
         organization: Optional[str] = None,
         enable_confirm_on_commit: bool = False,
+        archived: bool = False,
     ) -> Dataset:
         """Add a dataset.
 
@@ -487,6 +488,7 @@ class SegmentsClient:
             enable_3d_cuboid_rotation: Enable 3D cuboid rotation (i.e., yaw, pitch and roll). Defaults to :obj:`False`.
             organization: The username of the organization for which this dataset should be created. None will create a dataset for the current user. Defaults to :obj:`None`.
             enable_confirm_on_commit: Enable a confirmation dialog when saving a sample in this dataset. Defaults to :obj:`False`.
+            archived: Whether the dataset is archived. Defaults to :obj:`False`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the task attributes fails.
@@ -534,6 +536,7 @@ class SegmentsClient:
             "enable_label_status_verified": enable_label_status_verified,
             "enable_3d_cuboid_rotation": enable_3d_cuboid_rotation,
             "enable_confirm_on_submit": enable_confirm_on_commit,
+            "archived": archived,
             "data_type": "IMAGE",
         }
 
@@ -566,6 +569,7 @@ class SegmentsClient:
         enable_label_status_verified: Optional[bool] = None,
         enable_3d_cuboid_rotation: Optional[bool] = None,
         enable_confirm_on_commit: Optional[bool] = None,
+        archived: Optional[bool] = None,
     ) -> Dataset:
         """Update a dataset.
 
@@ -595,6 +599,7 @@ class SegmentsClient:
             enable_label_status_verified: Enable an additional label status "Verified". Defaults to :obj:`False`.
             enable_3d_cuboid_rotation: Enable 3D cuboid rotation (i.e., yaw, pitch and roll). Defaults to :obj:`False`.
             enable_confirm_on_commit: Enable a confirmation dialog when saving a sample in this dataset. Defaults to :obj:`None`.
+            archived: Whether the dataset is archived. Defaults to :obj:`None`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
@@ -669,6 +674,9 @@ class SegmentsClient:
 
         if enable_confirm_on_commit is not None:
             payload["enable_confirm_on_submit"] = enable_confirm_on_commit
+
+        if archived is not None:
+            payload["archived"] = archived
 
         r = self._patch(f"/datasets/{dataset_identifier}/", data=payload, model=Dataset)
         # logger.info(f"Updated {dataset_identifier}")

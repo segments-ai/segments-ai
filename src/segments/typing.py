@@ -965,6 +965,7 @@ class Dataset(BaseModel):
     # data_type: Literal["IMAGE"]
     category: Category
     public: bool
+    archived: bool
     owner: Owner
     created_at: str
     enable_ratings: bool
