@@ -65,7 +65,7 @@ def label_attribute_types() -> List[str]:
 @pytest.fixture(scope="module")
 def TIME_INTERVAL() -> float:
     """Wait for API call to complete."""
-    return 0.2
+    return 0.5
 
 
 @pytest.fixture(scope="module")
