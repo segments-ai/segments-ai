@@ -974,6 +974,7 @@ class Dataset(BaseModel):
     enable_save_button: bool
     enable_label_status_verified: bool
     enable_same_dimensions_track_constraint: bool
+    enable_3d_region_of_interest: bool
     enable_interpolation: bool
     use_timestamps_for_interpolation: bool
     enable_object_linking: bool
@@ -991,6 +992,7 @@ class Dataset(BaseModel):
     noncollaborator_can_label: Optional[bool] = None
     noncollaborator_can_review: Optional[bool] = None
     insights_urls: Optional[Dict[str, str]] = None
+    region_of_interest: Optional[Dict[str, Any]] = None
     # tasks: Optional[List[Dict[str, Any]]] = None
 
     @field_validator("category")
