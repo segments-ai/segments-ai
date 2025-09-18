@@ -43,6 +43,7 @@ from segments.typing import (
     AWSFields,
     Category,
     File,
+    IssueAnchor,
     IssueStatus,
     LabelAttributes,
     LabelStatus,
@@ -1629,10 +1630,7 @@ class SegmentsClient:
         return cast(List[Issue], r)
 
     def add_issue(
-        self,
-        sample_uuid: str,
-        description: str,
-        status: IssueStatus = IssueStatus.OPEN,
+        self, sample_uuid: str, description: str, status: IssueStatus = IssueStatus.OPEN, anchor: IssueAnchor = None
     ) -> Issue:
         """Add an issue to a sample.
 
@@ -1647,6 +1645,7 @@ class SegmentsClient:
             sample_uuid: The sample uuid.
             description: The issue description.
             status: The issue status. One of ``OPEN`` or ``CLOSED``. Defaults to ``OPEN``.
+            anchor: An optional issue anchor. Defaults to :obj:`None`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the issue fails.
@@ -1661,6 +1660,9 @@ class SegmentsClient:
             "status": status,
         }
 
+        if anchor is not None:
+            payload["anchor"] = anchor
+
         r = self._post(f"/samples/{sample_uuid}/issues/", data=payload, model=Issue)
 
         return cast(Issue, r)
@@ -1670,6 +1672,7 @@ class SegmentsClient:
         uuid: str,
         description: Optional[str] = None,
         status: Optional[IssueStatus] = None,
+        anchor: Optional[IssueAnchor] = None,
     ) -> Issue:
         """Add an issue to a sample.
 
@@ -1684,6 +1687,7 @@ class SegmentsClient:
             uuid: The issue uuid.
             description: The issue description. Defaults to :obj:`None`.
             status: The issue status. One of ``OPEN`` or ``CLOSED``. Defaults to :obj:`None`.
+            anchor: An optional issue anchor. Defaults to :obj:`None`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the issue fails.
@@ -1700,6 +1704,9 @@ class SegmentsClient:
 
         if status is not None:
             payload["status"] = status
+
+        if anchor is not None:
+            payload["anchor"] = anchor
 
         r = self._patch(f"/issues/{uuid}/", data=payload, model=Issue)
 

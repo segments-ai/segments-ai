@@ -348,15 +348,16 @@ class TestIssue:
 
     def test_add_update_delete_issue(self, sample_uuids) -> None:
         description = "You forgot to label this car."
+        anchor = {"type": "location", "frame": 0, "sensor": "Lidar", "location": {"type": "2d", "x": 1.2, "y": 3.5}}
         sample_uuid = sample_uuids[0]
         sample = self.client.get_sample(sample_uuid)
         issue = None
         try:
             # Add issue
-            issue = sample.add_issue(description)
+            issue = sample.add_issue(description, anchor=anchor)
             assert isinstance(issue, segments_typing.Issue)
             description2 = description.replace("car", "bike")
-            issue = issue.update(description2)
+            issue = issue.update(description2, anchor=anchor)
             assert isinstance(issue, segments_typing.Issue)
             assert issue.description == description2
         finally:
