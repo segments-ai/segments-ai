@@ -245,7 +245,10 @@ class IssueAnchor3DCoordinates(BaseModel):
     z: float
 
 
-IssueAnchorCoordinates = Union[IssueAnchor2DCoordinates, IssueAnchor3DCoordinates]
+IssueAnchorCoordinates = Annotated[
+    Union[IssueAnchor2DCoordinates, IssueAnchor3DCoordinates],
+    pydantic.Field(discriminator="type"),
+]
 
 
 # Anchors
@@ -275,11 +278,14 @@ class IssueLocationAnchor(IssueBaseAnchor):
     location: IssueAnchorCoordinates
 
 
-IssueAnchor = Union[
-    IssueBasicAnchor,
-    IssueTrackAnchor,
-    IssueSceneAttributeAnchor,
-    IssueLocationAnchor,
+IssueAnchor = Annotated[
+    Union[
+        IssueBasicAnchor,
+        IssueTrackAnchor,
+        IssueSceneAttributeAnchor,
+        IssueLocationAnchor,
+    ],
+    pydantic.Field(discriminator="type"),
 ]
 
 
