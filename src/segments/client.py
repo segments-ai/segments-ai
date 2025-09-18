@@ -428,6 +428,8 @@ class SegmentsClient:
         organization: Optional[str] = None,
         enable_confirm_on_commit: bool = False,
         archived: bool = False,
+        enable_3d_region_of_interest: bool = False,
+        region_of_interest: Optional[dict[str, Any]] = None,
     ) -> Dataset:
         """Add a dataset.
 
@@ -490,6 +492,8 @@ class SegmentsClient:
             organization: The username of the organization for which this dataset should be created. None will create a dataset for the current user. Defaults to :obj:`None`.
             enable_confirm_on_commit: Enable a confirmation dialog when saving a sample in this dataset. Defaults to :obj:`False`.
             archived: Whether the dataset is archived. Defaults to :obj:`False`.
+            enable_3d_region_of_interest: Enable region of interest for point cloud datasets. Defaults to :obj:`False`.
+            region_of_interest: Region of interest configuration. Defaults to :obj:`None`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the task attributes fails.
@@ -536,6 +540,7 @@ class SegmentsClient:
             "enable_save_button": enable_save_button,
             "enable_label_status_verified": enable_label_status_verified,
             "enable_3d_cuboid_rotation": enable_3d_cuboid_rotation,
+            "enable_3d_region_of_interest": enable_3d_region_of_interest,
             "enable_confirm_on_submit": enable_confirm_on_commit,
             "archived": archived,
             "data_type": "IMAGE",
@@ -543,6 +548,9 @@ class SegmentsClient:
 
         if metadata:
             payload["metadata"] = metadata
+
+        if region_of_interest is not None:
+            payload["region_of_interest"] = region_of_interest
 
         endpoint = f"/organizations/{organization}/datasets/" if organization is not None else "/user/datasets/"
 
@@ -571,6 +579,8 @@ class SegmentsClient:
         enable_3d_cuboid_rotation: Optional[bool] = None,
         enable_confirm_on_commit: Optional[bool] = None,
         archived: Optional[bool] = None,
+        enable_3d_region_of_interest: Optional[bool] = None,
+        region_of_interest: Optional[dict[str, Any]] = None,
     ) -> Dataset:
         """Update a dataset.
 
@@ -601,6 +611,8 @@ class SegmentsClient:
             enable_3d_cuboid_rotation: Enable 3D cuboid rotation (i.e., yaw, pitch and roll). Defaults to :obj:`False`.
             enable_confirm_on_commit: Enable a confirmation dialog when saving a sample in this dataset. Defaults to :obj:`None`.
             archived: Whether the dataset is archived. Defaults to :obj:`None`.
+            enable_3d_region_of_interest: Enable region of interest for point cloud datasets. Defaults to :obj:`None`.
+            region_of_interest: Region of interest configuration. Defaults to :obj:`None`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
@@ -678,6 +690,12 @@ class SegmentsClient:
 
         if archived is not None:
             payload["archived"] = archived
+
+        if enable_3d_region_of_interest is not None:
+            payload["enable_3d_region_of_interest"] = enable_3d_region_of_interest
+
+        if region_of_interest is not None:
+            payload["region_of_interest"] = region_of_interest
 
         r = self._patch(f"/datasets/{dataset_identifier}/", data=payload, model=Dataset)
         # logger.info(f"Updated {dataset_identifier}")

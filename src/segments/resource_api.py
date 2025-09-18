@@ -138,6 +138,8 @@ class Dataset(segments_typing.Dataset, HasClient):
         enable_3d_cuboid_rotation: Optional[bool] = None,
         enable_confirm_on_commit: Optional[bool] = None,
         archived: Optional[bool] = None,
+        enable_3d_region_of_interest: Optional[bool] = None,
+        region_of_interest: Optional[dict[str, Any]] = None,
     ) -> Dataset:
         """Updates the dataset, see :meth:`segments.client.SegmentsClient.update_dataset` for more details.
 
@@ -160,6 +162,8 @@ class Dataset(segments_typing.Dataset, HasClient):
             enable_3d_cuboid_rotation: Enable 3D cuboid rotation (i.e., yaw, pitch and roll). Defaults to :obj:`False`.
             enable_confirm_on_commit: Enable a confirmation dialog when saving a sample in this dataset. Defaults to :obj:`None`.
             archived: Whether the dataset is archived. Defaults to :obj:`None`.
+            enable_3d_region_of_interest: Enable region of interest for point cloud datasets. Defaults to :obj:`None`.
+            region_of_interest: Region of interest configuration. Defaults to :obj:`None`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
@@ -188,6 +192,8 @@ class Dataset(segments_typing.Dataset, HasClient):
             enable_3d_cuboid_rotation,
             enable_confirm_on_commit,
             archived,
+            enable_3d_region_of_interest,
+            region_of_interest,
         )
 
     def get_samples(
