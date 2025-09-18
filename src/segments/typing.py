@@ -97,11 +97,6 @@ class Role(str, Enum):
     ADMIN = "admin"
 
 
-class IssueStatus(str, Enum):
-    OPEN = "OPEN"
-    CLOSED = "CLOSED"
-
-
 class Category(str, Enum):
     STREET_SCENERY = "street_scenery"
     GARDEN = "garden"
@@ -234,6 +229,72 @@ class Release(BaseModel):
 #########
 # Issue #
 #########
+
+
+# Anchor coordinates
+class IssueAnchor2DCoordinates(BaseModel):
+    type: Literal["2d"]
+    x: float
+    y: float
+
+
+class IssueAnchor3DCoordinates(BaseModel):
+    type: Literal["3d"]
+    x: float
+    y: float
+    z: float
+
+
+IssueAnchorCoordinates = Annotated[
+    Union[IssueAnchor2DCoordinates, IssueAnchor3DCoordinates],
+    pydantic.Field(discriminator="type"),
+]
+
+
+# Anchors
+class IssueBaseAnchor(BaseModel):
+    sensor: Optional[str] = None
+    frame: Optional[int] = None
+    type: Literal["basic", "location", "sceneAttribute", "location"]
+
+
+class IssueBasicAnchor(IssueBaseAnchor):
+    type: Literal["basic"]
+
+
+class IssueTrackAnchor(IssueBaseAnchor):
+    type: Literal["track"]
+    track: int
+    trackAttribute: Optional[str] = None
+
+
+class IssueSceneAttributeAnchor(IssueBaseAnchor):
+    type: Literal["sceneAttribute"]
+    sceneAttribute: str
+
+
+class IssueLocationAnchor(IssueBaseAnchor):
+    type: Literal["location"]
+    location: IssueAnchorCoordinates
+
+
+IssueAnchor = Annotated[
+    Union[
+        IssueBasicAnchor,
+        IssueTrackAnchor,
+        IssueSceneAttributeAnchor,
+        IssueLocationAnchor,
+    ],
+    pydantic.Field(discriminator="type"),
+]
+
+
+# Issue
+class IssueStatus(str, Enum):
+    OPEN = "OPEN"
+    CLOSED = "CLOSED"
+
+
 class IssueComment(BaseModel):
     created_at: str
     created_by: str
@@ -247,8 +308,9 @@ class Issue(BaseModel):
     updated_at: str
     created_by: str
     updated_by: str
-    comments: List[IssueComment]
     status: IssueStatus
+    comments: List[IssueComment]
+    anchor: Optional[IssueAnchor] = None
     sample_uuid: str
     sample_name: str
 

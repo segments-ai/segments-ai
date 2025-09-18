@@ -291,7 +291,9 @@ class TestSample:
             assert len(matched_samples) == 1, f"Multiple matches found for sample with name {name}"
             self.client.delete_sample(matched_samples[0].uuid)
 
-        sample = self.client.add_sample(dataset_identifier, name, attributes[attributes_type], assigned_reviewer=owner, assigned_labeler=owner)
+        sample = self.client.add_sample(
+            dataset_identifier, name, attributes[attributes_type], assigned_reviewer=owner, assigned_labeler=owner
+        )
         try:
             assert sample.assigned_labeler == owner
             assert sample.assigned_reviewer == owner
@@ -300,7 +302,7 @@ class TestSample:
 
             assert sample.assigned_labeler is None
             assert sample.assigned_reviewer == owner
-            
+
             sample = self.client.update_sample(sample.uuid, assigned_reviewer=None)
 
             assert sample.assigned_reviewer is None
@@ -353,13 +355,14 @@ class TestIssue:
 
     def test_add_update_delete_issue(self, sample_uuids) -> None:
         description = "You forgot to label this car."
+        anchor = {"type": "location", "frame": 0, "sensor": "Lidar", "location": {"type": "2d", "x": 1.2, "y": 3.5}}
         for sample_uuid in sample_uuids:
             issue = None
             try:
                 # Add issue
-                issue = self.client.add_issue(sample_uuid, description)
+                issue = self.client.add_issue(sample_uuid, description, anchor=anchor)
                 assert isinstance(issue, Issue)
-                issue = self.client.update_issue(issue.uuid, description)
+                issue = self.client.update_issue(issue.uuid, description, anchor=anchor)
                 assert isinstance(issue, Issue)
             except AlreadyExistsError:
                 pass

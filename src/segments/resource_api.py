@@ -596,13 +596,17 @@ class Sample(segments_typing.Sample, HasClient):
         return self._client.delete_label(self.uuid, labelset)
 
     def add_issue(
-        self, description: str, status: segments_typing.IssueStatus = segments_typing.IssueStatus.OPEN
+        self,
+        description: str,
+        status: segments_typing.IssueStatus = segments_typing.IssueStatus.OPEN,
+        anchor: segments_typing.IssueAnchor = None,
     ) -> Issue:
         """Adds an issue to this sample. See :meth:`segments.client.SegmentsClient.add_issue` for more details.
 
         Args:
             description: The issue description.
             status: The issue status. One of ``OPEN`` or ``CLOSED``. Defaults to ``OPEN``.
+            anchor: An optional issue anchor. Defaults to :obj:`None`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the issue fails.
@@ -611,7 +615,7 @@ class Sample(segments_typing.Sample, HasClient):
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
-        return self._client.add_issue(self.uuid, description, status)
+        return self._client.add_issue(self.uuid, description, status, anchor)
 
     def get_issues(self) -> List[Issue]:
         """Gets all issues associated to this sample. See :meth:`segments.client.SegmentsClient.get_issues` for more details.
@@ -677,12 +681,14 @@ class Issue(segments_typing.Issue, HasClient):
         self,
         description: Optional[str] = None,
         status: Optional[segments_typing.IssueStatus] = None,
+        anchor: Optional[segments_typing.IssueAnchor] = None,
     ) -> Issue:
         """Updates this issue. See :meth:`segments.client.SegmentsClient.add_issue` for more details.
 
         Args:
             description: The issue description. Defaults to :obj:`None`.
             status: The issue status. One of ``OPEN`` or ``CLOSED``. Defaults to :obj:`None`.
+            anchor: An optional issue anchor. Defaults to :obj:`None`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the issue fails.
@@ -691,7 +697,7 @@ class Issue(segments_typing.Issue, HasClient):
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
-        return self._client.update_issue(self.uuid, description, status)
+        return self._client.update_issue(self.uuid, description, status, anchor)
 
     def delete(
         self,
