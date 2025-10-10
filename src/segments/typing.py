@@ -435,6 +435,12 @@ class XYZ(BaseModel):
     z: float
 
 
+class PartialXYZ(BaseModel):
+    x: Optional[float] = None
+    y: Optional[float] = None
+    z: Optional[float] = None
+
+
 class XYZW(BaseModel):
     qx: float
     qy: float
@@ -980,11 +986,34 @@ class TaskAttributeCategory(BaseModel):
     link_attributes: Optional[List[TaskLinkAttribute]] = None
 
 
+class IntersectingCuboidsRule(BaseModel):
+    name: Literal["intersecting-cuboids"]
+    excluded_categories: Optional[List[int]] = None
+    excluded_set_of_categories: Optional[List[int]] = None
+
+
+class CuboidDimensionLimitsRule(BaseModel):
+    name: Literal["cuboid-dimension-limits"]
+    categories: Optional[List[int]] = None
+    min: Optional[PartialXYZ] = None
+    max: Optional[PartialXYZ] = None
+
+
+WarningRule = Annotated[
+    Union[
+        IntersectingCuboidsRule,
+        CuboidDimensionLimitsRule,
+    ],
+    pydantic.Field(discriminator="name"),
+]
+
+
 class TaskAttributes(BaseModel):
     format_version: Optional[FormatVersion] = None
     categories: Optional[List[TaskAttributeCategory]] = None
     image_attributes: Optional[List[TaskAttribute]] = None
     model_config = ConfigDict(extra="allow")
+    warning_rules: Optional[List[WarningRule]] = None
 
 
 class Owner(BaseModel):

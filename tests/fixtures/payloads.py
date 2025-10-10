@@ -44,6 +44,25 @@ def add_update_dataset_arguments(owner):
                     ],
                 },
             ],
+            "warning_rules": [
+                {
+                    "name": "intersecting-cuboids",
+                    "excluded_categories": [1, 2],
+                },
+                {
+                    "name": "intersecting-cuboids",
+                    "excluded_set_of_categories": [1, 2],
+                },
+                {
+                    "name": "cuboid-dimension-limits",
+                    "min": {"x": 0.1},
+                },
+                {
+                    "name": "cuboid-dimension-limits",
+                    "categories": [1, 2],
+                    "max": {"x": 0.1, "y": 0.2, "z": 0.3},
+                },
+            ],
         },
         "category": "people",
         "public": False,
