@@ -249,6 +249,11 @@ IssueAnchorCoordinates = Annotated[
     Union[IssueAnchor2DCoordinates, IssueAnchor3DCoordinates],
     pydantic.Field(discriminator="type"),
 ]
+"""IssueAnchorCoordinates can be one of the following:
+
+- :py:class:`IssueAnchor2DCoordinates`
+- :py:class:`IssueAnchor3DCoordinates`
+"""
 
 
 # Anchors
@@ -287,6 +292,13 @@ IssueAnchor = Annotated[
     ],
     pydantic.Field(discriminator="type"),
 ]
+"""IssueAnchor can be one of the following:
+
+- :py:class:`IssueBasicAnchor`
+- :py:class:`IssueTrackAnchor`
+- :py:class:`IssueSceneAttributeAnchor`
+- :py:class:`IssueLocationAnchor`
+"""
 
 
 # Issue
@@ -1006,6 +1018,11 @@ WarningRule = Annotated[
     ],
     pydantic.Field(discriminator="name"),
 ]
+"""WarningRule can be one of the following:
+
+- :py:class:`IntersectingCuboidsRule`
+- :py:class:`CuboidDimensionLimitsRule`
+"""
 
 
 class TaskAttributes(BaseModel):
