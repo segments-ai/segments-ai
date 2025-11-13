@@ -26,7 +26,6 @@ resource_api
 client
 segmentsdataset
 utils
-huggingface
 types
 exceptions
 ```
