@@ -1,16 +1,14 @@
 [project]
 name = "segments-ai"
-authors = [
-    {name = "Bert De Branderere", email = "bert@segments.ai"},
-]
+authors = [{ name = "Bert De Branderere", email = "bert@segments.ai" }]
 description = ""
 requires-python = ">=3.9"
-keywords=[ "image", "segmentation", "labeling", "vision"]
+keywords = ["image", "segmentation", "labeling", "vision"]
 classifiers = [
-    "Development Status :: 3 - Alpha", 
-    "Intended Audience :: Developers",  
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
     "Topic :: Software Development :: Build Tools",
-    "Programming Language :: Python :: 3", 
+    "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -23,7 +21,7 @@ classifiers = [
     "Operating System :: MacOS",
 ]
 readme = "README.md"
-license  = "MIT"
+license = "MIT"
 dependencies = [
     "numpy>=1.20",
     "requests>=2.0",
@@ -52,7 +50,7 @@ dev = [
     "pycocotools==2.*",
     "scikit-image==0.*",
     "opencv-python==4.*",
-    "build>=1.2.0"
+    "build>=1.2.0",
 ]
 docs = [
     "sphinx>=4.0",
@@ -74,10 +72,10 @@ requires = ["setuptools>=42.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-package-dir = {""= "src/"}
+package-dir = { "" = "src/" }
 
 [tool.setuptools.dynamic]
-version = { attr = "segments.version.__version__"}
+version = { attr = "segments.version.__version__" }
 
 # pytest
 [tool.pytest.ini_options]
@@ -103,8 +101,8 @@ no_implicit_reexport = true
 
 # ruff
 [tool.ruff]
-line-length = 119 # huggingface default
+line-length = 119
 
 [tool.ruff.isort]
 known-third-party = ["segments"]
-lines-after-imports = 2          # huggingface default
+lines-after-imports = 2
