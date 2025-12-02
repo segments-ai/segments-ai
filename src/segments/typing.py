@@ -460,6 +460,16 @@ class XYZW(BaseModel):
     qw: float
 
 
+class Velocity(BaseModel):
+    relative: Optional[float]
+    absolute: float
+
+
+class Acceleration(BaseModel):
+    relative: Optional[float]
+    absolute: float
+
+
 class FisheyeDistortionCoefficients(BaseModel):
     k1: float
     k2: float
@@ -502,6 +512,8 @@ class PointcloudCuboidAnnotation(BaseModel):
     rotation: Optional[XYZW] = None
     type: PointcloudCuboidAnnotationTypeLiteral
     attributes: Optional[ObjectAttributes] = None
+    velocity: Optional[Velocity] = None
+    acceleration: Optional[Acceleration] = None
 
 
 class BasePointcloudCuboidLabelAttributes(BaseModel):

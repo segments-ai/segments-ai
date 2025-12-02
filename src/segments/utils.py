@@ -20,12 +20,20 @@ from segments import SegmentsClient
 from segments.exceptions import AlreadyExistsError
 from segments.typing import (
     XYZW,
+    Acceleration,
     Annotation,
     EgoPose,
     ExportFormat,
+    Label,
+    MultiSensorLabelAttributes,
+    MultiSensorPointcloudSequenceCuboidLabelAttributes,
+    MultiSensorSampleAttributes,
     PointcloudCuboidLabelAttributes,
+    PointcloudSequenceCuboidLabelAttributes,
     PointcloudSequenceSampleAttributes,
+    Sample,
     TaskType,
+    Velocity,
 )
 from tqdm import tqdm
 
@@ -1050,3 +1058,228 @@ def find_camera_rotation(client: SegmentsClient, dataset_identifier: str) -> Qua
                     raise ValueError(f"Please enter `y(es)` or `n(o)` (case insensitive) not `{rotation_OK}`.")
 
     raise ValueError("Correct rotation not found.")
+
+
+def add_kinematics_to_label(
+    sample: Sample,
+    label: Label,
+    timestamp_unit: Optional[int] = 1_000_000_000.0,
+    fps: Optional[float] = None,
+) -> Label:
+    """Add velocity and acceleration calculations to point cloud sequence cuboid labels.
+
+    This function calculates velocity and acceleration (relative and absolute) for annotations with position, ego_position and timestamp data across frames in point cloud sequence datasets. If timestamp data is missing, it estimates a frame per 0.5 seconds. If ego-position data is missing, only absolute kinematics are calculated.
+
+    Args:
+        sample: A Sample object containing the point cloud sequence sample data.
+        label: A Label object containing point cloud sequence data.
+        timestamp_unit: Conversion factor for timestamps to seconds. Defaults to ``1_000_000_000.0`` (i.e., timestamps in nanoseconds).
+        fps: Frames per second to use when timestamps are missing.
+
+    Returns:
+        A copy of the label with velocity and acceleration attributes added to annotations.
+
+    Raises:
+        ValueError: If the sample is not a multisensor or point cloud sequence cuboid label.
+        ValueError: If the label sample UUID does not match the sample UUID.
+        ValueError: If fps is not provided when timestamps are missing.
+
+    Example:
+
+      .. code-block:: python
+
+        # pip install segments-ai
+        from segments import SegmentsClient
+        from segments.utils import add_kinematics_to_label
+
+        client = SegmentsClient('YOUR_API_KEY')
+        sample = client.get_sample(sample_uuid)
+        label = client.get_label(sample_uuid)
+        updated_label = add_kinematics_to_label(sample, label)
+    """
+
+    def _calculate_velocity_and_acceleration(
+        ego_positions: List[Optional[npt.NDArray[np.float64]]],
+        positions: List[Optional[npt.NDArray[np.float64]]],
+        timestamps: List[Optional[float]],
+    ) -> Tuple[List[Optional[float]], List[Optional[float]]]:
+        velocities: List[Optional[Velocity]] = []
+        accelerations: List[Optional[Acceleration]] = []
+
+        previous_ego_position = None
+        previous_position = None
+        previous_timestamp = None
+        previous_index = None
+        previous_velocity_vector = None
+        previous_ego_velocity_vector = None
+
+        for i, (ego_position, position, timestamp) in enumerate(zip(ego_positions, positions, timestamps)):
+            if previous_position is None or position is None:
+                velocities.append(None)
+                accelerations.append(None)
+
+                if position is not None:
+                    previous_ego_position = ego_position
+                    previous_position = position
+                    previous_timestamp = timestamp
+                    previous_index = i
+
+                continue
+
+            velocity = None
+            acceleration = None
+
+            time_delta = None
+            if timestamp is None or previous_timestamp is None:
+                if fps is None:
+                    raise ValueError("FPS must be provided if timestamps are missing.")
+                frame_index_delta = i - previous_index
+                time_delta = frame_index_delta / fps
+            else:
+                time_delta = (timestamp - previous_timestamp) / timestamp_unit
+            if time_delta <= 0:
+                raise ValueError("Timestamps must be increasing.")
+
+            velocity_vector = (position - previous_position) / time_delta
+
+            ego_velocity_vector = None
+            relative_velocity = None
+            if ego_position is not None and previous_ego_position is not None:
+                ego_velocity_vector = (ego_position - previous_ego_position) / time_delta
+                relative_velocity = float(np.linalg.norm(velocity_vector - ego_velocity_vector))
+
+            velocity = Velocity(
+                absolute=float(np.linalg.norm(velocity_vector)),
+                relative=relative_velocity,
+            )
+
+            if previous_velocity_vector is not None:
+                acceleration_vector = (velocity_vector - previous_velocity_vector) / time_delta
+
+                relative_acceleration = None
+                if ego_velocity_vector is not None and previous_ego_velocity_vector is not None:
+                    ego_acceleration_vector = (ego_velocity_vector - previous_ego_velocity_vector) / time_delta
+                    relative_acceleration = float(np.linalg.norm(acceleration_vector - ego_acceleration_vector))
+
+                acceleration = Acceleration(
+                    absolute=float(np.linalg.norm(acceleration_vector)),
+                    relative=relative_acceleration,
+                )
+
+            previous_velocity_vector = velocity_vector
+            previous_ego_velocity_vector = ego_velocity_vector
+
+            previous_ego_position = ego_position
+            previous_position = position
+            previous_timestamp = timestamp
+            previous_index = i
+
+            velocities.append(velocity)
+            accelerations.append(acceleration)
+
+        return velocities, accelerations
+
+    if label.sample_uuid != sample.uuid:
+        raise ValueError("Label sample UUID does not match sample UUID.")
+
+    if isinstance(sample.attributes, PointcloudSequenceSampleAttributes):
+        sample_pointcloud_frames = sample.attributes.frames
+    elif isinstance(sample.attributes, MultiSensorSampleAttributes):
+        pointcloud_sensor = None
+        for sensor in sample.attributes.sensors:
+            if hasattr(sensor, "task_type") and sensor.task_type == TaskType.POINTCLOUD_CUBOID_SEQUENCE:
+                pointcloud_sensor = sensor
+                break
+
+        if pointcloud_sensor is None:
+            raise ValueError(
+                "Sample must contain a pointcloud cuboid sensor to calculate kinematics. "
+                "No sensor with task_type 'pointcloud-cuboid-sequence' found in sample."
+            )
+        sample_pointcloud_frames = pointcloud_sensor.attributes.frames
+    else:
+        raise ValueError(
+            "Sample must be a pointcloud cuboid sequence or multisensor sample to calculate kinematics. "
+            "Supported types: PointcloudSequenceSample, MultiSensorSample."
+        )
+
+    label_copy = copy.deepcopy(label)
+    sequence_attributes = []
+
+    if isinstance(label_copy.attributes, PointcloudSequenceCuboidLabelAttributes):
+        if hasattr(label_copy.attributes, "frames") and label_copy.attributes.frames:
+            sequence_attributes.append(label_copy.attributes)
+    elif isinstance(label_copy.attributes, MultiSensorLabelAttributes):
+        for sensor in label_copy.attributes.sensors:
+            if isinstance(
+                sensor,
+                MultiSensorPointcloudSequenceCuboidLabelAttributes,
+            ):
+                if hasattr(sensor.attributes, "frames") and sensor.attributes.frames:
+                    sequence_attributes.append(sensor.attributes)
+
+    if not sequence_attributes:
+        raise ValueError(
+            "Label must be a point cloud sequence type with frames to calculate kinematics. "
+            "Supported label types: PointcloudSequenceCuboidLabel, "
+            "or MultiSensorLabel containing point cloud sequence sensors."
+        )
+
+    ego_positions = []
+    for frames in sample_pointcloud_frames:
+        if not hasattr(frames, "ego_pose") or frames.ego_pose is None or not hasattr(frames.ego_pose, "position"):
+            ego_positions.append(None)
+        else:
+            pos = frames.ego_pose.position
+            ego_positions.append(np.array([pos.x, pos.y, pos.z]))
+
+    for seq_attr in sequence_attributes:
+        tracks: Dict[int, List[Tuple[int, Any]]] = defaultdict(list)
+
+        for frame_idx, frame in enumerate(seq_attr.frames):
+            if not hasattr(frame, "annotations"):
+                continue
+
+            for annotation in frame.annotations:
+                if not hasattr(annotation, "track_id") or not hasattr(annotation, "position"):
+                    continue
+                tracks[annotation.track_id].append((frame_idx, annotation))
+
+        for track_annotations in tracks.values():
+            track_annotations.sort(key=lambda x: x[0])
+
+            positions = []
+            timestamps = []
+            annotation_refs = []
+
+            for frame_idx, annotation in track_annotations:
+                frame = seq_attr.frames[frame_idx]
+
+                position = None
+                if annotation.position is not None:
+                    position = np.array([annotation.position.x, annotation.position.y, annotation.position.z])
+
+                timestamp = frame.timestamp
+                if isinstance(timestamp, str):
+                    try:
+                        timestamp = float(timestamp)
+                    except ValueError:
+                        timestamp = None
+                elif isinstance(timestamp, (int, float)):
+                    timestamp = float(timestamp)
+
+                timestamps.append(timestamp)
+                positions.append(position)
+                annotation_refs.append(annotation)
+
+            velocities, accelerations = _calculate_velocity_and_acceleration(ego_positions, positions, timestamps)
+
+            for i, (velocity, acceleration) in enumerate(zip(velocities, accelerations)):
+                annotation = annotation_refs[i]
+                if velocity is not None:
+                    annotation.velocity = velocity
+
+                if acceleration is not None:
+                    annotation.acceleration = acceleration
+
+    return label_copy
