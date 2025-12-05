@@ -233,6 +233,7 @@ class SegmentsClient:
 
     Raises:
         :exc:`~segments.exceptions.AuthenticationError`: If an invalid API key is used or (when not passing the API key directly) if ``SEGMENTS_API_KEY`` is not found in your environment.
+        :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded at the time of initialization (most likely due to calls made by a parallel process).
     """
 
     def __init__(
@@ -275,6 +276,8 @@ class SegmentsClient:
                 logger.warning(
                     "There's a new version available. Please upgrade by running `pip install --upgrade segments-ai`"
                 )
+            elif cast(requests.exceptions.RequestException, e.cause).response.status_code == 429:
+                raise APILimitError(message="Initialization failed due to rate limiting. Please try again later.")
             else:
                 raise AuthenticationError(message="Something went wrong. Did you use the right API key?")
 
