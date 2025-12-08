@@ -99,3 +99,11 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 ```{eval-rst}
 .. autofunction:: segments.utils.find_camera_rotation
 ```
+
+## Kinematics
+
+### Add velocity and acceleration calculations to sequence labels
+
+```{eval-rst}
+.. autofunction:: segments.utils.add_kinematics_to_label
+```
