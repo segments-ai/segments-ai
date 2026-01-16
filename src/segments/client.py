@@ -186,9 +186,17 @@ def convert_model(
 
         except pydantic.ValidationError as e:
             if not self._strict_checking:
-                # We're not applying strict type checking, just return the decoded json
-                logging.warning(f"Validation failed for model {model}, returning the raw json.")
-                return r_json
+                logging.warning(f"Validation failed for model {model}, constructing object without validation.")
+                if isinstance(r_json, list):
+                    m = [get_args(model)[0].model_construct(**item) for item in r_json]
+                    if issubclass(get_args(model)[0], HasClient):
+                        for item in m:
+                            item._inject_client(self)
+                else:
+                    m = model.model_construct(**r_json)
+                    if inspect.isclass(model) and issubclass(model, HasClient):
+                        m._inject_client(self)
+                return m
             else:
                 raise ValidationError(message=str(e), cause=e)
 
@@ -264,7 +272,7 @@ class SegmentsClient:
         self.s3_session.mount("http://", adapter)
         self.s3_session.mount("https://", adapter)
 
-        self._strict_checking = True
+        self._strict_checking = False
 
         try:
             r = self._get(f"/api_status/?lib_version={VERSION}")
@@ -981,13 +989,29 @@ class SegmentsClient:
         direction_str = "" if direction == "asc" else "-"
         query_string += f"&sort={direction_str}{sort}"
 
-        r = self._get(f"/datasets/{dataset_identifier}/samples/{query_string}")
-        results = r.json()
+        import time as time_module
 
+        http_start = time_module.time()
+        r = self._get(f"/datasets/{dataset_identifier}/samples/{query_string}")
+        http_time = time_module.time() - http_start
+
+        json_start = time_module.time()
+        results = r.json()
+        json_time = time_module.time() - json_start
+
+        logger.info(f"Backend response sample (first item): {json.dumps(results, indent=2)}")
+
+        validation_start = time_module.time()
         try:
             results = TypeAdapter(List[Sample]).validate_python(results)
         except pydantic.ValidationError as e:
             raise ValidationError(message=str(e), cause=e)
+        validation_time = time_module.time() - validation_start
+
+        logger.info(f"Timing breakdown for {len(results)} samples:")
+        logger.info(f"  - HTTP request: {http_time:.2f}s")
+        logger.info(f"  - JSON parsing: {json_time:.2f}s")
+        logger.info(f"  - Pydantic validation: {validation_time:.2f}s")
 
         # TODO: refactor into decorator
         for s in results:
@@ -1103,10 +1127,16 @@ class SegmentsClient:
                     .model_dump(mode="json", exclude_unset=True)
                 )
             except pydantic.ValidationError as e:
-                logger.error(
-                    "Did you use the right sample attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/sample-types.",
+                logger.warning(
+                    f"Validation failed for sample attributes, using raw structure: {e}"
                 )
-                raise ValidationError(message=str(e), cause=e)
+                logger.warning(
+                    f"Attributes image url: {attributes}"
+                )
+                if attributes is not None:
+                    attributes = json.loads(json.dumps(attributes))
+                else:
+                    attributes = {"image": {"signed_url": ""}}
 
         payload: Dict[str, Any] = {
             "name": name,
@@ -1128,10 +1158,19 @@ class SegmentsClient:
         if readme is not None:
             payload["readme"] = readme
 
-        r = self._post(
-            f"/datasets/{dataset_identifier}/samples/", data=payload, model=Sample, gzip_compress=enable_compression
-        )
-        # logger.info(f"Added {name}")
+        logger.info(f"add_sample payload before HTTP call: {json.dumps(payload)}")
+
+        try:
+            r = self._post(
+                f"/datasets/{dataset_identifier}/samples/", data=payload, model=Sample, gzip_compress=enable_compression
+            )
+            logger.info(f"add_sample HTTP call succeeded for sample: {name}")
+        except Exception as e:
+            logger.error(f"add_sample HTTP call failed for sample: {name}")
+            logger.error(f"Payload was: {json.dumps(payload)}")
+            logger.error(f"Exception type: {type(e).__name__}")
+            logger.error(f"Exception message: {str(e)}")
+            raise
 
         return cast(Sample, r)
 
