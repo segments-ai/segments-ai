@@ -42,6 +42,7 @@ from segments.exceptions import (
 from segments.typing import (
     AWSFields,
     Category,
+    DeleteSamplesResponse,
     File,
     IssueAnchor,
     IssueStatus,
@@ -1298,6 +1299,54 @@ class SegmentsClient:
         """
 
         self._delete(f"/samples/{uuid}/")
+
+    def delete_samples(self, dataset_identifier: str, uuids: List[str]) -> DeleteSamplesResponse:
+        """Delete multiple samples from a dataset in bulk.
+
+        .. code-block:: python
+
+            dataset_identifier = 'jane/flowers'
+            uuids = [
+                '602a3eec-a61c-4a77-9fcc-3037ce5e9606',
+                '7f3b2c1d-e456-7890-abcd-ef1234567890',
+            ]
+            result = client.delete_samples(dataset_identifier, uuids)
+            print(f"Deleted {result.deleted_count} samples")
+
+        Note:
+            - Maximum 1000 UUIDs per request.
+            - UUIDs that don't exist are silently skipped.
+            - The operation is atomic (all succeed or all fail).
+
+        Args:
+            dataset_identifier: The dataset identifier, consisting of the name of the dataset owner followed by the name of the dataset itself. Example: ``jane/flowers``.
+            uuids: List of sample UUIDs to delete. Maximum 1000 per request.
+
+        Returns:
+            :class:`~segments.typing.DeleteSamplesResponse` containing the count of deleted samples.
+
+        Raises:
+            :exc:`~segments.exceptions.ValidationError`: If uuids is empty or exceeds 1000 items.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.NotFoundError`: If the dataset is not found.
+            :exc:`~segments.exceptions.AuthorizationError`: If you lack permission to delete from this dataset.
+            :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+        """
+        if not uuids:
+            raise ValidationError(message="uuids list cannot be empty")
+        if len(uuids) > 1000:
+            raise ValidationError(message=f"Cannot delete more than 1000 samples at once. Got {len(uuids)}.")
+
+        payload = {"uuids": uuids}
+
+        r = self._delete(
+            f"/datasets/{dataset_identifier}/samples_bulk/",
+            data=payload,
+            model=DeleteSamplesResponse,
+        )
+
+        return cast(DeleteSamplesResponse, r)
 
     ##########
     # Labels #

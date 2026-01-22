@@ -118,6 +118,26 @@ class Dataset(segments_typing.Dataset, HasClient):
         """
         return self._client.delete_dataset(self.full_name)
 
+    def delete_samples(self, uuids: List[str]) -> segments_typing.DeleteSamplesResponse:
+        """Delete multiple samples from this dataset in bulk.
+
+        See :meth:`segments.client.SegmentsClient.delete_samples` for more details.
+
+        Args:
+            uuids: List of sample UUIDs to delete. Maximum 1000 per request.
+
+        Returns:
+            :class:`~segments.typing.DeleteSamplesResponse` containing the count of deleted samples.
+
+        Raises:
+            :exc:`~segments.exceptions.ValidationError`: If uuids is empty or exceeds 1000 items.
+            :exc:`~segments.exceptions.APILimitError`: If the API limit is exceeded.
+            :exc:`~segments.exceptions.AuthorizationError`: If you lack permission to delete from this dataset.
+            :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
+            :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+        """
+        return self._client.delete_samples(self.full_name, uuids)
+
     def update(
         self,
         description: Optional[str] = None,

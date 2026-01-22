@@ -17,6 +17,7 @@ from segments.exceptions import (
 from segments.typing import (
     Collaborator,
     Dataset,
+    DeleteSamplesResponse,
     File,
     Issue,
     Label,
@@ -577,6 +578,44 @@ class TestException:
         for sample_uuid in sample_uuids:
             with pytest.raises(ValidationError):
                 self.client.add_label(sample_uuid, labelset, wrong_attributes)
+
+
+##################
+# Delete Samples #
+##################
+@pytest.mark.usefixtures("setup_class_client")
+class TestDeleteSamples:
+    """Tests for bulk sample deletion."""
+
+    def test_delete_samples_empty_list_validationerror(self, datasets, owner) -> None:
+        """Test that empty UUID list raises ValidationError."""
+        dataset_identifier = f"{owner}/{datasets[0]}"
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.delete_samples(dataset_identifier, [])
+        assert "empty" in str(exc_info.value).lower()
+
+    def test_delete_samples_exceeds_limit_validationerror(self, datasets, owner) -> None:
+        """Test that >1000 UUIDs raises ValidationError."""
+        dataset_identifier = f"{owner}/{datasets[0]}"
+        uuids = [f"00000000-0000-0000-0000-{i:012d}" for i in range(1001)]
+        with pytest.raises(ValidationError) as exc_info:
+            self.client.delete_samples(dataset_identifier, uuids)
+        assert "1000" in str(exc_info.value)
+
+    def test_delete_samples_dataset_notfounderror(self) -> None:
+        """Test that invalid dataset raises NotFoundError."""
+        with pytest.raises(NotFoundError):
+            self.client.delete_samples("nonexistent/dataset", ["00000000-0000-0000-0000-000000000001"])
+
+    def test_delete_samples_nonexistent_uuids(self, datasets, owner) -> None:
+        """Test that non-existent UUIDs are silently skipped and return deleted_count=0."""
+        dataset_identifier = f"{owner}/{datasets[0]}"
+        fake_uuids = ["00000000-0000-0000-0000-000000000001"]
+
+        result = self.client.delete_samples(dataset_identifier, fake_uuids)
+
+        assert isinstance(result, DeleteSamplesResponse)
+        assert result.deleted_count == 0
 
 
 if __name__ == "__main__":
