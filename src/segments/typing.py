@@ -214,6 +214,16 @@ class URL(BaseModel):
     signed_url: Optional[str] = None
 
 
+class DeleteSamplesResponse(BaseModel):
+    """Response from bulk sample deletion.
+
+    Attributes:
+        deleted_count: Number of samples successfully deleted.
+    """
+
+    deleted_count: int
+
+
 class Release(BaseModel):
     uuid: str
     name: str
