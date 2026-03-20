@@ -199,9 +199,9 @@ class Subscription(str, Enum):
 RGB = Tuple[int, int, int]
 RGBA = Tuple[int, int, int, int]
 FormatVersion = Union[float, str]
-ObjectAttributes = Dict[str, Optional[Union[str, bool, int, float]]]
-ImageAttributes = Dict[str, Optional[Union[str, bool, int, float]]]
-LinkAttributes = Dict[str, Optional[Union[str, bool, int, float]]]
+ObjectAttributes = Dict[str, Optional[Union[str, bool, int, float, List[str]]]]
+ImageAttributes = Dict[str, Optional[Union[str, bool, int, float, List[str]]]]
+LinkAttributes = Dict[str, Optional[Union[str, bool, int, float, List[str]]]]
 Timestamp = Union[str, int, float]
 
 
