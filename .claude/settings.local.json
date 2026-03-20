@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc:*)",
+      "mcp__plugin_compound-engineering_context7__resolve-library-id",
+      "WebSearch",
+      "Bash(open:*)",
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)",
+      "Bash(mypy:*)",
+      "Bash(pytest:*)",
+      "Bash(python:*)",
+      "Bash(ruff check:*)",
+      "Bash(ruff format:*)",
+      "Skill(compound-engineering:workflows:work)",
+      "Bash(make format:*)",
+      "Bash(git add:*)",
+      "Bash(python3:*)"
+    ]
+  }
+}
