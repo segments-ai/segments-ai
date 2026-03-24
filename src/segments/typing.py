@@ -279,7 +279,7 @@ class IssueBasicAnchor(IssueBaseAnchor):
 
 class IssueTrackAnchor(IssueBaseAnchor):
     type: Literal["track"]
-    track: int
+    trackNumber: int
     trackAttribute: Optional[str] = None
 
 
