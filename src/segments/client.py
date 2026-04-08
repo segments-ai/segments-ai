@@ -585,6 +585,8 @@ class SegmentsClient:
         archived: Optional[bool] = None,
         enable_3d_region_of_interest: Optional[bool] = None,
         region_of_interest: Optional[dict[str, Any]] = None,
+        use_timestamps_for_interpolation: Optional[bool] = None,
+        enable_object_linking: Optional[bool] = None,
     ) -> Dataset:
         """Update a dataset.
 
@@ -617,6 +619,8 @@ class SegmentsClient:
             archived: Whether the dataset is archived. Defaults to :obj:`None`.
             enable_3d_region_of_interest: Enable region of interest for point cloud datasets. Defaults to :obj:`None`.
             region_of_interest: Region of interest configuration. Defaults to :obj:`None`.
+            use_timestamps_for_interpolation: Use timestamps for interpolation in sequence datasets. Defaults to :obj:`None`.
+            enable_object_linking: Enable object linking (beta). Defaults to :obj:`None`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
@@ -700,6 +704,12 @@ class SegmentsClient:
 
         if region_of_interest is not None:
             payload["region_of_interest"] = region_of_interest
+
+        if use_timestamps_for_interpolation is not None:
+            payload["use_timestamps_for_interpolation"] = use_timestamps_for_interpolation
+
+        if enable_object_linking is not None:
+            payload["enable_object_linking"] = enable_object_linking
 
         r = self._patch(f"/datasets/{dataset_identifier}/", data=payload, model=Dataset)
         # logger.info(f"Updated {dataset_identifier}")

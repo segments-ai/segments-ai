@@ -1105,6 +1105,8 @@ class Dataset(BaseModel):
     enable_label_status_verified: bool
     enable_same_dimensions_track_constraint: bool
     enable_3d_region_of_interest: bool
+    enable_3d_cuboid_rotation: Optional[bool] = None
+    enable_confirm_on_commit: Optional[bool] = None
     enable_interpolation: bool
     use_timestamps_for_interpolation: bool
     enable_object_linking: bool
