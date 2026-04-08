@@ -160,6 +160,8 @@ class Dataset(segments_typing.Dataset, HasClient):
         archived: Optional[bool] = None,
         enable_3d_region_of_interest: Optional[bool] = None,
         region_of_interest: Optional[dict[str, Any]] = None,
+        use_timestamps_for_interpolation: Optional[bool] = None,
+        enable_object_linking: Optional[bool] = None,
     ) -> Dataset:
         """Updates the dataset, see :meth:`segments.client.SegmentsClient.update_dataset` for more details.
 
@@ -184,6 +186,8 @@ class Dataset(segments_typing.Dataset, HasClient):
             archived: Whether the dataset is archived. Defaults to :obj:`None`.
             enable_3d_region_of_interest: Enable region of interest for point cloud datasets. Defaults to :obj:`None`.
             region_of_interest: Region of interest configuration. Defaults to :obj:`None`.
+            use_timestamps_for_interpolation: Use timestamps for interpolation in sequence datasets. Defaults to :obj:`None`.
+            enable_object_linking: Enable object linking (beta). Defaults to :obj:`None`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
@@ -214,6 +218,8 @@ class Dataset(segments_typing.Dataset, HasClient):
             archived,
             enable_3d_region_of_interest,
             region_of_interest,
+            use_timestamps_for_interpolation,
+            enable_object_linking,
         )
 
     def get_samples(
