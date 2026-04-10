@@ -270,6 +270,10 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 .. autopydantic_model:: segments.typing.MultiSensorImageSequenceVectorLabelAttributes
 ```
 
+```{eval-rst}
+.. autopydantic_model:: segments.typing.MultiSensorImageSequenceSegmentationLabelAttributes
+```
+
 ### Links
 
 ```{eval-rst}
