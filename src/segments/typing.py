@@ -635,6 +635,13 @@ class MultiSensorImageSequenceVectorLabelAttributes(BaseModel):
     attributes: Union[ImageSequenceVectorLabelAttributes, List]
 
 
+class MultiSensorImageSequenceSegmentationLabelAttributes(BaseModel):
+    name: str
+    task_type: Literal[TaskType.IMAGE_SEGMENTATION_SEQUENCE]
+    # TODO remove list and replace with `Optional[ImageSequenceSegmentationLabelAttributes] = None`
+    attributes: Union[ImageSequenceSegmentationLabelAttributes, List]
+
+
 class MultiSensorPointcloudSequenceVectorLabelAttributes(BaseModel):
     name: str
     task_type: Literal[TaskType.POINTCLOUD_VECTOR_SEQUENCE]
@@ -649,6 +656,7 @@ class MultiSensorLabelAttributes(BaseModel):
                 MultiSensorPointcloudSequenceCuboidLabelAttributes,
                 MultiSensorPointcloudSequenceVectorLabelAttributes,
                 MultiSensorImageSequenceVectorLabelAttributes,
+                MultiSensorImageSequenceSegmentationLabelAttributes,
             ],
             pydantic.Field(discriminator="task_type"),
         ]
@@ -781,7 +789,10 @@ class MultiSensorPointcloudSequenceSampleAttributes(BaseModel):
 
 class MultiSensorImageSequenceSampleAttributes(BaseModel):
     name: str
-    task_type: Literal[TaskType.IMAGE_VECTOR_SEQUENCE]
+    task_type: Union[
+        Literal[TaskType.IMAGE_VECTOR_SEQUENCE],
+        Literal[TaskType.IMAGE_SEGMENTATION_SEQUENCE],
+    ]
     attributes: ImageSequenceSampleAttributes
 
 
