@@ -649,6 +649,10 @@ class MultiSensorPointcloudSequenceVectorLabelAttributes(BaseModel):
     # TODO remove list and replace with `Optional[ImageSequenceVectorLabelAttributes] = None`
     attributes: Union[BasePointcloudSequenceVectorLabelAttributes, List]
 
+class MultiSensorPointcloudSequenceSegmentationLabelAttributes(BaseModel):
+    name: str
+    task_type: Literal[TaskType.POINTCLOUD_SEGMENTATION_SEQUENCE]
+    attributes: Union[PointcloudSequenceSegmentationLabelAttributes, List]
 
 class MultiSensorLabelAttributes(BaseModel):
     sensors: List[
@@ -656,6 +660,7 @@ class MultiSensorLabelAttributes(BaseModel):
             Union[
                 MultiSensorPointcloudSequenceCuboidLabelAttributes,
                 MultiSensorPointcloudSequenceVectorLabelAttributes,
+                MultiSensorPointcloudSequenceSegmentationLabelAttributes,
                 MultiSensorImageSequenceVectorLabelAttributes,
                 MultiSensorImageSequenceSegmentationLabelAttributes,
             ],
@@ -784,6 +789,7 @@ class MultiSensorPointcloudSequenceSampleAttributes(BaseModel):
     task_type: Union[
         Literal[TaskType.POINTCLOUD_CUBOID_SEQUENCE],
         Literal[TaskType.POINTCLOUD_VECTOR_SEQUENCE],
+        Literal[TaskType.POINTCLOUD_SEGMENTATION_SEQUENCE],
     ]
     attributes: PointcloudSequenceSampleAttributes
 

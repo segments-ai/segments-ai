@@ -9,7 +9,6 @@ from segments.client import SegmentsClient
 from segments.exceptions import (
     AlreadyExistsError,
     AuthenticationError,
-    AuthorizationError,
     NetworkError,
     NotFoundError,
     ValidationError,
@@ -557,7 +556,7 @@ class TestException:
             SegmentsClient(wrong_api_key)
 
     def test_unauthorized_dataset_request(self, owner) -> None:
-        with pytest.raises(AuthorizationError):
+        with pytest.raises(NotFoundError):
             dataset_identifier = f"{owner}/empty-dataset-for-authorization-tests"
             self.client.get_dataset(dataset_identifier)
 
