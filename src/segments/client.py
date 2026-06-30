@@ -1939,6 +1939,7 @@ class SegmentsClient:
         end: Optional[str] = None,
         per_page: int = 1000,
         page: int = 1,
+        include_session_time_metrics: bool = False,
     ) -> List[Workunit]:
         """Get the workunits in a dataset.
 
@@ -1957,6 +1958,7 @@ class SegmentsClient:
             end: The end datetime for filtering workunits. Must be in the format 'YYYY-MM-DDTHH:MM:SS'. Defaults to :obj:`None`.
             per_page: Pagination parameter indicating the maximum number of results to return. Defaults to ``1000``.
             page: Pagination parameter indicating the page to return. Defaults to ``1``.
+            include_session_time_metrics: Whether to include session time metrics in the response. Defaults to :obj:`False`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the samples fails.
@@ -1980,6 +1982,9 @@ class SegmentsClient:
         # filter by end datetime
         if end is not None:
             query_string += f"&end={end}"
+
+        if include_session_time_metrics:
+            query_string += "&include_session_time_metrics=true"
 
         r = self._get(f"/datasets/{dataset_identifier}/workunits/{query_string}")
         results = r.json()

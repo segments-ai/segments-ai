@@ -1103,6 +1103,7 @@ class Workunit(BaseModel):
     sample_uuid: str
     sample_name: str
     label_rating: Optional[int] = None
+    session_time_metrics: Optional[Dict[str, Any]] = None
 
 
 class Dataset(BaseModel):

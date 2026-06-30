@@ -442,6 +442,7 @@ class Dataset(segments_typing.Dataset, HasClient):
         end: Optional[str] = None,
         per_page: int = 1000,
         page: int = 1,
+        include_session_time_metrics: bool = False,
     ) -> List[segments_typing.Workunit]:
         """Lists all workunits associated to this dataset, see :meth:`segments.client.SegmentsClient.get_workunits` for more details.
 
@@ -452,6 +453,7 @@ class Dataset(segments_typing.Dataset, HasClient):
             end: The end datetime for filtering workunits. Must be in the format 'YYYY-MM-DDTHH:MM:SS'. Defaults to :obj:`None`.
             per_page: Pagination parameter indicating the maximum number of results to return. Defaults to ``1000``.
             page: Pagination parameter indicating the page to return. Defaults to ``1``.
+            include_session_time_metrics: Whether to include session time metrics in the response. Defaults to :obj:`False`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the samples fails.
@@ -460,7 +462,7 @@ class Dataset(segments_typing.Dataset, HasClient):
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
-        return self._client.get_workunits(self.full_name, sort, direction, start, end, per_page, page)
+        return self._client.get_workunits(self.full_name, sort, direction, start, end, per_page, page, include_session_time_metrics)
 
 
 class Sample(segments_typing.Sample, HasClient):
