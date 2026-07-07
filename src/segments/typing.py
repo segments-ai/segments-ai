@@ -1033,7 +1033,7 @@ class TaskAttributeCategory(BaseModel):
     color: Optional[Union[RGB, RGBA]] = None
     has_instances: Optional[bool] = None
     attributes: Optional[List[TaskAttribute]] = None
-    dimensions: Optional[XYZ] = None
+    dimensions: Optional[PartialXYZ] = None
     model_config = ConfigDict(extra="allow")
     link_attributes: Optional[List[TaskLinkAttribute]] = None
 
