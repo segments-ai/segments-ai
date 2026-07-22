@@ -434,6 +434,8 @@ class SegmentsClient:
         archived: bool = False,
         enable_3d_region_of_interest: bool = False,
         region_of_interest: Optional[dict[str, Any]] = None,
+        enable_object_linking: Optional[bool] = None,
+        enable_object_link_category_restrictions: Optional[bool] = None,
     ) -> Dataset:
         """Add a dataset.
 
@@ -498,6 +500,8 @@ class SegmentsClient:
             archived: Whether the dataset is archived. Defaults to :obj:`False`.
             enable_3d_region_of_interest: Enable region of interest for point cloud datasets. Defaults to :obj:`False`.
             region_of_interest: Region of interest configuration. Defaults to :obj:`None`.
+            enable_object_linking: Enable object linking. Defaults to :obj:`None`, which lets the server decide.
+            enable_object_link_category_restrictions: Restrict object linking to the categories allowlisted in each category's ``link_category_restrictions``. Ignored when object linking is disabled. Note that a category with an empty or missing allowlist can then not be linked to anything. Defaults to :obj:`None`, which lets the server decide.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the task attributes fails.
@@ -556,6 +560,12 @@ class SegmentsClient:
         if region_of_interest is not None:
             payload["region_of_interest"] = region_of_interest
 
+        if enable_object_linking is not None:
+            payload["enable_object_linking"] = enable_object_linking
+
+        if enable_object_link_category_restrictions is not None:
+            payload["enable_object_link_category_restrictions"] = enable_object_link_category_restrictions
+
         endpoint = f"/organizations/{organization}/datasets/" if organization is not None else "/user/datasets/"
 
         r = self._post(endpoint, data=payload, model=Dataset)
@@ -587,6 +597,7 @@ class SegmentsClient:
         region_of_interest: Optional[dict[str, Any]] = None,
         use_timestamps_for_interpolation: Optional[bool] = None,
         enable_object_linking: Optional[bool] = None,
+        enable_object_link_category_restrictions: Optional[bool] = None,
     ) -> Dataset:
         """Update a dataset.
 
@@ -621,6 +632,7 @@ class SegmentsClient:
             region_of_interest: Region of interest configuration. Defaults to :obj:`None`.
             use_timestamps_for_interpolation: Use timestamps for interpolation in sequence datasets. Defaults to :obj:`None`.
             enable_object_linking: Enable object linking (beta). Defaults to :obj:`None`.
+            enable_object_link_category_restrictions: Restrict object linking to the categories allowlisted in each category's ``link_category_restrictions``. Ignored when object linking is disabled. Note that a category with an empty or missing allowlist can then not be linked to anything. Defaults to :obj:`None`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
@@ -710,6 +722,9 @@ class SegmentsClient:
 
         if enable_object_linking is not None:
             payload["enable_object_linking"] = enable_object_linking
+
+        if enable_object_link_category_restrictions is not None:
+            payload["enable_object_link_category_restrictions"] = enable_object_link_category_restrictions
 
         r = self._patch(f"/datasets/{dataset_identifier}/", data=payload, model=Dataset)
         # logger.info(f"Updated {dataset_identifier}")
