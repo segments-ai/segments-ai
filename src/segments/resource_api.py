@@ -162,6 +162,7 @@ class Dataset(segments_typing.Dataset, HasClient):
         region_of_interest: Optional[dict[str, Any]] = None,
         use_timestamps_for_interpolation: Optional[bool] = None,
         enable_object_linking: Optional[bool] = None,
+        enable_object_link_category_restrictions: Optional[bool] = None,
     ) -> Dataset:
         """Updates the dataset, see :meth:`segments.client.SegmentsClient.update_dataset` for more details.
 
@@ -188,6 +189,7 @@ class Dataset(segments_typing.Dataset, HasClient):
             region_of_interest: Region of interest configuration. Defaults to :obj:`None`.
             use_timestamps_for_interpolation: Use timestamps for interpolation in sequence datasets. Defaults to :obj:`None`.
             enable_object_linking: Enable object linking (beta). Defaults to :obj:`None`.
+            enable_object_link_category_restrictions: Restrict object linking to the categories allowlisted in each category's ``link_category_restrictions``. Ignored when object linking is disabled. Note that a category with an empty or missing allowlist can then not be linked to anything. Defaults to :obj:`None`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
@@ -220,6 +222,7 @@ class Dataset(segments_typing.Dataset, HasClient):
             region_of_interest,
             use_timestamps_for_interpolation,
             enable_object_linking,
+            enable_object_link_category_restrictions,
         )
 
     def get_samples(

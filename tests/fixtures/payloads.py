@@ -42,6 +42,13 @@ def add_update_dataset_arguments(owner):
                             "default_value": False,
                         },
                     ],
+                    "link_category_restrictions": [2],
+                },
+                {
+                    "name": "test_link_target",
+                    "id": 2,
+                    "color": [0, 0, 0, 0],
+                    "link_category_restrictions": [1],
                 },
             ],
             "warning_rules": [
@@ -70,6 +77,8 @@ def add_update_dataset_arguments(owner):
         "enable_skip_labeling": True,
         "enable_skip_reviewing": True,
         "enable_ratings": True,
+        "enable_object_linking": True,
+        "enable_object_link_category_restrictions": True,
         "organization": owner,
     }
     return arguments

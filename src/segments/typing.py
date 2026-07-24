@@ -1036,6 +1036,7 @@ class TaskAttributeCategory(BaseModel):
     dimensions: Optional[PartialXYZ] = None
     model_config = ConfigDict(extra="allow")
     link_attributes: Optional[List[TaskLinkAttribute]] = None
+    link_category_restrictions: Optional[List[int]] = None
 
 
 class IntersectingCuboidsRule(BaseModel):
@@ -1129,6 +1130,7 @@ class Dataset(BaseModel):
     enable_interpolation: bool
     use_timestamps_for_interpolation: bool
     enable_object_linking: bool
+    enable_object_link_category_restrictions: bool = None
     task_type: TaskType
     # task_readme: str
     label_stats: LabelStats
