@@ -60,6 +60,12 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 .. autofunction:: segments.utils.cuboid_to_segmentation
 ```
 
+### Transform a point cloud label from world to ego coordinates
+
+```{eval-rst}
+.. autofunction:: segments.utils.transform_label_to_ego_coordinates
+```
+
 ### Turn a numpy array into a point cloud
 
 ```{eval-rst}

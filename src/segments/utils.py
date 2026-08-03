@@ -27,10 +27,14 @@ from segments.typing import (
     Label,
     MultiSensorLabelAttributes,
     MultiSensorPointcloudSequenceCuboidLabelAttributes,
+    MultiSensorPointcloudSequenceSampleAttributes,
     MultiSensorSampleAttributes,
+    PointcloudCuboidAnnotation,
     PointcloudCuboidLabelAttributes,
+    PointcloudSampleAttributes,
     PointcloudSequenceCuboidLabelAttributes,
     PointcloudSequenceSampleAttributes,
+    PointcloudVectorAnnotation,
     Sample,
     TaskType,
     Velocity,
@@ -1281,5 +1285,159 @@ def add_kinematics_to_label(
 
                 if acceleration is not None:
                     annotation.acceleration = acceleration
+
+    return label_copy
+
+
+def _quaternion_normalized(q: XYZW) -> npt.NDArray[np.float64]:
+    array = np.array([q.qx, q.qy, q.qz, q.qw], dtype=np.float64)
+    norm = np.linalg.norm(array)
+    if norm == 0:
+        raise ValueError("Invalid ego pose heading: quaternion has zero norm.")
+    return array / norm
+
+
+def _quaternion_rotation_matrix(q: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
+    x, y, z, w = q
+    return np.array(
+        [
+            [1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w)],
+            [2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w)],
+            [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)],
+        ]
+    )
+
+
+def _quaternion_multiply(q1: npt.NDArray[np.float64], q2: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
+    x1, y1, z1, w1 = q1
+    x2, y2, z2, w2 = q2
+    return np.array(
+        [
+            w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2,
+            w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2,
+            w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2,
+            w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2,
+        ]
+    )
+
+
+def _quaternion_yaw(q: npt.NDArray[np.float64]) -> float:
+    x, y, z, w = q
+    return float(np.arctan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z)))
+
+
+def _transform_annotations_to_ego(annotations: List[Any], ego_pose: EgoPose) -> None:
+    """Transform cuboid and vector annotations from world to ego coordinates, in place."""
+    ego_quaternion = _quaternion_normalized(ego_pose.heading)
+    ego_quaternion_inverse = ego_quaternion * np.array([-1.0, -1.0, -1.0, 1.0])
+    rotation = _quaternion_rotation_matrix(ego_quaternion)
+    translation = np.array([ego_pose.position.x, ego_pose.position.y, ego_pose.position.z])
+    ego_yaw = _quaternion_yaw(ego_quaternion)
+
+    for annotation in annotations:
+        if isinstance(annotation, PointcloudCuboidAnnotation):
+            position = np.array([annotation.position.x, annotation.position.y, annotation.position.z])
+            position = rotation.T @ (position - translation)
+            annotation.position.x, annotation.position.y, annotation.position.z = (
+                float(position[0]),
+                float(position[1]),
+                float(position[2]),
+            )
+            annotation.yaw = annotation.yaw - ego_yaw
+            if annotation.rotation is not None:
+                annotation_quaternion = _quaternion_multiply(
+                    ego_quaternion_inverse, _quaternion_normalized(annotation.rotation)
+                )
+                annotation.rotation = XYZW(
+                    qx=float(annotation_quaternion[0]),
+                    qy=float(annotation_quaternion[1]),
+                    qz=float(annotation_quaternion[2]),
+                    qw=float(annotation_quaternion[3]),
+                )
+        elif isinstance(annotation, PointcloudVectorAnnotation):
+            annotation.points = [
+                list(map(float, rotation.T @ (np.array(point) - translation))) if len(point) == 3 else point
+                for point in annotation.points
+            ]
+
+
+def transform_label_to_ego_coordinates(sample: Sample, label: Label) -> Label:
+    """Transform point cloud label annotations from world to ego coordinates using the ego poses in the sample.
+
+    Cuboid annotations get their ``position``, ``yaw`` and ``rotation`` transformed; vector annotations get their ``points`` transformed. Segmentation annotations have no coordinates and are returned unchanged. Frames without an ego pose are left in world coordinates and a warning is logged.
+
+    Args:
+        sample: A point cloud (sequence) or multi-sensor Sample object containing the ego poses.
+        label: A Label object belonging to the sample.
+
+    Returns:
+        A copy of the label with the annotations transformed to ego coordinates.
+
+    Raises:
+        ValueError: If the label sample UUID does not match the sample UUID.
+        ValueError: If the sample is not a point cloud (sequence) or multi-sensor sample.
+
+    Example:
+
+      .. code-block:: python
+
+        # pip install segments-ai
+        from segments import SegmentsClient
+        from segments.utils import transform_label_to_ego_coordinates
+
+        client = SegmentsClient('YOUR_API_KEY')
+        sample = client.get_sample(sample_uuid)
+        label = client.get_label(sample_uuid)
+        transformed_label = transform_label_to_ego_coordinates(sample, label)
+    """
+
+    if label.sample_uuid != sample.uuid:
+        raise ValueError("Label sample UUID does not match sample UUID.")
+
+    label_copy = copy.deepcopy(label)
+    if label_copy.attributes is None:
+        return label_copy
+
+    frames_without_ego_pose = 0
+
+    def transform_frames(label_attributes: Any, sample_frames: List[PointcloudSampleAttributes]) -> None:
+        nonlocal frames_without_ego_pose
+        for frame_index, frame in enumerate(label_attributes.frames):
+            ego_pose = sample_frames[frame_index].ego_pose if frame_index < len(sample_frames) else None
+            if ego_pose is None:
+                frames_without_ego_pose += 1
+            else:
+                _transform_annotations_to_ego(frame.annotations, ego_pose)
+
+    if isinstance(sample.attributes, PointcloudSampleAttributes):
+        if sample.attributes.ego_pose is None:
+            frames_without_ego_pose += 1
+        elif hasattr(label_copy.attributes, "annotations"):
+            _transform_annotations_to_ego(label_copy.attributes.annotations, sample.attributes.ego_pose)
+    elif isinstance(sample.attributes, PointcloudSequenceSampleAttributes):
+        if hasattr(label_copy.attributes, "frames"):
+            transform_frames(label_copy.attributes, sample.attributes.frames)
+    elif isinstance(sample.attributes, MultiSensorSampleAttributes):
+        sample_sensors = {
+            sensor.name: sensor
+            for sensor in sample.attributes.sensors
+            if isinstance(sensor, MultiSensorPointcloudSequenceSampleAttributes)
+        }
+        if isinstance(label_copy.attributes, MultiSensorLabelAttributes):
+            for label_sensor in label_copy.attributes.sensors:
+                sample_sensor = sample_sensors.get(label_sensor.name)
+                if sample_sensor is not None and hasattr(label_sensor.attributes, "frames"):
+                    transform_frames(label_sensor.attributes, sample_sensor.attributes.frames)
+    else:
+        raise ValueError(
+            "Sample must be a point cloud, point cloud sequence or multi-sensor sample "
+            "to transform its label to ego coordinates."
+        )
+
+    if frames_without_ego_pose:
+        logger.warning(
+            f"{frames_without_ego_pose} frame(s) have no ego pose: "
+            "their annotations are left in world coordinates."
+        )
 
     return label_copy

@@ -546,11 +546,14 @@ class Sample(segments_typing.Sample, HasClient):
             enable_compression,
         )
 
-    def get_label(self, labelset: Optional[str] = "ground-truth") -> Label:
+    def get_label(
+        self, labelset: Optional[str] = "ground-truth", transform_to_ego_coordinates: bool = False
+    ) -> Label:
         """Gets the label of this sample. See :meth:`segments.client.SegmentsClient.get_label` for more details.
 
         Args:
             labelset: The labelset this label belongs to. Defaults to ``ground-truth``.
+            transform_to_ego_coordinates: Whether to transform the annotations of a point cloud label from world to ego coordinates, using the ego poses in the sample. Defaults to :obj:`False`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the label fails.
@@ -559,7 +562,7 @@ class Sample(segments_typing.Sample, HasClient):
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
         """
-        return self._client.get_label(self.uuid, labelset)
+        return self._client.get_label(self.uuid, labelset, transform_to_ego_coordinates)
 
     def add_label(
         self,
