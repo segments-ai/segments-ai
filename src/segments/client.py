@@ -1376,7 +1376,12 @@ class SegmentsClient:
     ##########
     # Labels #
     ##########
-    def get_label(self, sample_uuid: str, labelset: str = "ground-truth") -> Label:
+    def get_label(
+        self,
+        sample_uuid: str,
+        labelset: str = "ground-truth",
+        transform_to_ego_coordinates: bool = False,
+    ) -> Label:
         """Get a label.
 
         Note:
@@ -1391,6 +1396,7 @@ class SegmentsClient:
         Args:
             sample_uuid: The sample uuid.
             labelset: The labelset this label belongs to. Defaults to ``ground-truth``.
+            transform_to_ego_coordinates: Whether to transform the annotations of a point cloud label from world to ego coordinates, using the ego poses in the sample. This makes an additional request to fetch the sample. See :func:`segments.utils.transform_label_to_ego_coordinates` for more details. Defaults to :obj:`False`.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the label fails.
@@ -1398,11 +1404,19 @@ class SegmentsClient:
             :exc:`~segments.exceptions.NotFoundError`: If the sample or labelset is not found or if the sample is unlabeled.
             :exc:`~segments.exceptions.NetworkError`: If the request is not valid or if the server experienced an error.
             :exc:`~segments.exceptions.TimeoutError`: If the request times out.
+            :exc:`ValueError`: If ``transform_to_ego_coordinates`` is :obj:`True` and the sample is not a point cloud (sequence) or multi-sensor sample.
         """
 
         r = self._get(f"/labels/{sample_uuid}/{labelset}/", model=Label)
+        label = cast(Label, r)
 
-        return cast(Label, r)
+        if transform_to_ego_coordinates:
+            from segments.utils import transform_label_to_ego_coordinates
+
+            sample = self.get_sample(sample_uuid)
+            label = transform_label_to_ego_coordinates(sample, label)
+
+        return label
 
     def add_label(
         self,
