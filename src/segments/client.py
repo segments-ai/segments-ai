@@ -436,6 +436,7 @@ class SegmentsClient:
         region_of_interest: Optional[dict[str, Any]] = None,
         enable_object_linking: Optional[bool] = None,
         enable_object_link_category_restrictions: Optional[bool] = None,
+        enable_extrapolation: Optional[bool] = None,
     ) -> Dataset:
         """Add a dataset.
 
@@ -502,6 +503,7 @@ class SegmentsClient:
             region_of_interest: Region of interest configuration. Defaults to :obj:`None`.
             enable_object_linking: Enable object linking. Defaults to :obj:`None`, which lets the server decide.
             enable_object_link_category_restrictions: Restrict object linking to the categories allowlisted in each category's ``link_category_restrictions``. Ignored when object linking is disabled. Note that a category with an empty or missing allowlist can then not be linked to anything. Defaults to :obj:`None`, which lets the server decide.
+            enable_extrapolation: Enable linear extrapolation of a 3D cuboid's position past its last keyframe in sequence datasets. Ignored for non-cuboid datasets. Defaults to :obj:`None`, which lets the server decide (currently defaults to :obj:`False`).
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the task attributes fails.
@@ -566,6 +568,9 @@ class SegmentsClient:
         if enable_object_link_category_restrictions is not None:
             payload["enable_object_link_category_restrictions"] = enable_object_link_category_restrictions
 
+        if enable_extrapolation is not None:
+            payload["enable_extrapolation"] = enable_extrapolation
+
         endpoint = f"/organizations/{organization}/datasets/" if organization is not None else "/user/datasets/"
 
         r = self._post(endpoint, data=payload, model=Dataset)
@@ -598,6 +603,7 @@ class SegmentsClient:
         use_timestamps_for_interpolation: Optional[bool] = None,
         enable_object_linking: Optional[bool] = None,
         enable_object_link_category_restrictions: Optional[bool] = None,
+        enable_extrapolation: Optional[bool] = None,
     ) -> Dataset:
         """Update a dataset.
 
@@ -633,6 +639,7 @@ class SegmentsClient:
             use_timestamps_for_interpolation: Use timestamps for interpolation in sequence datasets. Defaults to :obj:`None`.
             enable_object_linking: Enable object linking (beta). Defaults to :obj:`None`.
             enable_object_link_category_restrictions: Restrict object linking to the categories allowlisted in each category's ``link_category_restrictions``. Ignored when object linking is disabled. Note that a category with an empty or missing allowlist can then not be linked to anything. Defaults to :obj:`None`.
+            enable_extrapolation: Enable linear extrapolation of a 3D cuboid's position past its last keyframe in sequence datasets. Ignored for non-cuboid datasets. Defaults to :obj:`None`, which leaves the dataset's current setting unchanged.
 
         Raises:
             :exc:`~segments.exceptions.ValidationError`: If validation of the dataset fails.
@@ -725,6 +732,9 @@ class SegmentsClient:
 
         if enable_object_link_category_restrictions is not None:
             payload["enable_object_link_category_restrictions"] = enable_object_link_category_restrictions
+
+        if enable_extrapolation is not None:
+            payload["enable_extrapolation"] = enable_extrapolation
 
         r = self._patch(f"/datasets/{dataset_identifier}/", data=payload, model=Dataset)
         # logger.info(f"Updated {dataset_identifier}")
