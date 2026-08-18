@@ -1131,6 +1131,7 @@ class Dataset(BaseModel):
     use_timestamps_for_interpolation: bool
     enable_object_linking: bool
     enable_object_link_category_restrictions: bool = None
+    enable_extrapolation: bool = None
     task_type: TaskType
     # task_readme: str
     label_stats: LabelStats
