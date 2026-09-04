@@ -378,10 +378,25 @@ class Annotation(BaseModel):
     attributes: Optional[ObjectAttributes] = None
 
 
+class LinkFrameAttributes(BaseModel):
+    """The frame-level link attribute values of one sample frame."""
+
+    attributes: LinkAttributes
+
+
 class Link(BaseModel):
+    """A link between two tracks.
+
+    Sequence-level link attribute values (``is_track_level`` missing or ``True`` on the definition) live in
+    ``attributes``. Frame-level link attribute values (``is_track_level: False`` on the definition) live in
+    ``frames``, one entry per sample frame, index-aligned with the sample's frames. ``frames`` is omitted when the
+    link has no frame-level values.
+    """
+
     from_id: int
     to_id: int
     attributes: Optional[LinkAttributes] = None
+    frames: Optional[List[LinkFrameAttributes]] = None
 
 
 # Image segmentation
@@ -983,7 +998,14 @@ TaskAttribute = Annotated[
 
 
 class BaseTaskLinkAttribute(BaseModel):
-    is_track_level: Literal[True] = True
+    """Fields shared by all link attribute definitions.
+
+    ``is_track_level`` decides where a link stores the attribute's value: ``True`` (the default, also used when the
+    field is missing) means sequence-level, stored in :py:attr:`Link.attributes`; ``False`` means frame-level, stored
+    per sample frame in :py:attr:`Link.frames`.
+    """
+
+    is_track_level: Optional[bool] = True
 
 
 class SelectTaskLinkAttribute(BaseTaskLinkAttribute, BaseSelectTaskAttribute):

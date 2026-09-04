@@ -284,6 +284,10 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 .. autopydantic_model:: segments.typing.Link
 ```
 
+```{eval-rst}
+.. autopydantic_model:: segments.typing.LinkFrameAttributes
+```
+
 ## Labelsets
 
 ```{eval-rst}
