@@ -506,6 +506,18 @@ These types are used for defining link attributes.
 ```
 
 ```{eval-rst}
+.. autopydantic_model:: segments.typing.OrthoImage
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.OrthoImageCorners
+```
+
+```{eval-rst}
+.. autopydantic_model:: segments.typing.OrthoImageCorner
+```
+
+```{eval-rst}
 .. autoclass:: segments.typing.PCDType
     :members:
     :undoc-members:
