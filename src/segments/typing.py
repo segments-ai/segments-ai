@@ -763,6 +763,38 @@ class Bounds(BaseModel):
     max_z: Optional[float] = None
 
 
+class OrthoImageCorner(BaseModel):
+    x: float
+    y: float
+
+
+class OrthoImageCorners(BaseModel):
+    """World-frame position of each corner of the image.
+
+    The keys name the corner *of the image* (top-left is the image's first pixel), the values say where that
+    corner lands on the ground plane. Giving all four corners lets the image be rotated or skewed rather than
+    only axis-aligned.
+    """
+
+    top_left: OrthoImageCorner
+    top_right: OrthoImageCorner
+    bottom_right: OrthoImageCorner
+    bottom_left: OrthoImageCorner
+
+
+class OrthoImage(BaseModel):
+    """A top-down (orthographic) image covering (part of) the point cloud, rendered under it in orthographic camera mode.
+
+    The image is stretched over the quadrilateral spanned by its four world-frame corners.
+    A sample can carry several of these (e.g. tiles) so users don't have to stitch them beforehand.
+    For sequences, the same images are used for the whole sequence, so they live next to ``frames``.
+    """
+
+    url: str
+    signed_url: Optional[str] = None
+    corners: OrthoImageCorners
+
+
 class CameraIntrinsics(BaseModel):
     intrinsic_matrix: List[List[float]]
 
@@ -791,11 +823,13 @@ class PointcloudSampleAttributes(BaseModel):
     name: Optional[str] = None
     timestamp: Optional[Timestamp] = None
     bounds: Optional[Bounds] = None
+    ortho_images: Optional[List[OrthoImage]] = None
 
 
 # Point cloud sequence
 class PointcloudSequenceSampleAttributes(BaseModel):
     frames: List[PointcloudSampleAttributes]
+    ortho_images: Optional[List[OrthoImage]] = None
 
 
 # Multi-sensor

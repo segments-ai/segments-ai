@@ -98,6 +98,17 @@ def add_update_sample_arguments():
             "default_z": -1,
             "name": "test_name",
             "timestamp": 1000,
+            "ortho_images": [
+                {
+                    "url": "url",
+                    "corners": {
+                        "top_left": {"x": -10, "y": 10},
+                        "top_right": {"x": 10, "y": 10},
+                        "bottom_right": {"x": 10, "y": -10},
+                        "bottom_left": {"x": -10, "y": -10},
+                    },
+                }
+            ],
         },
         "pointcloud-sequence": {
             "frames": [
@@ -121,7 +132,18 @@ def add_update_sample_arguments():
                     "name": "test_name",
                     "timestamp": 1000,
                 },
-            ]
+            ],
+            "ortho_images": [
+                {
+                    "url": "url",
+                    "corners": {
+                        "top_left": {"x": -10, "y": 10},
+                        "top_right": {"x": 10, "y": 10},
+                        "bottom_right": {"x": 10, "y": -10},
+                        "bottom_left": {"x": -10, "y": -10},
+                    },
+                }
+            ],
         },
     }
     # Multi-sensor
