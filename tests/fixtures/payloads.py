@@ -107,6 +107,12 @@ def add_update_sample_arguments():
                         "bottom_right": {"x": 10, "y": -10},
                         "bottom_left": {"x": -10, "y": -10},
                     },
+                    "height_map": {
+                        "url": "url",
+                        "encoding": "rgb16",
+                        "offset": -12.5,
+                        "scale": 0.01,
+                    },
                 }
             ],
         },

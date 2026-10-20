@@ -1,8 +1,9 @@
 from typing import Any, Dict
 
+import pydantic
 import pytest
 from pydantic import TypeAdapter
-from segments.typing import LabelAttributes, Link, TaskAttributes
+from segments.typing import LabelAttributes, Link, OrthoImage, SampleAttributes, TaskAttributes
 
 
 def test_link_category_restrictions_round_trip() -> None:
@@ -131,3 +132,61 @@ def test_link_attribute_definition_accepts_explicit_sequence_level(is_track_leve
     )
 
     assert task_attributes.categories[0].link_attributes[0].is_track_level is is_track_level
+
+
+CORNERS: Dict[str, Any] = {
+    "top_left": {"x": -10.0, "y": 10.0},
+    "top_right": {"x": 10.0, "y": 10.0},
+    "bottom_right": {"x": 10.0, "y": -10.0},
+    "bottom_left": {"x": -10.0, "y": -10.0},
+}
+HEIGHT_MAP: Dict[str, Any] = {
+    "url": "https://example.com/ortho_height.png",
+    "encoding": "rgb16",
+    "offset": -12.5,
+    "scale": 0.01,
+}
+ORTHO_IMAGE: Dict[str, Any] = {"url": "https://example.com/ortho.png", "corners": CORNERS}
+
+
+def dump_like_client(ortho_image: Dict[str, Any]) -> Dict[str, Any]:
+    """Validate and dump point cloud sample attributes the way ``SegmentsClient.add_sample`` does."""
+    attributes = {"pcd": {"url": "url", "type": "kitti"}, "ortho_images": [ortho_image]}
+    dumped = TypeAdapter(SampleAttributes).validate_python(attributes).model_dump(mode="json", exclude_unset=True)
+    return dumped["ortho_images"][0]
+
+
+def test_ortho_image_height_map_round_trip() -> None:
+    ortho_image = {**ORTHO_IMAGE, "height_map": HEIGHT_MAP}
+
+    assert dump_like_client(ortho_image) == ortho_image
+
+
+def test_ortho_image_without_height_map_dumps_without_height_map_key() -> None:
+    """Existing ortho images must not start sending ``"height_map": null``."""
+    assert "height_map" not in dump_like_client(ORTHO_IMAGE)
+
+
+def test_height_map_sends_default_offset_and_scale() -> None:
+    """The server applies no defaults, so the client must send them even when they were not set."""
+    height_map = {k: v for k, v in HEIGHT_MAP.items() if k not in ("offset", "scale")}
+
+    dumped = dump_like_client({**ORTHO_IMAGE, "height_map": height_map})
+
+    assert dumped["height_map"] == {**height_map, "offset": 0, "scale": 1}
+
+
+@pytest.mark.parametrize(
+    "height_map",
+    [
+        pytest.param({k: v for k, v in HEIGHT_MAP.items() if k != "encoding"}, id="missing encoding"),
+        pytest.param({**HEIGHT_MAP, "encoding": "png16"}, id="unknown encoding"),
+        pytest.param({**HEIGHT_MAP, "scale": 0}, id="zero scale"),
+        pytest.param({**HEIGHT_MAP, "scale": -0.01}, id="negative scale"),
+        pytest.param({**HEIGHT_MAP, "scale": float("inf")}, id="infinite scale"),
+        pytest.param({**HEIGHT_MAP, "offset": float("nan")}, id="nan offset"),
+    ],
+)
+def test_height_map_rejects_invalid(height_map: Dict[str, Any]) -> None:
+    with pytest.raises(pydantic.ValidationError):
+        OrthoImage.model_validate({**ORTHO_IMAGE, "height_map": height_map})

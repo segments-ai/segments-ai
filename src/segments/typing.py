@@ -140,6 +140,10 @@ class PCDType(str, Enum):
     SPLAT = "splat"
 
 
+class HeightMapEncoding(str, Enum):
+    RGB16 = "rgb16"
+
+
 class ReleaseStatus(str, Enum):
     PENDING = "PENDING"
     SUCCEEDED = "SUCCEEDED"
@@ -782,10 +786,31 @@ class OrthoImageCorners(BaseModel):
     bottom_left: OrthoImageCorner
 
 
+class HeightMap(BaseModel):
+    """Ground height (world-frame z) under an ortho image, so annotations drawn on it can get a z without the point cloud.
+
+    A raster covering exactly the same area as its :class:`OrthoImage`, so it shares the image's corners: its
+    pixels map onto the quadrilateral spanned by those corners the same way the image's pixels do. With the
+    ``rgb16`` encoding each pixel is opaque 8-bit RGB with ``z = offset + (R * 256 + G) * scale``, and B flags
+    the cell: 255 measured, 128 filled (interpolated from nearby measured cells), 0 no data (ignore R and G).
+    """
+
+    url: str
+    signed_url: Optional[str] = None
+    encoding: HeightMapEncoding
+    offset: float = pydantic.Field(default=0, allow_inf_nan=False)
+    scale: float = pydantic.Field(default=1, gt=0, allow_inf_nan=False)
+
+    def model_post_init(self, context: Any) -> None:
+        # The client dumps with exclude_unset and the server applies no defaults, so mark these as set to always send them.
+        self.model_fields_set.update({"offset", "scale"})
+
+
 class OrthoImage(BaseModel):
     """A top-down (orthographic) image covering (part of) the point cloud, rendered under it in orthographic camera mode.
 
-    The image is stretched over the quadrilateral spanned by its four world-frame corners.
+    The image is stretched over the quadrilateral spanned by its four world-frame corners. An optional
+    :class:`HeightMap` gives the ground z under it.
     A sample can carry several of these (e.g. tiles) so users don't have to stitch them beforehand.
     For sequences, the same images are used for the whole sequence, so they live next to ``frames``.
     """
@@ -793,6 +818,7 @@ class OrthoImage(BaseModel):
     url: str
     signed_url: Optional[str] = None
     corners: OrthoImageCorners
+    height_map: Optional[HeightMap] = None
 
 
 class CameraIntrinsics(BaseModel):
