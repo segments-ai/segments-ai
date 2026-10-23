@@ -518,6 +518,16 @@ These types are used for defining link attributes.
 ```
 
 ```{eval-rst}
+.. autopydantic_model:: segments.typing.HeightMap
+```
+
+```{eval-rst}
+.. autoclass:: segments.typing.HeightMapEncoding
+    :members:
+    :undoc-members:
+```
+
+```{eval-rst}
 .. autoclass:: segments.typing.PCDType
     :members:
     :undoc-members:
