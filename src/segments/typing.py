@@ -1150,6 +1150,8 @@ WarningRule = Annotated[
 
 class TaskAttributes(BaseModel):
     format_version: Optional[FormatVersion] = None
+    # Freeform, written into the attributes of every label saved in the label editor.
+    taxonomy_version: Optional[str] = None
     categories: Optional[List[TaskAttributeCategory]] = None
     image_attributes: Optional[List[TaskAttribute]] = None
     model_config = ConfigDict(extra="allow")

@@ -30,6 +30,25 @@ def test_link_category_restrictions_round_trip() -> None:
     assert "link_category_restrictions" not in dumped["categories"][2]
 
 
+def test_taxonomy_version_round_trip() -> None:
+    """The freeform taxonomy version must survive the validate + dump path that add_dataset/update_dataset use."""
+    task_attributes = TaskAttributes.model_validate(
+        {"format_version": "0.1", "taxonomy_version": "v3", "categories": [{"name": "car", "id": 1}]}
+    )
+
+    assert task_attributes.taxonomy_version == "v3"
+    assert task_attributes.model_dump(mode="json", exclude_unset=True)["taxonomy_version"] == "v3"
+
+
+def test_task_attributes_without_taxonomy_version_dumps_without_key() -> None:
+    """A dataset without a taxonomy version must not start sending ``"taxonomy_version": null``."""
+    dumped = TaskAttributes.model_validate({"format_version": "0.1", "categories": []}).model_dump(
+        mode="json", exclude_unset=True
+    )
+
+    assert "taxonomy_version" not in dumped
+
+
 LINK_WITH_FRAMES: Dict[str, Any] = {
     "from_id": 3,
     "to_id": 7,
