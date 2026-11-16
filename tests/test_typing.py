@@ -105,6 +105,61 @@ def test_label_attributes_with_link_frames_round_trip() -> None:
     assert dumped["links"] == [LINK_WITH_FRAMES]
 
 
+CUBOID: Dict[str, Any] = {
+    "id": 1,
+    "category_id": 1,
+    "type": "cuboid",
+    "position": {"x": 0, "y": 0, "z": 0},
+    "dimensions": {"x": 1, "y": 1, "z": 1},
+    "yaw": 0,
+}
+
+LABEL_ATTRIBUTES_PER_TYPE: Dict[str, Dict[str, Any]] = {
+    "image-vector": {
+        "format_version": "0.1",
+        "annotations": [{"id": 1, "category_id": 1, "type": "bbox", "points": [[0, 0], [1, 1]]}],
+    },
+    "image-segmentation": {
+        "format_version": "0.1",
+        "annotations": [{"id": 1, "category_id": 1}],
+        "segmentation_bitmap": {"url": "https://example.com/bitmap.png"},
+    },
+    "pointcloud-cuboid": {"format_version": "0.2", "annotations": [CUBOID]},
+    "pointcloud-cuboid-sequence": {
+        "format_version": "0.2",
+        "frames": [{"annotations": [{**CUBOID, "track_id": 1}]}],
+    },
+    "multisensor-sequence": {
+        "sensors": [
+            {
+                "name": "lidar",
+                "task_type": "pointcloud-cuboid-sequence",
+                "attributes": {"format_version": "0.2", "frames": [{"annotations": [{**CUBOID, "track_id": 1}]}]},
+            }
+        ],
+    },
+}
+
+
+@pytest.mark.parametrize("label_attributes", LABEL_ATTRIBUTES_PER_TYPE.values(), ids=LABEL_ATTRIBUTES_PER_TYPE.keys())
+def test_label_attributes_taxonomy_version_round_trip(label_attributes: Dict[str, Any]) -> None:
+    """Reading a label and uploading it again must keep the taxonomy version the web app saved it with."""
+    label_attributes = {**label_attributes, "taxonomy_version": "v3"}
+
+    parsed = TypeAdapter(LabelAttributes).validate_python(label_attributes)
+
+    assert parsed.taxonomy_version == "v3"
+    assert parsed.model_dump(mode="json", exclude_unset=True) == label_attributes
+
+
+@pytest.mark.parametrize("label_attributes", LABEL_ATTRIBUTES_PER_TYPE.values(), ids=LABEL_ATTRIBUTES_PER_TYPE.keys())
+def test_label_attributes_without_taxonomy_version_dumps_without_key(label_attributes: Dict[str, Any]) -> None:
+    """A label saved before taxonomy versioning must not start sending ``"taxonomy_version": null``."""
+    dumped = TypeAdapter(LabelAttributes).validate_python(label_attributes).model_dump(mode="json", exclude_unset=True)
+
+    assert "taxonomy_version" not in dumped
+
+
 def _task_attributes_with_link_attribute(link_attribute: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "format_version": "0.1",

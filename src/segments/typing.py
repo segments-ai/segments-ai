@@ -409,6 +409,7 @@ class ImageSegmentationLabelAttributes(BaseModel):
     segmentation_bitmap: URL
     image_attributes: Optional[ImageAttributes] = None
     format_version: Optional[FormatVersion] = None
+    taxonomy_version: Optional[str] = None
 
 
 # Image vector
@@ -424,6 +425,7 @@ class ImageVectorAnnotation(BaseModel):
 class ImageVectorLabelAttributes(BaseModel):
     annotations: List[ImageVectorAnnotation]
     format_version: Optional[FormatVersion] = None
+    taxonomy_version: Optional[str] = None
     image_attributes: Optional[ImageAttributes] = None
 
 
@@ -443,6 +445,7 @@ class ImageSequenceSegmentationFrame(ImageSegmentationLabelAttributes):
 class ImageSequenceSegmentationLabelAttributes(BaseModel):
     frames: List[ImageSequenceSegmentationFrame]
     format_version: Optional[FormatVersion] = None
+    taxonomy_version: Optional[str] = None
 
 
 # Image sequence vector
@@ -461,6 +464,7 @@ class ImageVectorFrame(ImageVectorLabelAttributes):
 class ImageSequenceVectorLabelAttributes(BaseModel):
     frames: List[ImageVectorFrame]
     format_version: Optional[FormatVersion] = None
+    taxonomy_version: Optional[str] = None
 
 
 # Point cloud segmentation
@@ -469,6 +473,7 @@ class PointcloudSegmentationLabelAttributes(BaseModel):
     image_attributes: Optional[ImageAttributes] = None
     point_annotations: List[int]
     format_version: Optional[FormatVersion] = None
+    taxonomy_version: Optional[str] = None
 
 
 class XYZ(BaseModel):
@@ -554,6 +559,7 @@ class BasePointcloudCuboidLabelAttributes(BaseModel):
 
 class PointcloudCuboidLabelAttributes(BasePointcloudCuboidLabelAttributes):
     links: Optional[List[Link]] = None
+    taxonomy_version: Optional[str] = None
 
 
 # Point cloud vector
@@ -575,6 +581,7 @@ class BasePointcloudVectorLabelAttributes(BaseModel):
 
 class PointcloudVectorLabelAttributes(BasePointcloudVectorLabelAttributes):
     links: Optional[List[Link]] = None
+    taxonomy_version: Optional[str] = None
 
 
 # Point cloud sequence segmentation
@@ -592,6 +599,7 @@ class PointcloudSegmentationFrame(PointcloudSegmentationLabelAttributes):
 class PointcloudSequenceSegmentationLabelAttributes(BaseModel):
     frames: List[PointcloudSegmentationFrame]
     format_version: Optional[FormatVersion] = None
+    taxonomy_version: Optional[str] = None
 
 
 # Point cloud sequence cuboid
@@ -613,6 +621,7 @@ class BasePointcloudSequenceCuboidLabelAttributes(BaseModel):
 
 class PointcloudSequenceCuboidLabelAttributes(BasePointcloudSequenceCuboidLabelAttributes):
     links: Optional[List[Link]] = None
+    taxonomy_version: Optional[str] = None
 
 
 # Point cloud sequence vector
@@ -638,6 +647,7 @@ class BasePointcloudSequenceVectorLabelAttributes(BaseModel):
 
 class PointcloudSequenceVectorLabelAttributes(BasePointcloudSequenceVectorLabelAttributes):
     links: Optional[List[Link]] = None
+    taxonomy_version: Optional[str] = None
 
 
 # Multi-sensor
@@ -687,6 +697,7 @@ class MultiSensorLabelAttributes(BaseModel):
         ]
     ]
     links: Optional[List[Link]] = None
+    taxonomy_version: Optional[str] = None
 
 
 LabelAttributes = Union[
