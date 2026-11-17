@@ -21,7 +21,7 @@ jobs:
       max-parallel: 1
       matrix:
         os: [ubuntu-latest]
-        python-version: ["3.9"]
+        python-version: ["3.12"]
 
     steps:
       - name: Print env
