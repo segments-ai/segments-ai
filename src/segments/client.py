@@ -58,6 +58,7 @@ from segments.typing import (
 )
 from typing_extensions import Literal, get_args
 
+from .point_annotations import POINT_ENCODING, POINT_ENCODING_HEADER, compress_label_attributes
 from .resource_api import Collaborator, Dataset, HasClient, Issue, Label, Labelset, Release, Sample
 from .sentinel import _NOT_ASSIGNED
 from .version import __version__
@@ -1495,6 +1496,8 @@ class SegmentsClient:
                 )
                 raise ValidationError(message=str(e), cause=e)
 
+        compress_label_attributes(attributes)
+
         payload: Dict[str, Any] = {
             "label_status": label_status,
             "attributes": attributes,
@@ -1572,6 +1575,8 @@ class SegmentsClient:
                         "Did you use the right label attributes? Please refer to the online documentation: https://docs.segments.ai/reference/sample-and-label-types/label-types.",
                     )
                     raise ValidationError(message=str(e), cause=e)
+
+            compress_label_attributes(attributes)
 
             payload["attributes"] = attributes
 
@@ -2238,6 +2243,7 @@ class SegmentsClient:
         headers = {
             "X-source": "python-sdk",
             "Segments-SDK-Version": VERSION,
+            POINT_ENCODING_HEADER: POINT_ENCODING,
         }
         if auth and self.api_key:
             headers["Authorization"] = f"APIKey {self.api_key}"

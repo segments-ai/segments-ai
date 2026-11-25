@@ -18,6 +18,7 @@ import requests
 from PIL import ExifTags, Image
 from segments import SegmentsClient
 from segments.exceptions import AlreadyExistsError
+from segments.point_annotations import decode_point_annotations, encode_point_annotations  # noqa: F401
 from segments.typing import (
     XYZW,
     Acceleration,
