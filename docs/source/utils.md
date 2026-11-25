@@ -60,6 +60,18 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 .. autofunction:: segments.utils.cuboid_to_segmentation
 ```
 
+### Compress and decompress point annotations
+
+The API stores the `point_annotations` of point cloud segmentation labels in a [compressed form](types.md). The client converts it for you; these functions are for scripts that call the API directly or want a numpy array.
+
+```{eval-rst}
+.. autofunction:: segments.utils.encode_point_annotations
+```
+
+```{eval-rst}
+.. autofunction:: segments.utils.decode_point_annotations
+```
+
 ### Turn a numpy array into a point cloud
 
 ```{eval-rst}

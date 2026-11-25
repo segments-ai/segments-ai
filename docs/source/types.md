@@ -148,6 +148,20 @@ Please visit our [docs](https://docs.segments.ai/) for more information on Segme
 
 ### Point cloud segmentation label
 
+`point_annotations` holds the object id of each point (0 for unlabeled points), in the order of the points in the point cloud. This also applies to each frame of a point cloud sequence segmentation label.
+
+````{note}
+The API stores `point_annotations` compressed, because a plain JSON array makes labels of long sequences very large. The compressed form is an object instead of an array:
+
+```json
+"point_annotations": {"encoding": "gzip-uint8-base64", "data": "H4sIA..."}
+```
+
+`data` holds the ids as little-endian unsigned integers (`uint8`, or `uint16` when an id is above 255), gzipped and base64 encoded.
+
+The SDK converts this for you: `point_annotations` is always a list of ints when you read a label, and you can pass a list or a numpy array when you add or update one. You only meet the compressed form when you call the API directly and send the `Segments-Point-Encoding: gzip-base64` request header. Without that header the API returns and accepts plain arrays, as do webhooks and release files. Use [`encode_point_annotations` and `decode_point_annotations`](utils.md) to convert it yourself.
+````
+
 ```{eval-rst}
 .. autopydantic_model:: segments.typing.PointcloudSegmentationLabelAttributes
 ```
