@@ -4,10 +4,12 @@ from enum import Enum as BaseEnum
 from enum import EnumMeta as BaseEnumMeta
 from typing import Annotated, Any, Dict, List, Optional, Tuple, Union
 
+import numpy as np
 import pydantic
 from pydantic import BaseModel as PydanticBaseModel
 from pydantic import ConfigDict, field_validator
 from segments.exceptions import ValidationError
+from segments.point_annotations import decode_point_annotations
 from typing_extensions import Literal, TypedDict
 
 
@@ -450,6 +452,16 @@ class PointcloudSegmentationLabelAttributes(BaseModel):
     image_attributes: Optional[ImageAttributes] = None
     point_annotations: List[int]
     format_version: Optional[FormatVersion] = None
+
+    @field_validator("point_annotations", mode="wrap")
+    @classmethod
+    def decode_point_annotations(cls, value: Any, handler: Any) -> Any:
+        # The API returns the array compressed (see segments.point_annotations). Keep exposing a list of ints.
+        if isinstance(value, dict):
+            return decode_point_annotations(value).tolist()
+        if isinstance(value, np.ndarray):
+            return value.tolist()
+        return handler(value)
 
 
 class XYZ(BaseModel):
